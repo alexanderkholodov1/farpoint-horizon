@@ -8,7 +8,8 @@ Apps Challenge, challenge "Space Mission Design Game", by team SK Horizon (Quito
 route, launch it, fly it to its target, land it or keep it talking to Earth, and enjoy what they achieved.
 
 ## Read first
-1. `docs/STATE.md`: where the project is today and what comes next.
+1. `tools/state.sh`: where the project is today and what comes next, assembled from one note per topic
+   (`docs/state/`), the steps on the version branch and the open issues.
 2. `docs/design/vision.md`: what the game will be and what it will have. Every change serves it.
 3. `kb/README.md`, then `kb/challenge/requirements.md` (the challenge as IDs) and `kb/decisions.md` (what the team
    decided; open items are theirs to decide).
@@ -41,6 +42,27 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
   `scripts/game_data.gd`), so content and balance change without touching logic.
 - **Measure before you claim.** Run it, read the log, look at the screenshot; cite the file and line or the command.
   A guess is labeled as a guess.
+- **Real behavior, never a drawing of it.** Everything that moves behaves as in real life: launch, orbits, transfers,
+  landings. Paths come from the physics (the gravity of every body involved, with real constants and ephemerides),
+  never from a hand-drawn curve or a straight dash. Speeds, orbital periods, burn lengths, trip times and distances
+  are the real ones or follow from real physics, and the code cites where each comes from. A trip to another body is
+  planned as a real one: the departure is timed so the craft meets the body where it will be (phasing), with the
+  corrections real missions make. Where we simplify, the code says what and why.
+- **Real time, said on screen.** Every simulation runs in real time by default. Faster time is a visible control
+  (×1, ×10, ×100 ... as in `scripts/flight/flight_hud.gd`, keys `,` and `.`), the screen always says how fast time
+  runs, and a clock shows the true mission time. Never compress time silently. With an engine on, at most ×10; near
+  the ground, real time only.
+- **True scale, made readable.** Sizes and distances keep their true proportions. What is too small to see gets a
+  marker of constant screen size and a label; it is never scaled up (a craft is never drawn half a planet's size).
+  What the player must act on (the orbit, the path, the target, where the target will be) is in view.
+- **Mechanics before content.** The core mechanics (time, building, launch, orbit, transfer, landing, ground control)
+  are made right and real before new missions or content are added on top. A new mission waits until every
+  mechanic it uses has passed the rule below.
+- **Done means you judged it, as a player.** Before integrating, play it yourself at each speed of time, look at every
+  screenshot and write down what a player sees and what is wrong (sizes, what is visible, whether motion and timing
+  look and feel real), check the numbers against real values, and iterate until it is right. "It runs and the tests
+  pass" is not done; neither is a screenshot you did not judge. Then integrate it yourself, with no need to wait for
+  a person, and say in the issue what you checked. Never integrate what you have not judged this way.
 - **Proven by playing.** A feature is done when someone played it as a player would and looked at the screen;
   say what you checked.
 - **Plain explanations.** Every concept a player meets is explained in simple words inside the game (challenge E1-E4).
@@ -97,12 +119,14 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
   changing, say so in both issues and agree who goes first. A change to something everyone uses (data formats, the
   mission model, `GameState`, `project.godot`, this file) is its own small piece, agreed by both team members and
   integrated first, so the others build on it.
-- Files every piece touches: `docs/STATE.md` is not edited on a work branch (`tools/integrate.sh` adds each step to it;
-  describe your piece in its issue and in your package's own notes). `docs/sources.md` only grows: add entries at the
-  end of the right section with a short unique word as ID (`S-gibs-viirs`), never a new number; git keeps both sides
-  when two branches add entries at the same place.
-- No shared lists: a piece adds its own files and never edits a list every piece edits, so parallel branches do not
-  conflict (issue #26). Its Spanish texts go in its own `i18n/<piece>.csv` (`keys,es`; `translations.csv` is the old
+- Files every piece touches: none by hand. The state is one note per topic in `docs/state/` (keep the notes of your
+  own pieces, delete them when they stop being true) and `tools/state.sh` assembles it with the steps and the open
+  issues; describe your piece in its issue. `docs/sources.md` only grows: add entries at the end of the right section
+  with a short unique word as ID (`S-gibs-viirs`), never a new number; git keeps both sides when two branches add
+  entries at the same place.
+- No shared lists or files: a piece adds its own files and never edits a list or file every piece edits, so three or
+  more agents work at once without conflicts (issues #26, #28); a new thing every piece would have to register is
+  found by folder instead. Its Spanish texts go in its own `i18n/<piece>.csv` (`keys,es`; `translations.csv` is the old
   base and takes no new lines); a new screen is only `scripts/screens/<id>.gd`; a new test is only `tests/<name>.gd`
   with a `## check: <pattern>` line. The game and `tools/check.sh` find them by folder.
 - Never rewrite, reformat or revert someone else's work, and never push to someone else's branch; ask in the issue,
@@ -136,6 +160,6 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
 
 ## Layout
 - Godot project at the root: `project.godot`, `scenes/`, `scripts/`, `shaders/`, `fonts/`, `textures/`, `tests/`.
-- `docs/`: `STATE.md`, `architecture.md`, `design/`, `agents/`, `changelog/`, `challenge/` (the challenge page
+- `docs/`: `state/` (one note per topic), `architecture.md`, `design/`, `agents/`, `changelog/`, `challenge/` (the challenge page
   material), `team/` (the team's notes, schedule and pitch outline).
 - `kb/`: the knowledge base. `tools/`: scripts for people and agents. `.github/`: CI, release, pull request template.

@@ -5,7 +5,7 @@
 # deletes a branch. The complete version branch reaches main only through its one pull request, merged by a person.
 #
 # 1. The branch's last pushed commit must have passed CI (it waits while CI is still running).
-# 2. In a scratch copy, it merges the branch into the newest version branch, adds the step to docs/STATE.md and commits
+# 2. In a scratch copy, it merges the branch into the newest version branch and commits
 #    it as the next step number (`0.1.6: <what it adds>`); the branch's own commits and authors are kept.
 # 3. It runs tools/check.sh (what CI runs) on that result, so the version branch never turns red.
 # 4. It pushes. If someone integrated first, it starts again on top of theirs, so numbers never collide.
@@ -53,8 +53,6 @@ for attempt in 1 2 3 4 5; do
     echo "Its author merges $base into it (git merge origin/$base), resolves, pushes, and this runs again. Nothing integrated."
     git merge --abort; exit 1
   fi
-  printf -- '- %s: %s (`%s`, %s)\n' "$next" "$what" "$branch" "$(date -u +%Y-%m-%d)" >> docs/STATE.md
-  git add docs/STATE.md
   git commit -q -m "$next: $what" -m "Integrated from $branch (${sha:0:7}) by tools/integrate.sh."
   # 3. What CI runs, on the merged result.
   echo "Checking the merged result ($next) with tools/check.sh"
