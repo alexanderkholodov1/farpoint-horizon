@@ -36,7 +36,7 @@ Then read what your task needs.
 ## What the event requires (sources in `kb/challenge/event-and-judging.md`)
 - **AI tools** are allowed. The rules say they "should not be used to come up with your idea of how to solve the
   challenge" and require disclosure: generated images and videos carry a visible watermark; generated code, audio and
-  data are acknowledged in text and metadata (how we do it: decision D7).
+  data are acknowledged in text and metadata (the team cites every source, formula and dataset and names the agents used in a disclosure section).
 - **NASA branding:** generated content may not contain NASA logos, insignia, flags or mission identifiers, and nothing
   may imply NASA's endorsement. Crediting the NASA data and resources we use, in text, is expected.
 - **Minors:** the demo and the project contain no image, video, voice or likeness of anyone under 18.
@@ -47,4 +47,4 @@ Then read what your task needs.
 ## Layout
 - `docs/`: raw material gathered from the challenge page.
 - `kb/`: the knowledge base (see `kb/README.md`).
-- The game's code layout is set with the engine (decision D3).
+- The game is built in Godot 4.7, optimized for the web; its code layout is set when construction starts.
