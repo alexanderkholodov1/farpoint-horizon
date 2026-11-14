@@ -14,6 +14,7 @@ Read `AGENTS.md` first. Then read only what your task needs; the table says what
 | `domain/tradeoffs.md` | What each design decision affects, with simple formulas and rules of thumb | Before designing or coding any rule of the simulation |
 | `data/reference.json`, `data/README.md` | Real-world reference values with a source for each (orbits, launch vehicles, buses, components, instruments, ground networks) | Before writing game data or balance |
 | `tech/platform-options.md` | Godot, web and hybrid options with current facts, and what is installed | Before choosing or setting up the engine |
+| `tech/godot-agent-tooling.md` | Tools that let agents operate Godot (MCP servers, headless runs and screenshots, tests, Blender for 3D models, asset sources and licenses), with a recommended toolkit and its risks | Before setting up an agent to work on the game |
 | `tech/collaboration.md` | How two people with several AI agents share this repository without collisions | Before your first commit |
 | `decisions.md` | Decisions taken (with who decided and when) and decisions still open | Always; a decision here overrides anything older |
 
