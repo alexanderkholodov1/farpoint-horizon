@@ -11,25 +11,28 @@ anyone can check, repeat or update them. Every source ID (`S-...`) is described 
 
 ## What it does, step by step
 
-### 1. Volcano Watch photos (`assets/mission_photos/volcano_watch/`, source S-gibs)
-1. Ask NASA's GIBS image service (the service behind NASA Worldview) for a picture of the volcano: a box 0.7 degrees
-   wide (about 78 km) around the summit, from the `VIIRS_SNPP_CorrectedReflectance_TrueColor` layer, which is the
-   VIIRS camera on Suomi NPP, one of the real satellites our mission copies.
-2. The date is not random. Mountains near the equator are almost always under cloud, so we scanned every third day of
-   2024 and kept the day with the least cloud and no missing data (2024-08-31 for all three volcanoes).
-3. Ask the same service for the `VIIRS_SNPP_Thermal_Anomalies_375m_All` layer, the places the satellite's infrared
-   channel sees as unusually hot. Each hot spot is one 375 m pixel, too small to see, so we enlarge it and paint it red
-   over the picture (our own processing, said so in the manifest). Sangay and Reventador both show a hot spot on the summit.
-4. Save as JPEG.
+### 1. Volcano Watch photos (`assets/mission_photos/volcano_watch/`, sources S-eo and S-nasa-images)
+The mission's real twin is Landsat 9, so we want pictures of the same kind: 15 to 30 m pixels, natural colour and infrared.
+We first tried NASA's GIBS image service (VIIRS, 250 m), but the Ecuadorian Andes were under cloud and the pictures were soft,
+so we dropped them. Now:
+1. NASA Earth Observatory publishes full-size Landsat 8 and EO-1 scenes of Ecuador's eruptions. The script downloads the
+   big files (the Sangay scene is 6009 x 4751 pixels), cuts out the part around the volcano and shrinks it to at
+   most 1024 px. Sangay (ash plume, 5 Nov 2022) and Cotopaxi (first eruption in 70 years, 15 Sep 2015) are Landsat 8; Tungurahua
+   (1 Jan 2011) is EO-1 ALI, in natural colour and in short-wave infrared, where the hot crater glows red.
+2. Two pictures from the ASTER camera on Terra come from the NASA Image and Video Library: Sangay at night in thermal
+   infrared (lava flows white, ash plume dark), and Cotopaxi in false colour with its ash columns. These are the
+   "special instrument" photos.
+3. The credit line each page prints is saved in the manifest next to the file.
 
-### 2. Moon south pole photos (`assets/mission_photos/moon_south_pole/`, source S-lroc-wac)
+### 2. Moon south pole photos (`assets/mission_photos/moon_south_pole/`, sources S-lroc-wac and S-nasa-science)
 1. NASA Moon Trek serves the LROC Wide Angle Camera mosaic of the whole Moon as small square tiles on a flat map. Near
    the pole a flat map is stretched sideways, so the tiles are useless as they are.
-2. Download every tile that touches the pole (128 tiles for the wide view, 512 for the close view).
-3. Join them, then redraw the picture as seen from above the pole: for each pixel of the new picture we compute its
-   distance and direction from the pole (a polar, "azimuthal equidistant" projection) and copy the matching pixel from
-   the flat map. Wide view: 11 degrees (about 330 km) around the pole. Close view: 2.8 degrees (about 85 km), which
-   shows the permanently dark craters near Shackleton. The faint straight seams are the edges of the mosaic's own strips.
+2. Download the 128 tiles that touch the pole, join them, then redraw the picture as seen from above the pole: for each
+   pixel of the new picture we compute its distance and direction from the pole (a polar, "azimuthal equidistant"
+   projection) and copy the matching pixel from the flat map. It covers 11 degrees (about 330 km) around the pole. The
+   faint straight seams are the edges of the mosaic's own strips.
+3. Two close views of Shackleton crater come straight from NASA Science pages: its sunlit rim (LRO) and its floor, which
+   never sees the Sun, taken by ShadowCam (shows a track left by a rolling boulder).
 
 ### 3. Grand Tour photos (`assets/mission_photos/grand_tour/`, source S-nasa-images)
 1. For Jupiter, Saturn, Uranus and Neptune we picked one Voyager image each (record numbers in the script) from the
