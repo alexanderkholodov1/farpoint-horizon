@@ -17,6 +17,10 @@ func _ready() -> void:
 	g = load("res://scenes/main.tscn").instantiate()
 	add_child(g)
 	await wait(1.5)
+	if OS.get_cmdline_user_args().has("panels"):
+		await _panels()
+		get_tree().quit()
+		return
 	if OS.get_cmdline_user_args().has("moon"):
 		_moon_mission()
 		g.go("flight")
@@ -268,3 +272,27 @@ func _to_the_moon() -> void:
 		await wait(0.2)
 	await wait(2.0)
 	await shot("44_after_landing")
+
+
+## The flight panels at a glance, in the appearance LOOK_MODE names ("dark" or "light"): launch, trip, landing.
+## Quick (seconds), to judge the panels' look against the rest of the game.
+func _panels() -> void:
+	var mode := OS.get_environment("LOOK_MODE")
+	if mode != "":
+		var K := preload("res://scripts/ui/kit.gd")
+		K.load_mode()
+		K._apply(mode)
+		g.root_ui.theme = K.build_theme()
+	mode = "dark" if mode == "" else mode
+	_moon_mission()
+	g.go("launch")
+	await wait(4.5)
+	await shot("50_panel_launch_" + mode)
+	g.go("flight")
+	while g.screen.plan.is_empty():
+		await wait(0.2)
+	await wait(0.8)
+	await shot("51_panel_trip_" + mode)
+	g.go("landing")
+	await wait(2.0)
+	await shot("52_panel_landing_" + mode)

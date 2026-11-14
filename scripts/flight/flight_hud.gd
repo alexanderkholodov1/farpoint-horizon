@@ -56,28 +56,29 @@ func _init() -> void:
 
 
 ## Builds the panel. action_label is the big button's word; four_way adds forward and back steering (the lander).
+## Built with the UI kit's pieces, as the menu and the builder are (issue #12): frosted panels with room to breathe,
+## small spaced capitals for section labels, joined choices, tabular numbers, the appearance's own colours.
 func build(heading: String, action_label: String, keys_text: String, four_way := false, with_dial := true) -> void:
 	# readouts, top left
-	var p := Kit.panel_box(14)
-	Kit.place(p, 0, 0, 0, 0, 16, 16, 436, 16)
+	var p := Kit.panel_box(Kit.PAD)
+	Kit.place(p, 0, 0, 0, 0, Kit.MARGIN, Kit.MARGIN, 480, Kit.MARGIN)
 	add_child(p)
-	var v := Kit.vbox(6)
+	var v := Kit.vbox(Kit.GAP)
 	p.add_child(v)
 	_top = v
-	title = Kit.lbl(heading, 14, Kit.C_ACCENT, Kit.FONT_B)
+	title = Kit.caps(heading)
 	v.add_child(title)
-	clock = Kit.lbl("", 30, Color.WHITE, Kit.FONT_T)
+	clock = Kit.lbl("", Kit.T_CLOCK, Kit.C_TEXT, Kit.font_num())
 	v.add_child(clock)
+	v.add_child(Kit.rule())
 	readouts = GridContainer.new()
 	readouts.columns = 2
-	readouts.add_theme_constant_override("h_separation", 22)
-	readouts.add_theme_constant_override("v_separation", 2)
 	v.add_child(readouts)
-	gauges = Kit.vbox(4)
+	gauges = Kit.vbox(8)
 	v.add_child(gauges)
 	# the instrument, bottom left
-	instrument_box = Kit.panel_box(12)
-	Kit.place(instrument_box, 0, 1, 0, 1, 16, -236, 300, -16)
+	instrument_box = Kit.panel_box(18)
+	Kit.place(instrument_box, 0, 1, 0, 1, 24, -262, 340, -24)
 	add_child(instrument_box)
 	if with_dial:
 		dial = Instruments.Dial.new()
@@ -86,18 +87,19 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 	else:
 		instrument_box.visible = false
 	# controls, bottom right
-	var cp := Kit.panel_box(12)
-	Kit.place(cp, 1, 1, 1, 1, -420, -282, -16, -16)
+	var cp := Kit.panel_box(20)
+	Kit.place(cp, 1, 1, 1, 1, -476, -330, -24, -24)
 	add_child(cp)
-	var ch := Kit.hbox(12)
+	var ch := Kit.hbox(18)
 	cp.add_child(ch)
-	var steer := Kit.vbox(6)
+	var steer := Kit.vbox(8)
 	steer.alignment = BoxContainer.ALIGNMENT_CENTER
 	ch.add_child(steer)
 	if four_way:
 		up_btn = Instruments.HoldButton.new("▲")
+		up_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		steer.add_child(up_btn)
-	var lr := Kit.hbox(6)
+	var lr := Kit.hbox(8)
 	steer.add_child(lr)
 	left_btn = Instruments.HoldButton.new("◀")
 	right_btn = Instruments.HoldButton.new("▶")
@@ -105,64 +107,62 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 	lr.add_child(right_btn)
 	if four_way:
 		down_btn = Instruments.HoldButton.new("▼")
+		down_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		steer.add_child(down_btn)
-	autopilot_btn = Kit.btn(TranslationServer.translate("Autopilot"), func(): set_autopilot(not autopilot, true), 13)
+	autopilot_btn = Kit.btn(TranslationServer.translate("Autopilot"), func(): set_autopilot(not autopilot, true), Kit.T_BODY)
 	autopilot_btn.focus_mode = Control.FOCUS_NONE
-	autopilot_btn.custom_minimum_size = Vector2(118, 44)
+	autopilot_btn.custom_minimum_size = Vector2(136, Kit.BTN_H)
 	steer.add_child(autopilot_btn)
 	lever = Instruments.Lever.new()
 	lever.changed.connect(func(x): throttle_changed.emit(x))
 	ch.add_child(lever)
-	var av := Kit.vbox(8)
+	var av := Kit.vbox(10)
 	av.alignment = BoxContainer.ALIGNMENT_CENTER
 	ch.add_child(av)
 	action = Instruments.BigButton.new()
 	action.label = action_label
 	action.pressed.connect(func(): action_pressed.emit())
 	av.add_child(action)
-	keys_lbl = Kit.lbl(keys_text, 11, Kit.C_DIM, Kit.FONT_R, true)
-	keys_lbl.custom_minimum_size.x = 110
+	keys_lbl = Kit.lbl(keys_text, Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true)
+	keys_lbl.custom_minimum_size.x = 132
+	keys_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	av.add_child(keys_lbl)
 	# sound and skip, top right
 	var tr_box := Kit.hbox(8)
-	Kit.place(tr_box, 1, 0, 1, 0, -330, 16, -16, 60)
+	Kit.place(tr_box, 1, 0, 1, 0, -380, 24, -24, 70)
 	tr_box.alignment = BoxContainer.ALIGNMENT_END
 	add_child(tr_box)
-	var snd := Button.new()
-	snd.text = _sound_text()
-	snd.add_theme_font_size_override("font_size", 13)
+	var snd := Kit.btn(_sound_text(), func(): pass, Kit.T_BODY, 128)
 	snd.focus_mode = Control.FOCUS_NONE
+	snd.custom_minimum_size.y = Kit.BTN_H
 	snd.pressed.connect(func():
 		Sound.set_muted(not Sound.is_muted())
 		snd.text = _sound_text())
 	tr_box.add_child(snd)
-	var skip := Kit.btn(TranslationServer.translate("Skip ▶▶"), func(): skip_pressed.emit(), 13)
+	var skip := Kit.btn(TranslationServer.translate("Skip ▶▶"), func(): skip_pressed.emit(), Kit.T_BODY, 128)
 	skip.focus_mode = Control.FOCUS_NONE
+	skip.custom_minimum_size.y = Kit.BTN_H
 	tr_box.add_child(skip)
-	# the message and the hint
-	big = Kit.lbl("", 58, Color.WHITE, Kit.FONT_T)
+	# the message, straight on the scene, and the hint in its own panel
+	big = Kit.lbl("", Kit.T_SHOUT, Kit.C_ON_DARK, Kit.FONT_T)
 	big.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	big.add_theme_constant_override("outline_size", 10)
+	big.add_theme_constant_override("outline_size", 12)
 	big.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.55))
-	Kit.place(big, 0.5, 0.2, 0.5, 0.2, -560, -50, 560, 30)
+	Kit.place(big, 0.5, 0.2, 0.5, 0.2, -600, -50, 600, 32)
 	big.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(big)
-	sub = Kit.lbl("", 19, Color(1, 1, 1, 0.92), Kit.FONT_B, true)
+	sub = Kit.lbl("", Kit.T_ACTION, Kit.C_ON_DARK, Kit.FONT_B, true)
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	sub.add_theme_constant_override("outline_size", 6)
+	sub.add_theme_constant_override("outline_size", 7)
 	sub.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.6))
-	Kit.place(sub, 0.5, 0.2, 0.5, 0.2, -460, 34, 460, 100)
+	Kit.place(sub, 0.5, 0.2, 0.5, 0.2, -500, 38, 500, 110)
 	sub.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(sub)
-	hint_panel = PanelContainer.new()
-	hint_panel.add_theme_stylebox_override("panel", Kit.flat(Color(0.03, 0.05, 0.09, 0.82), Color(1, 1, 1, 0.1), 10, 1, 16, 10))
-	Kit.place(hint_panel, 0.5, 1, 0.5, 1, -340, -96, 340, -20)
-	hint_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var hb: Array = Kit.hint_box()
+	hint_panel = hb[0]
+	hint_lbl = hb[1]
+	Kit.place(hint_panel, 0.5, 1, 0.5, 1, -440, -128, 300, -Kit.MARGIN)
 	add_child(hint_panel)
-	hint_lbl = Kit.lbl("", 15, Kit.C_TEXT, Kit.FONT_R, true)
-	hint_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	hint_panel.add_child(hint_lbl)
 	hint_panel.visible = false
 
 
@@ -173,18 +173,19 @@ func _sound_text() -> String:
 ## Adds the time control under the clock: real time and faster, chosen with the buttons or the keys , and . ;
 ## `cap` is the fastest allowed at first. A note says in words how fast time runs, so the clock never misleads.
 func add_time_warp(cap := 1.0) -> void:
-	warp_box = Kit.hbox(4)
+	var head := Kit.caps(TranslationServer.translate("Time"))
+	_top.add_child(head)
+	_top.move_child(head, 2)
+	warp_box = Kit.segmented()
 	for w in WARPS:
-		var b := Kit.btn(_warp_label(w), func(): set_warp(w, true), 12, 46)
-		b.focus_mode = Control.FOCUS_NONE
-		b.custom_minimum_size.y = 26
+		var b := Kit.choice(_warp_label(w), false, func(): set_warp(w, true), 66)
 		_warp_btns[w] = b
 		warp_box.add_child(b)
 	_top.add_child(warp_box)
-	_top.move_child(warp_box, 2)
-	warp_note = Kit.lbl("", 12, Kit.C_DIM, Kit.FONT_R)
+	_top.move_child(warp_box, 3)
+	warp_note = Kit.lbl("", Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R)
 	_top.add_child(warp_note)
-	_top.move_child(warp_note, 3)
+	_top.move_child(warp_note, 4)
 	cap_warp(cap)
 
 
@@ -251,16 +252,15 @@ static func met_text(seconds: float) -> String:
 
 ## Adds a readout (name, then its value label); set it with value(name, text).
 func add_readout(name_: String, label: String) -> void:
-	readouts.add_child(Kit.lbl(label, 13, Kit.C_DIM, Kit.FONT_B))
-	var l := Kit.lbl("", 17, Color.WHITE, Kit.FONT_B)
-	readouts.add_child(l)
-	_values[name_] = l
+	_values[name_] = Kit.readout(readouts, label)
 
 
+## Sets a readout. col is a status colour (Kit.C_OK...); white or none means the appearance's plain text colour, and
+## any colour is made readable on the current panels (Kit.ink).
 func value(name_: String, text: String, col := Color.WHITE) -> void:
 	var l: Label = _values[name_]
 	l.text = text
-	l.add_theme_color_override("font_color", col)
+	l.add_theme_color_override("font_color", Kit.C_TEXT if col == Color.WHITE else Kit.ink(col))
 
 
 ## Adds a gauge; set it with gauge(name, 0..1, text).
