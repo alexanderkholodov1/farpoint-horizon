@@ -1,5 +1,6 @@
 extends Node
 ## Scripted walkthrough: plays through the game and saves screenshots to the project's shots/ folder (development only; needs a window).
+## It drives the game as the buttons do: GameState for the choices, g.go(screen id) and g.overlay(id) for the flow.
 var g
 
 func shot(name: String) -> void:
@@ -17,76 +18,80 @@ func _ready() -> void:
 	add_child(g)
 	await wait(1.5)
 	await shot("01_menu")
-	g._start_solo()
+	GameState.start_solo()
+	g.go("missions")
 	await wait(0.5)
 	await shot("02_scenarios")
-	g._choose_scenario("volcanes")
-	g.mission.from_dict({"bus": "small", "instruments": ["ir_adv", "gas_adv", "cam_ms"], "panels": "dep_m", "battery": "b1k", "comms": "xband", "adcs": "rw", "propulsion": "cold", "launcher": "ride", "orbit": "sso", "years": 3})
-	g.rebuild_ship()
-	g.show_design(2)
+	GameState.start_mission("volcanes")
+	g.go("design", {"step": 0})
+	GameState.mission.from_dict({"bus": "small", "instruments": ["ir_adv", "gas_adv", "cam_ms"], "panels": "dep_m", "battery": "b1k", "comms": "xband", "adcs": "rw", "propulsion": "cold", "launcher": "ride", "orbit": "sso", "years": 3})
+	g.world.rebuild_ship()
+	g.go("design", {"step": 2})
 	await wait(1.5)
 	await shot("03_instruments")
-	g.show_design(7)
+	g.go("design", {"step": 7})
 	await wait(0.5)
 	await shot("04_review")
-	g._try_launch()
+	g.launch()
 	await wait(4.6)
 	await shot("05_launch")
 	await wait(4.0)
 	await shot("06_launch_high")
-	while g.state != "sim":
+	while g.screen_id != "operation":
 		await wait(0.2)
 	await wait(5.0)
 	await shot("07_sim")
-	g.sim_month_f = 9999.0
-	while g.state != "report":
+	g.screen.month_f = 9999.0
+	while g.screen_id != "report":
 		await wait(0.2)
 	await wait(1.0)
 	await shot("08_report")
-	# Luna
-	g._choose_scenario("luna")
-	g.mission.from_dict({"bus": "medium", "instruments": ["cam_ms", "gamma"], "panels": "dep_m", "battery": "b1k", "comms": "ka", "adcs": "st", "propulsion": "chem", "launcher": "medium", "orbit": "lunar", "years": 1, "redundancy": true, "shielding": true})
-	g.stage_design()
-	g.show_design(5)
+	# Moon
+	GameState.start_mission("luna")
+	g.go("design", {"step": 0})
+	GameState.mission.from_dict({"bus": "medium", "instruments": ["cam_ms", "gamma"], "panels": "dep_m", "battery": "b1k", "comms": "ka", "adcs": "st", "propulsion": "chem", "launcher": "medium", "orbit": "lunar", "years": 1, "redundancy": true, "shielding": true})
+	g.world.stage_design()
+	g.go("design", {"step": 5})
 	await wait(1.5)
 	await shot("09_luna_design")
-	g.last_sim = g.mission.simulate(5)
-	g.last_report = g.mission.compute()
-	g.show_sim()
+	GameState.last_sim = GameState.mission.simulate(5)
+	GameState.last_report = GameState.mission.compute()
+	g.go("operation")
 	await wait(3.0)
 	await shot("10_luna_orbit")
-	# Telescopio en L2
-	g._choose_scenario("telescopio")
-	g.mission.from_dict({"bus": "large", "instruments": ["tel_ir"], "panels": "wing_l", "battery": "b6k", "comms": "ka", "adcs": "st", "propulsion": "cold", "launcher": "heavy", "orbit": "l2", "years": 5})
-	g.stage_design()
-	g.show_design(2)
+	# Telescope at L2
+	GameState.start_mission("telescopio")
+	g.go("design", {"step": 0})
+	GameState.mission.from_dict({"bus": "large", "instruments": ["tel_ir"], "panels": "wing_l", "battery": "b6k", "comms": "ka", "adcs": "st", "propulsion": "cold", "launcher": "heavy", "orbit": "l2", "years": 5})
+	g.world.stage_design()
+	g.go("design", {"step": 2})
 	await wait(1.5)
 	await shot("11_tel_design")
-	g.last_sim = g.mission.simulate(2)
-	g.last_report = g.mission.compute()
-	g.show_sim()
+	GameState.last_sim = GameState.mission.simulate(2)
+	GameState.last_report = GameState.mission.compute()
+	g.go("operation")
 	await wait(3.0)
 	await shot("12_l2_orbit")
-	# Falla de lanzamiento forzada
-	g.last_report = g.mission.compute()
-	var s = g.mission.simulate(2)
+	# Forced launch failure
+	GameState.last_report = GameState.mission.compute()
+	var s = GameState.mission.simulate(2)
 	s.launch_failed = true
 	s.months = 0
 	s.status = "lost"
-	s.score = g.mission.score(g.last_report, s)
-	g.last_sim = s
-	g.show_launch()
+	s.score = GameState.mission.score(GameState.last_report, s)
+	GameState.last_sim = s
+	g.go("launch")
 	await wait(7.0)
 	await shot("13_explosion")
-	while g.state != "report":
+	while g.screen_id != "report":
 		await wait(0.2)
 	await wait(1.0)
 	await shot("14_fail_report")
-	# Modo equipo
-	g.show_team(3)
+	# Team mode
+	g.go("team", {"players": 3})
 	await wait(0.5)
 	await shot("15_team")
-	g.show_howto()
+	g.overlay("howto")
 	await wait(0.5)
 	await shot("16_howto")
 	get_tree().quit()

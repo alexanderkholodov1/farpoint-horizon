@@ -1,6 +1,7 @@
 # Project state
 
-Last update: 2026-11-14. Version v0.1.0 (first playable sketch). Next: v0.2.0, see `docs/design/vision.md`.
+Last update: 2026-11-14. Released: v0.1.0 (first playable sketch). In progress on branch `v0.2.0`, following
+`docs/plan/v0.2.0.md` and `docs/design/vision.md`.
 
 ## What works today
 
@@ -24,16 +25,27 @@ every `[SKH]` startup step through `menu listo` and the first frames print, 600 
 `tools/shots.sh` produced all 16 screenshots (menu and launch looked at); `tools/check.sh` passed. The only messages are
 the same texture-leak warnings at exit as on the lead's laptop. The safe mode is no longer needed for this laptop.
 
-## Models (C7, branch `c7-models`)
+## Models (C7)
 
 - `assets/models/cubesat_3u.glb`: a 3U CubeSat at real scale with four wings and four antennas that deploy (animation
   `deploy`), built from `assets/source/cubesat_3u.py`. Not yet used by any screen; see `assets/models/README.md`.
 
-## Who owns what
+## The skeleton (Phase B of the plan)
 
-The two team members agree on it and write it here; until then, coordinate in GitHub issues before touching the same
-files. The shared contracts (`scripts/game_data.gd` formats, `scripts/mission.gd`'s model, `project.godot`,
-`AGENTS.md`) change only by agreement.
+- **B1 done:** every screen in its own script under `scripts/screens/`, a small flow controller (`scripts/main.gd`),
+  the 3D world in `scripts/world.gd`, shared state in the `GameState` autoload, the UI kit in `scripts/ui/kit.gd`.
+  How to add a screen: `docs/architecture.md`. Verified: `tools/check.sh` green, the 16 walkthrough screenshots match
+  v0.1.0 except where events are random.
+- **Next:** B2 (catalogs to `data/*.json`, every value cited in `docs/sources.md`, English text with Spanish as an
+  option, the game's name), then B3 (the shared room: one screen and Firebase).
+- Known bugs kept from the sketch: in `GameState.start_mission` the telescope's orbit is set to L2 and then overwritten
+  to LEO; a double click on the launch button during the fade launches twice.
+
+## How work is shared
+
+Nobody owns a part: each piece is claimed through its GitHub issue before starting (`AGENTS.md`). The shared contracts
+(data formats, the mission model, `GameState`, `project.godot`, `AGENTS.md`) change only by agreement of both team
+members.
 
 ## Pending
 
