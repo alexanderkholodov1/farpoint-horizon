@@ -1,4 +1,8 @@
-# Priority now: the mechanics before any more missions (alexanderkholodov1, 2026-11-14)
+# Priority now (alexanderkholodov1, 2026-11-14)
+
+**A complete proof of concept first, judged by the challenge's requirements** (`kb/challenge/requirements.md`,
+`kb/challenge/event-and-judging.md`): one mission played end to end that feels whole. Nothing that is not crucial for
+that, even if part of the plan is left out. Within that, the mechanics before any more missions:
 
 Rules in `AGENTS.md` (How we work).
 Everything that moves must behave as in real life, in real time with a visible time warp. Known wrong and being redone:
