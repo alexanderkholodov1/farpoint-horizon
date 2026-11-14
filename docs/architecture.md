@@ -9,7 +9,7 @@ code on 2026-11-14.
 
 | File | Lines | Role |
 |---|---|---|
-| `project.godot` | | Main scene `res://scenes/main.tscn`; autoloads `GameData` then `GameState`; renderer `gl_compatibility` (also for mobile); window 1600x900, stretch mode `canvas_items`, aspect `expand`; `run/flush_stdout_on_print=true` |
+| `project.godot` | | Project name Farpoint HORIZON; main scene `res://scenes/main.tscn`; English fallback locale and the Spanish translation table; autoloads `GameData` then `GameState`; renderer `gl_compatibility` (also for mobile); window 1600x900, stretch mode `canvas_items`, aspect `expand`; `run/flush_stdout_on_print=true` |
 | `scripts/main.gd` | 127 | Flow controller: creates the world and the UI root (theme, fade layer), keeps the registry of screens and overlays (`SCREENS`, `OVERLAYS`), and switches them: `go(id, args)`, `go_faded(id, out, in, args)`, `overlay(id)`, `fade()`, `launch()`. Each frame it updates the world, then the current screen |
 | `scripts/game_state.gd` | 134 | Autoload `GameState`: the shared state of the game being played (below) and its rules: `start_solo`, `set_team`, `start_mission`, `can_launch`, `begin_flight`, `approve_all`, the local ranking, `trace()` |
 | `scripts/world.gd` | 277 | The 3D world every screen shares: sky, lights, the orbital camera (mouse drag and wheel), and the stage. Ready stages: `stage_menu`, `stage_design` with `rebuild_ship`, `stage_orbit`, `stage_earth`; `clear_stage()` for a screen that builds its own; `lose_ship()`; `cam_free` |
@@ -23,7 +23,8 @@ code on 2026-11-14.
 | `scripts/screens/operation.gd` | 133 | Month-by-month playback of `GameState.last_sim`: mission log, time and science bars, speed controls |
 | `scripts/screens/report.gd` | 143 | Grade, score, what happened and why, real missions like it; redesign, fly again, new mission, save to the ranking |
 | `scripts/screens/ranking.gd`, `howto.gd` | 26, 33 | Overlays: the local ranking, how to play |
-| `scripts/game_data.gd` | 250 | Catalogs and balance (autoload `GameData`, extends `Node`): scenarios, buses (platforms), instruments, panels, batteries, comms, ADCS (attitude control), propulsion, orbits, launchers, roles, design steps with CML level, difficulty, CML names. Units are in the file header: kg, W, Wh, millions of USD, GB/day, Mbps, m/s |
+| `scripts/game_data.gd` | 150 | Loader of the catalogs (autoload `GameData`, extends `Node`). Reads `data/*.json` at startup and keeps the same public names as before: `SCENARIOS`, `BUSES`, `INSTRUMENTS`, `PANELS`, `BATTERIES`, `COMMS`, `ADCS`, `PROPULSION`, `ORBITS`, `LAUNCHERS`, `ROLES`, `ROLE_ORDER`, `STEPS`, `DIFFICULTY`, `CML_NAMES`, `SIZE_NAMES` (static variables). Translates the text fields, remembers the language in `user://settings.cfg`. No content lives in it |
+| `data/*.json`, `i18n/translations.csv` | | The content (see "Data and translation") and the Spanish texts |
 | `scripts/mission.gd` | 563 | `Mission` model (extends `RefCounted`). Holds the player's choices; `compute()` returns mass, power, battery, data, delta-v, lifetime, cost, pointing, objectives, expected science, review checks (`fatal`, `warn`, `ok`) and role goals; `science_rate()`; `simulate(seed)` runs the month-by-month events; `score()` gives objectives 400, science 300, efficiency 200, team 100; `real_missions()` |
 | `scripts/ship_builder.gd` | 230 | Modular 3D spacecraft from primitives, changing with the chosen parts |
 | `scripts/space_builder.gd` | 282 | Sky, Earth (texture and an Ecuador marker), procedural Moon, orbit rings, rocket, launch pad with Andean volcanoes, particles, `Label3D` |
@@ -75,6 +76,54 @@ Rules that keep screens apart:
 - Do not `await` in a screen after a call that may change screen: the screen is freed at the end of that frame. To act
   on the next frame, connect to `get_tree().process_frame` with `CONNECT_ONE_SHOT` (see `operation.gd`); the
   connection is dropped if the screen is freed first.
+
+## Data and translation
+
+Content and balance live in `data/*.json`, never in code. `GameData` reads the files once at startup (and again when
+the language changes) and keeps them in static variables under the names in the table above, so
+`GameData.LAUNCHERS["light"].cost` works anywhere, including in a script started with `-s` (which compiles before the
+autoloads exist, so it reaches `GameData` through `const GD := preload("res://scripts/game_data.gd")`, see
+`tests/fuzz.gd`). JSON numbers load as floats; the fields in `GameData.INT_FIELDS` become integers; `color` (three
+numbers 0 to 1) becomes a `Color` and `dims` a `Vector3`.
+
+Every file is an object `{"doc": "...", "entries": {id: entry}}` and every entry carries:
+- `source`: a list of IDs of `docs/sources.md` the numbers come from (`["S14"]`).
+- `simplified` (where the numbers are our own rounding): one sentence that says so and names what it simplifies.
+- `value_notes` (optional): `{field: sentence}` for one value that has a different source or a stricter caveat.
+Ids (`volcanes`, `cam_basic`) are stable keys, never shown to players. To add content: add an entry with the same
+fields as its neighbors, cite the source, and run `tools/check.sh`. New sources go at the end of their section in
+`docs/sources.md` with a word ID. Text fields hold English; the Spanish goes in `i18n/translations.csv`.
+
+| File | Entry fields (units in the game header: kg, W, Wh, M$ = millions of USD, GB/day, Mbps, m/s) |
+|---|---|
+| `scenarios.json` | `name`, `type`, `desc`, `real` (text); `budget` (M$), `min_years`, `science_target` (points), `body` (`tierra` or `luna`), `needs` (list of `{any: [instrument tags], label}`: a goal is met when an instrument has one of the tags), `relevance` (tag to 0..1.1 value of that kind of instrument), `default_relevance` (optional, for tags not listed), `orbit_mult` (orbit id to science multiplier, 0 means it cannot serve), `color` |
+| `buses.json` | `name`, `desc`; `dry`, `max` (kg), `cost` (M$), `base_power` (W), `slots`, `max_size` (largest instrument size), `ep_power` (W an electric engine draws), `ops_mult` (operations cost factor), `cots` (commercial electronics, radiation risk), `dims` (3D size) |
+| `instruments.json` | `name`, `desc`; `tags` (what it observes), `size` (1 CubeSat, 2 small, 3 medium, 4 giant), `mass`, `power`, `cost`, `data` (GB/day), `sci` (science points per month), `pointing` (accuracy needed, 0 to 3), `shape` (how the 3D craft draws it) |
+| `panels.json`, `batteries.json` | `name`, `desc`, `mass`, `cost`; panels `power` (W) and `span` (3D width); batteries `wh` |
+| `comms.json` | `name`, `desc`, `rate` (Mbps), `mass`, `power`, `cost`, `dish` (3D size) |
+| `adcs.json` | `name`, `desc`, `level` (pointing it gives, 1 to 3), `mass_pct`, `power_pct`, `cost_pct` (share of the platform's) |
+| `propulsion.json` | `name`, `desc`, `dv` (m/s the craft carries), `mass_pct`, `cost_pct` (of the dry craft), `electric` |
+| `orbits.json` | `name`, `short`, `desc`; `period_min`, `eclipse_min`, `eclipse_frac`, `contact_min` (per day), `comm_factor` (signal loss), `insert_dv`, `maint_dv` (per year), `drag_life` (years without propulsion, 999 means no drag), `radiation` (1 to 3), `body`, `radius`, `incl` (3D drawing), `ops` (operations cost per year) |
+| `launchers.json` | `name`, `desc`; `cap` (orbit id to kg it can carry, 0 means it cannot go), `cost`, `cost_per_kg`, `min_cost` (M$), `fail`, `delay` (chances), `height` (3D) |
+| `roles.json` | `order` (the roles in turn order) and entries with `name`, `goal`, `why`, `color` |
+| `steps.json` | `entries` is a list: `id`, `title`, `role`, `cml` (the maturity level the step reaches) |
+| `difficulty.json` | `name`, `desc`, `budget`, `events`, `launch_fail` (multipliers) |
+| `labels.json` | `size_names` and `cml_names` (number to name) |
+
+Not in data yet: the numbers inside `scripts/mission.gd` (the 10 % and 20 % costs of redundancy, event chances,
+score weights), cited in its comments, and the missions of `data/nasa/` (another package).
+
+Translation. English is the default and the source text: every text a player sees is written once in English, in a
+data file or in the code. Spanish lives in `i18n/translations.csv` (columns `keys,es`; the key is the exact English
+text, quotes doubled in CSV). Godot imports it into `i18n/translations.es.translation` (listed in `project.godot`,
+git ignores `*.translation`; the import creates it). To add a string: write it in English, wrap it in `tr("...")` in
+code (static functions use `TranslationServer.translate`), or put it in a data text field (`name`, `type`, `desc`,
+`real`, `goal`, `why`, `title`, `label`, `short`; `GameData` translates those itself), then add a row with its
+Spanish. A text with numbers is translated before it is formatted: `tr("Budget %s") % x`. Never join pieces of a
+sentence, translate it whole. The language switch is on the menu (`GameData.set_language("es")`, saved in
+`user://settings.cfg`); screens already drawn must be drawn again, the menu does `go("menu")`.
+`tools/godot.sh --headless --path . -s res://tests/i18n.gd` plays every screen in both languages and lists the texts
+that look the same in both, which have no Spanish row.
 
 ## GameState
 

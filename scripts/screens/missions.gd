@@ -6,8 +6,8 @@ func enter(_args: Dictionary) -> void:
 	var head := Kit.vbox(4)
 	Kit.place(head, 0, 0, 1, 0, 50, 30, -50, 130)
 	add_child(head)
-	head.add_child(Kit.lbl(GameData.CML_NAMES[1] + "  —  Toda misión empieza con una pregunta científica", 15, Kit.C_ACCENT, Kit.FONT_B))
-	head.add_child(Kit.lbl("Elige el objetivo de tu misión", 36, Color.WHITE, Kit.FONT_T))
+	head.add_child(Kit.lbl(GameData.CML_NAMES[1] + "  —  " + tr("Every mission starts with a science question"), 15, Kit.C_ACCENT, Kit.FONT_B))
+	head.add_child(Kit.lbl(tr("Choose your mission's goal"), 36, Color.WHITE, Kit.FONT_T))
 	var grid := GridContainer.new()
 	grid.columns = 3
 	grid.add_theme_constant_override("h_separation", 16)
@@ -33,7 +33,7 @@ func enter(_args: Dictionary) -> void:
 		v.add_child(Kit.lbl(S.type.to_upper(), 13, S.color, Kit.FONT_B))
 		v.add_child(Kit.lbl(S.name, 22, Color.WHITE, Kit.FONT_T, true))
 		v.add_child(Kit.lbl(S.desc, 14, Kit.C_DIM, Kit.FONT_R, true))
-		var facts := "Presupuesto: %s   ·   Operar ≥ %d año(s)" % [Kit.money(S.budget * mult), S.min_years]
+		var facts := tr("Budget %s   ·   Operate at least %d yr") % [Kit.money(S.budget * mult), S.min_years]
 		v.add_child(Kit.lbl(facts, 14, Kit.C_WARN, Kit.FONT_B, true))
 		pc.gui_input.connect(func(e: InputEvent):
 			if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
@@ -41,7 +41,7 @@ func enter(_args: Dictionary) -> void:
 		pc.mouse_entered.connect(func(): sb.bg_color = Color(0.07, 0.13, 0.22, 0.95))
 		pc.mouse_exited.connect(func(): sb.bg_color = Kit.C_BG)
 		grid.add_child(pc)
-	var back := Kit.btn("◀ Menú", func(): go("menu"))
+	var back := Kit.btn(tr("◀ Menu"), func(): go("menu"))
 	Kit.place(back, 0, 1, 0, 1, 50, -62, 180, -20)
 	add_child(back)
 

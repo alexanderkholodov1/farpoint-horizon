@@ -44,7 +44,7 @@ func trace(msg: String) -> void:
 # ===================================================================================== TEAM
 func start_solo() -> void:
 	team_mode = false
-	players = [{"name": "Jugador", "roles": GameData.ROLE_ORDER.duplicate()}]
+	players = [{"name": tr("Player"), "roles": GameData.ROLE_ORDER.duplicate()}]
 	changed.emit()
 
 
@@ -58,7 +58,7 @@ func player_for_role(role: String) -> String:
 	for p in players:
 		if p.roles.has(role):
 			return p.name
-	return "Jugador"
+	return tr("Player")
 
 
 func all_approved() -> bool:
