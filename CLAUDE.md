@@ -1,5 +1,7 @@
 # CLAUDE.md — SK Horizon: Mission Architect
 
+Shared rules for every agent of both team members, whatever tool runs it: @AGENTS.md
+
 Contexto para continuar el proyecto en Claude Code. Responder en **español**, de forma concisa.
 
 ## Qué es
