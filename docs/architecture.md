@@ -10,7 +10,7 @@ code on 2026-11-14.
 | File | Lines | Role |
 |---|---|---|
 | `project.godot` | | Project name Farpoint HORIZON; main scene `res://scenes/main.tscn`; English fallback locale and the Spanish translation table; autoloads `GameData` then `GameState`; renderer `gl_compatibility` (also for mobile); window 1600x900, stretch mode `canvas_items`, aspect `expand`; `run/flush_stdout_on_print=true` |
-| `scripts/main.gd` | 127 | Flow controller: creates the world and the UI root (theme, fade layer), keeps the registry of screens and overlays (`SCREENS`, `OVERLAYS`), and switches them: `go(id, args)`, `go_faded(id, out, in, args)`, `overlay(id)`, `fade()`, `launch()`. Each frame it updates the world, then the current screen |
+| `scripts/main.gd` | 127 | Flow controller: creates the world and the UI root (theme, fade layer), finds the screens and overlays in `scripts/screens/` (`SCREENS`, by `scripts/found.gd`), and switches them: `go(id, args)`, `go_faded(id, out, in, args)`, `overlay(id)`, `fade()`, `launch()`. Each frame it updates the world, then the current screen |
 | `scripts/game_state.gd` | 134 | Autoload `GameState`: the shared state of the game being played (below) and its rules: `start_solo`, `set_team`, `start_mission`, `can_launch`, `begin_flight`, `approve_all`, the local ranking, `trace()` |
 | `scripts/world.gd` | 277 | The 3D world every screen shares: sky, lights, the orbital camera (mouse drag and wheel), and the stage. Ready stages: `stage_menu`, `stage_design` with `rebuild_ship`, `stage_orbit`, `stage_earth`; `clear_stage()` for a screen that builds its own; `lose_ship()`; `cam_free` |
 | `scripts/ui/kit.gd` | 256 | The UI kit, all static: colors `C_*`, fonts `FONT_R/B/T`, `build_theme()`, `flat()` style boxes, `place()` anchors, `lbl`, `btn`, `accent_btn`, `panel_box`, `vbox`, `hbox`, `spacer`, `card`, `toast`, `overlay`, and number formatting `pct`, `money`, `kg`, `watts`, `gb`, `mins` |
@@ -29,7 +29,8 @@ code on 2026-11-14.
 | `scripts/screens/report.gd` | 143 | Grade, score, what happened and why, real missions like it; redesign, fly again, new mission, save to the ranking |
 | `scripts/screens/ranking.gd`, `howto.gd` | 26, 33 | Overlays: the local ranking, how to play |
 | `scripts/game_data.gd` | 150 | Loader of the catalogs (autoload `GameData`, extends `Node`). Reads `data/*.json` at startup and keeps the same public names as before: `SCENARIOS`, `BUSES`, `INSTRUMENTS`, `PANELS`, `BATTERIES`, `COMMS`, `ADCS`, `PROPULSION`, `ORBITS`, `LAUNCHERS`, `ROLES`, `ROLE_ORDER`, `STEPS`, `DIFFICULTY`, `CML_NAMES`, `SIZE_NAMES` (static variables). Translates the text fields, remembers the language in `user://settings.cfg`. No content lives in it |
-| `data/*.json`, `i18n/translations.csv` | | The content (see "Data and translation") and the Spanish texts |
+| `data/*.json`, `i18n/*.csv` | | The content (see "Data and translation") and the Spanish texts, one file per piece |
+| `scripts/found.gd` | 50 | What the game finds by folder instead of by a shared list: the screens, the translations |
 | `scripts/mission.gd` | 563 | `Mission` model (extends `RefCounted`). Holds the player's choices; `compute()` returns mass, power, battery, data, delta-v, lifetime, cost, pointing, objectives, expected science, review checks (`fatal`, `warn`, `ok`) and role goals; `science_rate()`; `simulate(seed)` runs the month-by-month events; `score()` gives objectives 400, science 300, efficiency 200, team 100; `real_missions()` |
 | `scripts/ship_builder.gd` | 230 | Modular 3D spacecraft from primitives, changing with the chosen parts |
 | `scripts/space_builder.gd` | 282 | Sky, Earth (texture and an Ecuador marker), procedural Moon, orbit rings, rocket, launch pad with Andean volcanoes, particles, `Label3D` |
@@ -68,8 +69,10 @@ How to add a screen:
    says what the player does there and which `args` it takes.
 2. Build its UI in `enter(args)` with `add_child()` and `Kit`; to redraw, call `clear()` and build again. Put per-frame
    work in `process(delta)`.
-3. Register it: one line in `SCREENS` (or `OVERLAYS` for an overlay) in `scripts/main.gd`. That `preload` also makes a
-   parse error in the screen fail `tools/check.sh` at once.
+3. Nothing to register: `main.gd` finds every script in `scripts/screens/` at startup (`scripts/found.gd`), and the
+   file name is the id. An overlay is a screen opened with `main.overlay(id)`. A parse error in the screen fails
+   `tools/check.sh` at once (the main scene loads every screen). Its Spanish texts go in its piece's own
+   `i18n/<piece>.csv`, and `tests/i18n.gd` checks every `tr("...")` in the code.
 4. Reach it from another screen with `go("<id>", {...})`; keep what other screens need in `GameState`, not in the
    screen, since the screen is freed when the player leaves it.
 5. Add it to `tests/autoshot.gd` with a screenshot, run the walkthrough and look at the picture.
@@ -97,7 +100,9 @@ Every file is an object `{"doc": "...", "entries": {id: entry}}` and every entry
 - `value_notes` (optional): `{field: sentence}` for one value that has a different source or a stricter caveat.
 Ids (`volcanes`, `cam_basic`) are stable keys, never shown to players. To add content: add an entry with the same
 fields as its neighbors, cite the source, and run `tools/check.sh`. New sources go at the end of their section in
-`docs/sources.md` with a word ID. Text fields hold English; the Spanish goes in `i18n/translations.csv`.
+`docs/sources.md` with a word ID. Text fields hold English; the Spanish goes in the piece's own
+`i18n/<piece>.csv` (columns `keys,es`), which `scripts/found.gd` loads at startup with every other file in `i18n/`
+(`translations.csv` is the old base and takes no new lines). One file per piece, so two branches never edit the same one.
 
 | File | Entry fields (units in the game header: kg, W, Wh, M$ = millions of USD, GB/day, Mbps, m/s) |
 |---|---|

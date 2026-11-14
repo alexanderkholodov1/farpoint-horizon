@@ -7,25 +7,11 @@ extends Node3D
 const World := preload("res://scripts/world.gd")
 const Kit := preload("res://scripts/ui/kit.gd")
 const Screen := preload("res://scripts/screens/screen.gd")
+const Found := preload("res://scripts/found.gd")
 
-## Every screen by id. A new screen is a script in scripts/screens/ and one line here.
-const SCREENS := {
-	"menu": preload("res://scripts/screens/menu.gd"),
-	"team": preload("res://scripts/screens/team.gd"),
-	"missions": preload("res://scripts/screens/missions.gd"),
-	"design": preload("res://scripts/screens/design.gd"),
-	"builder": preload("res://scripts/screens/builder.gd"),
-	"launch": preload("res://scripts/screens/launch.gd"),
-	"flight": preload("res://scripts/screens/flight.gd"),
-	"landing": preload("res://scripts/screens/landing.gd"),
-	"operation": preload("res://scripts/screens/operation.gd"),
-	"report": preload("res://scripts/screens/report.gd"),
-}
-## Overlays by id: drawn on top of the current screen, which stays.
-const OVERLAYS := {
-	"ranking": preload("res://scripts/screens/ranking.gd"),
-	"howto": preload("res://scripts/screens/howto.gd"),
-}
+## Every screen and overlay by id, found in scripts/screens/ at startup (scripts/found.gd): a new screen is only a new
+## file there, named after its id; nothing to register. An overlay is a screen opened with overlay(id).
+var SCREENS := {}
 
 var world: World
 var ui: CanvasLayer
@@ -38,6 +24,7 @@ var launching := false      ## A launch is fading in: a second click on the laun
 
 func _ready() -> void:
 	randomize()
+	SCREENS = Found.screens()
 	GameState.trace("inicio")
 	world = World.new()
 	add_child(world)
@@ -95,7 +82,7 @@ func go_faded(id: String, out_time: float, in_time: float, args := {}) -> void:
 
 ## Opens overlay `id` (a key of OVERLAYS) on top of the current screen.
 func overlay(id: String, args := {}) -> void:
-	var o: Screen = _make(OVERLAYS[id], screen)
+	var o: Screen = _make(SCREENS[id], screen)
 	o.enter(args)
 
 
