@@ -14,7 +14,7 @@ var Mission: GDScript
 var GS: Node
 
 ## Texts that are the same in every language on purpose.
-const SAME := ["Farpoint HORIZON", "NASA SPACE APPS CHALLENGE 2026", "SK Horizon", "● Ecuador", "CubeSat", "CubeSat 3U", "CubeSat 6U",
+const SAME := ["Farpoint HORIZON", "Farpoint", "HORIZON", "NASA SPACE APPS CHALLENGE 2026", "SK Horizon", "● Ecuador", "CubeSat", "CubeSat 3U", "CubeSat 6U",
 	"CubeSat 12U", "SmallSat (~200 kg)", "Ranking", "Normal", "CML 1 · Idea", "L2", "GEO", "LEO", "SSO", "English", "Español", "Ka band high gain",
 	"UHF radio", "Magnetómetro", "CML 4", "SAR", "Solo", "Bot · Rivet", "Bot · Quark", "Bot · Skip", "Bot · Echo", "Bot", "%s (bot) · %s"]
 

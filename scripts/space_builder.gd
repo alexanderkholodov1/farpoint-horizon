@@ -98,14 +98,16 @@ static func make_earth(radius := 1.0, with_marker := true) -> Node3D:
 	var cl := Ship.add_mesh(surface, cs, Vector3.ZERO, cm)
 	cl.name = "Clouds"
 	cl.add_to_group(SUN_LIT)
-	# atmósfera
+	# the air: about 100 km thick (1.6 % of the radius), drawn at 3.5 % so it reads at game size
+	const ATMO_K := 1.035
 	var as_ := SphereMesh.new()
-	as_.radius = radius * 1.045
-	as_.height = radius * 2.09
-	as_.radial_segments = 96
-	as_.rings = 48
+	as_.radius = radius * ATMO_K
+	as_.height = radius * 2.0 * ATMO_K
+	as_.radial_segments = 128
+	as_.rings = 64
 	var am := ShaderMaterial.new()
 	am.shader = ATMO_SHADER
+	am.set_shader_parameter("inner", 1.0 / ATMO_K)
 	Ship.add_mesh(root, as_, Vector3.ZERO, am).add_to_group(SUN_LIT)
 	# marcador de Ecuador (Quito: -0.2°, -78.5°)
 	if with_marker:

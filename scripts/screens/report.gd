@@ -23,13 +23,15 @@ func enter(_args: Dictionary) -> void:
 	outer.add_child(head)
 	var gcol: Color = {"S": Color(1.0, 0.85, 0.3), "A": Kit.C_OK, "B": Kit.C_ACCENT, "C": Kit.C_WARN, "D": Kit.C_BAD}[s.grade]
 	var gl := Kit.lbl(s.grade, 88, gcol, Kit.FONT_T)
+	if s.grade == "S" or s.grade == "A":
+		Kit.UiSound.play("success", 0.0)
 	gl.custom_minimum_size.x = 90
 	head.add_child(gl)
 	var hv := Kit.vbox(2)
 	hv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(hv)
 	hv.add_child(Kit.lbl(tr("MISSION REPORT") + " · " + S.name.to_upper(), 14, Kit.C_ACCENT, Kit.FONT_B))
-	hv.add_child(Kit.lbl(s.label, 34, Color.WHITE, Kit.FONT_T))
+	hv.add_child(Kit.lbl(s.label, 34, Kit.C_TEXT, Kit.FONT_T))
 	hv.add_child(Kit.lbl(tr("%d / 1000 points   ·   Final cost %s of %s   ·   %d of %d months in operation") % [s.total, Kit.money(s.final_cost), Kit.money(r.budget), last_sim.months, mission.years * 12], 15, Kit.C_DIM))
 	var cols := Kit.hbox(18)
 	cols.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -38,13 +40,13 @@ func enter(_args: Dictionary) -> void:
 	var c1 := Kit.vbox(8)
 	c1.custom_minimum_size.x = 360
 	cols.add_child(c1)
-	c1.add_child(Kit.lbl(tr("Score"), 18, Color.WHITE, Kit.FONT_B))
+	c1.add_child(Kit.lbl(tr("Score"), 18, Kit.C_TEXT, Kit.FONT_B))
 	_score_row(c1, tr("Goals met"), s.objectives, 400, tr("Science goals covered and time in operation."))
 	_score_row(c1, tr("Science gathered"), s.science, 300, tr("%d of %d science points.") % [int(last_sim.science), int(S.science_target)])
 	_score_row(c1, tr("Efficient use of resources"), s.efficiency, 200, tr("Budget reserve and mass and power margins."))
 	_score_row(c1, tr("Teamwork"), s.team, 100, tr("Each role's goals met."))
 	c1.add_child(Kit.spacer(6))
-	c1.add_child(Kit.lbl(tr("Goals by role"), 16, Color.WHITE, Kit.FONT_B))
+	c1.add_child(Kit.lbl(tr("Goals by role"), 16, Kit.C_TEXT, Kit.FONT_B))
 	for role in GameData.ROLE_ORDER:
 		var R: Dictionary = GameData.ROLES[role]
 		var ok: bool = r.goals[role]
@@ -59,7 +61,7 @@ func enter(_args: Dictionary) -> void:
 	var c2 := Kit.vbox(6)
 	c2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	c2sc.add_child(c2)
-	c2.add_child(Kit.lbl(tr("Why it went the way it did"), 18, Color.WHITE, Kit.FONT_B))
+	c2.add_child(Kit.lbl(tr("Why it went the way it did"), 18, Kit.C_TEXT, Kit.FONT_B))
 	var lessons := 0
 	for c in r.checks:
 		if c.level == "warn":
@@ -74,12 +76,12 @@ func enter(_args: Dictionary) -> void:
 	if lessons == 0:
 		c2.add_child(Kit.lbl(tr("✓ The design was balanced, with margin in power, data, mass and fuel. That's how a mission gets designed!"), 14, Kit.C_OK, Kit.FONT_B, true))
 	c2.add_child(Kit.spacer(6))
-	c2.add_child(Kit.lbl(tr("What went well"), 18, Color.WHITE, Kit.FONT_B))
+	c2.add_child(Kit.lbl(tr("What went well"), 18, Kit.C_TEXT, Kit.FONT_B))
 	for e in last_sim.events:
 		if e.kind == "good":
 			c2.add_child(Kit.lbl(tr("✓ Month %d · %s") % [e.month, e.title], 14, Kit.C_OK, Kit.FONT_B, true))
 	c2.add_child(Kit.spacer(6))
-	c2.add_child(Kit.lbl(tr("Similar real missions"), 18, Color.WHITE, Kit.FONT_B))
+	c2.add_child(Kit.lbl(tr("Similar real missions"), 18, Kit.C_TEXT, Kit.FONT_B))
 	for t in mission.real_missions():
 		c2.add_child(Kit.lbl("• " + t, 14, Kit.C_DIM, Kit.FONT_R, true))
 	c2.add_child(Kit.spacer(6))
@@ -118,7 +120,7 @@ func _score_row(parent: VBoxContainer, nm: String, val: int, mx: int, sub: Strin
 	var n := Kit.lbl(nm, 15, Kit.C_TEXT, Kit.FONT_B)
 	n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	h.add_child(n)
-	h.add_child(Kit.lbl("%d / %d" % [val, mx], 15, Color.WHITE, Kit.FONT_B))
+	h.add_child(Kit.lbl("%d / %d" % [val, mx], 15, Kit.C_TEXT, Kit.FONT_B))
 	var pb := ProgressBar.new()
 	pb.show_percentage = false
 	pb.custom_minimum_size = Vector2(0, 10)

@@ -42,7 +42,10 @@ var told := {}                   ## Hints already given.
 var craft: Node3D
 var rocket_h := 6.0
 var old_far := 2000.0
-var cam_off := Vector3(-5.0, 2.0, 12.0)
+var cam_off := Vector3(6.5, 1.5, 11.0)
+var cam_aim := Vector3.INF     ## Where the camera looks, damped (INF until the first frame).
+var cam_t := 0.0               ## Clock of the camera's wobble.
+var base_fov := 75.0           ## The camera's field of view on entering, restored on exit.
 var smoke: CPUParticles3D       ## Steam and smoke thrown sideways at ignition (the look of #12).
 
 
@@ -65,6 +68,7 @@ func enter(_args: Dictionary) -> void:
 	world.stage.add_child(smoke)
 	rocket_h = rocket.get_meta("height", 6.0)
 	old_far = world.cam.far
+	base_fov = world.cam.fov
 	world.cam.far = 9000.0
 	world.cam.position = Vector3(7, 2.5, 9)
 	world.cam.look_at(Vector3(0, 3, 0), Vector3.UP)
@@ -85,6 +89,7 @@ func enter(_args: Dictionary) -> void:
 
 func exit() -> void:
 	world.cam.far = old_far
+	world.cam.fov = base_fov
 
 
 func _build_hud() -> void:
@@ -240,6 +245,9 @@ func _place_rocket() -> void:
 	# the sky darkens on the way up, and the stars come out in space
 	var k: float = clampf(model.h / 45000.0, 0.0, 1.0)
 	var env: Environment = world.world_env.environment
+	# the haze of the Andes thins as the rocket climbs above the air, and is gone once the globe shows (look, #12)
+	env.fog_density = lerpf(0.00042, 0.00006, clampf(model.h / 15000.0, 0.0, 1.0))
+	env.fog_enabled = model.h <= 15000.0
 	if not in_space:
 		var sky_m = env.sky.sky_material
 		if sky_m is ProceduralSkyMaterial:
@@ -255,30 +263,44 @@ static func _squash(m: float, knee: float, slope: float) -> float:
 	return m if m < knee else knee + (m - knee) * slope
 
 
+## The chase camera (look by issue #12; flight by #8). It stays on the side it starts on (no swing across the rocket),
+## follows and aims with damping so liftoff reads fast but steady, shakes with a smooth low wobble rather than a new
+## random jolt every frame, and widens its view a little with speed so the climb still feels quick.
 func _camera(delta: float) -> void:
 	var cam: Camera3D = world.cam
 	if phase == "countdown":
 		return
+	cam_t += delta
 	var rp := rocket.position
 	var s := maxf(rocket_h / 6.0, 0.6)
 	var hk: float = clampf((model.h - 12000.0) / 40000.0, 0.0, 1.0)
-	var want: Vector3 = Vector3(-5.0, 2.0, 12.0).lerp(Vector3(-7.0, 7.0, 9.0), hk) * s
+	var want: Vector3 = Vector3(6.5, 1.5, 11.0).lerp(Vector3(7.0, 6.0, 9.5), hk) * s
 	if phase == "orbit":
-		want = Vector3(-4.0, 3.5, 8.0) * s
-	if phase == "climb" and phase_t < 3.0:
-		# liftoff seen from the pad, then the camera catches up with the rocket
-		var k: float = smoothstep(0.0, 3.0, phase_t)
-		cam.position = Vector3(7, 2.5, 9).lerp(rp + want, k)
+		want = Vector3(5.0, 3.5, 8.0) * s
+	if phase == "climb" and phase_t < 4.0:
+		# liftoff seen from the pad: the camera stays put a moment, then eases up after the rocket from the same side
+		var k: float = smoothstep(0.6, 4.0, phase_t)
+		k = k * k * (3.0 - 2.0 * k)
+		var target_pos: Vector3 = Vector3(7, 2.5, 9).lerp(rp + want, k)
+		cam.position = cam.position.lerp(target_pos, clampf(delta * 6.0, 0.0, 1.0))
 		cam_off = cam.position - rp
 	else:
-		cam_off = cam_off.lerp(want, clampf(delta * 1.5, 0.0, 1.0))
+		cam_off = cam_off.lerp(want, clampf(delta * 1.2, 0.0, 1.0))
 		cam.position = rp + cam_off
 	var shake_now: float = shake + (model.stress / Ascent.STRESS_BREAK * 0.6 if phase == "climb" else 0.0)
 	if phase == "climb" and model.h < 3000.0:
 		shake_now += throttle * 0.35
 	shake = maxf(0.0, shake - delta * 0.8)
-	var jitter: Vector3 = Vector3(randf_range(-1, 1), randf_range(-1, 1), 0) * shake_now * 0.05 * s
-	cam.look_at(rp + rocket.global_transform.basis.y * rocket_h * 0.5 + jitter, Vector3.UP)
+	# a smooth wobble: a few slow sines instead of white noise
+	var wob := Vector3(sin(cam_t * 11.0) + 0.5 * sin(cam_t * 23.0 + 1.3), sin(cam_t * 9.0 + 0.7) + 0.5 * sin(cam_t * 19.0), 0.0)
+	var jitter: Vector3 = wob * shake_now * 0.03 * s
+	var aim := rp + rocket.global_transform.basis.y * rocket_h * 0.5
+	cam_aim = aim if cam_aim == Vector3.INF else cam_aim.lerp(aim, clampf(delta * 5.0, 0.0, 1.0))
+	cam.look_at(cam_aim + jitter, Vector3.UP)
+	# the sense of speed: the view widens a little as the rocket gains speed
+	var spd: float = sqrt(model.vx * model.vx + model.vy * model.vy)
+	var fov_goal: float = base_fov + clampf(spd / 2500.0, 0.0, 1.0) * 8.0
+	cam.fov = lerpf(cam.fov, fov_goal, clampf(delta * 1.5, 0.0, 1.0))
 
 
 func _flames() -> void:

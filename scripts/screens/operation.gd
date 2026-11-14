@@ -33,7 +33,7 @@ func enter(_args: Dictionary) -> void:
 	var tt := Kit.lbl(tr("OPERATIONS") + " · " + GameData.ORBITS[mission.orbit].name, 15, Kit.C_ACCENT, Kit.FONT_B)
 	tt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	th.add_child(tt)
-	month_lbl = Kit.lbl(tr("Month 0 of %d") % months_total, 15, Color.WHITE, Kit.FONT_B)
+	month_lbl = Kit.lbl(tr("Month 0 of %d") % months_total, 15, Kit.C_TEXT, Kit.FONT_B)
 	th.add_child(month_lbl)
 	time_bar = ProgressBar.new()
 	time_bar.show_percentage = false
@@ -60,7 +60,7 @@ func enter(_args: Dictionary) -> void:
 	add_child(log_p)
 	var lv := Kit.vbox(6)
 	log_p.add_child(lv)
-	lv.add_child(Kit.lbl(tr("Mission log"), 20, Color.WHITE, Kit.FONT_T))
+	lv.add_child(Kit.lbl(tr("Mission log"), 20, Kit.C_TEXT, Kit.FONT_T))
 	log_scroll = ScrollContainer.new()
 	log_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	log_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL

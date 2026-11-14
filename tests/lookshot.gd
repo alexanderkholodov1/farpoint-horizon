@@ -18,6 +18,13 @@ func _ready() -> void:
 	var only: String = OS.get_environment("LOOK_ONLY")
 	g = load("res://scenes/main.tscn").instantiate()
 	add_child(g)
+	var look_mode := OS.get_environment("LOOK_MODE")   # "light" or "dark": shoot that appearance without saving it
+	if look_mode != "":
+		var K := preload("res://scripts/ui/kit.gd")
+		K.load_mode()
+		K._apply(look_mode)
+		g.root_ui.theme = K.build_theme()
+		g.go("menu")
 	await wait(1.2)
 	if only == "" or "menu" in only:
 		await shot("menu")

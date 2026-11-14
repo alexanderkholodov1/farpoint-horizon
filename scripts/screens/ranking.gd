@@ -20,7 +20,7 @@ func enter(_args: Dictionary) -> void:
 	for i in ranking.size():
 		var e: Dictionary = ranking[i]
 		g.add_child(Kit.lbl(str(i + 1), 15, Kit.C_DIM))
-		g.add_child(Kit.lbl(str(e.team), 15, Color.WHITE, Kit.FONT_B))
+		g.add_child(Kit.lbl(str(e.team), 15, Kit.C_TEXT, Kit.FONT_B))
 		g.add_child(Kit.lbl("%d (%s)" % [int(e.score), e.grade], 15, Kit.C_WARN, Kit.FONT_B))
 		g.add_child(Kit.lbl(str(e.scenario), 14, Kit.C_DIM))
 		g.add_child(Kit.lbl(str(e.difficulty), 14, Kit.C_DIM))

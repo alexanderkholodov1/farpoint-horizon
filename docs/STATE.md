@@ -105,3 +105,4 @@ integration; nobody edits this list by hand on a work branch.
 - 0.1.17: CI also runs the translation, flight, room and crew tests (`work/13-more-checks`, 2026-11-14)
 - 0.1.18: The flight to the Moon's south pole: the burn the pilot cuts by hand, the coast, and the landing on NASA's LOLA ground with long shadows, the 1202 alarm and touchdown grades; the extra objectives are settled at touchdown (`work/8-pilot`, 2026-11-14)
 - 0.1.19: No shared lists: screens, translations and tests are found by folder, and translations merge by union, so pieces built in parallel never conflict on them (`work/26-found-by-folder`, 2026-11-14)
+- 0.1.20: The UI theme with dark and light appearances, the horizon-arc logo and a formal menu, interface sounds (`work/12-ui`, 2026-11-14)
