@@ -1,0 +1,93 @@
+{
+ "doc": "The design steps in order, each with its responsible role and the CML level it reaches.",
+ "entries": [
+  {
+   "id": "orbita",
+   "title": "Orbit",
+   "role": "operaciones",
+   "cml": 2,
+   "source": [
+    "S3",
+    "S5"
+   ],
+   "simplified": "The eight steps group the design the way the CML stages do, with our own split between roles."
+  },
+  {
+   "id": "plataforma",
+   "title": "Platform",
+   "role": "ingeniero",
+   "cml": 2,
+   "source": [
+    "S3",
+    "S5"
+   ],
+   "simplified": "The eight steps group the design the way the CML stages do, with our own split between roles."
+  },
+  {
+   "id": "instrumentos",
+   "title": "Instruments",
+   "role": "cientifico",
+   "cml": 3,
+   "source": [
+    "S3",
+    "S5"
+   ],
+   "simplified": "The eight steps group the design the way the CML stages do, with our own split between roles."
+  },
+  {
+   "id": "energia",
+   "title": "Power",
+   "role": "ingeniero",
+   "cml": 3,
+   "source": [
+    "S3",
+    "S5"
+   ],
+   "simplified": "The eight steps group the design the way the CML stages do, with our own split between roles."
+  },
+  {
+   "id": "comunicaciones",
+   "title": "Communications",
+   "role": "operaciones",
+   "cml": 3,
+   "source": [
+    "S3",
+    "S5"
+   ],
+   "simplified": "The eight steps group the design the way the CML stages do, with our own split between roles."
+  },
+  {
+   "id": "control",
+   "title": "Control and propulsion",
+   "role": "ingeniero",
+   "cml": 3,
+   "source": [
+    "S3",
+    "S5"
+   ],
+   "simplified": "The eight steps group the design the way the CML stages do, with our own split between roles."
+  },
+  {
+   "id": "lanzador",
+   "title": "Launcher and lifetime",
+   "role": "director",
+   "cml": 4,
+   "source": [
+    "S3",
+    "S5"
+   ],
+   "simplified": "The eight steps group the design the way the CML stages do, with our own split between roles."
+  },
+  {
+   "id": "revision",
+   "title": "Review",
+   "role": "director",
+   "cml": 4,
+   "source": [
+    "S3",
+    "S5"
+   ],
+   "simplified": "The eight steps group the design the way the CML stages do, with our own split between roles."
+  }
+ ]
+}
