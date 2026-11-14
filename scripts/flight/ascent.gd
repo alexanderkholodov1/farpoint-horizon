@@ -8,20 +8,23 @@ extends RefCounted
 ## Simplified, and labeled as ours: no drag on speed (air only matters for the stress on the structure, dynamic
 ## pressure times the angle between where the rocket points and where it moves); the climb's delta-v budget is
 ## the usual 9.3 to 10 km/s to low orbit [S-delta-v] plus the rocket's own margin; every stage has the same exhaust
-## speed; boosters add thrust for the first 40 % of the first stage. Time runs TIME_SCALE times faster than real.
+## speed; boosters add thrust for the first 40 % of the first stage.
+## Time is real: the climb takes the eight minutes or so a real one does. The screen may run it faster with the flight
+## panel's time warp (at most ×10 with the engines on); step() takes the real seconds and the warp. The pilot's own
+## pace (how long the hands were off the stick) is counted in real seconds, the rocket's in mission seconds.
 
 const FlightData := preload("res://scripts/flight/flight_data.gd")
 const ROCKET_DESIGN := "res://scripts/craft/rocket_design.gd"   # loaded when needed: it names GameData
 
-const TIME_SCALE := 8.0          ## Mission seconds per game second.
 const ORBIT_ALT := 120000.0      ## Lowest height (m) that counts as an orbit.
 const BUDGET := 10000.0          ## Climb delta-v (m/s) of a rocket with no margin [S-delta-v].
 const STRESS_WARN := 220.0       ## kPa x degrees: the stress gauge turns red.
-const STRESS_BREAK := 520.0      ## Above this for BREAK_TIME game seconds the rocket breaks up.
-const BREAK_TIME := 0.9
-const STEER_RATE := 14.0         ## Degrees per game second while the pilot holds a steering key.
-const ASSIST_AFTER := 2.5        ## Game seconds with hands off the stick before the flight computer holds the marker.
-const ASSIST_RATE := 7.0         ## Degrees per game second the flight computer turns at most.
+const STRESS_BREAK := 520.0      ## Above this for BREAK_TIME mission seconds the rocket breaks up.
+const BREAK_TIME := 7.2
+const STEER_RATE := 1.75         ## Degrees per mission second while the pilot holds a steering key (a real rocket
+                                 ## pitches over at about a degree a second).
+const ASSIST_AFTER := 2.5        ## Real seconds with hands off the stick before the flight computer holds the marker.
+const ASSIST_RATE := 0.875       ## Degrees per mission second the flight computer turns at most.
 
 var R: float
 var GM: float
@@ -51,7 +54,7 @@ var red_time := 0.0
 var err_sum := 0.0
 var err_time := 0.0
 var fuel_dropped := 0.0          ## Share of stages dropped with fuel still in them (staged early).
-var hands_off := 0.0             ## Game seconds since the pilot last steered.
+var hands_off := 0.0             ## Real seconds since the pilot last steered.
 var assisting := false           ## The flight computer is holding the marker for a hands-off pilot.
 var helped_time := 0.0           ## Game seconds above 800 m flown by the flight computer or the autopilot.
 var autopilot := false           ## Set by the screen while the autopilot (or the bot pilot) flies.
@@ -108,20 +111,22 @@ func guidance() -> float:
 	return clampf(tgt, 0.0, 100.0)
 
 
-## Advances the climb by dt game seconds. steer is -1, 0 or 1 (the pilot's keys).
-func step(dt: float, steer: float) -> void:
+## Advances the climb by dt real seconds at a time warp of `warp` (mission seconds per real second). steer is -1, 0
+## or 1 (the pilot's keys).
+func step(dt: float, steer: float, warp := 1.0) -> void:
 	if orbit or broken or crashed:
 		return
 	hands_off = 0.0 if steer != 0.0 else hands_off + dt
 	assisting = hands_off > ASSIST_AFTER and lifted
+	dt *= warp           # from here on, mission seconds
 	if assisting:
-		pitch += clampf((marker - pitch) * 0.6, -ASSIST_RATE, ASSIST_RATE) * dt
+		pitch += clampf((marker - pitch) * 0.075, -ASSIST_RATE, ASSIST_RATE) * dt
 	pitch = clampf(pitch + steer * STEER_RATE * dt, -30.0, 150.0)
-	var n := int(ceil(dt * TIME_SCALE / 0.1))
-	var mdt := dt * TIME_SCALE / n
+	var n := int(ceil(dt / 0.1))
+	var mdt := dt / n
 	for _i in n:
 		_physics(mdt)
-	marker = lerpf(marker, guidance(), clampf(dt * 3.0, 0.0, 1.0))
+	marker = lerpf(marker, guidance(), clampf(dt * 0.375, 0.0, 1.0))
 	if h > 800.0:
 		err_sum += absf(pitch - marker) * dt
 		err_time += dt

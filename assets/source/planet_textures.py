@@ -29,11 +29,20 @@ SRC = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.path.join(ROOT, 
 
 GIBS = ("https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1"
         "&SRS=EPSG:4326&BBOX=-180,-90,180,90&WIDTH=4096&HEIGHT=2048&FORMAT=image/jpeg&LAYERS={layer}&TIME={time}")
+## The region under the climb from Ecuador, 24 x 24 degrees around the launch site, at about 1.3 km per pixel (eight
+## times the whole-globe maps): the globe's shader blends it in so the Earth stays sharp right after the rocket leaves
+## the Andes terrain (look, issue #12). Keep REGION_LONLAT in step with REGION_RECT in scripts/space_builder.gd.
+REGION_LONLAT = (-92.0, -12.0, -68.0, 12.0)
+REGION = ("https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1"
+          "&SRS=EPSG:4326&BBOX=-92,-12,-68,12&WIDTH=2048&HEIGHT=2048&FORMAT=image/jpeg&LAYERS={layer}&TIME={time}")
 FILES = {
     "bm.jpg": GIBS.format(layer="BlueMarble_NextGeneration", time="2004-08-01"),
     "relief.jpg": GIBS.format(layer="BlueMarble_ShadedRelief", time="2004-08-01"),
     "night.jpg": GIBS.format(layer="VIIRS_Black_Marble", time="2016-01-01"),
     "viirs.jpg": GIBS.format(layer="VIIRS_SNPP_CorrectedReflectance_TrueColor", time="2024-08-31"),
+    "reg_bm.jpg": REGION.format(layer="BlueMarble_NextGeneration", time="2004-08-01"),
+    "reg_relief.jpg": REGION.format(layer="BlueMarble_ShadedRelief", time="2004-08-01"),
+    "reg_viirs.jpg": REGION.format(layer="VIIRS_SNPP_CorrectedReflectance_TrueColor", time="2024-08-31"),
     "moon.jpg": "https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/lroc_color_2k.jpg",
     "ldem_4.tif": "https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/ldem_4.tif",
 }
@@ -99,6 +108,24 @@ def earth():
     save(a, "earth_clouds.jpg", size=(2048, 1024), quality=85)
 
 
+def clouds_from(v):
+    mn = v.min(axis=2)
+    mx = v.max(axis=2)
+    sat = (mx - mn) / np.maximum(mx, 1e-3)
+    a = smooth(0.3, 0.95, mn) ** 1.4 * (1.0 - smooth(0.1, 0.3, sat))
+    return np.where(mx < 0.02, 0.0, a)
+
+
+def region():
+    day = rgb("reg_bm.jpg")
+    shaded = rgb("reg_relief.jpg").mean(axis=2)
+    plain = day.mean(axis=2)
+    rel = np.where(plain < 0.03, 0.5, np.clip(shaded / np.maximum(plain, 0.03), 0.0, 2.0) * 0.5)
+    save(day, "earth_region_day.jpg", quality=85)
+    save(rel, "earth_region_relief.jpg", size=(1024, 1024), quality=85)
+    save(clouds_from(rgb("reg_viirs.jpg")), "earth_region_clouds.jpg", size=(1536, 1536), quality=78)
+
+
 def moon():
     save(rgb("moon.jpg"), "moon_color.jpg", quality=86)
     h = np.asarray(Image.open(os.path.join(SRC, "ldem_4.tif")), dtype=np.float32)   # km, 4 px per degree
@@ -119,4 +146,5 @@ def moon():
 if __name__ == "__main__":
     fetch()
     earth()
+    region()
     moon()

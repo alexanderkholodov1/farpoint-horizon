@@ -43,7 +43,7 @@ var craft: Node3D
 var rocket_h := 6.0
 var old_far := 2000.0
 var cam_off := Vector3(6.5, 1.5, 11.0)
-var cam_aim := Vector3.INF     ## Where the camera looks, damped (INF until the first frame).
+var cam_aim := Vector3.INF     ## Where the camera looks, from the rocket's base, damped (INF until the first frame).
 var cam_t := 0.0               ## Clock of the camera's wobble.
 var base_fov := 75.0           ## The camera's field of view on entering, restored on exit.
 var smoke: CPUParticles3D       ## Steam and smoke thrown sideways at ignition (the look of #12).
@@ -97,6 +97,8 @@ func _build_hud() -> void:
 	add_child(hud)
 	hud.build(tr("LAUNCH") + " · " + tr(RocketDesign.launcher(mission.launcher).name), tr("STAGE"),
 		tr("← → lean · W S throttle · Space stage"))
+	# real time, as the rules ask; the pilot may speed it up to ×10 while the engines burn
+	hud.add_time_warp(1.0)
 	hud.add_readout("alt", tr("Height"))
 	hud.add_readout("speed", tr("Speed"))
 	hud.add_gauge("orbit", tr("Speed toward orbit"), 2.0, 2.0, Color(0.45, 0.85, 1.0))
@@ -133,7 +135,7 @@ func process(delta: float) -> void:
 			if phase_t > 4.2 and not leaving:
 				leaving = true
 				main.go_faded("report", 0.8, 0.6)
-	_fall(delta)
+	_fall(delta * hud.warp)
 	_camera(delta)
 	_flames()
 	_sound(delta)
@@ -168,7 +170,8 @@ func _climb(delta: float) -> void:
 		throttle = hud.throttle_keys(throttle, delta)
 	model.throttle = throttle
 	model.autopilot = hud.autopilot
-	model.step(delta, steer)
+	hud.cap_warp(10.0, tr("engine on"))
+	model.step(delta, steer, hud.warp)
 	# staging: the pilot's job; the autopilot does it at once, the flight computer after a few seconds
 	if model.wants_stage():
 		stage_wait += delta
@@ -218,7 +221,7 @@ func _hints() -> void:
 
 
 func _telemetry() -> void:
-	hud.clock.text = "T+%02d:%02d" % [int(model.t) / 60, int(model.t) % 60]
+	hud.clock.text = FlightHud.met_text(model.t)
 	hud.value("alt", ("%.1f km" % (model.h / 1000.0)) if model.h >= 1000.0 else ("%d m" % int(model.h)))
 	var v: float = sqrt(model.vx * model.vx + model.vy * model.vy)
 	hud.value("speed", ("%.2f km/s" % (v / 1000.0)) if v >= 1000.0 else ("%d m/s" % int(v)))
@@ -246,13 +249,20 @@ func _place_rocket() -> void:
 	var k: float = clampf(model.h / 45000.0, 0.0, 1.0)
 	var env: Environment = world.world_env.environment
 	# the haze of the Andes thins as the rocket climbs above the air, and is gone once the globe shows (look, #12)
-	env.fog_density = lerpf(0.00042, 0.00006, clampf(model.h / 15000.0, 0.0, 1.0))
-	env.fog_enabled = model.h <= 15000.0
+	# ...with a veil of high haze right where the Andes terrain hands over to the globe at 15 km, so the switch reads
+	# as climbing through haze rather than as a cut
+	var veil: float = exp(-pow((model.h - 15000.0) / 1800.0, 2.0))
+	env.fog_density = lerpf(0.00042, 0.00006, clampf(model.h / 15000.0, 0.0, 1.0)) + veil * 0.0016
+	env.fog_enabled = model.h <= 19000.0
 	if not in_space:
 		var sky_m = env.sky.sky_material
 		if sky_m is ProceduralSkyMaterial:
 			sky_m.sky_top_color = Color(0.18, 0.4, 0.78).lerp(Color(0, 0, 0.02), k)
 			sky_m.sky_horizon_color = Color(0.62, 0.74, 0.88).lerp(Color(0.05, 0.08, 0.15), k)
+			# below the horizon line the sky's "ground" shows between it and the globe's limb: the same colour as the
+			# horizon, so no grey band appears there (look, #12)
+			sky_m.ground_horizon_color = sky_m.sky_horizon_color
+			sky_m.ground_bottom_color = sky_m.sky_horizon_color.darkened(0.25)
 		env.ambient_light_energy = lerpf(0.55, 0.3, k)
 		if model.h > 55000.0:
 			in_space = true
@@ -294,9 +304,11 @@ func _camera(delta: float) -> void:
 	# a smooth wobble: a few slow sines instead of white noise
 	var wob := Vector3(sin(cam_t * 11.0) + 0.5 * sin(cam_t * 23.0 + 1.3), sin(cam_t * 9.0 + 0.7) + 0.5 * sin(cam_t * 19.0), 0.0)
 	var jitter: Vector3 = wob * shake_now * 0.03 * s
-	var aim := rp + rocket.global_transform.basis.y * rocket_h * 0.5
-	cam_aim = aim if cam_aim == Vector3.INF else cam_aim.lerp(aim, clampf(delta * 5.0, 0.0, 1.0))
-	cam.look_at(cam_aim + jitter, Vector3.UP)
+	# the aim is smoothed relative to the rocket, never in the world: at orbital speed a world-space lag left the
+	# rocket behind the frame (it moves tens of units a second while the aim caught up)
+	var aim_off := rocket.global_transform.basis.y * rocket_h * 0.5
+	cam_aim = aim_off if cam_aim == Vector3.INF else cam_aim.lerp(aim_off, clampf(delta * 5.0, 0.0, 1.0))
+	cam.look_at(rp + cam_aim + jitter, Vector3.UP)
 	# the sense of speed: the view widens a little as the rocket gains speed
 	var spd: float = sqrt(model.vx * model.vx + model.vy * model.vy)
 	var fov_goal: float = base_fov + clampf(spd / 2500.0, 0.0, 1.0) * 8.0
@@ -479,7 +491,7 @@ func _skip() -> void:
 		if model.orbit or model.broken or model.crashed:
 			break
 		model.throttle = 1.0
-		model.step(1.0 / 30.0, clampf((model.marker - model.pitch) * 0.5, -1.0, 1.0))
+		model.step(1.0 / 30.0, clampf((model.marker - model.pitch) * 0.5, -1.0, 1.0), 8.0)
 		if model.wants_stage():
 			var what: String = model.stage()
 			if what != "":

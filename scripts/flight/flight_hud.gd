@@ -10,6 +10,10 @@ signal action_pressed                       ## The big button (STAGE, BURN...) o
 signal throttle_changed(value: float)       ## The pilot moved the lever.
 signal autopilot_toggled(on: bool)
 signal skip_pressed
+signal warp_changed(value: float)           ## The pilot changed how fast time runs.
+
+## How fast time can run: real time, then faster. The screen multiplies its real seconds by `warp`.
+const WARPS := [1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0]
 
 const Kit := preload("res://scripts/ui/kit.gd")
 const Instruments := preload("res://scripts/flight/instruments.gd")
@@ -37,6 +41,13 @@ var _values := {}          ## readout name -> Label
 var _gauges := {}          ## gauge name -> Instruments.Gauge
 var _msg_tw: Tween
 var autopilot := false
+var warp := 1.0             ## Mission seconds per real second (1 is real time).
+var warp_cap := 1.0         ## The fastest allowed now (an engine on, the ground near).
+var warp_box: HBoxContainer
+var warp_note: Label
+var _warp_btns := {}        ## warp -> Button
+var _top: VBoxContainer
+var _cap_why := ""         ## Why time may not run faster now, said beside the warp.
 
 
 func _init() -> void:
@@ -52,6 +63,7 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 	add_child(p)
 	var v := Kit.vbox(6)
 	p.add_child(v)
+	_top = v
 	title = Kit.lbl(heading, 14, Kit.C_ACCENT, Kit.FONT_B)
 	v.add_child(title)
 	clock = Kit.lbl("", 30, Color.WHITE, Kit.FONT_T)
@@ -156,6 +168,85 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 
 func _sound_text() -> String:
 	return TranslationServer.translate("Sound off") if Sound.is_muted() else TranslationServer.translate("Sound on")
+
+
+## Adds the time control under the clock: real time and faster, chosen with the buttons or the keys , and . ;
+## `cap` is the fastest allowed at first. A note says in words how fast time runs, so the clock never misleads.
+func add_time_warp(cap := 1.0) -> void:
+	warp_box = Kit.hbox(4)
+	for w in WARPS:
+		var b := Kit.btn(_warp_label(w), func(): set_warp(w, true), 12, 46)
+		b.focus_mode = Control.FOCUS_NONE
+		b.custom_minimum_size.y = 26
+		_warp_btns[w] = b
+		warp_box.add_child(b)
+	_top.add_child(warp_box)
+	_top.move_child(warp_box, 2)
+	warp_note = Kit.lbl("", 12, Kit.C_DIM, Kit.FONT_R)
+	_top.add_child(warp_note)
+	_top.move_child(warp_note, 3)
+	cap_warp(cap)
+
+
+static func _warp_label(w: float) -> String:
+	return "×1" if w <= 1.0 else "×" + ("%dk" % roundi(w / 1000.0) if w >= 1000.0 else "%d" % roundi(w))
+
+
+## Sets how fast time runs (kept at most warp_cap).
+func set_warp(w: float, _by_pilot := false) -> void:
+	w = clampf(w, 1.0, warp_cap)
+	var changed := w != warp
+	warp = w
+	_show_warp()
+	if changed:
+		warp_changed.emit(warp)
+
+
+## The fastest time may run now; why is said in the note. Lowers the current warp when it is above.
+func cap_warp(cap: float, why := "") -> void:
+	warp_cap = cap
+	if warp > cap:
+		set_warp(cap)
+	_cap_why = why
+	_show_warp()
+
+
+func _show_warp() -> void:
+	if warp_box == null:
+		return
+	for w in _warp_btns:
+		var b: Button = _warp_btns[w]
+		b.disabled = w > warp_cap
+		if w == warp:
+			Kit.accent_btn(b, Kit.C_ACCENT)
+		else:
+			_plain(b)
+	var t: String = TranslationServer.translate("Real time") if warp <= 1.0 else TranslationServer.translate("Time runs %s times faster") % _thousands(warp)
+	if _cap_why != "":
+		t += " · " + _cap_why
+	warp_note.text = t
+
+
+## 100000 as "100,000".
+static func _thousands(v: float) -> String:
+	var s := str(roundi(v))
+	var out := ""
+	while s.length() > 3:
+		out = "," + s.substr(s.length() - 3) + out
+		s = s.substr(0, s.length() - 3)
+	return s + out
+
+
+## Mission elapsed time as the clock shows it: "T+ 00:52:10", with days when there are.
+static func met_text(seconds: float) -> String:
+	var s := maxi(roundi(seconds), 0)
+	var d := s / 86400
+	var h := (s % 86400) / 3600
+	var m := (s % 3600) / 60
+	var text := "T+ %02d:%02d:%02d" % [h, m, s % 60]
+	if d > 0:
+		text = "T+ %d d %02d:%02d:%02d" % [d, h, m, s % 60]
+	return text
 
 
 ## Adds a readout (name, then its value label); set it with value(name, text).
@@ -282,4 +373,9 @@ func pilot_input() -> bool:
 func _unhandled_input(e: InputEvent) -> void:
 	if e is InputEventKey and e.pressed and not e.echo and e.physical_keycode == KEY_SPACE:
 		action.press()
+		get_viewport().set_input_as_handled()
+	elif e is InputEventKey and e.pressed and not e.echo and warp_box and (e.physical_keycode == KEY_PERIOD or e.physical_keycode == KEY_COMMA):
+		var i := WARPS.find(warp)
+		i = clampi(i + (1 if e.physical_keycode == KEY_PERIOD else -1), 0, WARPS.size() - 1)
+		set_warp(WARPS[i], true)
 		get_viewport().set_input_as_handled()

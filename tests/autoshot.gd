@@ -174,6 +174,7 @@ func _pilot() -> void:
 	await shot("24_pilot_countdown")
 	await wait(4.0)
 	await shot("25_pilot_liftoff")
+	g.screen.hud.set_warp(10.0)     # the climb is real time; a player speeds it up
 	await wait(6.0)
 	await shot("26_pilot_maxq")
 	while g.screen_id == "launch" and g.screen.phase == "climb" and not g.screen.model.wants_stage():
@@ -199,38 +200,71 @@ func _moon_mission() -> void:
 	GameState.last_sim.launch_failed = false
 
 
-## The burn toward the Moon, the coast and the landing at the south pole, flown by the flight computer (issue #8).
+## The trip to the Moon (issue #8), flown as a player who lets the flight computer act and speeds up time:
+## the plan, the countdown, the burn, the correction, the coast, the arrival, the capture into lunar orbit.
 func _to_the_moon() -> void:
 	while g.screen_id != "flight":
 		await wait(0.2)
-	await wait(1.5)
-	await shot("31_moon_parking_orbit")
-	g.screen._on_action()
-	await wait(5.0)
-	await shot("32_moon_burn")
-	while g.screen_id == "flight" and g.screen.phase == "burn":
+	while g.screen.plan.is_empty():
 		await wait(0.2)
 	await wait(1.0)
-	await shot("33_moon_burn_cut")
-	await wait(5.0)
-	await shot("34_moon_coast")
+	await shot("31_moon_plan")
+	g.screen.hud.set_warp(1000.0)
+	while g.screen.phase == "plan" and g.screen.burn_start - g.screen.m.t > 400.0:
+		await wait(0.2)
+	await wait(1.5)
+	await shot("32_moon_countdown")
+	while g.screen.phase == "plan":
+		await wait(0.2)
+	g.screen.hud.set_warp(10.0)
+	await wait(12.0)
+	await shot("33_moon_burn")
+	while g.screen.phase == "burn":
+		await wait(0.2)
+	await wait(1.0)
+	await shot("34_moon_cut")
+	g.screen.hud.set_warp(10000.0)
+	while g.screen.correction_state != "offered" and g.screen.correction_state != "done":
+		await wait(0.2)
+	await wait(0.5)
+	await shot("35_moon_correction")
+	while g.screen.correction_state != "done":
+		await wait(0.2)
+	g.screen.hud.set_warp(100000.0)
+	await wait(2.0)
+	await shot("36_moon_coast")
+	while g.screen.phase == "coast" and g.screen.m.about_moon().r > 2.0e7:
+		await wait(0.2)
+	await shot("37_moon_approach")
+	while g.screen.phase == "coast":
+		await wait(0.2)
+	g.screen.hud.set_warp(10.0)
+	while g.screen.phase == "capture" and not g.screen.braking:
+		await wait(0.2)
+	await wait(3.0)
+	await shot("38_moon_brake")
+	while g.screen.phase == "capture":
+		await wait(0.2)
+	await wait(2.0)
+	await shot("39_lunar_orbit")
+	print("flight ", GameState.flight.get("tli", {}), " correction ", GameState.flight.get("correction", {}), " capture ", GameState.flight.get("capture", {}))
 	while g.screen_id != "landing":
 		await wait(0.2)
 	await wait(1.5)
-	await shot("35_landing_start")
+	await shot("40_landing_start")
 	while g.screen_id == "landing" and g.screen.model.altitude() > 240.0:
 		await wait(0.2)
 	await wait(0.6)
-	await shot("36_landing_alarm")
+	await shot("41_landing_alarm")
 	while g.screen_id == "landing" and g.screen.model.altitude() > 20.0:
 		await wait(0.2)
-	await shot("37_landing_low")
+	await shot("42_landing_low")
 	while g.screen_id == "landing" and g.screen.phase == "descent":
 		await wait(0.2)
 	await wait(1.2)
-	await shot("38_touchdown")
+	await shot("43_touchdown")
 	print("landing ", GameState.flight.get("landing", {}), " extras ", GameState.flight.get("extras", {}), " tli ", GameState.flight.get("tli", {}))
 	while g.screen_id == "landing":
 		await wait(0.2)
 	await wait(2.0)
-	await shot("39_after_landing")
+	await shot("44_after_landing")

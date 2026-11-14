@@ -49,7 +49,8 @@ static func met(id: String, flight: Dictionary) -> bool:
 		"contact_kept":
 			return land.get("landed", false) and bool(land.get("contact_kept", false))
 		"tli_error":
-			return flight.has("tli") and absf(float(flight.tli.get("error", 1.0))) <= float(c.max)
+			# a burn the pilot cut by hand, not the flight computer
+			return flight.has("tli") and flight.tli.get("by", "") == "pilot" and absf(float(flight.tli.get("error", 1.0))) <= float(c.max)
 		"ascent_error_deg":
 			# flown by a person for most of the climb, not by the flight computer
 			return flight.has("ascent") and bool(flight.ascent.get("orbit", false)) and float(flight.ascent.get("own_share", 0.0)) >= 0.6 				and float(flight.ascent.get("mean_error_deg", 99.0)) <= float(c.max)
