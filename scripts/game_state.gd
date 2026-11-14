@@ -56,7 +56,7 @@ func _process(_delta: float) -> void:
 		room.poll()
 
 
-## Prints a startup trace line tagged [SKH] (see docs/STATE.md, open problem).
+## Prints a startup trace line tagged [SKH] (see docs/state/skh-traces.md).
 func trace(msg: String) -> void:
 	print("[SKH] ", msg)
 

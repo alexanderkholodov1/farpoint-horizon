@@ -210,7 +210,7 @@ data, 10 % reserve), which are our own game choices.
 
 ## Renderer notes
 
-- The project uses `gl_compatibility`, with no 3D MSAA. The first version (Forward+ with Vulkan) crashed on an AMD integrated GPU; see `docs/STATE.md`.
+- The project uses `gl_compatibility`, with no 3D MSAA. The first version (Forward+ with Vulkan) crashed on an AMD integrated GPU; see `docs/state/laptops.md`.
 - Rendering features in use that matter when debugging a crash: `Environment` glow (`space_builder.gd`), a `DirectionalLight3D` with shadows (`world.gd`), transparent clouds and atmosphere shaders, a star-loop sky shader (`shaders/sky.gdshader`), and `CPUParticles3D` flames.
 - Godot 4.5.1 and 4.7.1 on Linux, and 4.7.2 Steam on Windows (lead's laptop), are the versions on which the project has run.
 - The game log is at `%APPDATA%\Godot\app_userdata\SK Horizon - Mission Architect\logs\godot.log`.
