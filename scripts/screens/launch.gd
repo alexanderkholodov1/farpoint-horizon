@@ -33,15 +33,15 @@ func enter(_args: Dictionary) -> void:
 	add_child(p)
 	var v := Kit.vbox(4)
 	p.add_child(v)
-	v.add_child(Kit.lbl("LANZAMIENTO · " + GameData.LAUNCHERS[mission.launcher].name, 15, Kit.C_ACCENT, Kit.FONT_B))
+	v.add_child(Kit.lbl(tr("LAUNCH") + " · " + GameData.LAUNCHERS[mission.launcher].name, 15, Kit.C_ACCENT, Kit.FONT_B))
 	telemetry = Kit.lbl("T-00:03", 26, Color.WHITE, Kit.FONT_T)
 	v.add_child(telemetry)
-	v.add_child(Kit.lbl("Destino: " + GameData.ORBITS[mission.orbit].name, 14, Kit.C_DIM))
+	v.add_child(Kit.lbl(tr("Destination") + " · " + GameData.ORBITS[mission.orbit].name, 14, Kit.C_DIM))
 	big = Kit.lbl("3", 120, Color.WHITE, Kit.FONT_T)
 	big.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	Kit.place(big, 0.5, 0.35, 0.5, 0.35, -300, -80, 300, 80)
 	add_child(big)
-	var skip := Kit.btn("Saltar ▶▶", func(): launch_t = max(launch_t, 9.0), 14)
+	var skip := Kit.btn(tr("Skip ▶▶"), func(): launch_t = max(launch_t, 9.0), 14)
 	Kit.place(skip, 1, 1, 1, 1, -150, -60, -20, -20)
 	add_child(skip)
 
@@ -60,7 +60,7 @@ func process(delta: float) -> void:
 				f.emitting = launch_t > 2.4
 		return
 	var tt := launch_t - 3.0
-	big.text = "¡DESPEGUE!" if tt < 1.5 else ""
+	big.text = tr("LIFTOFF!") if tt < 1.5 else ""
 	var alt := 0.6 * tt * tt * 2.2
 	if not exploded:
 		rocket.position.y = 0.2 + alt
@@ -95,7 +95,7 @@ func process(delta: float) -> void:
 
 func _explode() -> void:
 	exploded = true
-	big.text = "¡FALLA DEL LANZADOR!"
+	big.text = tr("LAUNCHER FAILURE!")
 	big.add_theme_font_size_override("font_size", 56)
 	big.add_theme_color_override("font_color", Kit.C_BAD)
 	var pos := rocket.position + Vector3(0, 2.0, 0)

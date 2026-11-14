@@ -44,7 +44,7 @@ func trace(msg: String) -> void:
 # ===================================================================================== TEAM
 func start_solo() -> void:
 	team_mode = false
-	players = [{"name": "Jugador", "roles": GameData.ROLE_ORDER.duplicate()}]
+	players = [{"name": tr("Player"), "roles": GameData.ROLE_ORDER.duplicate()}]
 	changed.emit()
 
 
@@ -58,7 +58,7 @@ func player_for_role(role: String) -> String:
 	for p in players:
 		if p.roles.has(role):
 			return p.name
-	return "Jugador"
+	return tr("Player")
 
 
 func all_approved() -> bool:
@@ -91,8 +91,6 @@ func start_mission(scenario_id: String) -> void:
 	mission.propulsion = "none"
 	mission.launcher = "ride"
 	mission.orbit = "lunar" if scenario_id == "luna" else ("l2" if scenario_id == "telescopio" else "sso")
-	if scenario_id == "telescopio":
-		mission.orbit = "leo"
 	mission.years = GameData.SCENARIOS[scenario_id].min_years
 	approvals = {}
 	changed.emit()

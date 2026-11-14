@@ -1,6 +1,7 @@
 extends RefCounted
-## Modelo de la misión: guarda las decisiones del equipo, calcula los presupuestos
-## (masa, energía, datos, delta-v, costo), revisa compatibilidades y simula la operación.
+## The mission model: keeps the team's decisions, works out the budgets (mass, power, data, delta-v, cost), checks
+## that the parts fit together and simulates the operation. Every text a player sees goes through tr().
+## Margins used in the checks: mass 10 % and power 15 %, simplified from [S-gsfc-std-1000].
 
 var scenario := "volcanes"
 var difficulty := "normal"
@@ -17,7 +18,7 @@ var years := 2
 var redundancy := false
 var shielding := false
 
-const DOD := 0.6            # profundidad de descarga segura de la batería
+const DOD := 0.6            # safe battery depth of discharge in low orbit, simplified from [S-ntrs-dod]
 const KEYS := ["scenario", "difficulty", "orbit", "bus", "instruments", "panels", "battery", "comms",
 	"adcs", "propulsion", "launcher", "years", "redundancy", "shielding"]
 
@@ -232,56 +233,56 @@ func _checks(r: Dictionary, S: Dictionary, B: Dictionary, O: Dictionary, L: Dict
 	var c: Array = []
 	# --- bloqueantes
 	if instruments.is_empty():
-		c.append(_ck("fatal", "Sin instrumentos", "Una nave sin instrumentos no produce ciencia. Ve al paso Instrumentos."))
+		c.append(_ck("fatal", tr("Your craft needs an instrument"), tr("A craft with no instruments makes no science. Head to the Instruments step.")))
 	if instruments.size() > B.slots:
-		c.append(_ck("fatal", "No caben tantos instrumentos", "%s tiene espacio para %d instrumento(s) y elegiste %d. Usa una plataforma más grande o quita instrumentos." % [B.name, B.slots, instruments.size()]))
+		c.append(_ck("fatal", tr("Too many instruments for this platform"), tr("%s has room for %d instrument(s) and you picked %d. Use a bigger platform or drop some instruments.") % [B.name, B.slots, instruments.size()]))
 	for id in instruments:
 		var I: Dictionary = GameData.INSTRUMENTS[id]
 		if I.size > B.max_size:
-			c.append(_ck("fatal", "%s es demasiado grande" % I.name, "Necesita una plataforma de tamaño «%s» o mayor." % GameData.SIZE_NAMES[I.size]))
+			c.append(_ck("fatal", tr("%s is too big") % I.name, tr("It needs a platform of size “%s” or larger.") % GameData.SIZE_NAMES[I.size]))
 	if r.mass_total > B.max:
-		c.append(_ck("fatal", "La nave pesa más de lo que soporta la plataforma", "%.1f kg de %.1f kg permitidos. La estructura no aguanta: elige piezas más livianas o una plataforma mayor." % [r.mass_total, B.max]))
+		c.append(_ck("fatal", tr("The craft outweighs its platform"), tr("%.1f kg against %.1f kg allowed. The structure won't hold, so pick lighter parts or a bigger platform.") % [r.mass_total, B.max]))
 	if r.launch_cap <= 0.0:
-		c.append(_ck("fatal", "Este lanzador no llega a esa órbita", "%s no puede llevar carga a %s. Cada cohete tiene destinos y capacidades distintas." % [L.name, O.name]))
+		c.append(_ck("fatal", tr("This launcher can't reach that orbit"), tr("%s can't carry cargo to %s. Every rocket has its own destinations and capacity.") % [L.name, O.name]))
 	elif r.mass_total > r.launch_cap:
-		c.append(_ck("fatal", "Demasiado pesada para el cohete", "El lanzador lleva máximo %.0f kg a %s y tu nave pesa %.1f kg. Cuanto más lejos o alta la órbita, menos carga puede llevar." % [r.launch_cap, O.short, r.mass_total]))
+		c.append(_ck("fatal", tr("Too heavy for the rocket"), tr("The launcher carries at most %.0f kg to %s and your craft weighs %.1f kg. The farther or higher the orbit, the less it can carry.") % [r.launch_cap, O.short, r.mass_total]))
 	if r.cost_total > r.budget:
-		c.append(_ck("fatal", "Presupuesto excedido", "La misión cuesta %.1f M$ y solo hay %.1f M$. La agencia no aprobará la misión." % [r.cost_total, r.budget]))
+		c.append(_ck("fatal", tr("Over budget"), tr("The mission costs %.1f M$ and only %.1f M$ is available. The agency won't sign off on it.") % [r.cost_total, r.budget]))
 	if r.orbit_mult <= 0.0:
-		c.append(_ck("fatal", "Desde esta órbita no se cumple el objetivo", "El objetivo de «%s» no se puede observar desde %s." % [S.name, O.name]))
+		c.append(_ck("fatal", tr("This orbit can't serve the goal"), tr("The goal of “%s” can't be observed from %s.") % [S.name, O.name]))
 	# --- advertencias (consecuencias que se verán en la simulación)
 	for n in r.needs:
 		if not n.ok:
-			c.append(_ck("warn", "Objetivo sin cubrir: " + n.label, "Ningún instrumento elegido cumple este objetivo científico."))
+			c.append(_ck("warn", tr("Still to cover · %s") % n.label, tr("None of the chosen instruments serves this science goal.")))
 	if r.power_margin < 0.0:
-		c.append(_ck("warn", "Energía insuficiente (%d %%)" % int(r.power_margin * 100), "Los paneles generan %.0f W en promedio y la nave consume %.0f W. Los instrumentos tendrán que turnarse: menos ciencia." % [r.power_gen, r.power_load]))
+		c.append(_ck("warn", tr("Power falls short (%d %%)") % int(r.power_margin * 100), tr("The panels average %.0f W and the craft draws %.0f W. Instruments will have to take turns, which means less science.") % [r.power_gen, r.power_load]))
 	elif r.power_margin < 0.15:
-		c.append(_ck("warn", "Margen de energía bajo (%d %%)" % int(r.power_margin * 100), "Los paneles se degradan con los años. Se recomienda al menos 15 % de margen."))
+		c.append(_ck("warn", tr("Power margin is thin (%d %%)") % int(r.power_margin * 100), tr("Panels wear out over the years. A margin of at least 15 % is recommended.")))
 	if r.battery_ratio < 1.0:
-		c.append(_ck("warn", "La batería no aguanta los eclipses", "En la sombra de la Tierra (%.0f min) necesitas ~%.0f Wh y tienes %.0f Wh. Los instrumentos se apagarán en cada eclipse." % [O.eclipse_min, r.battery_need, r.battery_wh]))
+		c.append(_ck("warn", tr("The battery can't cover the eclipses"), tr("In Earth's shadow (%.0f min) you need ~%.0f Wh and have %.0f Wh. Instruments will switch off in every eclipse.") % [O.eclipse_min, r.battery_need, r.battery_wh]))
 	if r.data_ratio < 1.0:
-		c.append(_ck("warn", "No se pueden bajar todos los datos", "Generas %.1f GB/día y solo puedes enviar %.2f GB/día. Se perderá el %d %% de la ciencia." % [r.data_gen, r.data_down, int((1.0 - r.data_ratio) * 100)]))
+		c.append(_ck("warn", tr("Not all the data fits down the link"), tr("You make %.1f GB per day and can send only %.2f GB per day. %d %% of the science will be lost.") % [r.data_gen, r.data_down, int((1.0 - r.data_ratio) * 100)]))
 	if r.pointing_bad.size() > 0:
-		c.append(_ck("warn", "Apuntado insuficiente", "%s necesita(n) un control de actitud más preciso. Las imágenes saldrán movidas." % ", ".join(r.pointing_bad)))
+		c.append(_ck("warn", tr("Pointing is too coarse"), tr("%s need(s) finer attitude control. Images will come out blurred.") % ", ".join(r.pointing_bad)))
 	if not r.insertion_ok:
-		c.append(_ck("warn", "No hay delta-v para llegar a la órbita final", "Se necesitan %.0f m/s para entrar en %s y la propulsión da %.0f m/s. La nave no llegará a su destino." % [r.dv_insert, O.short, r.dv_have]))
+		c.append(_ck("warn", tr("Not enough delta-v to reach the final orbit"), tr("You need %.0f m/s to enter %s and the propulsion gives %.0f m/s. The craft won't reach its destination.") % [r.dv_insert, O.short, r.dv_have]))
 	elif r.life_years < years:
-		c.append(_ck("warn", "La nave no durará %d años" % years, "Con esta órbita y propulsión dura ~%.1f años (combustible o frenado atmosférico)." % r.life_years))
+		c.append(_ck("warn", tr("The craft won't last %d years") % years, tr("With this orbit and propulsion it lasts ~%.1f years (fuel or air drag).") % r.life_years))
 	if years < S.min_years:
-		c.append(_ck("warn", "Vida de diseño corta", "El objetivo pide al menos %d años de operación." % S.min_years))
+		c.append(_ck("warn", tr("Design life is short"), tr("The goal asks for at least %d years of operation.") % S.min_years))
 	if B.cots and O.radiation >= 2 and not shielding:
-		c.append(_ck("warn", "CubeSat sin blindaje en zona de radiación", "Los CubeSats usan electrónica comercial; lejos de la Tierra la radiación puede dañarla."))
+		c.append(_ck("warn", tr("Unshielded CubeSat in a radiation zone"), tr("CubeSats use off-the-shelf electronics, and far from Earth radiation can damage them.")))
 	if r.reserve >= 0.0 and r.reserve < 0.10:
-		c.append(_ck("warn", "Reserva de presupuesto baja", "Queda %.0f %% del presupuesto. Las misiones reales guardan 10-30 %% para imprevistos." % (r.reserve * 100)))
+		c.append(_ck("warn", tr("Budget reserve is low"), tr("%.0f %% of the budget is left. Real missions keep 10 to 30 %% for surprises.") % (r.reserve * 100)))
 	# --- buenas noticias
 	if r.power_margin >= 0.15 and r.battery_ratio >= 1.0:
-		c.append(_ck("ok", "Energía equilibrada", "Margen de %d %% y batería suficiente para los eclipses." % int(r.power_margin * 100)))
+		c.append(_ck("ok", tr("Power in balance"), tr("A margin of %d %% and enough battery for the eclipses.") % int(r.power_margin * 100)))
 	if r.data_ratio >= 1.0 and not instruments.is_empty():
-		c.append(_ck("ok", "Enlace de datos suficiente", "Puedes bajar %.1f GB/día; generas %.1f GB/día." % [r.data_down, r.data_gen]))
+		c.append(_ck("ok", tr("Data link is enough"), tr("You can send %.1f GB per day and make %.1f GB per day.") % [r.data_down, r.data_gen]))
 	if r.mass_margin >= 0.1 and r.mass_total <= B.max and r.launch_cap > 0.0:
-		c.append(_ck("ok", "Masa dentro de límites", "Margen de masa de %d %%." % int(r.mass_margin * 100)))
+		c.append(_ck("ok", tr("Mass within limits"), tr("A mass margin of %d %%.") % int(r.mass_margin * 100)))
 	if r.reserve >= 0.10:
-		c.append(_ck("ok", "Presupuesto con reserva", "Queda %.0f %% para imprevistos." % (r.reserve * 100)))
+		c.append(_ck("ok", tr("Budget with a reserve"), tr("%.0f %% is left for surprises.") % (r.reserve * 100)))
 	return c
 
 
@@ -325,19 +326,19 @@ func simulate(seed_value: int = -1) -> Dictionary:
 		var dm := rng.randi_range(1, 6)
 		var ec: float = O.ops * B.ops_mult * dm / 12.0 * 0.5
 		sim.extra_cost += ec
-		events.append(_ev(0, "info", "Lanzamiento retrasado %d meses" % dm,
-			"El cohete se demoró (clima, revisiones técnicas o el cliente principal). Mantener al equipo listo costó %.2f M$ extra." % ec))
+		events.append(_ev(0, "info", tr("Launch delayed %d months") % dm,
+			tr("The rocket slipped (weather, technical checks or the main customer). Keeping the team ready cost %.2f M$ extra.") % ec))
 
 	# --- lanzamiento
 	if rng.randf() < L.fail * D.launch_fail:
 		sim.launch_failed = true
 		sim.status = "lost"
-		sim.end_reason = "Falla del lanzador"
-		events.append(_ev(0, "bad", "¡Falla del cohete!",
-			"El lanzador falló durante el ascenso (probabilidad ~%d %%). Ocurre en la vida real: por eso las agencias contratan seguros y eligen cohetes confiables." % int(L.fail * 100)))
+		sim.end_reason = tr("Launcher failure")
+		events.append(_ev(0, "bad", tr("Rocket failure!"),
+			tr("The launcher failed during ascent (about %d %% chance). It happens in real life, which is why agencies buy insurance and choose reliable rockets.") % int(L.fail * 100)))
 		_finish(sim, r)
 		return sim
-	events.append(_ev(0, "good", "Despegue exitoso", "%s colocó la nave en el espacio." % L.name))
+	events.append(_ev(0, "good", tr("Liftoff"), tr("%s put the craft in space.") % L.name))
 
 	# --- inserción en órbita
 	var dv_left: float = PR.dv - O.insert_dv
@@ -345,35 +346,35 @@ func simulate(seed_value: int = -1) -> Dictionary:
 	if dv_left < 0.0:
 		if orbit == "lunar":
 			sim.status = "lost"
-			sim.end_reason = "No pudo frenar en la Luna"
-			events.append(_ev(0, "bad", "La nave pasó de largo de la Luna",
-				"Hacía falta frenar %.0f m/s para quedar en órbita lunar y solo había %.0f m/s. La nave siguió de largo hacia el espacio." % [O.insert_dv, PR.dv]))
+			sim.end_reason = tr("Couldn't brake at the Moon")
+			events.append(_ev(0, "bad", tr("The craft flew past the Moon"),
+				tr("It took %.0f m/s of braking to stay in lunar orbit and only %.0f m/s was there. The craft sailed on into space.") % [O.insert_dv, PR.dv]))
 			_finish(sim, r)
 			return sim
 		elif orbit == "geo":
 			orbit_penalty = 0.2
-			events.append(_ev(0, "bad", "Atrapada en la órbita de transferencia",
-				"El cohete la dejó en una órbita elíptica y sin propulsión no pudo subir a GEO. Solo ve la Tierra a ratos y cruza los cinturones de radiación."))
+			events.append(_ev(0, "bad", tr("Stuck in the transfer orbit"),
+				tr("The rocket left it in an elliptical orbit and without propulsion it couldn't climb to GEO. It sees Earth only part of the time and crosses the radiation belts.")))
 		else:
 			orbit_penalty = 0.5
-			events.append(_ev(0, "bad", "Órbita incorrecta", "Faltó delta-v para la inserción final."))
+			events.append(_ev(0, "bad", tr("Wrong orbit"), tr("There wasn't enough delta-v for the final insertion.")))
 		dv_left = 0.0
 	else:
-		events.append(_ev(0, "good", "En órbita: %s" % O.short, "Paneles desplegados y primer contacto con la estación terrena."))
+		events.append(_ev(0, "good", tr("In orbit at %s") % O.short, tr("Panels deployed and first contact with the ground station.")))
 
 	# --- avisos iniciales que explican el rendimiento
 	if r.power_margin < 0.0:
-		events.append(_ev(1, "bad", "Modo ahorro de energía",
-			"Los paneles no alcanzan para todo. Los instrumentos se turnan y la ciencia baja al %d %%." % int(clamp(r.power_gen / r.power_load, 0.1, 1.0) * 100)))
+		events.append(_ev(1, "bad", tr("Power saving mode"),
+			tr("The panels can't power everything. Instruments take turns and science drops to %d %%.") % int(clamp(r.power_gen / r.power_load, 0.1, 1.0) * 100)))
 	if r.battery_ratio < 1.0:
-		events.append(_ev(1, "bad", "Apagones en cada eclipse",
-			"La batería no aguanta la sombra de %.0f minutos; los instrumentos se apagan en cada vuelta." % O.eclipse_min))
+		events.append(_ev(1, "bad", tr("Blackouts in every eclipse"),
+			tr("The battery can't cover the %.0f minute shadow, so instruments switch off every lap.") % O.eclipse_min))
 	if r.data_ratio < 1.0:
-		events.append(_ev(1, "bad", "Memoria llena",
-			"Se generan más datos de los que la antena puede enviar. Se pierde el %d %% de las observaciones." % int((1.0 - r.data_ratio) * 100)))
+		events.append(_ev(1, "bad", tr("Memory full"),
+			tr("More data is made than the antenna can send. %d %% of the observations are lost.") % int((1.0 - r.data_ratio) * 100)))
 	if r.pointing_bad.size() > 0:
-		events.append(_ev(1, "bad", "Imágenes movidas",
-			"El control de actitud no es suficientemente preciso para: %s." % ", ".join(r.pointing_bad)))
+		events.append(_ev(1, "bad", tr("Blurry images"),
+			tr("Attitude control isn't precise enough for %s.") % ", ".join(r.pointing_bad)))
 
 	var life_months := int(floor(r.life_years * 12.0)) if r.insertion_ok else int(floor(1.0 * 12.0))
 	var working: Array = instruments.duplicate()
@@ -388,13 +389,13 @@ func simulate(seed_value: int = -1) -> Dictionary:
 
 	for m in range(1, months_total + 1):
 		if m > life_months:
-			var why := "Se acabó el combustible para mantener la órbita."
+			var why := tr("The fuel to hold the orbit ran out.")
 			if O.drag_life < 900.0 and r.insertion_ok:
-				why = "El roce con la atmósfera residual la frenó hasta reingresar y quemarse. Con propulsión habría podido compensar."
+				why = tr("Drag from the thin upper air slowed it until it reentered and burned up. With propulsion it could have made up for it.")
 			elif orbit == "lunar":
-				why = "Sin combustible para corregir la órbita, la gravedad irregular de la Luna la hizo chocar contra la superficie."
-			sim.end_reason = "Fin de vida anticipado"
-			events.append(_ev(m, "bad", "Fin de la misión antes de tiempo", why))
+				why = tr("With no fuel to correct the orbit, the Moon's lumpy gravity brought it down onto the surface.")
+			sim.end_reason = tr("Early end of life")
+			events.append(_ev(m, "bad", tr("Mission ended early"), why))
 			break
 		var month_sci := science_rate(working, point_level, power_mult) * orbit_penalty
 
@@ -404,50 +405,50 @@ func simulate(seed_value: int = -1) -> Dictionary:
 			if rng.randf() < dmg and working.size() > 0:
 				if rng.randf() < 0.25 and not redundancy:
 					sim.status = "lost"
-					sim.end_reason = "Computadora dañada por radiación"
-					events.append(_ev(m, "bad", "Tormenta solar: computadora dañada",
-						"Una partícula de alta energía dañó la computadora de a bordo y no hay respaldo. La nave quedó en silencio. El blindaje y la redundancia reducen este riesgo."))
+					sim.end_reason = tr("Computer damaged by radiation")
+					events.append(_ev(m, "bad", tr("Solar storm fries the computer"),
+						tr("A high-energy particle damaged the onboard computer and there is no backup. The craft went silent. Shielding and redundancy reduce this risk.")))
 					sim.timeline.append(sim.science)
 					sim.months = m
 					break
 				var lost: String = working[rng.randi_range(0, working.size() - 1)]
 				working.erase(lost)
 				sim.lost_instruments.append(lost)
-				events.append(_ev(m, "bad", "Tormenta solar: instrumento dañado",
-					"La radiación dañó el %s. %s" % [GameData.INSTRUMENTS[lost].name, "Sin blindaje la electrónica es más vulnerable." if not shielding else "Ni el blindaje alcanzó esta vez."]))
+				events.append(_ev(m, "bad", tr("Solar storm damages an instrument"),
+					tr("Radiation damaged the %s. %s") % [GameData.INSTRUMENTS[lost].name, tr("Without shielding the electronics are more vulnerable.") if not shielding else tr("Even the shielding wasn't enough this time.")]))
 			else:
-				events.append(_ev(m, "good", "Tormenta solar superada",
-					"Hubo una tormenta solar y la nave la resistió%s." % (" gracias al blindaje" if shielding else ", con suerte")))
+				events.append(_ev(m, "good", tr("Solar storm weathered"),
+					tr("A solar storm hit and the craft rode it out%s.") % (tr(" thanks to the shielding") if shielding else tr(", with a bit of luck"))))
 
 		# falla de rueda de reacción
 		if point_level >= 2 and rng.randf() < 0.008 * ev_mult:
 			if redundancy:
-				events.append(_ev(m, "info", "Rueda de reacción falló… respaldo activado", "La redundancia salvó el apuntado preciso."))
+				events.append(_ev(m, "info", tr("Reaction wheel failed, backup switched on"), tr("Redundancy saved the fine pointing.")))
 			else:
 				point_level -= 1
-				events.append(_ev(m, "bad", "Falla de una rueda de reacción", "Sin rueda de respaldo, el apuntado pierde precisión el resto de la misión."))
+				events.append(_ev(m, "bad", tr("A reaction wheel failed"), tr("With no spare wheel, pointing stays less precise for the rest of the mission.")))
 
 		# basura espacial
 		if (orbit == "leo" or orbit == "sso") and rng.randf() < 0.006 * ev_mult:
 			if dv_left >= 5.0:
 				dv_left -= 5.0
-				events.append(_ev(m, "info", "Maniobra para esquivar basura espacial", "Un fragmento venía en curso de colisión; la propulsión permitió esquivarlo."))
+				events.append(_ev(m, "info", tr("Dodging space debris"), tr("A fragment was on a collision course and the propulsion let the craft dodge it.")))
 			elif rng.randf() < 0.35:
 				power_mult *= 0.7
-				events.append(_ev(m, "bad", "Impacto de micrometeorito", "Sin propulsión no se pudo esquivar: un panel solar perdió 30 % de potencia."))
+				events.append(_ev(m, "bad", tr("Micrometeoroid hit"), tr("With no propulsion there was no dodging it, and a solar panel lost 30 % of its power.")))
 			else:
-				events.append(_ev(m, "info", "Basura espacial pasó cerca", "Sin propulsión no había cómo esquivar… por suerte pasó a 200 m."))
+				events.append(_ev(m, "info", tr("Space debris flew by"), tr("With no propulsion there was no way to dodge… luckily it passed 200 m away.")))
 
 		# estación terrena
 		if rng.randf() < 0.02 * ev_mult:
 			month_sci *= 0.5
-			events.append(_ev(m, "info", "Estación terrena fuera de servicio", "Una semana sin contacto: se perdió la mitad de los datos de este mes."))
+			events.append(_ev(m, "info", tr("Ground station offline"), tr("A week without contact cost half of this month's data.")))
 
 		# envejecimiento de batería
 		if not aged and m > months_total * 0.6 and r.battery_ratio < 1.3 and rng.randf() < 0.3:
 			aged = true
 			power_mult *= 0.85
-			events.append(_ev(m, "bad", "La batería envejece", "Miles de ciclos de carga y descarga redujeron su capacidad. Con más margen no se habría notado."))
+			events.append(_ev(m, "bad", tr("The battery is aging"), tr("Thousands of charge cycles cut its capacity. With more margin nobody would have noticed.")))
 
 		# descubrimientos (premian un buen diseño)
 		if bonuses < 2 and rng.randf() < 0.05:
@@ -463,7 +464,7 @@ func simulate(seed_value: int = -1) -> Dictionary:
 		sim.months = m
 
 	if sim.status == "ok" and sim.months >= months_total:
-		events.append(_ev(months_total, "good", "Misión completada", "La nave cumplió sus %d años de diseño." % years))
+		events.append(_ev(months_total, "good", tr("Mission complete"), tr("The craft served its full %d years of design life.") % years))
 	_finish(sim, r)
 	return sim
 
@@ -477,26 +478,26 @@ func _discovery(working: Array, idx: int) -> Array:
 		"volcanes":
 			if tags.has("termico") or tags.has("gases"):
 				if idx == 0:
-					return ["¡Alerta temprana en el Cotopaxi!", "Detectaste un aumento de temperatura y de SO2. El Instituto Geofísico recibió la alerta días antes del pico de actividad."]
-				return ["Columna de ceniza del Sangay", "Seguiste la nube de ceniza y se avisó a tiempo a los aeropuertos y a los agricultores de Chimborazo."]
+					return [tr("Early warning at Cotopaxi!"), tr("You detected a rise in temperature and SO2. The Geophysical Institute got the alert days before the activity peaked.")]
+				return [tr("Sangay ash plume"), tr("You tracked the ash cloud and airports and Chimborazo farmers were warned in time.")]
 		"clima":
 			if tags.has("altimetro") or tags.has("microondas"):
 				if idx == 0:
-					return ["¡Se acerca El Niño!", "El mar subió y se calentó frente a las costas de Sudamérica. La alerta llegó con meses de anticipación para preparar la Costa."]
-				return ["Corrientes de Galápagos", "Mediste cómo cambia la corriente de Humboldt alrededor de Galápagos: datos clave para proteger su vida marina."]
+					return [tr("El Niño is coming!"), tr("The sea rose and warmed off the South American coast. The alert came months ahead, in time to prepare the Coast.")]
+				return [tr("Galápagos currents"), tr("You measured how the Humboldt current shifts around Galápagos, key data to protect its marine life.")]
 		"luna":
 			if tags.has("composicion") or tags.has("termico"):
-				return ["Posible hielo en un cráter polar", "Los datos muestran hidrógeno en un cráter siempre en sombra: un recurso clave para futuras bases lunares."]
+				return [tr("Possible ice in a polar crater"), tr("The data show hydrogen in a crater that never sees the Sun, a key resource for future lunar bases.")]
 			if tags.has("optico"):
-				return ["Nuevo cráter fotografiado", "Comparando imágenes encontraste un impacto reciente."]
+				return [tr("New crater photographed"), tr("Comparing images, you found a recent impact.")]
 		"telescopio":
 			if tags.has("telescopio"):
 				if idx == 0:
-					return ["¡Nuevo exoplaneta!", "Un planeta pasó frente a su estrella y tu telescopio midió la sombra."]
-				return ["Galaxia muy lejana", "Captaste la luz de una galaxia que viajó miles de millones de años hasta tu espejo."]
+					return [tr("New exoplanet!"), tr("A planet crossed in front of its star and your telescope measured the shadow.")]
+				return [tr("A very distant galaxy"), tr("You caught light from a galaxy that traveled billions of years to reach your mirror.")]
 		_:
 			if working.size() > 0:
-				return ["Descubrimiento inesperado", "Tus instrumentos registraron algo que nadie esperaba. ¡Así avanza la ciencia!"]
+				return [tr("Unexpected discovery"), tr("Your instruments recorded something nobody expected. That's how science moves forward!")]
 	return []
 
 
@@ -534,19 +535,19 @@ func score(r: Dictionary, sim: Dictionary) -> Dictionary:
 	s.total = s.objectives + s.science + s.efficiency + s.team
 	s.final_cost = total_cost
 	var grade := "D"
-	var label := "Misión fallida: ¡hay mucho que aprender!"
+	var label := tr("Mission lost, and a lot learned!")
 	if s.total >= 900:
 		grade = "S"
-		label = "¡Misión legendaria!"
+		label = tr("Legendary mission!")
 	elif s.total >= 750:
 		grade = "A"
-		label = "Misión exitosa"
+		label = tr("Successful mission")
 	elif s.total >= 600:
 		grade = "B"
-		label = "Misión cumplida con limitaciones"
+		label = tr("Mission done, with limits")
 	elif s.total >= 400:
 		grade = "C"
-		label = "Éxito parcial"
+		label = tr("Partial success")
 	s.grade = grade
 	s.label = label
 	return s
@@ -557,7 +558,8 @@ func real_missions() -> Array:
 	var S: Dictionary = GameData.SCENARIOS[scenario]
 	var out: Array = [S.real]
 	if GameData.BUSES[bus].cots:
-		out.append("Ecuador también lo hizo: NEE-01 Pegaso (2013), el primer satélite ecuatoriano, fue un CubeSat 1U.")
+		# [S-pegaso] NEE-01 Pegaso, 1U, 2013; [S-capstone] CAPSTONE, 12U, 2022
+		out.append(tr("Ecuador did it too. NEE-01 Pegaso (2013), the first Ecuadorian satellite, was a 1U CubeSat."))
 		if orbit == "lunar":
-			out.append("CAPSTONE (NASA, 2022) fue un CubeSat 12U que llegó a la órbita lunar.")
+			out.append(tr("CAPSTONE (NASA, 2022) was a 12U CubeSat that reached lunar orbit."))
 	return out

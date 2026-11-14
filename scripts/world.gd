@@ -161,7 +161,7 @@ func stage_menu() -> void:
 	cam_target = Vector3(-1.25, 0.05, 0)
 
 
-## Puts the craft of mission m on a circular orbit (ring, craft, "TU NAVE" label); _animate_world moves it.
+## Puts the craft of mission m on a circular orbit (ring, craft, tr("YOUR CRAFT") label); _animate_world moves it.
 func setup_orbit_ship(m, center: Vector3, radius: float, incl: float, ship_size: float) -> void:
 	orbit_center = center
 	orbit_radius = radius
@@ -173,7 +173,7 @@ func setup_orbit_ship(m, center: Vector3, radius: float, incl: float, ship_size:
 	var r: float = orbit_ship.get_meta("radius")
 	orbit_ship.scale = Vector3.ONE * (ship_size / r)
 	stage.add_child(orbit_ship)
-	ship_label = Space.make_label("TU NAVE", Color(0.55, 0.9, 1.0))
+	ship_label = Space.make_label(tr("YOUR CRAFT"), Color(0.55, 0.9, 1.0))
 	stage.add_child(ship_label)
 	orbit_speed = 0.35
 
@@ -231,7 +231,7 @@ func stage_orbit() -> void:
 		setup_orbit_ship(mission, l2, 0.7, 90.0, 0.35)
 		cam_target = l2 * 0.5
 		cam_dist_goal = 11.0
-		var l2l := Space.make_label("Punto L2 · 1,5 millones de km", Color(0.85, 0.75, 1.0))
+		var l2l := Space.make_label(tr("L2 point · 1.5 million km"), Color(0.85, 0.75, 1.0))
 		l2l.position = l2 + Vector3(0, -0.95, 0)
 		stage.add_child(l2l)
 		var line := Space.make_orbit_ring(O.radius, 0.0, Color(1, 1, 1, 0.08))

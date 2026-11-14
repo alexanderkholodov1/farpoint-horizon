@@ -42,6 +42,29 @@ branches add entries at the same place (`.gitattributes`).
   https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/ideal-rocket-equation/. Fuel needed for a change of
   velocity.
 
+- **S-nasa-soa** NASA Small Spacecraft Systems Virtual Institute. *State-of-the-Art of Small Spacecraft Technology*.
+  https://www.nasa.gov/smallsat-institute/sst-soa/. Typical mass, power, data rate, pointing and delta-v of small
+  spacecraft platforms, solar arrays, batteries, radios, attitude control and propulsion (chapters on platforms,
+  power, communications, guidance and navigation, in-space propulsion). The game's parts are rounded from it.
+- **S-eoportal** European Space Agency. *eoPortal, Satellite Missions Directory*. https://www.eoportal.org/satellite-missions.
+  Mass, power and data of the real instruments (Landsat 8 OLI and TIRS, Sentinel-2 MSI, Sentinel-1, TROPOMI, ICESat-2,
+  TESS and others, listed in `kb/data/reference.json`, category instrument) that the game's instrument archetypes round.
+- **S-gsfc-std-1000** NASA Goddard Space Flight Center. *GSFC-STD-1000 Rev I, Rules for the Design, Development,
+  Verification and Operation of Flight Systems*, Rule 1.06 and Table 1.06-1.
+  https://standards.nasa.gov/system/files/tmp/GSFC-STD-1000RevI_Approved_0.pdf. Mass margin above 10 % and power margin
+  above 15 %, the margins of the Systems Engineer's goal.
+- **S-ntrs-dod** NASA Technical Reports Server. *Lithium-ion battery depth of discharge in low Earth orbit*, 2007.
+  https://ntrs.nasa.gov/citations/20070022412. Why the game uses 60 % of the battery per eclipse.
+- **S-wiki-geo** Wikipedia. *Geostationary orbit*. https://en.wikipedia.org/wiki/Geostationary_orbit. Altitude 35,786 km,
+  period 1,436 min, continuous view of one hemisphere.
+- **S-wiki-dv** Wikipedia. *Delta-v budget*. https://en.wikipedia.org/wiki/Delta-v_budget. Delta-v from low Earth orbit to
+  geostationary and lunar orbits.
+- **S-wiki-iss** Wikipedia. *International Space Station*. https://en.wikipedia.org/wiki/International_Space_Station.
+  Altitude near 400 km and inclination 51.6 degrees of the low orbit.
+- **S-wiki-sso** Wikipedia. *Sun-synchronous orbit*. https://en.wikipedia.org/wiki/Sun-synchronous_orbit. Altitude near
+  700 km and inclination near 98 degrees, same local solar time on every pass.
+- **S-webb-orbit** NASA. *Webb's orbit*. https://science.nasa.gov/mission/webb/orbit/. The Sun-Earth L2 point, 1.5 million
+  km from Earth, and why a telescope sits there.
 ## Launchers
 - **S13** Rocket Lab. *Electron*. https://rocketlabcorp.com/launch/electron/; figures as given in Wikipedia, *Rocket Lab
   Electron* (infobox, checked 2026-11-14), https://en.wikipedia.org/wiki/Rocket_Lab_Electron. Height 18 m, diameter
@@ -53,15 +76,35 @@ branches add entries at the same place (`.gitattributes`).
   Heavy* (infobox, checked 2026-11-14), https://en.wikipedia.org/wiki/Falcon_Heavy. Height 70 m, width 12.2 m, three
   cores of 3.7 m: the heavy launcher model.
 
+- **S-rideshare-price** New Space Economy. *SpaceX rideshare pricing as of February 2026*, 2026.
+  https://newspaceeconomy.ca/2026/02/27/spacex-rideshare-pricing-as-of-february-2026-what-it-costs-whats-included-and-how-buyers-budget-a-mission/.
+  About 7,000 $/kg for a rideshare to low orbit; the game uses 6,500 $/kg.
 ## Real missions
 - **S11** NASA. *Landsat 9*. https://science.nasa.gov/mission/landsat-9. Orbit and coverage of an Earth-imaging twin.
 - **S12** European Space Agency, Copernicus. *Sentinel-2 mission*. https://sentiwiki.copernicus.eu/web/s2-mission.
   Orbit and coverage of an Earth-imaging twin.
 
+- **S-sentinel5p** European Space Agency, eoPortal. *Copernicus Sentinel-5P*.
+  https://www.eoportal.org/satellite-missions/copernicus-sentinel-5p. Measures gases such as SO2 (volcano scenario).
+- **S-aster** Wikipedia. *Advanced Spaceborne Thermal Emission and Reflection Radiometer*.
+  https://en.wikipedia.org/wiki/Advanced_Spaceborne_Thermal_Emission_and_Reflection_Radiometer. Thermal images (volcano scenario).
+- **S-sentinel6** Wikipedia. *Sentinel-6 Michael Freilich*. https://en.wikipedia.org/wiki/Sentinel-6_Michael_Freilich.
+  Sea level height and the Jason series it continues (ocean scenario).
+- **S-smap** Wikipedia. *Soil Moisture Active Passive*. https://en.wikipedia.org/wiki/Soil_Moisture_Active_Passive.
+  Microwave radiometer of the ocean scenario.
+- **S-lro** NASA. *Lunar Reconnaissance Orbiter*. https://science.nasa.gov/mission/lro/. Real twin of the lunar scenario.
+- **S-chandrayaan2** Wikipedia. *Chandrayaan-2*. https://en.wikipedia.org/wiki/Chandrayaan-2. Real twin of the lunar scenario.
+- **S-hubble** ESA and NASA. *Hubble Space Telescope fact sheet*. https://esahubble.org/about/general/fact_sheet/. Low orbit
+  telescope of the astronomy scenario.
+- **S-pegaso** Wikipedia. *NEE-01 Pegaso*. https://en.wikipedia.org/wiki/NEE-01_Pegaso. The first Ecuadorian satellite, a
+  1U CubeSat launched in 2013 (shown in the report of a CubeSat mission).
+- **S-capstone** Wikipedia. *CAPSTONE*. https://en.wikipedia.org/wiki/CAPSTONE. A 12U CubeSat in lunar orbit, 2022 (shown in
+  the report of a lunar CubeSat mission).
+
 ## Still to add
-- Every value in the game's catalogs (`scripts/game_data.gd` today, `data/*.json` after step B2), from
-  `kb/data/reference.json` and `kb/data/missions.json`, checked against agency pages where they came from secondary
-  sources.
+- The sources of `data/*.json` are listed above. Each value of an entry that mixes sources still has to be checked
+  against the agency page (the catalogs cite the family of sources and say what they simplify; the values are rounded
+  and not yet checked one by one).
 - The source and license of `textures/earth_albedo.jpg`.
 - The fonts, the engine and every library, model, image and sound, with their licenses.
 

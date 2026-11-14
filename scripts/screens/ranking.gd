@@ -3,10 +3,10 @@ extends "res://scripts/screens/screen.gd"
 
 
 func enter(_args: Dictionary) -> void:
-	var v := Kit.overlay(self, "Ranking de misiones", 760, 560, queue_free)
+	var v := Kit.overlay(self, tr("Mission ranking"), 760, 560, queue_free)
 	var ranking: Array = GameState.ranking
 	if ranking.is_empty():
-		v.add_child(Kit.lbl("Todavía no hay misiones guardadas. ¡Sé el primero!", 16, Kit.C_DIM))
+		v.add_child(Kit.lbl(tr("The board is waiting for its first mission. Be the one."), 16, Kit.C_DIM))
 		return
 	var sc := ScrollContainer.new()
 	sc.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -15,7 +15,7 @@ func enter(_args: Dictionary) -> void:
 	g.columns = 5
 	g.add_theme_constant_override("h_separation", 22)
 	sc.add_child(g)
-	for hdr in ["#", "Equipo", "Puntos", "Misión", "Dificultad"]:
+	for hdr in ["#", tr("Team"), tr("Points"), tr("Mission"), tr("Difficulty")]:
 		g.add_child(Kit.lbl(hdr, 14, Kit.C_ACCENT, Kit.FONT_B))
 	for i in ranking.size():
 		var e: Dictionary = ranking[i]

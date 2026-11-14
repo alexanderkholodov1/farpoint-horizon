@@ -30,10 +30,10 @@ func enter(_args: Dictionary) -> void:
 	top.add_child(tv)
 	var th := Kit.hbox(10)
 	tv.add_child(th)
-	var tt := Kit.lbl("OPERACIÓN · " + GameData.ORBITS[mission.orbit].name, 15, Kit.C_ACCENT, Kit.FONT_B)
+	var tt := Kit.lbl(tr("OPERATIONS") + " · " + GameData.ORBITS[mission.orbit].name, 15, Kit.C_ACCENT, Kit.FONT_B)
 	tt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	th.add_child(tt)
-	month_lbl = Kit.lbl("Mes 0 de %d" % months_total, 15, Color.WHITE, Kit.FONT_B)
+	month_lbl = Kit.lbl(tr("Month 0 of %d") % months_total, 15, Color.WHITE, Kit.FONT_B)
 	th.add_child(month_lbl)
 	time_bar = ProgressBar.new()
 	time_bar.show_percentage = false
@@ -42,7 +42,7 @@ func enter(_args: Dictionary) -> void:
 	tv.add_child(time_bar)
 	var sh := Kit.hbox(10)
 	tv.add_child(sh)
-	var sl := Kit.lbl("Ciencia", 14, Kit.C_TEXT, Kit.FONT_B)
+	var sl := Kit.lbl(tr("Science"), 14, Kit.C_TEXT, Kit.FONT_B)
 	sh.add_child(sl)
 	sci_bar = ProgressBar.new()
 	sci_bar.show_percentage = false
@@ -60,7 +60,7 @@ func enter(_args: Dictionary) -> void:
 	add_child(log_p)
 	var lv := Kit.vbox(6)
 	log_p.add_child(lv)
-	lv.add_child(Kit.lbl("Bitácora de la misión", 20, Color.WHITE, Kit.FONT_T))
+	lv.add_child(Kit.lbl(tr("Mission log"), 20, Color.WHITE, Kit.FONT_T))
 	log_scroll = ScrollContainer.new()
 	log_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	log_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -75,7 +75,7 @@ func enter(_args: Dictionary) -> void:
 	add_child(ctl)
 	for sp in [1.0, 3.0, 10.0]:
 		ctl.add_child(Kit.btn("×%d" % int(sp), func(): speed = sp * max(1.0, months_total / 36.0), 14))
-	ctl.add_child(Kit.accent_btn(Kit.btn("Ver informe ▶▶", func(): month_f = 9999.0, 14), Kit.C_WARN))
+	ctl.add_child(Kit.accent_btn(Kit.btn(tr("See report ▶▶"), func(): month_f = 9999.0, 14), Kit.C_WARN))
 
 
 func process(delta: float) -> void:
@@ -95,7 +95,7 @@ func process(delta: float) -> void:
 			var s: float = sim.timeline[shown_month - 1]
 			sci_bar.value = s
 			sci_lbl.text = "%d / %d" % [int(s), int(GameData.SCENARIOS[mission.scenario].science_target)]
-		month_lbl.text = "Mes %d de %d" % [shown_month, months_total]
+		month_lbl.text = tr("Month %d of %d") % [shown_month, months_total]
 		time_bar.value = shown_month
 	if shown_month >= months and end_t < 0.0:
 		while shown_events < events.size():
@@ -117,7 +117,7 @@ func _log_event(e: Dictionary) -> void:
 	pc.add_theme_stylebox_override("panel", Kit.flat(Color(col.r, col.g, col.b, 0.08), Color(col.r, col.g, col.b, 0.55), 6, 1, 10, 7))
 	var v := Kit.vbox(2)
 	pc.add_child(v)
-	v.add_child(Kit.lbl("Mes %d · %s" % [e.month, e.title], 14, col, Kit.FONT_B, true))
+	v.add_child(Kit.lbl(tr("Month %d · %s") % [e.month, e.title], 14, col, Kit.FONT_B, true))
 	v.add_child(Kit.lbl(e.text, 13, Kit.C_DIM, Kit.FONT_R, true))
 	log_box.add_child(pc)
 	pc.modulate.a = 0.0

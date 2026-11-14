@@ -25,15 +25,15 @@ func _show_count() -> void:
 	add_child(p)
 	var v := Kit.vbox(12)
 	p.add_child(v)
-	v.add_child(Kit.lbl("Modo equipo", 30, Color.WHITE, Kit.FONT_T))
-	v.add_child(Kit.lbl("Como en el Mission Design Lab de la NASA, cada integrante es responsable de una parte de la misión. Tendrán que negociar: lo que uno gana, otro lo pierde.", 15, Kit.C_DIM, Kit.FONT_R, true))
-	v.add_child(Kit.lbl("¿Cuántos jugadores?", 16, Kit.C_TEXT, Kit.FONT_B))
+	v.add_child(Kit.lbl(tr("Team mode"), 30, Color.WHITE, Kit.FONT_T))
+	v.add_child(Kit.lbl(tr("As in NASA's Mission Design Lab, each member is responsible for a part of the mission. You will have to negotiate, because what one gains another gives up."), 15, Kit.C_DIM, Kit.FONT_R, true))
+	v.add_child(Kit.lbl(tr("How many players?"), 16, Kit.C_TEXT, Kit.FONT_B))
 	var h := Kit.hbox(10)
 	v.add_child(h)
 	for n in [2, 3, 4]:
-		h.add_child(Kit.accent_btn(Kit.btn("%d jugadores" % n, func(): go("team", {"players": n}), 18, 180), Color(0.5, 1.0, 0.6)))
+		h.add_child(Kit.accent_btn(Kit.btn(tr("%d players") % n, func(): go("team", {"players": n}), 18, 180), Color(0.5, 1.0, 0.6)))
 	v.add_child(Kit.spacer(10))
-	v.add_child(Kit.btn("◀ Volver", func(): go("menu")))
+	v.add_child(Kit.btn(tr("◀ Back"), func(): go("menu")))
 
 
 func _show_names(n: int) -> void:
@@ -42,16 +42,16 @@ func _show_names(n: int) -> void:
 	add_child(p)
 	var v := Kit.vbox(10)
 	p.add_child(v)
-	v.add_child(Kit.lbl("Su equipo de misión", 30, Color.WHITE, Kit.FONT_T))
-	v.add_child(Kit.lbl("Escriban sus nombres. Cada rol tiene una meta propia: si todos la cumplen, el equipo gana puntos extra.", 15, Kit.C_DIM, Kit.FONT_R, true))
+	v.add_child(Kit.lbl(tr("Your mission team"), 30, Color.WHITE, Kit.FONT_T))
+	v.add_child(Kit.lbl(tr("Type your names. Each role has its own goal, and if everyone meets theirs the team earns bonus points."), 15, Kit.C_DIM, Kit.FONT_R, true))
 	var split: Array = ROLE_SPLIT[n]
 	var edits: Array = []
 	for i in n:
 		var row := Kit.hbox(12)
 		v.add_child(row)
 		var e := LineEdit.new()
-		e.placeholder_text = "Jugador %d" % (i + 1)
-		e.text = "Jugador %d" % (i + 1)
+		e.placeholder_text = tr("Player %d") % (i + 1)
+		e.text = tr("Player %d") % (i + 1)
 		e.custom_minimum_size = Vector2(220, 0)
 		row.add_child(e)
 		edits.append(e)
@@ -61,15 +61,15 @@ func _show_names(n: int) -> void:
 		for role in split[i]:
 			var R: Dictionary = GameData.ROLES[role]
 			rv.add_child(Kit.lbl(R.name, 16, R.color, Kit.FONT_B))
-			rv.add_child(Kit.lbl("Meta: " + R.goal, 13, Kit.C_DIM, Kit.FONT_R, true))
+			rv.add_child(Kit.lbl(tr("Goal") + " · " + R.goal, 13, Kit.C_DIM, Kit.FONT_R, true))
 		v.add_child(HSeparator.new())
 	var h := Kit.hbox(10)
 	v.add_child(h)
-	h.add_child(Kit.btn("◀ Volver", func(): go("team")))
-	h.add_child(Kit.accent_btn(Kit.btn("Continuar ▶", func():
+	h.add_child(Kit.btn(tr("◀ Back"), func(): go("team")))
+	h.add_child(Kit.accent_btn(Kit.btn(tr("Continue ▶"), func():
 		var team: Array = []
 		for i in n:
 			var nm: String = edits[i].text.strip_edges()
-			team.append({"name": nm if nm != "" else "Jugador %d" % (i + 1), "roles": split[i].duplicate()})
+			team.append({"name": nm if nm != "" else tr("Player %d") % (i + 1), "roles": split[i].duplicate()})
 		GameState.set_team(team)
 		go("missions"), 18), Kit.C_ACCENT))
