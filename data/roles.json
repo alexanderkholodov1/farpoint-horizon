@@ -1,26 +1,26 @@
 {
- "doc": "Team roles in the design stations.",
+ "doc": "The four stations of the crew. Players take them, bots take the free ones. Each design step belongs to one station (data/steps.json).",
  "entries": {
-  "director": {
-   "name": "Mission Director",
+  "engineer": {
+   "name": "Engineer",
    "color": [
+    0.5,
     1.0,
-    0.75,
-    0.25
+    0.55
    ],
-   "goal": "Keep at least 10 % of the budget as reserve",
-   "why": "Real missions almost always cost more than planned, and the reserve keeps them from being canceled.",
+   "goal": "Mass margin ≥ 10 %, power margin ≥ 15 % and a budget reserve ≥ 10 %",
+   "why": "Designs grow as they get built, and margins soak up the surprises; real missions almost always cost more than planned.",
    "source": [
     "S5",
     "S-gsfc-std-1000"
    ],
-   "simplified": "The goals use one margin for every phase, where the standard gives different margins at each review."
+   "simplified": "The goals use one margin for every phase, where the standard gives different margins at each review. The four stations are our own split of the roles in NASA's Mission Design Lab."
   },
-  "cientifico": {
-   "name": "Principal Scientist",
+  "scientist": {
+   "name": "Scientist",
    "color": [
-    0.449999988079071,
-    0.850000023841858,
+    0.45,
+    0.85,
     1.0
    ],
    "goal": "Cover every science objective and reach ≥ 80 % of the science target",
@@ -29,29 +29,29 @@
     "S5",
     "S-gsfc-std-1000"
    ],
-   "simplified": "The goals use one margin for every phase, where the standard gives different margins at each review. The 80 % science target is game balance, not a value from these sources."
+   "simplified": "The goals use one margin for every phase, where the standard gives different margins at each review. The 80 % science target is game balance, not a value from these sources. The four stations are our own split of the roles in NASA's Mission Design Lab."
   },
-  "ingeniero": {
-   "name": "Systems Engineer",
+  "pilot": {
+   "name": "Pilot",
    "color": [
-    0.5,
     1.0,
-    0.550000011920929
+    0.75,
+    0.25
    ],
-   "goal": "Mass margin ≥ 10 % and power margin ≥ 15 %",
-   "why": "Designs grow as they get built, and margins soak up the surprises.",
+   "goal": "Reach the orbit with the fuel on board, on a rocket that can carry the craft",
+   "why": "A route that does not close on paper will not close in flight: the burns and the rocket have to add up.",
    "source": [
     "S5",
     "S-gsfc-std-1000"
    ],
-   "simplified": "The goals use one margin for every phase, where the standard gives different margins at each review."
+   "simplified": "The goals use one margin for every phase, where the standard gives different margins at each review. This goal is our own game rule. The four stations are our own split of the roles in NASA's Mission Design Lab."
   },
-  "operaciones": {
-   "name": "Operations and Communications",
+  "ground": {
+   "name": "Ground control",
    "color": [
     1.0,
     0.5,
-    0.800000011920929
+    0.8
    ],
    "goal": "Download 100 % of the data and keep the craft alive for its whole design life",
    "why": "Data that never reaches Earth is data lost.",
@@ -59,13 +59,13 @@
     "S5",
     "S-gsfc-std-1000"
    ],
-   "simplified": "The goals use one margin for every phase, where the standard gives different margins at each review."
+   "simplified": "The goals use one margin for every phase, where the standard gives different margins at each review. The four stations are our own split of the roles in NASA's Mission Design Lab."
   }
  },
  "order": [
-  "director",
-  "cientifico",
-  "ingeniero",
-  "operaciones"
+  "engineer",
+  "scientist",
+  "pilot",
+  "ground"
  ]
 }
