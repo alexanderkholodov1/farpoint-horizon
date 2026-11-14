@@ -30,7 +30,7 @@ code on 2026-11-14.
 | `scripts/space_builder.gd` | 282 | Sky, Earth (texture and an Ecuador marker), procedural Moon, orbit rings, rocket, launch pad with Andean volcanoes, particles, `Label3D` |
 | `shaders/` | | `earth`, `clouds`, `atmosphere`, `moon`, `sky`, `solar_cell`, `engine_glow`, and the include `noise.gdshaderinc` |
 | `fonts/` | | Inter Regular, SemiBold and Display Bold, with `FONTS_LICENSE.txt` |
-| `textures/` | | `earth_albedo.jpg` |
+| `textures/` | | `earth_day/night/relief/clouds.jpg`, `moon_color/normal.jpg`, `terrain_cotopaxi.png` (NASA data, made by `assets/source/planet_textures.py` and `terrain_cotopaxi.py`) |
 | `tests/fuzz.gd` | 34 | 600 random designs across all scenarios (see below) |
 | `tests/autoshot.gd`, `tests/autoshot.tscn` | 97, 6 | Automatic walkthrough that saves screenshots |
 
