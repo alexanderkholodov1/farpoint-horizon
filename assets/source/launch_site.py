@@ -12,7 +12,8 @@ Modeled after the pads of the US East Coast (SLC-40, LC-39A) as photographed, si
 - a low steel launch mount with an open centre and hold-down arms;
 - a square lattice fixed service structure about 80 m tall: four columns, a horizontal frame every 6 m, X bracing on
   every face, work platforms, a crew access arm and a lightning mast;
-- three tall lattice lightning towers around the pad joined by catenary wires;
+- three tall lattice lightning towers around the pad (their catenary wires left out: from the camera they seemed to
+  cross the rocket);
 - the elevated water tank that feeds the sound suppression deluge (a sphere on legs, LC-39A style);
 - a spherical liquid oxygen tank, horizontal fuel tanks, the horizontal integration hangar and the pad road.
 Sizes are our estimates from photographs and the published rocket heights, not drawings.
@@ -237,18 +238,8 @@ def lightning_towers():
         lattice_column("steel", x, y, 0.0, LIGHTNING_H, 3.0, 5.0, 0.22, 0.08)
         add_rod("steel", (x, y, LIGHTNING_H), (x, y, LIGHTNING_H + 12.0), 0.25, 8)
         add_box("concrete", (6, 6, 1.0), (x, y, 0.3))
-    # catenary wires between the mast tops, sagging over the pad
-    tops = [(x, y, LIGHTNING_H + 10.0) for x, y in LIGHTNING]
-    for i in range(3):
-        a, b = Vector(tops[i]), Vector(tops[(i + 1) % 3])
-        pts = []
-        for k in range(13):
-            t = k / 12
-            p = a.lerp(b, t)
-            p.z -= 14.0 * 4 * t * (1 - t)
-            pts.append(p)
-        for k in range(12):
-            add_rod("wire", pts[k], pts[k + 1], 0.07, 4)
+    # Real pads string catenary wires between these masts, high above the rocket. Seen from the launch camera they
+    # crossed the rocket and read as cables it could snag on (the team member's call), so the game leaves them out.
 
 
 def water_tower():
