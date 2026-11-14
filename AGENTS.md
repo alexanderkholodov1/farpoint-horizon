@@ -8,7 +8,8 @@ Apps Challenge, challenge "Space Mission Design Game", by team SK Horizon (Quito
 route, launch it, fly it to its target, land it or keep it talking to Earth, and enjoy what they achieved.
 
 ## Read first
-1. `docs/STATE.md`: where the project is today and what comes next.
+1. `tools/state.sh`: where the project is today and what comes next, assembled from one note per topic
+   (`docs/state/`), the steps on the version branch and the open issues.
 2. `docs/design/vision.md`: what the game will be and what it will have. Every change serves it.
 3. `kb/README.md`, then `kb/challenge/requirements.md` (the challenge as IDs) and `kb/decisions.md` (what the team
    decided; open items are theirs to decide).
@@ -118,12 +119,14 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
   changing, say so in both issues and agree who goes first. A change to something everyone uses (data formats, the
   mission model, `GameState`, `project.godot`, this file) is its own small piece, agreed by both team members and
   integrated first, so the others build on it.
-- Files every piece touches: `docs/STATE.md` is not edited on a work branch (`tools/integrate.sh` adds each step to it;
-  describe your piece in its issue and in your package's own notes). `docs/sources.md` only grows: add entries at the
-  end of the right section with a short unique word as ID (`S-gibs-viirs`), never a new number; git keeps both sides
-  when two branches add entries at the same place.
-- No shared lists: a piece adds its own files and never edits a list every piece edits, so parallel branches do not
-  conflict (issue #26). Its Spanish texts go in its own `i18n/<piece>.csv` (`keys,es`; `translations.csv` is the old
+- Files every piece touches: none by hand. The state is one note per topic in `docs/state/` (keep the notes of your
+  own pieces, delete them when they stop being true) and `tools/state.sh` assembles it with the steps and the open
+  issues; describe your piece in its issue. `docs/sources.md` only grows: add entries at the end of the right section
+  with a short unique word as ID (`S-gibs-viirs`), never a new number; git keeps both sides when two branches add
+  entries at the same place.
+- No shared lists or files: a piece adds its own files and never edits a list or file every piece edits, so three or
+  more agents work at once without conflicts (issues #26, #28); a new thing every piece would have to register is
+  found by folder instead. Its Spanish texts go in its own `i18n/<piece>.csv` (`keys,es`; `translations.csv` is the old
   base and takes no new lines); a new screen is only `scripts/screens/<id>.gd`; a new test is only `tests/<name>.gd`
   with a `## check: <pattern>` line. The game and `tools/check.sh` find them by folder.
 - Never rewrite, reformat or revert someone else's work, and never push to someone else's branch; ask in the issue,
@@ -157,6 +160,6 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
 
 ## Layout
 - Godot project at the root: `project.godot`, `scenes/`, `scripts/`, `shaders/`, `fonts/`, `textures/`, `tests/`.
-- `docs/`: `STATE.md`, `architecture.md`, `design/`, `agents/`, `changelog/`, `challenge/` (the challenge page
+- `docs/`: `state/` (one note per topic), `architecture.md`, `design/`, `agents/`, `changelog/`, `challenge/` (the challenge page
   material), `team/` (the team's notes, schedule and pitch outline).
 - `kb/`: the knowledge base. `tools/`: scripts for people and agents. `.github/`: CI, release, pull request template.

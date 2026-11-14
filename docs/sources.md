@@ -140,6 +140,9 @@ branches add entries at the same place (`.gitattributes`).
   Suomi NPP VIIRS) and `VIIRS_SNPP_CorrectedReflectance_TrueColor` of 2024-08-31 (the day of the volcano photos). The
   Earth by day, its relief, its city lights and its clouds (`textures/earth_*.jpg`, `assets/source/planet_textures.py`).
   Replaces `textures/earth_albedo.jpg`, whose source was unknown. Credit: "NASA Earth Observatory / NASA GIBS".
+- **S-gibs-region** NASA GIBS WMS (see S-gibs), the same three layers (Blue Marble, shaded relief, VIIRS of 2024-08-31)
+  over 92-68 W, 12 N-12 S at 2048 x 2048 (about 1.3 km per pixel): the sharper Earth under the climb from Ecuador
+  (`textures/earth_region_*.jpg`, `assets/source/planet_textures.py` `region()`).
 - **S-terrain-tiles** Mapzen/Tilezen. *Terrain Tiles* on the Registry of Open Data on AWS,
   https://registry.opendata.aws/terrain-tiles/ (terrarium encoding), which in the Andes is NASA SRTM elevation (NASA/
   USGS, public domain); attribution as the registry asks. Sixteen zoom-11 tiles around Cotopaxi; the launch site's

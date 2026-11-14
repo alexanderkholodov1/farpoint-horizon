@@ -9,21 +9,38 @@ uniform sampler2D relief_tex : filter_linear_mipmap, repeat_enable;
 uniform sampler2D cloud_tex : filter_linear_mipmap, repeat_enable;
 uniform vec3 sun_dir = vec3(0.0, 0.0, 1.0);   // world space, towards the Sun (set by World every frame)
 uniform float cloud_shift = 0.0;               // the cloud layer's drift in U, so the shadows follow it
+// a sharper NASA image of the region under the climb, blended in where it covers (rect in UV: u0, v0, u1, v1)
+uniform sampler2D region_day : source_color, filter_linear_mipmap_anisotropic;
+uniform sampler2D region_relief : filter_linear_mipmap;
+uniform sampler2D region_clouds : filter_linear_mipmap;
+uniform vec4 region_rect = vec4(0.0);
 uniform vec3 haze : source_color = vec3(0.36, 0.58, 0.95);
 uniform vec3 dusk : source_color = vec3(1.0, 0.5, 0.25);
 
+// where the region image covers this UV: 1 inside, fading to 0 over its outer tenth; and its own UV
+float region_w(vec2 uv, out vec2 ruv) {
+	ruv = (uv - region_rect.xy) / max(region_rect.zw - region_rect.xy, vec2(1e-5));
+	vec2 e = min(ruv, 1.0 - ruv);
+	return region_rect.z > 0.0 ? smoothstep(0.0, 0.1, min(e.x, e.y)) : 0.0;
+}
+
 void fragment() {
-	vec3 c = texture(day_tex, UV).rgb;
+	vec2 ruv;
+	float rw = region_w(UV, ruv);
+	vec3 c = mix(texture(day_tex, UV).rgb, texture(region_day, ruv).rgb, rw);
 	float ocean = smoothstep(0.02, 0.08, c.b - max(c.r, c.g * 0.8)) * (1.0 - smoothstep(0.18, 0.3, c.r));
 	// relief: the shaded map's light, and a normal from its slopes so mountains catch the real Sun
-	float rel = texture(relief_tex, UV).r;
+	float rel = mix(texture(relief_tex, UV).r, texture(region_relief, ruv).r, rw);
 	vec2 px = vec2(1.0 / 2048.0, 1.0 / 1024.0);
 	float rx = texture(relief_tex, UV + vec2(px.x, 0.0)).r - texture(relief_tex, UV - vec2(px.x, 0.0)).r;
 	float ry = texture(relief_tex, UV + vec2(0.0, px.y)).r - texture(relief_tex, UV - vec2(0.0, px.y)).r;
 	NORMAL_MAP = normalize(vec3(-rx * 3.0, ry * 3.0, 1.0) * (1.0 - ocean) + vec3(0.0, 0.0, 1.0) * ocean) * 0.5 + 0.5;
 	NORMAL_MAP_DEPTH = 1.0;
 	c *= mix(1.0, clamp(rel * 2.0, 0.5, 1.5), 0.4 * (1.0 - ocean));
-	float shadow = texture(cloud_tex, UV + vec2(cloud_shift + 0.0015, 0.001)).r;
+	vec2 suv = UV + vec2(cloud_shift + 0.0015, 0.001);
+	vec2 sruv;
+	float sw = region_w(suv, sruv);
+	float shadow = mix(texture(cloud_tex, suv).r, texture(region_clouds, sruv).r, sw);
 	c *= 1.0 - shadow * 0.35;
 	// the Blue Marble ocean is nearly black at game size; seen from orbit it reads deep blue
 	c = mix(c, c * 1.4 + vec3(0.012, 0.04, 0.09), ocean);

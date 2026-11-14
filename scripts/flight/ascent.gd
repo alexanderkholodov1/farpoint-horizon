@@ -109,6 +109,16 @@ func guidance() -> float:
 
 
 ## Advances the climb by dt game seconds. steer is -1, 0 or 1 (the pilot's keys).
+## Mission seconds per game second now: real time while the rocket clears the tower, so it rises heavy and slow as
+## a real one does, then a smooth ramp to TIME_SCALE by about 30 s into the flight (look, issue #12). A first step:
+## the rules of #27 ask for real time by default with a visible warp control instead of this silent ramp.
+func time_scale() -> float:
+	if not lifted:
+		return 1.0
+	var k := smoothstep(4.0, 30.0, t)
+	return lerpf(1.0, TIME_SCALE, k * k)
+
+
 func step(dt: float, steer: float) -> void:
 	if orbit or broken or crashed:
 		return
@@ -117,8 +127,8 @@ func step(dt: float, steer: float) -> void:
 	if assisting:
 		pitch += clampf((marker - pitch) * 0.6, -ASSIST_RATE, ASSIST_RATE) * dt
 	pitch = clampf(pitch + steer * STEER_RATE * dt, -30.0, 150.0)
-	var n := int(ceil(dt * TIME_SCALE / 0.1))
-	var mdt := dt * TIME_SCALE / n
+	var n := int(ceil(dt * time_scale() / 0.1))
+	var mdt := dt * time_scale() / n
 	for _i in n:
 		_physics(mdt)
 	marker = lerpf(marker, guidance(), clampf(dt * 3.0, 0.0, 1.0))

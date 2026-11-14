@@ -12,7 +12,7 @@ that there is no perfect design.
 
 **Current state.** Version v0.1.0 is the first playable sketch: it runs from menu to final report. The next version,
 v0.2.0, rebuilds it as described in [`docs/design/vision.md`](docs/design/vision.md). Where the project stands today
-is in [`docs/STATE.md`](docs/STATE.md). The interface text of v0.1.0 is in Spanish.
+is in `tools/state.sh` (notes in [`docs/state/`](docs/state/)). The interface text of v0.1.0 is in Spanish.
 
 ## How to play
 
