@@ -113,15 +113,20 @@ func fade(to: float, time: float) -> Tween:
 
 
 ## Launches GameState's mission if it can fly: records the flight (GameState.begin_flight) and fades to the launch.
-func launch() -> void:
+## In an online room the press only asks the room: every machine then launches with the same seed (`seed_value`), so
+## everyone flies the same random events.
+func launch(seed_value := -1) -> void:
 	if launching:
 		return
 	var r: Dictionary = GameState.mission.compute()
-	if not GameState.can_launch(r):
+	if seed_value < 0 and not GameState.can_launch(r):
 		screen.toast(tr("Fix the red items first"), Kit.C_BAD)
 		return
+	if seed_value < 0 and GameState.room.is_online():
+		GameState.room.request_launch(randi() % 1000000)
+		return
 	launching = true
-	GameState.begin_flight(r)
+	GameState.begin_flight(r, seed_value)
 	await go_faded("launch", 0.5, 0.6)
 	launching = false
 

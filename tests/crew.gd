@@ -2,11 +2,11 @@ extends SceneTree
 ## Crew test: the bots play every scenario from the defaults, step by step as the game does, and the result has to
 ## launch (nothing red) with every line readable. Run: tools/godot.sh --headless --path . -s res://tests/crew.gd
 const GD := preload("res://scripts/game_data.gd")
-const Mission := preload("res://scripts/mission.gd")
-const Bots := preload("res://scripts/crew/bots.gd")
 
 
 func _initialize() -> void:
+	var Mission = load("res://scripts/mission.gd")
+	var Bots = load("res://scripts/crew/bots.gd")
 	var bad := 0
 	for sc in GD.SCENARIOS:
 		var m = Mission.new()
@@ -24,7 +24,7 @@ func _initialize() -> void:
 				continue
 			var res: Dictionary = Bots.act(step.id, m, {})
 			m.from_dict(res.patch)
-			var line := Bots.say(res.line)
+			var line: String = Bots.say(res.line)
 			if "%" in line or line == "":
 				print("BAD LINE ", step.id, ": ", line)
 				bad += 1

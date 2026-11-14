@@ -13,12 +13,15 @@ extends RefCounted
 ## All numbers and rules come from the game's data (data/*.json), which cite their sources.
 
 const GD := preload("res://scripts/game_data.gd")
-const Mission := preload("res://scripts/mission.gd")
+## Loaded when first used: a script started with -s is compiled before the autoloads Mission refers to exist.
+static var _mission_script: GDScript
 
 ## Display names of the bots, one per station: ours, not a real crew.
 const NAMES := {"engineer": "Rivet", "scientist": "Quark", "pilot": "Skip", "ground": "Echo"}
-## The order in which the design is decided; each entry is a step id of data/steps.json.
-const CHAIN := ["orbita", "plataforma", "instrumentos", "comunicaciones", "control", "energia", "lanzador"]
+## The order of the steps in the game (data/steps.json); each entry is a step id of data/steps.json.
+const CHAIN := ["orbita", "plataforma", "instrumentos", "energia", "comunicaciones", "control", "lanzador"]
+## The order in which a plan works the parts out, by what each depends on.
+const PLAN := ["orbita", "plataforma", "instrumentos", "comunicaciones", "control", "energia", "lanzador"]
 
 
 ## What the bot does at `step_id`: {"patch": {mission fields it changes}, "line": {"t", "a"}}.
@@ -59,7 +62,10 @@ static func _resolve(a) -> Variant:
 		var kind: String = a.get_slice(":", 0)
 		var id: String = a.get_slice(":", 1)
 		if kind == "instruments":
-			return ", ".join(PackedStringArray(id.split(",").map(func(i): return GD.INSTRUMENTS[i].name if GD.INSTRUMENTS.has(i) else i)))
+			var names: Array = []
+			for i in id.split(","):
+				names.append(GD.INSTRUMENTS[i].name if GD.INSTRUMENTS.has(i) else i)
+			return ", ".join(PackedStringArray(names))
 		var cat := {"orbit": GD.ORBITS, "bus": GD.BUSES, "instrument": GD.INSTRUMENTS, "panels": GD.PANELS, "battery": GD.BATTERIES,
 			"comms": GD.COMMS, "adcs": GD.ADCS, "propulsion": GD.PROPULSION, "launcher": GD.LAUNCHERS}
 		if cat.has(kind) and cat[kind].has(id):
@@ -69,7 +75,9 @@ static func _resolve(a) -> Variant:
 
 # ===================================================================================== PLAN
 static func _copy(m):
-	var c := Mission.new()
+	if _mission_script == null:
+		_mission_script = load("res://scripts/mission.gd")
+	var c = _mission_script.new()
 	c.from_dict(m.to_dict())
 	return c
 
@@ -80,39 +88,44 @@ static func _fields(step_id: String) -> Array:
 		"lanzador": ["launcher", "years"]}.get(step_id, [])
 
 
-## Plans the chain from `from_step` on over the copy c, skipping the later steps a person touched.
+## Plans the design from `from_step` on over the copy c. Steps before it are decided and stay as they are; later steps a
+## person touched stay too. The plan runs in the order the parts depend on each other (PLAN), not the order of the steps.
 static func _plan(c, from_step: String, touched: Dictionary) -> void:
-	var start := CHAIN.find(from_step)
-	if start < 0:
-		return
-	if from_step == "plataforma":
-		_pick_bus(c, touched, start)
-	else:
-		_run(c, start, touched)
-
-
-static func _run(c, start: int, touched: Dictionary) -> void:
-	for i in range(start, CHAIN.size()):
-		var id: String = CHAIN[i]
-		if touched.get(id, false) and i != start:
+	for id in PLAN:
+		if _skipped(id, from_step, touched):
 			continue
-		match id:
-			"orbita": _pick_orbit(c)
-			"instrumentos": _pick_instruments(c)
-			"comunicaciones": _pick_comms(c)
-			"control": _pick_control(c)
-			"energia": _pick_power(c)
-			"lanzador": _pick_launcher(c)
+		if id == "plataforma":
+			_pick_bus(c, from_step, touched)
+		else:
+			_apply(c, id)
+
+
+static func _skipped(id: String, from_step: String, touched: Dictionary) -> bool:
+	if id == from_step:
+		return false
+	return CHAIN.find(id) < CHAIN.find(from_step) or touched.get(id, false)
+
+
+static func _apply(c, id: String) -> void:
+	match id:
+		"orbita": _pick_orbit(c)
+		"instrumentos": _pick_instruments(c)
+		"comunicaciones": _pick_comms(c)
+		"control": _pick_control(c)
+		"energia": _pick_power(c)
+		"lanzador": _pick_launcher(c)
 
 
 ## The smallest platform on which the rest of the plan closes: no red item and a reserve of at least 10 %.
-static func _pick_bus(c, touched: Dictionary, start: int) -> void:
+static func _pick_bus(c, from_step: String, touched: Dictionary) -> void:
 	var best := ""
 	var best_score := -INF
 	for b in GD.BUSES:
 		var t = _copy(c)
 		t.bus = b
-		_run(t, start + 1, touched)
+		for id in PLAN:
+			if id != "plataforma" and not _skipped(id, from_step, touched) and id != "orbita":
+				_apply(t, id)
 		var r: Dictionary = t.compute()
 		var score: float = r.reserve - (10.0 if r.fatal else 0.0)
 		if not r.fatal and r.reserve >= 0.10:
@@ -122,6 +135,10 @@ static func _pick_bus(c, touched: Dictionary, start: int) -> void:
 			best_score = score
 			best = b
 	c.bus = best
+	# The bus changed what the later steps should pick, so they follow it.
+	for id in PLAN:
+		if id != "plataforma" and id != "orbita" and not _skipped(id, from_step, touched):
+			_apply(c, id)
 
 
 static func _pick_orbit(c) -> void:
@@ -171,21 +188,23 @@ static func _pick_instruments(c) -> void:
 				pick = i
 		if pick != "" and chosen.size() < B.slots:
 			chosen.append(pick)
-	# One extra instrument when the platform has a free slot and a useful one fits.
+	# One extra instrument when the platform has a free slot and a useful one fits, if the design still closes with it.
+	var extra := ""
 	if chosen.size() < B.slots and chosen.size() < 3:
-		var extra := ""
 		for i in GD.INSTRUMENTS:
 			var I: Dictionary = GD.INSTRUMENTS[i]
 			if chosen.has(i) or I.size > B.max_size or _relevance(S, I) < 0.5:
 				continue
 			if extra == "" or _rank(S, I) > _rank(S, GD.INSTRUMENTS[extra]):
 				extra = i
-		if extra != "":
-			var t = _copy(c)
-			t.instruments = chosen + [extra]
-			var r: Dictionary = t.compute()
-			if r.mass_total <= r.mass_limit * 0.8:
-				chosen.append(extra)
+	if extra != "":
+		var t = _copy(c)
+		t.instruments = chosen + [extra]
+		for id in ["comunicaciones", "control", "energia", "lanzador"]:
+			_apply(t, id)
+		var r: Dictionary = t.compute()
+		if not r.fatal and r.reserve >= 0.15:
+			chosen.append(extra)
 	c.instruments = chosen
 
 
