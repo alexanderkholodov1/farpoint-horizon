@@ -91,8 +91,6 @@ func start_mission(scenario_id: String) -> void:
 	mission.propulsion = "none"
 	mission.launcher = "ride"
 	mission.orbit = "lunar" if scenario_id == "luna" else ("l2" if scenario_id == "telescopio" else "sso")
-	if scenario_id == "telescopio":
-		mission.orbit = "leo"
 	mission.years = GameData.SCENARIOS[scenario_id].min_years
 	approvals = {}
 	changed.emit()
