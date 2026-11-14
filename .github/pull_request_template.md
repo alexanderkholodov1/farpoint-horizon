@@ -1,7 +1,7 @@
-<!-- Integration pull request (work/* into the version branch): what this piece adds, titled without a number; the step
-number is given at integration by tools/integrate.sh.
-Version pull request (the version branch into main): titled `vX.Y.Z: <what it delivers>` by tools/pr-when-green.sh;
-only a team member merges it. -->
+<!-- Into main: only the version pull request, from the version branch, titled `vX.Y.Z: <what a player can now do>`
+(tools/pr-when-green.sh adds the version); only a team member merges it.
+Into any other branch: optional, titled with what it adds and no number; a lead agent integrates it into the version
+branch with tools/integrate.sh, which gives the step number. -->
 
 ## What it delivers
 <!-- What a player can now do or see, in a few lines. -->

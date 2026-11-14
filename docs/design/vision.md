@@ -21,7 +21,8 @@ its route, launch it, fly it to its destination, land it or keep it talking to E
 - **A team, each with a job.** Players take stations, and each station plays differently. Some decide (what to
   build, where to go, what to spend), some need skill: the pilot flies launch, maneuvers and landing with control
   panels and reflexes; ground control follows the mission from the control center and the map and reads the
-  signals that come back. Alone, you play every station with help.
+  signals that come back. There are four stations; with fewer players, bots take the free ones and work with you as
+  people would.
 - **Together, never against.** Teams can see other teams' missions, watch them try, and appear on a leaderboard, but
   nobody wins by making someone else lose.
 
@@ -72,10 +73,10 @@ spectacle of launch and landing. Not its difficulty, and not its fail-and-retry 
 **If time allows.** More missions and parts, saved and shared designs, dialogue for the characters, a sandbox.
 
 ## How it looks and sounds
-See `docs/design/criteria.md`. In short: modeled 3D with real geometry and recognizable materials; soft light and
-depth; light and warm where people are (the builder, the control center), and space lit by the Sun; a UI of its own,
-tactile, showing the few things that matter; two or three characteristic colors with a warm one; sound with
-character, quiet by default.
+See `docs/design/criteria.md`. In short: a futuristic space identity and UI of the present; craft, rockets and places
+as real as a documentary, modeled with real geometry and recognizable materials; characters that may be stylized;
+soft light and depth, space lit by the Sun; a UI of its own, tactile, showing the few things that matter; two or
+three characteristic colors, one warm, for the game's brand marks; sound with character, quiet by default.
 
 ## How it answers the challenge
 The full mission from objective to operation (C7), resources that react to every decision (C3, C8, R1-R3), stations

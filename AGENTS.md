@@ -49,18 +49,24 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
 1. The version branch (now `v0.2.0`) collects finished pieces. Its pull request into `main` opens only when the
    version is complete.
 2. Every piece of work is a GitHub issue. Claim it by assigning it to your person before starting.
-3. Build it on a work branch of your own, made from the version branch and named after the issue:
+3. Build it on a branch of your own, made from the version branch and named after the issue:
    `git fetch origin && git switch -c work/12-rockets origin/v0.2.0`. Commit small working steps in English, with no
-   version numbers, and push often (CI runs on every push). Bring in the version branch often:
-   `git pull --rebase origin v0.2.0`.
-4. When the piece works (CI green, played as a player, screenshots in the issue, every outside value cited), open an
-   integration pull request from the work branch into the version branch, titled with what it adds, with
-   `tools/pr-when-green.sh "<what it adds>" <body-file>` (it waits for green CI first). Someone who did
-   not build it reviews it; findings are verified before they are fixed, and fixed at their cause.
-5. A lead agent (or a team member) integrates it once its checks are green, with no need to ask, using
-   `tools/integrate.sh <pull request number>`: it checks that every check is green, puts the piece on the version
-   branch as one commit named with the next step number (`0.1.5: <title>`) and deletes the work branch.
-6. When the version is complete and verified, its pull request into `main` opens with `tools/pr-when-green.sh`. Only a
+   version numbers, and push often (CI runs on every push and must stay green; a red check is fixed first).
+4. Stay current by merging, never by rewriting: `git fetch origin && git merge origin/v0.2.0`. When your piece needs
+   another piece that is not integrated yet, merge that branch into yours (`git merge origin/work/6-builder`), or
+   propose yours into it with a pull request. Never rebase or force-push a pushed branch: others may have merged it.
+5. When the piece works (CI green, played as a player, screenshots in the issue, every outside value cited), say so
+   in its issue. A pull request into the version branch is optional (`tools/pr-when-green.sh "<what it adds>"
+   <body-file>`), for example to ask for a review.
+6. A lead agent (or a team member) integrates it, with no need to ask: `tools/integrate.sh <branch> "<what it adds>"`.
+   It checks the branch's CI, merges the branch into the version branch in a scratch copy, runs `tools/check.sh` on
+   the result and only then pushes, as one commit named with the next step number (`0.1.6: <what it adds>`). If
+   someone integrated first, it starts again on top, so numbers never collide. It comments on the branch's open pull
+   request (GitHub then shows it merged into the version branch) or on its issue. It never touches `main` and never
+   deletes a branch, so the piece can keep growing and be integrated again.
+7. Someone who did not build a piece reviews it; findings are verified before they are fixed, and fixed at their
+   cause.
+8. When the version is complete and verified, its pull request into `main` opens with `tools/pr-when-green.sh`. Only a
    team member merges it, never an agent. The release workflow tags it and publishes it; then someone checks the live
    game.
 
@@ -74,29 +80,30 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
   the pull request title into `main`, and the release workflow tags the merge with it.
 
 ## Pull requests
-- **Integration pull requests**: a work branch (`work/*`) into the version branch, one per finished piece, titled
-  with what it adds and no number.
-- **The version pull request**: the version branch into `main`, one per functional version, never one per fix. It
-  opens only when every CI check is green (`tools/pr-when-green.sh "<what it delivers>" <body-file>`); its title leads
-  with the version (`v0.2.0: <what a player can now do>`). Only a team member merges it.
-- CI refuses a pull request into `main` that does not come from a version branch with its version leading the title,
-  and a pull request into a version branch that does not come from a work branch. A red check is fixed on its branch;
-  a pull request never sits red.
+- **Into `main`: only the version pull request**, from the version branch, one per functional version, never one per
+  fix. It opens only when CI is green (`tools/pr-when-green.sh "<what it delivers>" <body-file>`); its title leads
+  with the version (`v0.2.0: <what a player can now do>`). Only a team member merges it. CI fails any other pull
+  request into `main`.
+- **Into any other branch** (the version branch, someone's work branch): allowed and optional, titled with what it
+  adds and no number. Lead agents integrate into the version branch with `tools/integrate.sh`, never into `main`.
 - Bodies follow `.github/pull_request_template.md`. Commits and pull requests carry no AI co-author lines or
   generated-by signatures (`.claude/settings.json` turns them off for Claude Code; set the same in other tools). AI
   use is disclosed in the README instead.
 
 ## Working beside other agents
 - Nobody owns a part: both team members work side by side. Each piece is claimed through its issue and built on its
-  own work branch, so two agents never write the same branch. If your piece must change files that another open
-  issue is changing, say so in both issues and agree who goes first. A change to something everyone uses (data
-  formats, the mission model, `GameState`, project settings, this file) is agreed by both team members.
-- Never rewrite, reformat or revert someone else's work, and never push to someone else's work branch; ask in the
-  issue.
-- Before integrating anything, list the open pull requests of the branches involved (`gh pr list --base v0.2.0`) and
-  integrate through the pull request itself, so its author sees what happened.
-- Several agents on one machine work in separate git worktrees, one per work branch.
-- Leave every branch better than you found it: the game runs, the checks pass, `docs/STATE.md` says what changed.
+  own branch, so two agents never write the same branch; several agents on one machine use separate git worktrees.
+- Each package owns its files (`docs/plan/v0.2.0.md`). If your piece must change files that another open issue is
+  changing, say so in both issues and agree who goes first. A change to something everyone uses (data formats, the
+  mission model, `GameState`, `project.godot`, this file) is its own small piece, agreed by both team members and
+  integrated first, so the others build on it.
+- Files every piece touches: `docs/STATE.md` is not edited on a work branch (`tools/integrate.sh` adds each step to it;
+  describe your piece in its issue and in your package's own notes). `docs/sources.md` only grows: add entries at the
+  end of the right section with a short unique word as ID (`S-gibs-viirs`), never a new number; git keeps both sides
+  when two branches add entries at the same place.
+- Never rewrite, reformat or revert someone else's work, and never push to someone else's branch; ask in the issue,
+  or propose your change with a pull request into their branch.
+- Leave every branch better than you found it: the game runs and the checks pass.
 
 ## Godot
 - Godot 4.7.2, renderer GL Compatibility (it runs in browsers and on integrated GPUs). The web build is the

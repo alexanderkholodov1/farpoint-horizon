@@ -16,3 +16,6 @@
 *.pdf binary
 *.zip binary
 *.tpz binary
+
+# The bibliography only grows: when two branches add entries at the same place, keep both sides instead of a conflict.
+docs/sources.md merge=union

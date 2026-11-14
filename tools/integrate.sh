@@ -1,55 +1,81 @@
 #!/usr/bin/env bash
-# Integrates a finished work branch into the version branch, with no pull request:
-#   tools/integrate.sh work/<issue>-<name> "<what it adds>" [version-branch]
-# Run by a lead agent (or a team member) once the piece is finished, reviewed and green; no need to ask. It never
-# touches main: the complete version branch reaches main only through its one pull request, which a team member
-# reviews and merges.
-# It checks that every CI check on the work branch's last pushed commit passed, puts the branch on the version branch
-# as one commit named with the next step number (0.1.N: <what it adds>), keeps the author of the work, pushes, and
-# deletes the work branch. Pieces built in parallel get their numbers in the order they are integrated.
+# Integrates a finished branch into the version branch:
+#   tools/integrate.sh <branch> "<what it adds>" [version-branch]
+# Run by a lead agent (or a team member) once the piece works; no need to ask. It never touches main and never
+# deletes a branch. The complete version branch reaches main only through its one pull request, merged by a person.
+#
+# 1. The branch's last pushed commit must have passed CI (it waits while CI is still running).
+# 2. In a scratch copy, it merges the branch into the newest version branch, adds the step to docs/STATE.md and commits
+#    it as the next step number (`0.1.6: <what it adds>`); the branch's own commits and authors are kept.
+# 3. It runs tools/check.sh (what CI runs) on that result, so the version branch never turns red.
+# 4. It pushes. If someone integrated first, it starts again on top of theirs, so numbers never collide.
+# 5. It comments on the branch's open pull request (GitHub then shows it merged into the version branch), or on the
+#    issue named in the branch (work/<issue>-<name>).
 set -euo pipefail
-work=${1:?work branch}; what=${2:?what it adds}
-[[ $work == work/* ]] || { echo "$work is not a work branch (work/<issue>-<name>)"; exit 1; }
+branch=${1:?branch to integrate}; what=${2:?what it adds}
+case $branch in main|v[0-9]*.[0-9]*.[0-9]*) echo "$branch is not a piece of work"; exit 1;; esac
 if [[ $what =~ ^v?[0-9]+\.[0-9]+\.[0-9]+ ]]; then echo "Say what it adds without a number; the number is given here"; exit 1; fi
-[ -z "$(git status --porcelain --untracked-files=no)" ] || { echo "Commit or stash your own changes first"; exit 1; }
+root=$(git rev-parse --show-toplevel)
 git fetch -q --prune origin
 base=${3:-$(git for-each-ref refs/remotes/origin --format='%(refname:lstrip=3)' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)}
-[[ $base =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]] || { echo "No version branch to integrate into"; exit 1; }
-major=${BASH_REMATCH[1]}; minor=${BASH_REMATCH[2]}
-git rev-parse -q --verify "origin/$work" >/dev/null || { echo "origin/$work does not exist: push it first"; exit 1; }
-sha=$(git rev-parse "origin/$work")
+[[ $base =~ ^v([0-9]+)\.([0-9]+)\.[0-9]+$ ]] || { echo "No version branch to integrate into"; exit 1; }
+line="${BASH_REMATCH[1]}.$((BASH_REMATCH[2] - 1))"
+git rev-parse -q --verify "origin/$branch" >/dev/null || { echo "origin/$branch does not exist: push it first"; exit 1; }
+sha=$(git rev-parse "origin/$branch")
+if git merge-base --is-ancestor "$sha" "origin/$base"; then echo "$branch (${sha:0:7}) is already in $base"; exit 0; fi
 
-# CI must be green on the work branch's last pushed commit.
+# 1. CI on the branch's last pushed commit (only the CI job: a pull request's other checks do not block this).
 repo=$(gh repo view --json nameWithOwner -q .nameWithOwner)
-api="repos/$repo/commits/$sha/check-runs"
-total=$(gh api "$api" --jq '.check_runs | length')
-notgreen=$(gh api "$api" --jq '[.check_runs[] | select(.status != "completed" or ((.conclusion == "success" or .conclusion == "skipped" or .conclusion == "neutral") | not)) | .name] | join(", ")')
-if [ "$total" -eq 0 ] || [ -n "$notgreen" ]; then
-  echo "CI is not green on ${sha:0:7} of $work: ${notgreen:-no checks yet}. Nothing integrated."; exit 1
-fi
+api="repos/$repo/commits/$sha/check-runs?check_name=Godot%20checks%20and%20web%20build"
+for i in $(seq 1 60); do
+  total=$(gh api "$api" --jq '.check_runs | length')
+  pending=$(gh api "$api" --jq '[.check_runs[] | select(.status != "completed")] | length')
+  if [ "$total" -gt 0 ] && [ "$pending" -eq 0 ]; then break; fi
+  [ "$i" -eq 60 ] && { echo "CI has not finished on ${sha:0:7} after 20 minutes. Nothing integrated."; exit 1; }
+  echo "Waiting for CI on ${sha:0:7} of $branch"; sleep 20
+done
+failed=$(gh api "$api" --jq '[.check_runs[] | select(.conclusion != "success")] | length')
+if [ "$failed" -gt 0 ]; then echo "CI failed on ${sha:0:7} of $branch: its author fixes it there. Nothing integrated."; exit 1; fi
 
-# The next step number on the version branch.
-last=$(git log "origin/$base" --format=%s | grep -oE '^[0-9]+\.[0-9]+\.[0-9]+:' | head -1 | tr -d ':' || true)
-if [ -n "$last" ]; then IFS=. read -r a b c <<<"$last"; next="$a.$b.$((c + 1))"; else next="$major.$((minor - 1)).1"; fi
-
-# Keep the author: one author becomes the commit's author; several people become co-authors (people only, never AI).
-mapfile -t authors < <(git log --format='%an <%ae>' "origin/$base..origin/$work" | sort -u)
-[ "${#authors[@]}" -gt 0 ] || { echo "$work has nothing that $base does not already have"; exit 1; }
-trailers=""
-for a in "${authors[@]:1}"; do trailers+=$'\n'"Co-authored-by: $a"; done
-
-start=$(git rev-parse --abbrev-ref HEAD)
-if git rev-parse -q --verify "$base" >/dev/null; then git switch -q "$base"; else git switch -q -c "$base" "origin/$base"; fi
-git merge -q --ff-only "origin/$base"
-if ! git merge --squash -q "origin/$work"; then
-  git reset -q --merge
-  echo "Conflicts with $base: bring it into the work branch (git pull --rebase origin $base), resolve there, push, and run this again."
-  git switch -q "$start" 2>/dev/null || true
-  exit 1
-fi
-git commit -q --author="${authors[0]}" -m "$next: $what" -m "Integrated from $work.${trailers}"
-git push -q origin "$base"
-git push -q origin --delete "$work"
-git branch -q -D "$work" 2>/dev/null || true
-echo "Integrated $work into $base as $next"
-[ "$start" = "$work" ] || git switch -q "$start" 2>/dev/null || true
+scratch=$(mktemp -d)
+cleanup() { cd "$root"; git worktree remove --force "$scratch/v" >/dev/null 2>&1 || true; rm -rf "$scratch"; }
+trap cleanup EXIT
+for attempt in 1 2 3 4 5; do
+  git fetch -q origin "$base"
+  git worktree remove --force "$scratch/v" >/dev/null 2>&1 || true
+  git worktree add -q --detach "$scratch/v" "origin/$base"
+  cd "$scratch/v"
+  # 2. The next step number of this line, from the steps already on the version branch.
+  last=$(git log --first-parent --format=%s HEAD | grep -oE "^${line//./\.}\.[0-9]+:" | tr -d ':' | sort -V | tail -1 || true)
+  if [ -n "$last" ]; then next="$line.$(( ${last##*.} + 1 ))"; else next="$line.1"; fi
+  if ! git merge -q --no-ff --no-commit "$sha" >/dev/null 2>&1; then
+    echo "$branch conflicts with $base in: $(git diff --name-only --diff-filter=U | tr '\n' ' ')"
+    echo "Its author merges $base into it (git merge origin/$base), resolves, pushes, and this runs again. Nothing integrated."
+    git merge --abort; exit 1
+  fi
+  printf -- '- %s: %s (`%s`, %s)\n' "$next" "$what" "$branch" "$(date -u +%Y-%m-%d)" >> docs/STATE.md
+  git add docs/STATE.md
+  git commit -q -m "$next: $what" -m "Integrated from $branch (${sha:0:7}) by tools/integrate.sh."
+  # 3. What CI runs, on the merged result.
+  echo "Checking the merged result ($next) with tools/check.sh"
+  if ! bash tools/check.sh > "$scratch/check.log" 2>&1; then
+    tail -40 "$scratch/check.log"
+    echo "The merged result fails tools/check.sh (above), though $branch alone passed: the two pieces clash. Nothing integrated."
+    exit 1
+  fi
+  # 4. Push; if the version branch moved meanwhile, start again on top of it.
+  if git push -q origin "HEAD:$base" 2>/dev/null; then
+    result=$(git rev-parse --short HEAD); cd "$root"
+    echo "Integrated $branch into $base as $next ($result)"
+    # 5. Tell the author where it went.
+    note="Integrated into \`$base\` as step \`$next\` ($result) by \`tools/integrate.sh\`: CI passed on ${sha:0:7} and \`tools/check.sh\` passed on the merged result. \`main\` is untouched; it changes only through the version pull request, merged by a person."
+    pr=$(gh pr list --head "$branch" --base "$base" --state open --json number -q '.[0].number' 2>/dev/null || true)
+    issue=$(sed -nE 's#^work/([0-9]+)-.*#\1#p' <<<"$branch")
+    if [ -n "$pr" ]; then gh pr comment "$pr" --body "$note GitHub shows this pull request as merged into \`$base\` because its commits are there now." >/dev/null || true
+    elif [ -n "$issue" ]; then gh issue comment "$issue" --body "$note" >/dev/null || true; fi
+    exit 0
+  fi
+  echo "$base moved while checking (attempt $attempt); starting again on top of it"
+  cd "$root"
+done
+echo "$base kept moving; nothing integrated. Run this again."; exit 1
