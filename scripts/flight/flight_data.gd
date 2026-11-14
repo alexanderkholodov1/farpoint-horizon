@@ -60,6 +60,12 @@ static func moon_at(day := 0) -> Dictionary:
 	return {"distance_km": v.length(), "dir": v.normalized(), "date": str(r.date).substr(0, 11)}
 
 
+## The Moon's rows from JPL Horizons [S-horizons], one per day from 2026-11-15 00:00 UTC, positions in km and
+## velocities in km/s (x, y, z in the ecliptic, from the Earth's centre).
+static func moon_rows() -> Array:
+	return _json(MOON_EPHEMERIS).get("moon", [])
+
+
 ## The flight block of a scenario (data/scenarios.json, `flight`), or {} when its mission has no pilot's flight.
 static func scenario_flight(scenario_id: String) -> Dictionary:
 	if not GD.SCENARIOS.has(scenario_id):
