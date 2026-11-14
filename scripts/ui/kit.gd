@@ -1,6 +1,9 @@
 extends RefCounted
 ## The UI kit every screen builds with: theme, colors, fonts, and helpers for labels, buttons, cards, panels, boxes,
-## toasts, overlays and number formatting. Everything is static and stateless:
+## toasts, overlays and number formatting. It is the project's one UI standard (issue #31): a screen takes its sizes
+## from the type scale and spacing below, its colours from C_*, and its pieces from the components here (section
+## labels, hairlines, joined choices, stat cards, hint boxes), never loose numbers or colours, so every screen looks
+## the same and nobody needs a screenshot to match another. Everything is static and stateless:
 ##   const Kit := preload("res://scripts/ui/kit.gd")   (screens already have it from scripts/screens/screen.gd)
 ##   add_child(Kit.lbl("Hola", 16, Kit.C_ACCENT, Kit.FONT_B))
 
@@ -36,6 +39,22 @@ static var C_LINE := Color(0.6, 0.75, 1.0, 0.16)      ## Hairlines: borders, div
 static var C_SHADE := Color(0.0, 0.01, 0.03, 0.55)    ## Behind an overlay.
 const C_ON_DARK := Color(0.96, 0.97, 1.0)             ## Text drawn straight on the 3D scene (space, sky).
 const FROST := preload("res://shaders/ui_frost.gdshader")
+
+## The type scale, in pixels. Every text in the game uses one of these.
+const T_CAPS := 11       ## Section labels, in spaced capitals (caps()).
+const T_SMALL := 13      ## Notes under a value, key hints, captions.
+const T_BODY := 15       ## Labels, buttons, list text.
+const T_LEAD := 17       ## Hints and lead paragraphs.
+const T_VALUE := 19      ## A readout's value (with font_num()).
+const T_ACTION := 21     ## The one main action's button.
+const T_STAT := 26       ## The big number of a stat card.
+const T_CLOCK := 40      ## Clocks and the one key number of a screen.
+const T_SHOUT := 60      ## A big message straight on the scene.
+## Spacing, in pixels.
+const MARGIN := 24       ## From the window's edge to a panel.
+const PAD := 22          ## Inside a panel.
+const GAP := 10          ## Between rows inside a panel.
+const BTN_H := 44        ## A button's height (a main action: 56).
 const UiSound := preload("res://scripts/ui/ui_sound.gd")
 
 static var _frost: ShaderMaterial
@@ -416,3 +435,70 @@ static func mins(m: float) -> String:
 	if m <= 0.0:
 		return "0 min"
 	return "%d min" % int(m)
+
+
+# ===================================================================================== SHARED COMPONENTS (#31)
+## A small spaced section label in capitals ("DIFFICULTY", "TIME").
+static func caps(text: String) -> Label:
+	var f := FontVariation.new()
+	f.base_font = FONT_B
+	f.spacing_glyph = 2
+	return lbl(text.to_upper(), T_CAPS, C_DIM, f)
+
+
+## A hairline across a panel.
+static func rule() -> Control:
+	var r := ColorRect.new()
+	r.color = C_LINE
+	r.custom_minimum_size = Vector2(0, 1)
+	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return r
+
+
+## A row of joined choices (a segmented control): add buttons made with choice().
+static func segmented() -> HBoxContainer:
+	return hbox(4)
+
+
+## One choice of a segmented control; `on` marks the chosen one in the accent colour.
+static func choice(text: String, on: bool, cb: Callable, min_w := 0.0) -> Button:
+	var b := btn(text, cb, T_BODY, min_w)
+	b.custom_minimum_size.y = BTN_H - 4
+	b.focus_mode = Control.FOCUS_NONE
+	if on:
+		accent_btn(b, C_ACCENT)
+	return b
+
+
+## A stat card: a title, a big number in the status colour, a note under it (the builder's "Carries to SSO").
+static func stat(title: String, value: String, note: String, col: Color) -> PanelContainer:
+	var p := PanelContainer.new()
+	p.add_theme_stylebox_override("panel", flat(C_CARD, col.darkened(0.3), 8, 2))
+	var v := vbox(2)
+	p.add_child(v)
+	v.add_child(lbl(title, T_SMALL, C_DIM, FONT_B))
+	v.add_child(lbl(value, T_STAT, ink(col), FONT_T))
+	if note != "":
+		v.add_child(lbl(note, T_SMALL - 1, C_DIM, FONT_R, true))
+	return p
+
+
+## A label and its value on one row of a readout grid (a GridContainer of two columns); returns the value label.
+static func readout(grid: GridContainer, label: String) -> Label:
+	grid.add_theme_constant_override("h_separation", 28)
+	grid.add_theme_constant_override("v_separation", 6)
+	grid.add_child(lbl(label, T_BODY, C_DIM, FONT_R))
+	var v := lbl("", T_VALUE, C_TEXT, font_num())
+	grid.add_child(v)
+	return v
+
+
+## A frosted box for a plain-words hint, with its label (set the label's text; hide the box when empty).
+static func hint_box() -> Array:
+	var p := panel_box(18)
+	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var l := lbl("", T_LEAD, C_TEXT, FONT_R, true)
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	p.add_child(l)
+	return [p, l]

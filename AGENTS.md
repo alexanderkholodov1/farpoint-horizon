@@ -144,6 +144,11 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
   merged into `main`.
 - Commit the `.import` and `.uid` files Godot creates beside the files you add (run `tools/check.sh` first: its import
   step creates them). They carry random IDs, so a file left for someone else to import collides between branches.
+- One UI standard: every screen builds its interface only from `scripts/ui/kit.gd`: its type scale (`Kit.T_*`),
+  spacing (`Kit.MARGIN`, `Kit.PAD`, `Kit.GAP`, `Kit.BTN_H`), colours (`Kit.C_*`, readable in both appearances) and
+  components (`panel_box`, `caps`, `rule`, `segmented`/`choice`, `stat`, `readout`, `hint_box`, `btn`, `card`...).
+  No loose font sizes, paddings or colours in a screen, and no need to copy another screen from a screenshot; a
+  piece the kit lacks is added to the kit, for everyone.
 - GDScript is Godot 4 syntax (`await`, `@onready`, `@export`, typed signals); the project's own pitfalls are in
   `docs/architecture.md`. Tools that let agents drive Godot, Blender and the browser: `kb/tech/godot-agent-tooling.md`.
 
