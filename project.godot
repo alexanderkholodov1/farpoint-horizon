@@ -1,0 +1,31 @@
+; Engine configuration file.
+; SK Horizon - Mission Architect
+; NASA Space Apps Challenge 2026 - Space Mission Design Game
+
+config_version=5
+
+[application]
+
+config/name="SK Horizon - Mission Architect"
+config/description="Juego 3D para diseñar, lanzar y operar una misión espacial completa."
+run/main_scene="res://scenes/main.tscn"
+config/icon="res://icon.svg"
+run/flush_stdout_on_print=true
+config/features=PackedStringArray("4.7", "GL Compatibility")
+
+[autoload]
+
+GameData="*res://scripts/game_data.gd"
+
+[display]
+
+window/size/viewport_width=1600
+window/size/viewport_height=900
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+
