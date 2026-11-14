@@ -139,3 +139,22 @@ Design note (inference): a turn/phase-based game with <=4 players and a JSON sta
 4. Multiplayer hosting: can the team create a free Cloudflare/Firebase/Supabase account? That decides the co-op approach; PartyKit hosted is dead.
 5. Actual size of your Godot web export vs host limits (Cloudflare 25 MiB/file; itch.io no on-the-fly compression).
 6. Repo visibility (public needed for free GitHub Pages in most cases - unverified here).
+
+## 6. Measured on the team's laptop (2026-11-14 spike)
+A minimal Godot 4.7.2 project, exported headless to the web and run in a real browser engine (headless Microsoft
+Edge driven by Playwright), proved the chain the team needs for "Godot made locally, published on the web, Firebase
+through JavaScript":
+- Export: `godot --headless --path . --export-release "Web" build/index.html` with the single-threaded template
+  (`variant/thread_support=false`): 2.8 s, exit 0. No COOP/COEP headers needed, so GitHub Pages can host it.
+- Sizes: `index.wasm` 37.7 MB raw, 9.7 MB gzip-compressed (what a browser downloads when the host compresses);
+  `index.js` 0.27 MB; the game's own `index.pck` 15 KB for the test scene.
+- Browser log: "OpenGL ES 3.0 (WebGL 2.0) - Compatibility", "Emscripten 4.0.20, single-threaded".
+- Round trip, both directions, every second: a page script standing in for Firebase called a Godot callback
+  (`JavaScriptBridge.create_callback`, kept in a member variable) with a JSON string; Godot parsed it, updated the
+  screen, and answered through `JavaScriptBridge.eval("window.reportFromGodot(...)")`. First answer from Godot 2.6 s
+  after the page started loading (local server).
+- Pitfalls found: (1) every file in the project folder is packed unless excluded: `node_modules` made the pack 25 MB
+  until a `.gdignore` file was put in it; (2) JSON numbers arrive in Godot as floats (`2` becomes `2.0`): cast where an
+  integer is meant; (3) Godot draws on a canvas, so browser tests read the console, not the page's DOM; (4) the
+  editor on the desktop has no `JavaScriptBridge`: guard with `OS.has_feature("web")` and test online play in the
+  exported build.

@@ -1,23 +1,25 @@
 # Decisions
 
-Newest last. A decision here overrides anything older in the repository. Only the two human team members decide
-what is listed as open; agents propose with evidence and a recommendation.
+Newest last. A decision here overrides anything older in the repository. Open items are the team's to decide;
+agents bring evidence, alternatives and a recommendation.
 
 ## Decided
 | Date (UTC) | Decision | Who |
 |---|---|---|
 | 2026-11-14 | The team enters the 2026 NASA Space Apps Challenge with the challenge "Space Mission Design Game" | Team |
 | 2026-11-14 | Two human members, each with their own AI agents across several accounts, working from this GitHub repository | Team |
-| 2026-11-14 | Engine candidates: Godot, the web, or a hybrid (to be decided) | Team |
+| 2026-11-14 | Every material is in English: the game, the repository, the pitch deck, the submission | Team |
+| 2026-11-14 | Kerbal Space Program is the main inspiration: we take what is relevant and build our own product | Team |
+| 2026-11-14 | The team defines the game idea; agents help with the brainstorm and are free to propose anything | Team |
+| 2026-11-14 | Online multiplayer goes through Firebase; the Firebase project is created after the brainstorm settles the game's name | Team |
 
 ## Open
 | # | Question | Why it matters | Status |
 |---|---|---|---|
-| D1 | Which day the local "9:00 AM" upload closes (pitch deck of at most 7 slides, and the repository link), and whether the website submission (closes Sun 2026-11-15 23:59 local) is also done | Sets the whole schedule | Open |
-| D2 | The core game idea: what the player does, what it should teach and feel like | The official rules say AI tools "should not be used to come up with your idea of how to solve the challenge" (`challenge/event-and-judging.md` section 5): the idea must come from the human team | Open |
-| D3 | Engine: Godot, web or hybrid | Everything technical depends on it | Open |
-| D4 | Multiplayer form for up to four players: online real-time, same-screen, or turn-based shared session | Core requirement C4; the largest technical risk | Open |
-| D5 | Who owns which part, and the git workflow (branches, pull requests, who merges) | Prevents collisions between two people's agents | Open |
-| D6 | Hosting a public playable link (for example GitHub Pages) | The submission needs a public link with no login | Open |
-| D7 | How AI use is disclosed (required by the rules: text, metadata, visible watermark on generated images) | Eligibility | Open |
-| D8 | The game's name and language (the deck and the submission must be in English) | Pitch and submission | Open |
+| D1 | Which day the local "9:00 AM" upload closes (pitch deck of at most 7 slides, and the repository link); the website submission closes Sun 2026-11-15 23:59 local and is done as well | Sets the whole schedule | Open |
+| D2 | The game idea: what the player does, what they learn, how it feels, the name | Everything else follows from it | Brainstorm in progress |
+| D3 | Engine: Godot made locally and published to the web (the team's preference), the web directly, or a hybrid | Everything technical depends on it | Being argued with evidence: a Godot 4.7.2 web export with a JavaScript round trip is being tested |
+| D4 | Multiplayer form for up to four players on Firebase: what is shared, who acts when (real time, phases, turns) | Core requirement C4; the largest technical risk | Open; follows D2 and D3 |
+| D5 | Who owns which part, and the git workflow (branches, pull requests, who merges) | Keeps two people's agents from colliding | Open |
+| D6 | Hosting a public playable link (for example GitHub Pages) and the open-source license | The submission needs a public link with no login | Open |
+| D7 | How AI use is disclosed (the rules ask for text, metadata, and a visible watermark on generated images) | Eligibility | Open |

@@ -3,42 +3,48 @@
 This repository holds a game for the 2026 NASA Space Apps Challenge, challenge "Space Mission Design Game": players,
 alone or in teams of up to four, design, manage and simulate a complete space mission and see the trade-offs of
 every engineering decision. Two people build it, each with their own AI agents from different vendors. This file is
-for every agent, whatever tool runs it. It is a draft until both team members confirm it.
+for every agent, whatever tool runs it. "orbit-horizon" is the repository's working name; the game's name comes out
+of the team's brainstorm.
 
 ## Read first
 1. `kb/README.md`: the knowledge base index.
 2. `kb/challenge/requirements.md`: what the challenge expects, as IDs to cite.
-3. `kb/decisions.md`: what is decided and what is still open. Never decide an open item yourself; propose it with
-   evidence to the person you work for.
-Then read only what your task needs.
+3. `kb/decisions.md`: what the team decided and what is still open. Open items are the team's to decide: bring them
+   evidence, alternatives and your recommendation.
+Then read what your task needs.
 
-## Rules of the event (binding for everyone; sources in `kb/challenge/event-and-judging.md`)
-- **The idea is the humans'.** The official rules say AI tools "should not be used to come up with your idea of how
-  to solve the challenge". Agents research, structure, ask, propose implementations and build; the core game concept
-  and its main mechanics are chosen by the team members.
-- **AI use is disclosed.** Never remove a disclosure. AI-generated images and videos carry a visible watermark;
-  AI-generated code, audio and data are acknowledged in text and metadata (the exact form is decision D7).
-- **No NASA logos, insignia, flags or mission identifiers** in anything generated, and nothing implying NASA's
-  endorsement. A plain text credit of the NASA data and resources used is fine.
-- **No image, video, voice or likeness of anyone under 18.**
-- **Every outside asset is listed**: code, libraries, fonts, images, sounds, models, data, each with its source and
-  license. Nothing copyrighted without permission.
-- **English** for the repository, the pitch deck and the submission.
+## How we work
+- **The team defines the idea; agents help reach it.** Brainstorm with the person you work for, propose concepts,
+  mechanics, names and directions freely, argue for them, and align them with that person's preferences. They choose.
+- **Kerbal Space Program is the main inspiration.** Take what serves this game (building a craft from parts, the
+  satisfaction of a launch, learning by failing and trying again) and make it our own product, with its own names,
+  look and mechanics.
+- **Real data at the core.** The judges score how much NASA data is part of the solution (criterion Relevance). Game
+  values come from `kb/data/reference.json` or another cited source; where the game simplifies a value, the data file
+  says so.
+- **Each person's part.** Agents work in the part their person owns (decision D5). A change to something both sides
+  use (data formats, the shared mission state, project settings) is agreed with the other person first, so nobody's
+  work breaks.
+- **Data apart from code.** Missions, components, launch vehicles, orbits, events and texts live in data files, so
+  content and balance change without touching code.
+- **Small steps, shared often.** Pull before starting, commit each working step with a clear English message, push
+  right after. The main branch stays playable.
+- **Proven by playing.** A feature is done when someone ran the game and used it as a player; say what you checked.
+- **Plain explanations.** Every concept a player meets is explained in simple words, inside the game (challenge E1 to
+  E4).
 
-## How to work here
-- **Real data at the core.** NASA data must be a core part of the solution (judging criterion Relevance). Game values
-  come from `kb/data/reference.json` or another cited source. Never invent a number; when the game simplifies a
-  value, say so where it is defined.
-- **Stay in your part.** Work only in the files your person assigned you (the ownership split is decision D5). Never
-  rewrite or reformat another person's work; if you need a change there, ask.
-- **Data apart from code.** Game content (missions, components, launch vehicles, orbits, events, text) lives in data
-  files, so balance and content change without touching code.
-- **Small steps, shared often.** Pull before you start, commit each working step with a clear English message, push
-  right after. Do not leave the main branch broken.
-- **Prove it runs.** Run the game and use the feature as a player before calling it done; say what you checked.
-- **Plain explanations.** Every concept shown to players is explained in simple words (challenge E1 to E4).
+## What the event requires (sources in `kb/challenge/event-and-judging.md`)
+- **AI tools** are allowed. The rules say they "should not be used to come up with your idea of how to solve the
+  challenge" and require disclosure: generated images and videos carry a visible watermark; generated code, audio and
+  data are acknowledged in text and metadata (how we do it: decision D7).
+- **NASA branding:** generated content may not contain NASA logos, insignia, flags or mission identifiers, and nothing
+  may imply NASA's endorsement. Crediting the NASA data and resources we use, in text, is expected.
+- **Minors:** the demo and the project contain no image, video, voice or likeness of anyone under 18.
+- **References:** every outside asset (code, libraries, fonts, images, sounds, models, data) is listed with its source
+  and license; copyrighted material only with permission.
+- **English** for the game, the repository, the pitch deck and the submission.
 
 ## Layout
-- `docs/`: raw material gathered from the challenge page (do not edit).
+- `docs/`: raw material gathered from the challenge page.
 - `kb/`: the knowledge base (see `kb/README.md`).
-- The game's code layout is set once the engine is chosen (decision D3).
+- The game's code layout is set with the engine (decision D3).
