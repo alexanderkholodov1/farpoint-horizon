@@ -55,8 +55,8 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
 - The work toward the next version lives on one branch named after it (now `v0.2.0`). Each step is one commit that
   leaves the game running, and its message starts with the step number: the patch numbers of the current line,
   `0.1.1`, `0.1.2`, and so on. Before committing, pull and take the next free number. Never a `-1`/`-2` suffix.
-- Version numbers are never typed into the game, titles or documents by hand: the release workflow tags the merge
-  with the branch's version.
+- The version comes from the branch name, never from memory: `tools/pr-when-green.sh` puts it at the head of the pull
+  request title, and the release workflow tags the merge with it.
 - Agents commit straight to the version branch (no side branches, so nothing needs merging except by a person):
   `git pull --rebase` before you start and before you push; push after every step.
 
@@ -64,8 +64,10 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
 - One pull request per functional version, from its branch into `main`; never one per fix.
 - It opens only when every CI check on its last commit is green: `tools/pr-when-green.sh "<title>" <body-file>`.
   A red check is fixed on the branch; a pull request never sits red.
-- The title says what the version delivers, in English, without the version number (the branch carries it); the body
-  follows `.github/pull_request_template.md`.
+- The title leads with the version it delivers, then what it delivers, in English: `v0.2.0: <what a player can now
+  do>`. `tools/pr-when-green.sh` adds the branch's version when the title lacks it and refuses a different one; CI
+  fails a pull request whose title does not lead with its branch's version. The body follows
+  `.github/pull_request_template.md`.
 - Commits and pull requests carry no AI co-author lines or generated-by signatures (`.claude/settings.json` turns them
   off for Claude Code; set the same in other tools). AI use is disclosed in the README instead.
 
