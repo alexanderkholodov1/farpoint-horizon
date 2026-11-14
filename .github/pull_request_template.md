@@ -1,5 +1,10 @@
-## What this version delivers
-<!-- What a player can now do or see, in a few lines. The version comes from the branch name. -->
+<!-- Integration pull request (work/* into the version branch): what this piece adds, titled without a number; the step
+number is given at integration by tools/integrate.sh.
+Version pull request (the version branch into main): titled `vX.Y.Z: <what it delivers>` by tools/pr-when-green.sh;
+only a team member merges it. -->
+
+## What it delivers
+<!-- What a player can now do or see, in a few lines. -->
 
 ## How it was checked
 <!-- CI result, what was played and on which machine, screenshots of what changed (shots/ or the web build). -->
@@ -11,7 +16,7 @@
 <!-- IDs from kb/challenge/requirements.md. -->
 
 ## Sources and assets added
-<!-- Every new formula, value, model, sound, font or image, with its source and license. -->
+<!-- Every new formula, value, model, sound, font or image, with its source ID in docs/sources.md and its license. -->
 
 ## Still open
-<!-- What this version does not do yet. -->
+<!-- What this does not do yet. -->

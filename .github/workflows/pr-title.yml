@@ -1,26 +1,29 @@
 name: PR title
 
-# A pull request's title leads with the version its branch delivers: `v0.2.0: <what it delivers>`.
+# Into main: only from a version branch, with its version leading the title (`v0.2.0: <what it delivers>`).
+# Into a version branch: only from a work branch (`work/*`); the step number is given at integration.
 on:
   pull_request:
     types: [opened, edited, synchronize, reopened]
 
 jobs:
   title:
-    name: Title leads with the branch's version
+    name: Branches and title follow the version rules
     runs-on: ubuntu-latest
     steps:
-      - name: Check the title against the branch
+      - name: Check the branches and the title
         env:
           TITLE: ${{ github.event.pull_request.title }}
-          BRANCH: ${{ github.event.pull_request.head.ref }}
+          HEAD: ${{ github.event.pull_request.head.ref }}
+          BASE: ${{ github.event.pull_request.base.ref }}
         run: |
-          if [[ "$BRANCH" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            if [[ "$TITLE" == "$BRANCH: "?* ]]; then
-              echo "OK: $TITLE"
-            else
-              echo "The title must lead with '$BRANCH: '. Got: $TITLE"; exit 1
-            fi
+          version='^v[0-9]+\.[0-9]+\.[0-9]+$'
+          if [[ "$BASE" == "main" ]]; then
+            [[ "$HEAD" =~ $version ]] || { echo "Into main only from a version branch (vX.Y.Z); this comes from '$HEAD'"; exit 1; }
+            [[ "$TITLE" == "$HEAD: "?* ]] || { echo "The title must lead with '$HEAD: '. Got: $TITLE"; exit 1; }
+          elif [[ "$BASE" =~ $version ]]; then
+            [[ "$HEAD" == work/* ]] || { echo "Into a version branch only from a work branch (work/<issue>-<name>); this comes from '$HEAD'"; exit 1; }
           else
-            echo "Pull requests come from a version branch (vX.Y.Z); this one is '$BRANCH'"; exit 1
+            echo "Pull requests go into main (from a version branch) or into a version branch (from a work branch); this goes into '$BASE'"; exit 1
           fi
+          echo "OK: $HEAD into $BASE: $TITLE"

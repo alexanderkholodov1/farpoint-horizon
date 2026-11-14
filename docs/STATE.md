@@ -43,7 +43,8 @@ the same texture-leak warnings at exit as on the lead's laptop. The safe mode is
 
 ## How work is shared
 
-Nobody owns a part: each piece is claimed through its GitHub issue before starting (`AGENTS.md`). The shared contracts
+Nobody owns a part: each piece is claimed through its GitHub issue, built on its own work branch
+(`work/<issue>-<name>`) and integrated into `v0.2.0` through a pull request (`AGENTS.md`, `tools/integrate.sh`). The shared contracts
 (data formats, the mission model, `GameState`, `project.godot`, `AGENTS.md`) change only by agreement of both team
 members.
 
