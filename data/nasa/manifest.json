@@ -1,0 +1,128 @@
+[
+ {
+  "file": "data/nasa/horizons_planets.json",
+  "mission": "grand_tour",
+  "source_id": "S-horizons",
+  "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='199'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='ELEMENTS'&CENTER='500@10'&START_TIME='2026-11-15'&STOP_TIME='2026-11-16'&STEP_SIZE='1d'&REF_SYSTEM='ICRF'&REF_PLANE='ECLIPTIC'&OUT_UNITS='KM-S'&CSV_FORMAT='YES'; https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='299'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='ELEMENTS'&CENTER='500@10'&START_TIME='2026-11-15'&STOP_TIME='2026-11-16'&STEP_SIZE='1d'&REF_SYSTEM='ICRF'&REF_PLANE='ECLIPTIC'&OUT_UNITS='KM-S'&CSV_FORMAT='YES'; https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='399'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='ELEMENTS'&CENTER='500@10'&START_TIME='2026-11-15'&STOP_TIME='2026-11-16'&STEP_SIZE='1d'&REF_SYSTEM='ICRF'&REF_PLANE='ECLIPTIC'&OUT_UNITS='KM-S'&CSV_FORMAT='YES'; https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='499'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='ELEMENTS'&CENTER='500@10'&START_TIME='2026-11-15'&STOP_TIME='2026-11-16'&STEP_SIZE='1d'&REF_SYSTEM='ICRF'&REF_PLANE='ECLIPTIC'&OUT_UNITS='KM-S'&CSV_FORMAT='YES'; https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='599'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='ELEMENTS'&CENTER='500@10'&START_TIME='2026-11-15'&STOP_TIME='2026-11-16'&STEP_SIZE='1d'&REF_SYSTEM='ICRF'&REF_PLANE='ECLIPTIC'&OUT_UNITS='KM-S'&CSV_FORMAT='YES'; https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='699'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='ELEMENTS'&CENTER='500@10'&START_TIME='2026-11-15'&STOP_TIME='2026-11-16'&STEP_SIZE='1d'&REF_SYSTEM='ICRF'&REF_PLANE='ECLIPTIC'&OUT_UNITS='KM-S'&CSV_FORMAT='YES'; https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='799'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='ELEMENTS'&CENTER='500@10'&START_TIME='2026-11-15'&STOP_TIME='2026-11-16'&STEP_SIZE='1d'&REF_SYSTEM='ICRF'&REF_PLANE='ECLIPTIC'&OUT_UNITS='KM-S'&CSV_FORMAT='YES'; https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='899'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='ELEMENTS'&CENTER='500@10'&START_TIME='2026-11-15'&STOP_TIME='2026-11-16'&STEP_SIZE='1d'&REF_SYSTEM='ICRF'&REF_PLANE='ECLIPTIC'&OUT_UNITS='KM-S'&CSV_FORMAT='YES'",
+  "date_checked": "2026-11-14",
+  "processing": "CSV rows parsed to JSON",
+  "bytes": 5830
+ },
+ {
+  "file": "data/nasa/horizons_moon.json",
+  "mission": "grand_tour",
+  "source_id": "S-horizons",
+  "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='301'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='VECTORS'&CENTER='500@399'&START_TIME='2026-11-15'&STOP_TIME='2026-12-15'&STEP_SIZE='1d'&REF_SYSTEM='ICRF'&REF_PLANE='ECLIPTIC'&OUT_UNITS='KM-S'&CSV_FORMAT='YES'",
+  "date_checked": "2026-11-14",
+  "processing": "CSV rows parsed to JSON",
+  "bytes": 8366
+ },
+ {
+  "file": "data/nasa/nssdc_factsheets.json",
+  "mission": null,
+  "source_id": "S-nssdc-planets",
+  "query": "https://nssdc.gsfc.nasa.gov/planetary/factsheet/mercuryfact.html; https://nssdc.gsfc.nasa.gov/planetary/factsheet/venusfact.html; https://nssdc.gsfc.nasa.gov/planetary/factsheet/earthfact.html; https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html; https://nssdc.gsfc.nasa.gov/planetary/factsheet/jupiterfact.html; https://nssdc.gsfc.nasa.gov/planetary/factsheet/saturnfact.html; https://nssdc.gsfc.nasa.gov/planetary/factsheet/uranusfact.html; https://nssdc.gsfc.nasa.gov/planetary/factsheet/neptunefact.html; https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html",
+  "date_checked": "2026-11-14",
+  "processing": "HTML table rows parsed to JSON",
+  "bytes": 8848
+ },
+ {
+  "file": "assets/mission_photos/volcano_watch/sangay_2024-08-31_truecolor.jpg",
+  "mission": "volcano_watch",
+  "source_id": "S-gibs",
+  "query": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&LAYERS=VIIRS_SNPP_CorrectedReflectance_TrueColor&SRS=EPSG:4326&BBOX=-78.69,-2.35,-77.99000000000001,-1.65&WIDTH=700&HEIGHT=700&FORMAT=image/jpeg&TIME=2024-08-31",
+  "date_checked": "2026-11-14",
+  "processing": "none (as served)",
+  "bytes": 49395
+ },
+ {
+  "file": "assets/mission_photos/volcano_watch/sangay_2024-08-31_thermal.jpg",
+  "mission": "volcano_watch",
+  "source_id": "S-gibs",
+  "query": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&LAYERS=VIIRS_SNPP_CorrectedReflectance_TrueColor&SRS=EPSG:4326&BBOX=-78.69,-2.35,-77.99000000000001,-1.65&WIDTH=700&HEIGHT=700&FORMAT=image/jpeg&TIME=2024-08-31  +  https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&LAYERS=VIIRS_SNPP_Thermal_Anomalies_375m_All&SRS=EPSG:4326&BBOX=-78.69,-2.35,-77.99000000000001,-1.65&WIDTH=700&HEIGHT=700&FORMAT=image/png&TIME=2024-08-31&TRANSPARENT=TRUE",
+  "date_checked": "2026-11-14",
+  "processing": "hot-spot pixels enlarged 7x and drawn in red over the true-colour image",
+  "bytes": 50220
+ },
+ {
+  "file": "assets/mission_photos/volcano_watch/reventador_2024-08-31_truecolor.jpg",
+  "mission": "volcano_watch",
+  "source_id": "S-gibs",
+  "query": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&LAYERS=VIIRS_SNPP_CorrectedReflectance_TrueColor&SRS=EPSG:4326&BBOX=-78.006,-0.427,-77.30600000000001,0.27299999999999996&WIDTH=700&HEIGHT=700&FORMAT=image/jpeg&TIME=2024-08-31",
+  "date_checked": "2026-11-14",
+  "processing": "none (as served)",
+  "bytes": 43868
+ },
+ {
+  "file": "assets/mission_photos/volcano_watch/reventador_2024-08-31_thermal.jpg",
+  "mission": "volcano_watch",
+  "source_id": "S-gibs",
+  "query": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&LAYERS=VIIRS_SNPP_CorrectedReflectance_TrueColor&SRS=EPSG:4326&BBOX=-78.006,-0.427,-77.30600000000001,0.27299999999999996&WIDTH=700&HEIGHT=700&FORMAT=image/jpeg&TIME=2024-08-31  +  https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&LAYERS=VIIRS_SNPP_Thermal_Anomalies_375m_All&SRS=EPSG:4326&BBOX=-78.006,-0.427,-77.30600000000001,0.27299999999999996&WIDTH=700&HEIGHT=700&FORMAT=image/png&TIME=2024-08-31&TRANSPARENT=TRUE",
+  "date_checked": "2026-11-14",
+  "processing": "hot-spot pixels enlarged 7x and drawn in red over the true-colour image",
+  "bytes": 44101
+ },
+ {
+  "file": "assets/mission_photos/volcano_watch/cotopaxi_2024-08-31_truecolor.jpg",
+  "mission": "volcano_watch",
+  "source_id": "S-gibs",
+  "query": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&LAYERS=VIIRS_SNPP_CorrectedReflectance_TrueColor&SRS=EPSG:4326&BBOX=-78.78999999999999,-1.03,-78.09,-0.33000000000000007&WIDTH=700&HEIGHT=700&FORMAT=image/jpeg&TIME=2024-08-31",
+  "date_checked": "2026-11-14",
+  "processing": "none (as served)",
+  "bytes": 38580
+ },
+ {
+  "file": "assets/mission_photos/moon_south_pole/south_pole_wide_lroc_wac.jpg",
+  "mission": "moon_south_pole",
+  "source_id": "S-lroc-wac",
+  "query": "https://trek.nasa.gov/tiles/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd_v02/1.0.0//default/default028mm/5/{row}/{col}.jpg for row 30..31, column 0..63",
+  "date_checked": "2026-11-14",
+  "processing": "tiles joined, re-projected to a view from above the south pole (azimuthal equidistant, 11.0 deg radius)",
+  "bytes": 295819
+ },
+ {
+  "file": "assets/mission_photos/moon_south_pole/south_pole_shackleton_lroc_wac.jpg",
+  "mission": "moon_south_pole",
+  "source_id": "S-lroc-wac",
+  "query": "https://trek.nasa.gov/tiles/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd_v02/1.0.0//default/default028mm/7/{row}/{col}.jpg for row 126..127, column 0..255",
+  "date_checked": "2026-11-14",
+  "processing": "tiles joined, re-projected to a view from above the south pole (azimuthal equidistant, 2.8 deg radius)",
+  "bytes": 116483
+ },
+ {
+  "file": "assets/mission_photos/grand_tour/jupiter_voyager1_1979.jpg",
+  "mission": "grand_tour",
+  "source_id": "S-nasa-images",
+  "query": "https://images-assets.nasa.gov/image/PIA00022/PIA00022~large.jpg",
+  "date_checked": "2026-11-14",
+  "processing": "resized to at most 1024 px; Jupiter's Great Red Spot, Voyager 1, March 1979; library record PIA00022, credit NASA/JPL",
+  "bytes": 69786
+ },
+ {
+  "file": "assets/mission_photos/grand_tour/saturn_voyager1_1980.jpg",
+  "mission": "grand_tour",
+  "source_id": "S-nasa-images",
+  "query": "https://images-assets.nasa.gov/image/PIA01374/PIA01374~orig.jpg",
+  "date_checked": "2026-11-14",
+  "processing": "resized to at most 1024 px; Saturn's limb and ring shadow, Voyager 1, 9 Nov 1980; library record PIA01374, credit NASA/JPL",
+  "bytes": 30420
+ },
+ {
+  "file": "assets/mission_photos/grand_tour/uranus_voyager2_1986.jpg",
+  "mission": "grand_tour",
+  "source_id": "S-nasa-images",
+  "query": "https://images-assets.nasa.gov/image/PIA18182/PIA18182~medium.jpg",
+  "date_checked": "2026-11-14",
+  "processing": "resized to at most 1024 px; Uranus, Voyager 2, 1986; library record PIA18182, credit NASA/JPL-Caltech",
+  "bytes": 38388
+ },
+ {
+  "file": "assets/mission_photos/grand_tour/neptune_voyager2_1989.jpg",
+  "mission": "grand_tour",
+  "source_id": "S-nasa-images",
+  "query": "https://images-assets.nasa.gov/image/PIA00049/PIA00049~orig.jpg",
+  "date_checked": "2026-11-14",
+  "processing": "resized to at most 1024 px; Neptune and its Great Dark Spot, Voyager 2, 1989; library record PIA00049, credit NASA/JPL",
+  "bytes": 57209
+ }
+]
