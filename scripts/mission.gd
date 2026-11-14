@@ -1,4 +1,6 @@
 extends RefCounted
+
+const RocketDesign := preload("res://scripts/craft/rocket_design.gd")
 ## Modelo de la misión: guarda las decisiones del equipo, calcula los presupuestos
 ## (masa, energía, datos, delta-v, costo), revisa compatibilidades y simula la operación.
 
@@ -54,7 +56,7 @@ func compute() -> Dictionary:
 	var C: Dictionary = GameData.COMMS[comms]
 	var A: Dictionary = GameData.ADCS[adcs]
 	var PR: Dictionary = GameData.PROPULSION[propulsion]
-	var L: Dictionary = GameData.LAUNCHERS[launcher]
+	var L: Dictionary = RocketDesign.launcher(launcher)  # a catalog launcher or the player's rocket
 	var D: Dictionary = GameData.DIFFICULTY[difficulty]
 	var r := {}
 
@@ -309,7 +311,7 @@ func simulate(seed_value: int = -1) -> Dictionary:
 	var S: Dictionary = GameData.SCENARIOS[scenario]
 	var B: Dictionary = GameData.BUSES[bus]
 	var O: Dictionary = GameData.ORBITS[orbit]
-	var L: Dictionary = GameData.LAUNCHERS[launcher]
+	var L: Dictionary = RocketDesign.launcher(launcher)  # a catalog launcher or the player's rocket
 	var A: Dictionary = GameData.ADCS[adcs]
 	var PR: Dictionary = GameData.PROPULSION[propulsion]
 	var D: Dictionary = GameData.DIFFICULTY[difficulty]

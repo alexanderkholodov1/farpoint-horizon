@@ -9,6 +9,7 @@ const SKY_SHADER := preload("res://shaders/sky.gdshader")
 const GLOW := preload("res://shaders/engine_glow.gdshader")
 const EARTH_TEX := preload("res://textures/earth_albedo.jpg")
 const Ship := preload("res://scripts/ship_builder.gd")
+const RocketDesign := preload("res://scripts/craft/rocket_design.gd")
 const FONT := preload("res://fonts/Inter-SemiBold.otf")
 
 
@@ -223,6 +224,8 @@ const LAUNCHER_MODEL_INFO := {
 ## The launcher on the pad: its model, scaled to the size the launch screen frames (4.8 x the launcher's `height`),
 ## with a `Flames` child for every engine cluster and the `height` meta. Origin at the base of the first stage.
 static func make_rocket(launcher_id: String) -> Node3D:
+	if launcher_id == RocketDesign.CUSTOM and RocketDesign.current != null:
+		return make_custom_rocket(RocketDesign.current)
 	var root := Node3D.new()
 	root.name = "Rocket"
 	var L: Dictionary = GameData.LAUNCHERS[launcher_id]
@@ -254,6 +257,46 @@ static func make_rocket(launcher_id: String) -> Node3D:
 			fb.position = Vector3(sx * float(info.boosters) * k, -0.2 * h, 0)
 			flames.add_child(fb)
 	root.set_meta("height", total)
+	return root
+
+
+## The rocket the player assembled (RocketDesign), at the launch screen's scale (0.088 units per metre, the scale of
+## the catalog launchers), with Flames under its first stage, flames under each booster, and the meta "height" and
+## "stage1_y" (where the second stage's engine fires after separation).
+static func make_custom_rocket(design) -> Node3D:
+	var root := Node3D.new()
+	root.name = "Rocket"
+	var k := 0.088
+	var asm: Node3D = design.build_model()
+	asm.scale = Vector3.ONE * k
+	root.add_child(asm)
+	var core_r: float = RocketDesign.part(design.stack[0]).family / 2.0
+	var h := 1.3 * core_r / 1.85
+	var flames := Node3D.new()
+	flames.name = "Flames"
+	root.add_child(flames)
+	var f := make_flame(h)
+	f.position = Vector3(0, -0.25, 0)
+	flames.add_child(f)
+	var gm := ShaderMaterial.new()
+	gm.shader = GLOW
+	var plume := Ship.cyl(flames, core_r * k * 0.9, core_r * k * 0.45, 1.2 * h, Vector3(0, -0.25 - 0.6 * h, 0), gm)
+	plume.name = "Plume"
+	var boosters := asm.get_node_or_null("Boosters") as Node3D
+	if boosters:
+		for b in boosters.get_children():
+			var fb := make_flame(h)
+			fb.position = Vector3(b.position.x * k, b.position.y * k - 0.1, 0)
+			fb.name = "BoosterFlame%d" % flames.get_child_count()
+			fb.set_meta("booster", true)
+			flames.add_child(fb)
+	# where the second stage starts: the top of the first stage
+	var st: Array = design.stages()
+	var y1 := 0.0
+	for id in st[0]:
+		y1 += RocketDesign._part_height(id)
+	root.set_meta("stage1_y", y1 * k)
+	root.set_meta("height", design.height_m() * k)
 	return root
 
 

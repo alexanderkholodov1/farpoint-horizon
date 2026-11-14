@@ -49,6 +49,34 @@ when the game or the pitch uses it.
   Heavy* (infobox, checked 2026-11-14), https://en.wikipedia.org/wiki/Falcon_Heavy. Height 70 m, width 12.2 m, three
   cores of 3.7 m: the heavy launcher model.
 
+## Rocket parts (the builder)
+- **S16** hoahluke. *Merlin Engine* (3D model). Sketchfab, CC BY 4.0.
+  https://sketchfab.com/3d-models/merlin-engine-b6725717165c4c0db0e4e2d744370a51. The sea-level engines of the large
+  first stage (`assets/parts/engine_merlin_x9.glb`).
+- **S17** MartianDays. *Merlin 1D Vacuum* (3D model). Sketchfab, CC BY 4.0.
+  https://sketchfab.com/3d-models/merlin-1d-vacuum-f20ebb6e857b405cbdc66568d48d2fcb. The large vacuum engine
+  (`assets/parts/engine_merlin_vac.glb`).
+- **S18** Zachary (corncob_127). *Rocket Nozzle Part* (3D model). Sketchfab, CC BY 4.0.
+  https://sketchfab.com/3d-models/rocket-nozzle-part-e86374e66a4d462684b9826cedafe815. The small engines
+  (`assets/parts/engine_small_x9.glb`, `engine_small_vac.glb`).
+- **S19** NASA 3D Resources. *Space Shuttle Parts: Solid Rocket Booster* (3D model). Public domain (NASA media usage
+  guidelines). https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Space%20Shuttle%20Parts. The side
+  boosters (`assets/parts/booster_srb.glb`); no insignia on its texture.
+- **S20** Wikipedia. *SpaceX Merlin* (infobox, checked 2026-11-14). https://en.wikipedia.org/wiki/SpaceX_Merlin.
+  Merlin 1D: 845 kN at sea level, Isp 282 s (sea level) and 311 s (vacuum), 470 kg, 0.92 m; Merlin 1D Vacuum: 981 kN,
+  348 s, 3.3 m nozzle.
+- **S21** Wikipedia. *Rutherford (rocket engine)* (infobox, checked 2026-11-14).
+  https://en.wikipedia.org/wiki/Rutherford_(rocket_engine). 25 kN at sea level, 26 kN in vacuum, Isp 311 s and 343 s,
+  35 kg.
+- **S22** Wikipedia. *Space Shuttle Solid Rocket Booster* (infobox and text, checked 2026-11-14).
+  https://en.wikipedia.org/wiki/Space_Shuttle_Solid_Rocket_Booster. 45.46 m by 3.71 m, 91 t empty, 500 t of
+  propellant, about 12 MN at liftoff, Isp 242 s (sea level) and 268 s (vacuum), 123 s burn.
+- **S23** Wikipedia. *Delta-v budget* (checked 2026-11-14). https://en.wikipedia.org/wiki/Delta-v_budget. Earth to low
+  orbit 9.3-10 km/s with losses; low orbit to the geostationary transfer orbit 2.3 km/s; translunar injection 3.20 km/s.
+- [S13] and [S14] also give the stage lengths and masses the parts are cut from: Falcon 9 first stage 25.6 t empty and
+  395.7 t of propellant, second stage 3.9 t and 92.67 t, fairing about 1.9 t; Electron 13.0 t at liftoff, stages of
+  12.1 m and 2.4 m, fairing 44 kg.
+
 ## Real missions
 - **S11** NASA. *Landsat 9*. https://science.nasa.gov/mission/landsat-9. Orbit and coverage of an Earth-imaging twin.
 - **S12** European Space Agency, Copernicus. *Sentinel-2 mission*. https://sentiwiki.copernicus.eu/web/s2-mission.
