@@ -20,7 +20,7 @@
    "source": [
     "S-rideshare-price"
    ],
-   "simplified": "Capacity to each orbit and the price are rounded from the published figures; the failure and delay chances are our own estimate of each class."
+   "simplified": "The price is rounded from the published rideshare price [S-rideshare-price]; the capacity to each orbit is our own estimate for the game (that source gives prices, not capacities), and so are the failure and delay chances."
   },
   "light": {
    "name": "Light launcher (Electron type)",

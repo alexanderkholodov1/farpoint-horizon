@@ -83,3 +83,4 @@ integration; nobody edits this list by hand on a work branch.
 - 0.1.8: Data apart and in English: the catalogs in data files with their sources, English by default with Spanish as an option, the name Farpoint HORIZON in the game; the telescope starts in L2 and launch fires once (`work/4-data`, 2026-11-14)
 - 0.1.9: Sharper photos the mission returns: Ecuadorian volcanoes from Landsat 8, EO-1 and ASTER, Shackleton crater from LRO and ShadowCam (`work/19-nasa-data`, 2026-11-14)
 - 0.1.10: The mission photos' import files committed, so branches never collide on them (`work/19-photo-imports`, 2026-11-14)
+- 0.1.11: Honest citations: three values the cross-vendor review found unsupported are labeled as our game estimates (`work/4-honest-citations`, 2026-11-14)
