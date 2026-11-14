@@ -8,6 +8,10 @@ Format of an entry: **ID**, who published it, title, year, link, and what we use
 so where it is used and cites what it simplifies. Research notes in `kb/` keep their own links; a value moves here
 when the game or the pitch uses it.
 
+New entries go at the end of their section with a short unique word as ID (`S-horizons`, `S-gibs-viirs`), never a
+new number: branches built in parallel would collide on numbers. S1-S15 keep theirs. Git keeps both sides when two
+branches add entries at the same place (`.gitattributes`).
+
 ## Challenge and NASA resources
 - **S1** NASA Space Apps Challenge. *Space Mission Design Game* (challenge statement and resources). 2026.
   https://www.spaceappschallenge.org/2026/challenges/space-mission-design-game/ (copy in `docs/challenge/`). The brief.

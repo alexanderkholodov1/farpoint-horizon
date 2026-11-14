@@ -1,26 +1,22 @@
-name: PR title
+name: Version pull request
 
-# A pull request's title leads with the version its branch delivers: `v0.2.0: <what it delivers>`.
+# main takes only the version pull request: from a version branch, its title leading with that version
+# (`v0.2.0: <what it delivers>`). Pull requests into any other branch are free and not checked here.
 on:
   pull_request:
+    branches: [main]
     types: [opened, edited, synchronize, reopened]
 
 jobs:
   title:
-    name: Title leads with the branch's version
+    name: Into main only from a version branch, title led by its version
     runs-on: ubuntu-latest
     steps:
-      - name: Check the title against the branch
+      - name: Check the branch and the title
         env:
           TITLE: ${{ github.event.pull_request.title }}
-          BRANCH: ${{ github.event.pull_request.head.ref }}
+          HEAD: ${{ github.event.pull_request.head.ref }}
         run: |
-          if [[ "$BRANCH" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            if [[ "$TITLE" == "$BRANCH: "?* ]]; then
-              echo "OK: $TITLE"
-            else
-              echo "The title must lead with '$BRANCH: '. Got: $TITLE"; exit 1
-            fi
-          else
-            echo "Pull requests come from a version branch (vX.Y.Z); this one is '$BRANCH'"; exit 1
-          fi
+          [[ "$HEAD" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Into main only from a version branch (vX.Y.Z); this comes from '$HEAD'"; exit 1; }
+          [[ "$TITLE" == "$HEAD: "?* ]] || { echo "The title must lead with '$HEAD: '. Got: $TITLE"; exit 1; }
+          echo "OK: $TITLE"

@@ -37,4 +37,5 @@ and judgment, cheaper ones for mechanical work.
 - Keep `docs/STATE.md` true after each step; record decisions in `kb/decisions.md` with who decided and when.
 - Report to your person in their language: what was done and how it was checked, what is open, which agents did the
   work (tool, model, account if relevant). Each message stands on its own; links are full and tested.
-- Open the version's pull request only when it is complete and green (`tools/pr-when-green.sh`). Never merge.
+- Integrate finished pieces into the version branch with `tools/integrate.sh` (no need to ask). Open the version's
+  pull request only when it is complete and green (`tools/pr-when-green.sh`). Never merge into `main`.
