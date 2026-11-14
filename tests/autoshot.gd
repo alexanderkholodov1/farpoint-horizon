@@ -17,6 +17,12 @@ func _ready() -> void:
 	g = load("res://scenes/main.tscn").instantiate()
 	add_child(g)
 	await wait(1.5)
+	if OS.get_cmdline_user_args().has("moon"):
+		_moon_mission()
+		g.go("flight")
+		await _to_the_moon()
+		get_tree().quit()
+		return
 	if OS.get_cmdline_user_args().has("pilot"):
 		await _pilot()
 		get_tree().quit()
@@ -162,11 +168,7 @@ func _ready() -> void:
 func _pilot() -> void:
 	var RD := preload("res://scripts/craft/rocket_design.gd")
 	RD.current = null
-	GameState.start_solo()
-	GameState.start_mission("moon_south_pole")
-	GameState.mission.from_dict({"bus": "medium", "instruments": ["cam_ms", "gamma"], "panels": "dep_m", "battery": "b1k", "comms": "ka", "adcs": "st", "propulsion": "chem", "launcher": "medium", "orbit": "lunar", "years": 1, "redundancy": true, "shielding": true})
-	GameState.begin_flight(GameState.mission.compute())
-	GameState.last_sim.launch_failed = false
+	_moon_mission()
 	g.go("launch")
 	await wait(1.2)
 	await shot("24_pilot_countdown")
@@ -186,3 +188,49 @@ func _pilot() -> void:
 	await shot("29_pilot_orbit")
 	await wait(1.4)
 	await shot("30_pilot_craft_away")
+	await _to_the_moon()
+
+
+func _moon_mission() -> void:
+	GameState.start_solo()
+	GameState.start_mission("moon_south_pole")
+	GameState.mission.from_dict({"bus": "medium", "instruments": ["cam_ms", "gamma"], "panels": "dep_m", "battery": "b1k", "comms": "ka", "adcs": "st", "propulsion": "chem", "launcher": "medium", "orbit": "lunar", "years": 1, "redundancy": true, "shielding": true})
+	GameState.begin_flight(GameState.mission.compute())
+	GameState.last_sim.launch_failed = false
+
+
+## The burn toward the Moon, the coast and the landing at the south pole, flown by the flight computer (issue #8).
+func _to_the_moon() -> void:
+	while g.screen_id != "flight":
+		await wait(0.2)
+	await wait(1.5)
+	await shot("31_moon_parking_orbit")
+	g.screen._on_action()
+	await wait(5.0)
+	await shot("32_moon_burn")
+	while g.screen_id == "flight" and g.screen.phase == "burn":
+		await wait(0.2)
+	await wait(1.0)
+	await shot("33_moon_burn_cut")
+	await wait(5.0)
+	await shot("34_moon_coast")
+	while g.screen_id != "landing":
+		await wait(0.2)
+	await wait(1.5)
+	await shot("35_landing_start")
+	while g.screen_id == "landing" and g.screen.model.altitude() > 240.0:
+		await wait(0.2)
+	await wait(0.6)
+	await shot("36_landing_alarm")
+	while g.screen_id == "landing" and g.screen.model.altitude() > 20.0:
+		await wait(0.2)
+	await shot("37_landing_low")
+	while g.screen_id == "landing" and g.screen.phase == "descent":
+		await wait(0.2)
+	await wait(1.2)
+	await shot("38_touchdown")
+	print("landing ", GameState.flight.get("landing", {}), " extras ", GameState.flight.get("extras", {}), " tli ", GameState.flight.get("tli", {}))
+	while g.screen_id == "landing":
+		await wait(0.2)
+	await wait(2.0)
+	await shot("39_after_landing")
