@@ -4,8 +4,9 @@ shader_type canvas_item;
 // this shader only replaces its fill with blur + tint. Two rings of taps around each pixel: soft enough under the tint,
 // cheap enough for a laptop GPU and the browser (no mipmaps needed, which GL Compatibility may not build).
 uniform sampler2D screen : hint_screen_texture, filter_linear;
-uniform float tint : hint_range(0.0, 1.0) = 0.84;   // how much of the panel colour covers the blur
-uniform float lift : hint_range(0.0, 1.0) = 0.55;   // frost scatters light: the blur is lifted toward white first
+uniform float tint : hint_range(0.0, 1.0) = 0.8;    // how much of the panel colour covers the blur
+uniform float lift : hint_range(0.0, 1.0) = 0.0;    // frost scatters light: the blur is lifted toward lift_to first
+uniform vec3 lift_to : source_color = vec3(0.0);       // white for the light appearance, black for the dark one
 uniform float radius = 9.0;                         // blur radius in pixels
 
 void fragment() {
@@ -17,6 +18,6 @@ void fragment() {
 		b += texture(screen, SCREEN_UV + d * px * 0.5).rgb * 0.06;
 		b += texture(screen, SCREEN_UV + d.yx * vec2(1.0, -1.0) * px).rgb * 0.04;
 	}
-	b = mix(b, vec3(1.0), lift);
+	b = mix(b, lift_to, lift);
 	COLOR = vec4(mix(b, COLOR.rgb, tint), COLOR.a);
 }
