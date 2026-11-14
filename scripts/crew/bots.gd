@@ -20,6 +20,8 @@ static var _mission_script: GDScript
 const NAMES := {"engineer": "Rivet", "scientist": "Quark", "pilot": "Skip", "ground": "Echo"}
 ## The order of the steps in the game (data/steps.json); each entry is a step id of data/steps.json.
 const CHAIN := ["orbita", "plataforma", "instrumentos", "energia", "comunicaciones", "control", "lanzador"]
+## A step id the bots know how to decide is in CHAIN; a bot that meets any other step (the steps change as parts move
+## into the builder) skips it: no change, no line. Who holds a step comes from data/steps.json, never from here.
 ## The order in which a plan works the parts out, by what each depends on.
 const PLAN := ["orbita", "plataforma", "instrumentos", "comunicaciones", "control", "energia", "lanzador"]
 
@@ -27,6 +29,8 @@ const PLAN := ["orbita", "plataforma", "instrumentos", "comunicaciones", "contro
 ## What the bot does at `step_id`: {"patch": {mission fields it changes}, "line": {"t", "a"}}.
 ## m is the design as it is now (a Mission); touched maps the step ids a person has edited.
 static func act(step_id: String, m, touched: Dictionary) -> Dictionary:
+	if not CHAIN.has(step_id):
+		return {"patch": {}, "line": {}}
 	var c = _copy(m)
 	_plan(c, step_id, touched)
 	var patch := {}
@@ -263,6 +267,8 @@ static func _pick_power(c) -> void:
 
 
 static func _pick_launcher(c) -> void:
+	if c.launcher == "custom":
+		return   # the player built a rocket (RocketDesign.CUSTOM): a bot never swaps it for a catalog one
 	c.years = maxi(c.years, GD.SCENARIOS[c.scenario].min_years)
 	var pick := ""
 	var pick_cost := INF

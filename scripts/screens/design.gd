@@ -313,8 +313,7 @@ func _fill_review(r: Dictionary) -> void:
 	for role in GameData.ROLE_ORDER:
 		var R: Dictionary = GameData.ROLES[role]
 		var ok: bool = r.goals[role]
-		var pc := PanelContainer.new()
-		pc.add_theme_stylebox_override("panel", Kit.flat(Kit.C_CARD, R.color.darkened(0.3), 8, 1, 10, 8))
+		var pc := Kit.tile(R.color, 10.0, 8.0)
 		var h := Kit.hbox(8)
 		pc.add_child(h)
 		var v := Kit.vbox(1)

@@ -56,7 +56,7 @@ func _show_home() -> void:
 	var v := _frame(700, 520, tr("Your crew"), tr("A mission is a team effort. You have four stations: engineer, scientist, pilot and ground control. Friends take the stations they like, and bots take the rest, so you never fly alone."))
 	var opts := [
 		[tr("Solo"), tr("You take one station. Three bots take the others and work with you."), "solo", Kit.C_ACCENT],
-		[tr("Same screen"), tr("Two to four people on one computer, passing the screen. Free stations get a bot."), "same", Color(0.5, 1.0, 0.6)],
+		[tr("Same screen"), tr("Two to four people on one computer, passing the screen. Free stations get a bot."), "same", Kit.C_OK],
 		[tr("Online"), tr("Create a room, share its code, and up to four friends join from their own browsers."), "online", Kit.C_WARN]]
 	for o in opts:
 		var b := Kit.accent_btn(Kit.btn(o[0], func(): go("team", {"view": o[2]}), 22, 640), o[3])
@@ -84,9 +84,8 @@ func _show_solo() -> void:
 ## A card of a station: its name, goal, steps and who would hold it. pick runs when the button is pressed.
 func _station_card(st: String, pick: Callable, button_text: String, holder_text := "") -> PanelContainer:
 	var R: Dictionary = GameData.ROLES[st]
-	var pc := PanelContainer.new()
+	var pc := Kit.tile(R.color)
 	pc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	pc.add_theme_stylebox_override("panel", Kit.flat(Kit.C_CARD, R.color.darkened(0.3), 8, 1, 12, 10))
 	var cv := Kit.vbox(3)
 	pc.add_child(cv)
 	cv.add_child(Kit.lbl(R.name, 20, R.color, Kit.FONT_T))

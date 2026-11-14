@@ -250,6 +250,8 @@ func _bots_enter(step_id: String) -> void:
 		return
 	var m = _mission()
 	var res: Dictionary = Bots.act(step_id, m, state.touched)
+	if res.line.is_empty():
+		return   # a step the bots do not know
 	for k in res.patch:
 		state.mission[k] = res.patch[k]
 	state.bot_lines[step_id] = {"station": st, "line": res.line}
