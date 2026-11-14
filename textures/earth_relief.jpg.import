@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://5j2kouudl5a7"
-path="res://.godot/imported/earth_albedo.jpg-f7a0c5caadcb203b08d8c09cbebabe35.ctex"
+uid="uid://m0ydvgt3hein"
+path="res://.godot/imported/earth_relief.jpg-8cd5d29131c2c45d9e294b56ad525eb4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://textures/earth_albedo.jpg"
-dest_files=["res://.godot/imported/earth_albedo.jpg-f7a0c5caadcb203b08d8c09cbebabe35.ctex"]
+source_file="res://textures/earth_relief.jpg"
+dest_files=["res://.godot/imported/earth_relief.jpg-8cd5d29131c2c45d9e294b56ad525eb4.ctex"]
 
 [params]
 

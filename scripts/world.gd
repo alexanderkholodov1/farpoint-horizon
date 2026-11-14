@@ -36,6 +36,7 @@ var orbit_angle := 0.0
 var orbit_speed := 1.0
 var ship_lost := false
 var ship_label: Label3D
+var cloud_shift := 0.0     ## Drift of the Earth's cloud layer (U of its texture).
 
 
 func setup() -> void:
@@ -103,6 +104,14 @@ func face_sun(extra := 0.8) -> void:
 
 
 func _animate_world(delta: float) -> void:
+	# the Sun's direction for the night side of the Earth, and the slow drift of its clouds
+	cloud_shift = fmod(cloud_shift + delta * 0.0012, 1.0)
+	var sd: Vector3 = sun.global_transform.basis.z
+	for m in get_tree().get_nodes_in_group(Space.SUN_LIT):
+		var mat := (m as MeshInstance3D).material_override as ShaderMaterial
+		if mat:
+			mat.set_shader_parameter("sun_dir", sd)
+			mat.set_shader_parameter("cloud_shift", cloud_shift)
 	if planet and is_instance_valid(planet):
 		var surf: Node3D = planet.get_node_or_null("Surface")
 		if surf:
@@ -139,6 +148,9 @@ func clear_stage() -> void:
 	ship_lost = false
 	world_env.environment.sky = Space.make_space_sky()
 	world_env.environment.ambient_light_energy = 0.35
+	world_env.environment.fog_enabled = false
+	world_env.environment.tonemap_exposure = 1.0
+	cam.far = 2000.0
 	sun.rotation_degrees = Vector3(-30, -60, 0)
 
 
@@ -217,7 +229,7 @@ func stage_orbit() -> void:
 	if mission.orbit == "lunar":
 		planet = Space.make_moon(1.0)
 		stage.add_child(planet)
-		var earth := Space.make_earth(1.4)
+		var earth := Space.make_earth(1.4, false)
 		earth.position = Vector3(-30, 6, -40)
 		stage.add_child(earth)
 		setup_orbit_ship(mission, Vector3.ZERO, O.radius, O.incl, ship_size)

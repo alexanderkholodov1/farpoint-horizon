@@ -13,18 +13,20 @@ var dropped: Array = []     ## Stages and boosters falling away: [node, velocity
 var sep_at := -1.0          ## Time after liftoff of the last stage separation, for its caption.
 var telemetry: Label
 var big: Label
+var smoke: CPUParticles3D
 
 
 func enter(_args: Dictionary) -> void:
 	world.cam_free = false
 	world.clear_stage()
 	var env: Environment = world.world_env.environment
-	env.sky = Space.make_day_sky()
-	env.ambient_light_energy = 0.8
+	Space.apply_day(env)
+	env.ambient_light_energy = 0.55
+	world.cam.far = 6000.0
 	world.sun.rotation_degrees = Vector3(-50, -30, 0)
 	world.stage.add_child(Space.make_pad())
 	rocket = Space.make_rocket(mission.launcher)
-	rocket.position = Vector3(0, 0.2, 0)
+	rocket.position = Vector3(0, Space.PAD_TOP, 0)
 	world.stage.add_child(rocket)
 	launch_t = 0.0
 	exploded = false
@@ -40,10 +42,19 @@ func enter(_args: Dictionary) -> void:
 	telemetry = Kit.lbl("T-00:03", 26, Color.WHITE, Kit.FONT_T)
 	v.add_child(telemetry)
 	v.add_child(Kit.lbl(tr("Destination") + " · " + GameData.ORBITS[mission.orbit].name, 14, Kit.C_DIM))
-	big = Kit.lbl("3", 120, Color.WHITE, Kit.FONT_T)
+	# the countdown and the call-outs sit in the lower third, as on a launch broadcast, so they never cover the rocket
+	big = Kit.lbl("3", 64, Color.WHITE, Kit.FONT_T)
 	big.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	Kit.place(big, 0.5, 0.35, 0.5, 0.35, -300, -80, 300, 80)
+	big.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.5))
+	big.add_theme_constant_override("shadow_offset_x", 0)
+	big.add_theme_constant_override("shadow_offset_y", 3)
+	big.add_theme_constant_override("shadow_outline_size", 8)
+	Kit.place(big, 0.5, 0.82, 0.5, 0.82, -360, -50, 360, 50)
 	add_child(big)
+	# the cloud of steam and smoke the deluge water and the exhaust throw sideways at ignition
+	smoke = Space.make_pad_smoke()
+	smoke.position = Vector3(1.0, 0.5, 0)
+	world.stage.add_child(smoke)
 	var skip := Kit.btn(tr("Skip ▶▶"), func(): launch_t = max(launch_t, 9.0), 14)
 	Kit.place(skip, 1, 1, 1, 1, -150, -60, -20, -20)
 	add_child(skip)
@@ -61,12 +72,15 @@ func process(delta: float) -> void:
 		for f in flames.get_children():
 			if f is CPUParticles3D:
 				f.emitting = launch_t > 2.4
+		smoke.emitting = launch_t > 2.5
 		return
+	smoke.emitting = launch_t < 6.0
 	var tt := launch_t - 3.0
-	big.text = tr("LIFTOFF!") if tt < 1.5 else (tr("STAGE SEPARATION") if sep_at >= 0.0 and tt - sep_at < 1.6 else "")
+	if not exploded:   # the failure call-out stays up once it is shown
+		big.text = tr("LIFTOFF!") if tt < 1.5 else (tr("STAGE SEPARATION") if sep_at >= 0.0 and tt - sep_at < 1.6 else "")
 	var alt := 0.6 * tt * tt * 2.2
 	if not exploded:
-		rocket.position.y = 0.2 + alt
+		rocket.position.y = Space.PAD_TOP + alt
 		rocket.rotation_degrees.z = -clamp(tt - 2.0, 0.0, 6.0) * 3.0
 		rocket.position.x = -pow(max(tt - 2.0, 0.0), 2.0) * 0.25
 		var km := alt * 0.8
@@ -78,7 +92,7 @@ func process(delta: float) -> void:
 	if sky_m is ProceduralSkyMaterial:
 		sky_m.sky_top_color = Color(0.18, 0.4, 0.78).lerp(Color(0, 0, 0.02), k)
 		sky_m.sky_horizon_color = Color(0.62, 0.74, 0.88).lerp(Color(0.05, 0.08, 0.15), k)
-	world.world_env.environment.ambient_light_energy = lerp(0.8, 0.3, k)
+	world.world_env.environment.ambient_light_energy = lerp(0.55, 0.3, k)
 	# chase camera
 	var cam: Camera3D = world.cam
 	var rp := rocket.position
@@ -149,18 +163,11 @@ func _explode() -> void:
 	big.add_theme_color_override("font_color", Kit.C_BAD)
 	var pos := rocket.position + Vector3(0, 2.0, 0)
 	rocket.visible = false
-	var boom := Space.make_flame(1.2)
+	var boom := Space.make_explosion()
 	boom.position = pos
-	boom.direction = Vector3.UP
-	boom.spread = 180.0
-	boom.one_shot = true
-	boom.explosiveness = 0.9
-	boom.amount = 220
-	boom.lifetime = 2.0
-	boom.initial_velocity_min = 2.0
-	boom.initial_velocity_max = 7.0
 	world.stage.add_child(boom)
-	boom.emitting = true
+	for e in boom.get_children():
+		(e as CPUParticles3D).emitting = true
 	var flash := OmniLight3D.new()
 	flash.position = pos
 	flash.light_energy = 16.0
