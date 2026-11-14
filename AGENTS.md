@@ -41,6 +41,27 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
   `scripts/game_data.gd`), so content and balance change without touching logic.
 - **Measure before you claim.** Run it, read the log, look at the screenshot; cite the file and line or the command.
   A guess is labeled as a guess.
+- **Real behavior, never a drawing of it.** Everything that moves behaves as in real life: launch, orbits, transfers,
+  landings. Paths come from the physics (the gravity of every body involved, with real constants and ephemerides),
+  never from a hand-drawn curve or a straight dash. Speeds, orbital periods, burn lengths, trip times and distances
+  are the real ones or follow from real physics, and the code cites where each comes from. A trip to another body is
+  planned as a real one: the departure is timed so the craft meets the body where it will be (phasing), with the
+  corrections real missions make. Where we simplify, the code says what and why.
+- **Real time, said on screen.** Every simulation runs in real time by default. Faster time is a visible control
+  (×1, ×10, ×100 ... as in `scripts/flight/flight_hud.gd`, keys `,` and `.`), the screen always says how fast time
+  runs, and a clock shows the true mission time. Never compress time silently. With an engine on, at most ×10; near
+  the ground, real time only.
+- **True scale, made readable.** Sizes and distances keep their true proportions. What is too small to see gets a
+  marker of constant screen size and a label; it is never scaled up (a craft is never drawn half a planet's size).
+  What the player must act on (the orbit, the path, the target, where the target will be) is in view.
+- **Mechanics before content.** The core mechanics (time, building, launch, orbit, transfer, landing, ground control)
+  are made right and real before new missions or content are added on top. A new mission waits until every
+  mechanic it uses has passed the rule below.
+- **Done means you judged it, as a player.** Before integrating, play it yourself at each speed of time, look at every
+  screenshot and write down what a player sees and what is wrong (sizes, what is visible, whether motion and timing
+  look and feel real), check the numbers against real values, and iterate until it is right. "It runs and the tests
+  pass" is not done; neither is a screenshot you did not judge. Then integrate it yourself, with no need to wait for
+  a person, and say in the issue what you checked. Never integrate what you have not judged this way.
 - **Proven by playing.** A feature is done when someone played it as a player would and looked at the screen;
   say what you checked.
 - **Plain explanations.** Every concept a player meets is explained in simple words inside the game (challenge E1-E4).
