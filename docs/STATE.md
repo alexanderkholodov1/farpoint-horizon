@@ -1,1 +1,0 @@
-- 0.1.22: No shared state file: one note per topic in docs/state/, assembled by tools/state.sh with the steps and the open issues (`work/28-no-state-file`, 2026-11-14)
