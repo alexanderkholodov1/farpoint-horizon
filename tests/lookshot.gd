@@ -80,6 +80,20 @@ func _ready() -> void:
 		await shot("smoke_after")
 		await wait(2.4)
 		await shot("ascent")
+	if "climb" in only:
+		# the whole climb, a frame every 2.5 s, to judge the camera (the pilot's moon mission, as the walkthrough)
+		GameState.start_solo("pilot")
+		GameState.start_mission("luna")
+		GameState.mission.from_dict({"bus": "medium", "instruments": ["cam_ms", "gamma"], "panels": "dep_m", "battery": "b1k", "comms": "ka", "adcs": "st", "propulsion": "chem", "launcher": "medium", "orbit": "lunar", "years": 1})
+		GameState.last_report = GameState.mission.compute()
+		GameState.last_sim = GameState.mission.simulate(5)
+		g.go("launch")
+		await wait(3.6)
+		var i := 0
+		while g.screen_id == "launch" and i < 60:
+			await shot("climb_%02d" % i)
+			await wait(2.5)
+			i += 1
 	if only == "" or "boom" in only:
 		GameState.last_report = GameState.mission.compute()
 		var f = GameState.mission.simulate(3)

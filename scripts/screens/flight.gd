@@ -24,6 +24,8 @@ const COMPUTER_LATE := 1.02     ## The flight computer cuts at 102 % of the burn
 const OVERRUN := 1.3            ## Past this share the computer cuts whatever happens.
 const COAST_S := 9.0            ## Real seconds the coast takes on screen.
 const HANDS_OFF := 4.0
+const CRAFT_SIZE := 0.45        ## The craft's size in scene units: small beside a 20-unit Earth, as in the other views
+                                ## (look, #12: at 0.9 with the camera close it looked as big as the Moon).
 
 var info: Dictionary
 var target := 3200.0
@@ -35,6 +37,7 @@ var moon: Node3D
 var phase := "orbit"            ## orbit, burn, coast
 var phase_t := 0.0
 var ang := 0.0                  ## The craft's angle along its parking orbit.
+var cam_off := Vector3.INF      ## The camera's place from the craft, damped (INF until the first frame).
 var dv := 0.0
 var throttle := 1.0
 var idle := 0.0
@@ -65,13 +68,13 @@ func enter(_args: Dictionary) -> void:
 	world.sun.rotation_degrees = Vector3(-20, 60, 0)
 	craft = Ship.build(mission)
 	var r: float = craft.get_meta("radius", 1.0)
-	craft.scale = Vector3.ONE * (0.9 / maxf(r, 0.01))
+	craft.scale = Vector3.ONE * (CRAFT_SIZE / maxf(r, 0.01))
 	world.stage.add_child(craft)
-	flame = Space.make_flame(0.25)
+	flame = Space.make_flame(0.25 * CRAFT_SIZE / 0.9)
 	world.stage.add_child(flame)
 	ang = 0.3
 	_place_orbit()
-	world.cam.position = craft.position + Vector3(6, 3, 8)
+	world.cam.position = craft.position + Vector3(3.4, 1.6, 4.4)
 	world.cam.look_at(craft.position, Vector3.UP)
 	_build_hud()
 	for id in ["beep", "clunk", "chime"]:
@@ -139,7 +142,7 @@ func process(delta: float) -> void:
 	var fy := -back
 	var fx := fy.cross(Vector3.UP).normalized() if absf(fy.y) < 0.99 else Vector3.RIGHT
 	flame.basis = Basis(fx, fy, fx.cross(fy))
-	flame.position = craft.position + back * 0.6
+	flame.position = craft.position + back * CRAFT_SIZE * 0.67
 	var loud: bool = flame.emitting
 	if loud and not rumble.playing:
 		rumble.play()
@@ -227,6 +230,9 @@ func _coast(_delta: float) -> void:
 	if p.distance_to(craft.position) > 0.0001:
 		craft.basis = Basis.looking_at(craft.position - p, Vector3.UP)
 	craft.position = p
+	# out in deep space the craft (a few metres) shrinks to a small bright point beside a Moon 3,474 km across (look, #12)
+	var r: float = craft.get_meta("radius", 1.0)
+	craft.scale = Vector3.ONE * (CRAFT_SIZE / maxf(r, 0.01)) * lerpf(1.0, 0.45, smoothstep(0.0, 0.25, k))
 	hud.clock.text = tr("%d h of %d") % [roundi(hours * k), roundi(hours)]
 	if k > 0.45 and not told.has("half"):
 		told["half"] = true
@@ -257,10 +263,17 @@ func _camera(delta: float) -> void:
 	if phase == "coast":
 		# behind the craft, the Moon ahead growing
 		var to_moon: Vector3 = (moon.position - craft.position).normalized()
-		want = craft.position - to_moon * 9.0 + Vector3(0, 3.0, 0)
-		look = craft.position.lerp(moon.position, 0.35)
+		# far enough back that the craft is a small thing in space and the Moon grows ahead of it
+		# from behind and a little to the side: the craft small in the foreground, the Moon ahead beside it
+		var side: Vector3 = to_moon.cross(Vector3.UP).normalized()
+		want = craft.position - to_moon * 7.0 + side * 2.2 + Vector3(0, 1.4, 0)
+		look = craft.position.lerp(moon.position, 0.12)
 	else:
 		var out := craft.position.normalized()
-		want = craft.position + out * 9.0 + Vector3(0, 4.0, 0) + craft.basis.z.normalized() * 6.0
-	cam.position = cam.position.lerp(want, clampf(delta * 1.5, 0.0, 1.0))
+		want = craft.position + out * 5.0 + Vector3(0, 2.2, 0) + craft.basis.z.normalized() * 3.4
+	# smoothed relative to the craft, not in the world: in the coast the craft crosses 260 units in seconds and a
+	# world-space lag left the camera far behind it (look, #12)
+	var off_goal: Vector3 = want - craft.position
+	cam_off = off_goal if cam_off == Vector3.INF else cam_off.lerp(off_goal, clampf(delta * 1.5, 0.0, 1.0))
+	cam.position = craft.position + cam_off
 	cam.look_at(look, Vector3.UP)

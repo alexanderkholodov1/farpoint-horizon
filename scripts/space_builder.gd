@@ -13,6 +13,11 @@ const EARTH_DAY := preload("res://textures/earth_day.jpg")
 const EARTH_NIGHT := preload("res://textures/earth_night.jpg")
 const EARTH_RELIEF := preload("res://textures/earth_relief.jpg")
 const EARTH_CLOUDS := preload("res://textures/earth_clouds.jpg")
+const EARTH_REGION_DAY := preload("res://textures/earth_region_day.jpg")
+const EARTH_REGION_RELIEF := preload("res://textures/earth_region_relief.jpg")
+const EARTH_REGION_CLOUDS := preload("res://textures/earth_region_clouds.jpg")
+## Where those cover the globe, in its UV (u0, v0, u1, v1): 92-68 W, 12 N-12 S (planet_textures.py REGION_LONLAT).
+const REGION_RECT := Vector4((180.0 - 92.0) / 360.0, (90.0 - 12.0) / 180.0, (180.0 - 68.0) / 360.0, (90.0 + 12.0) / 180.0)
 const MOON_COLOR := preload("res://textures/moon_color.jpg")
 const MOON_NORMAL := preload("res://textures/moon_normal.jpg")
 ## Materials in this group get the Sun's direction ("sun_dir") from World every frame, for the night side.
@@ -85,6 +90,10 @@ static func make_earth(radius := 1.0, with_marker := true) -> Node3D:
 	em.set_shader_parameter("night_tex", EARTH_NIGHT)
 	em.set_shader_parameter("relief_tex", EARTH_RELIEF)
 	em.set_shader_parameter("cloud_tex", EARTH_CLOUDS)
+	em.set_shader_parameter("region_day", EARTH_REGION_DAY)
+	em.set_shader_parameter("region_relief", EARTH_REGION_RELIEF)
+	em.set_shader_parameter("region_clouds", EARTH_REGION_CLOUDS)
+	em.set_shader_parameter("region_rect", REGION_RECT)
 	Ship.add_mesh(surface, s, Vector3.ZERO, em).add_to_group(SUN_LIT)
 	# nubes
 	var cs := SphereMesh.new()
@@ -95,6 +104,8 @@ static func make_earth(radius := 1.0, with_marker := true) -> Node3D:
 	var cm := ShaderMaterial.new()
 	cm.shader = CLOUD_SHADER
 	cm.set_shader_parameter("cloud_tex", EARTH_CLOUDS)
+	cm.set_shader_parameter("region_clouds", EARTH_REGION_CLOUDS)
+	cm.set_shader_parameter("region_rect", REGION_RECT)
 	var cl := Ship.add_mesh(surface, cs, Vector3.ZERO, cm)
 	cl.name = "Clouds"
 	cl.add_to_group(SUN_LIT)
