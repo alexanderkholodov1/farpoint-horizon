@@ -84,11 +84,28 @@ func go(id: String, args := {}) -> void:
 
 
 ## Fades to black in out_time, goes to screen `id`, and fades back in in_time.
+## The brand's horizon arc sweeps across the dark as the screen changes.
 func go_faded(id: String, out_time: float, in_time: float, args := {}) -> void:
 	preload("res://scripts/ui/ui_sound.gd").play("whoosh", 0.1)
+	var arc := preload("res://scripts/ui/horizon.gd").new()
+	arc.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	arc.offset_left = -420
+	arc.offset_right = 420
+	arc.offset_top = -40
+	arc.offset_bottom = 40
+	arc.thickness = 3.0
+	arc.progress = 0.0
+	arc.modulate.a = 0.0
+	fade_rect.add_child(arc)
+	var tw := arc.create_tween().set_parallel(true)
+	tw.tween_property(arc, "modulate:a", 1.0, out_time)
+	tw.tween_property(arc, "progress", 1.0, out_time + in_time * 0.6).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	await fade(1.0, out_time).finished
 	go(id, args)
 	fade(0.0, in_time)
+	var tw2 := arc.create_tween()
+	tw2.tween_property(arc, "modulate:a", 0.0, in_time)
+	tw2.tween_callback(arc.queue_free)
 
 
 ## Opens overlay `id` (a key of OVERLAYS) on top of the current screen.

@@ -14,6 +14,8 @@ var step_box: VBoxContainer
 var step_scroll: ScrollContainer
 
 
+static var _arc_last := 0.0   ## Where the progress arc stood on the last step shown.
+
 func enter(args: Dictionary) -> void:
 	GameState.room.changed.connect(_on_room_changed)
 	show_step(args.get("step", 0))
@@ -67,6 +69,18 @@ func show_step(idx: int) -> void:
 			Kit.accent_btn(b, GameData.ROLES[st.role].color)
 		tabs.add_child(b)
 	th.add_child(Kit.btn(tr("Menu"), func(): go("menu"), 14))
+	# the brand's horizon arc as the progress line: it lights up step by step toward launch
+	var arc := preload("res://scripts/ui/horizon.gd").new()
+	arc.track = true
+	arc.bulge = 0.0
+	arc.thickness = 2.0
+	arc.sun_at = 0.98
+	Kit.place(arc, 0, 0, 1, 0, 26, 66, -26, 74)
+	add_child(arc)
+	var goal := float(idx + 1) / GameData.STEPS.size()
+	arc.progress = _arc_last
+	arc.create_tween().tween_property(arc, "progress", goal, 0.6).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	_arc_last = goal
 
 	# ---------- left panel: the step's options
 	var left := Kit.panel_box(14)

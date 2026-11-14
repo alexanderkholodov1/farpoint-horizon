@@ -36,9 +36,11 @@ func _point(t: float) -> Vector2:
 
 
 func _color(t: float) -> Color:
-	var d := absf(t - sun_at) / maxf(sun_at, 1.0 - sun_at)
+	# as a progress line the sunrise rides the line's head and the lit part stays visible to its start
+	var sun := progress if track else sun_at
+	var d := absf(t - sun) / maxf(maxf(sun, 1.0 - sun), 0.001)
 	var c := PALE.lerp(WARM, smoothstep(0.0, 0.12, d)).lerp(DEEP, smoothstep(0.12, 0.85, d))
-	c.a = 1.0 - smoothstep(0.75, 1.0, d)
+	c.a = (1.0 - smoothstep(0.75, 1.0, d)) if not track else lerpf(1.0, 0.55, smoothstep(0.3, 1.0, d))
 	return c
 
 
