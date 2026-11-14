@@ -8,9 +8,16 @@ projects and apply to the 3D models, the UI, motion, sound and copy.
 Nothing may read as made by AI. Before showing anything, check it against this page; after building it, an agent that
 did not build it reviews it, and a person with no context should be able to say in one sentence what a screen is for.
 
+## Identity and graphics (lead, 2026-11-14)
+- The identity and the UI are futuristic space, of the present: not a 1960s-70s control center, not retro.
+- The graphics (craft, rockets, places, planets) are as real as a documentary and resemble real spacecraft.
+- Characters may be stylized 3D; real objects never are. No Telltale-like look.
+
 ## Color
-- Two or three characteristic colors chosen together, one of them warm, with neutrals tinted toward them (never pure
-  grey). Shades of one hue count as one color: a single characteristic color looks flat and cold.
+- The brand marks (the logo and what identifies the game as Farpoint HORIZON) carry two or three characteristic
+  colors chosen together, one of them warm. Shades of one hue count as one color: a single characteristic color looks
+  flat and cold. Graphics take the real colors of what they show.
+- Neutrals are tinted toward the characteristic colors (never pure grey).
 - Avoid the combinations AI tools reach for by default (violet fading into blue, pink or cyan as a flat wash) and muddy
   mixes. Purple is fine in moderation when the subject calls for it.
 - Check the colors together, on light and dark ground and in a gradient, before using them.

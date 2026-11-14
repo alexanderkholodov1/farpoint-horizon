@@ -1,5 +1,5 @@
 extends Node3D
-## SK Horizon - Mission Architect. The flow controller: it owns the 3D world and the UI root, and switches screens.
+## Farpoint HORIZON. The flow controller: it owns the 3D world and the UI root, and switches screens.
 ## Flow: menu -> team -> missions (CML 1) -> design (CML 2-4, with the rocket builder) -> launch -> operation -> report.
 ## Each screen is a script in scripts/screens/ (see screen.gd); the shared state is the autoload GameState.
 
@@ -30,6 +30,7 @@ var root_ui: Control
 var fade_rect: ColorRect
 var screen: Screen          ## The current screen.
 var screen_id := ""
+var launching := false      ## A launch is fading in: a second click on the launch button does nothing.
 
 
 func _ready() -> void:
@@ -113,12 +114,16 @@ func fade(to: float, time: float) -> Tween:
 
 ## Launches GameState's mission if it can fly: records the flight (GameState.begin_flight) and fades to the launch.
 func launch() -> void:
+	if launching:
+		return
 	var r: Dictionary = GameState.mission.compute()
 	if not GameState.can_launch(r):
-		screen.toast("Todavía no se puede lanzar", Kit.C_BAD)
+		screen.toast(tr("Fix the red items first"), Kit.C_BAD)
 		return
+	launching = true
 	GameState.begin_flight(r)
-	go_faded("launch", 0.5, 0.6)
+	await go_faded("launch", 0.5, 0.6)
+	launching = false
 
 
 var _frames_traced := 0

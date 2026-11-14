@@ -2,7 +2,7 @@
   "_about": "Rocket parts for the builder (issue #6). One entry per part: its model in assets/parts/ (built by assets/source/parts.py), its real values and their sources (IDs of docs/sources.md). 'estimate' lists the fields that are our estimates (a stage mass split among its parts, or a price no one publishes); every other value is published. Masses in kg, thrust in kN, specific impulse in s, cost in millions of US dollars, lengths in m.",
   "g0": 9.80665,
   "targets": {
-    "_about": "Delta-v a launcher must give to put its payload on the way to each orbit, including gravity and drag losses. Earth to LEO is 9.3-10 km/s [S23]; we take 9.4. SSO adds 0.2 km/s for flying against the Earth's spin (our simplification). GEO means reaching the transfer orbit, LEO plus 2.3 km/s [S23]; the craft circularizes with its own engine. The Moon and L2 mean a translunar injection, LEO plus 3.2 km/s [S23].",
+    "_about": "Delta-v a launcher must give to put its payload on the way to each orbit, including gravity and drag losses. Earth to LEO is 9.3-10 km/s [S-delta-v]; we take 9.4. SSO adds 0.2 km/s for flying against the Earth's spin (our simplification). GEO means reaching the transfer orbit, LEO plus 2.3 km/s [S-delta-v]; the craft circularizes with its own engine. The Moon and L2 mean a translunar injection, LEO plus 3.2 km/s [S-delta-v].",
     "leo": 9400.0,
     "sso": 9600.0,
     "geo": 11700.0,
@@ -16,14 +16,14 @@
       "model": "res://assets/parts/engine_merlin_x9.glb",
       "dry_kg": 4230.0, "thrust_sl_kn": 7605.0, "isp_sl_s": 282.0, "isp_vac_s": 311.0, "cost_musd": 27.0,
       "desc": "Nine Merlin-type engines under a thrust section, the way the Falcon 9 first stage carries them: strong at sea level.",
-      "sources": ["S20", "S16"], "estimate": ["cost_musd"]
+      "sources": ["S-merlin", "S-merlin-model"], "estimate": ["cost_musd"]
     },
     "engine_merlin_vac": {
       "name": "Vacuum kerosene engine", "category": "engine", "family": 3.7, "count": 1, "vacuum_only": true,
       "model": "res://assets/parts/engine_merlin_vac.glb",
       "dry_kg": 500.0, "thrust_vac_kn": 981.0, "isp_vac_s": 348.0, "cost_musd": 5.0,
       "desc": "A huge nozzle that only works in near vacuum: weak at liftoff, very efficient up high. For upper stages.",
-      "sources": ["S20", "S17"], "estimate": ["dry_kg", "cost_musd"]
+      "sources": ["S-merlin", "S-mvac-model"], "estimate": ["dry_kg", "cost_musd"]
     },
     "tank_37_long": {
       "name": "Large first-stage tank", "category": "tank", "family": 3.7,
@@ -58,14 +58,14 @@
       "model": "res://assets/parts/engine_small_x9.glb",
       "dry_kg": 315.0, "thrust_sl_kn": 225.0, "isp_sl_s": 311.0, "isp_vac_s": 343.0, "cost_musd": 2.0,
       "desc": "Nine Rutherford-type engines, the way the Electron first stage carries them.",
-      "sources": ["S21", "S18"], "estimate": ["cost_musd"]
+      "sources": ["S-rutherford", "S-nozzle-model"], "estimate": ["cost_musd"]
     },
     "engine_small_vac": {
       "name": "Small vacuum engine", "category": "engine", "family": 1.2, "count": 1, "vacuum_only": true,
       "model": "res://assets/parts/engine_small_vac.glb",
       "dry_kg": 35.0, "thrust_vac_kn": 26.0, "isp_vac_s": 343.0, "cost_musd": 0.5,
       "desc": "One small engine with a longer nozzle, for the upper stage of a small rocket.",
-      "sources": ["S21", "S18"], "estimate": ["cost_musd"]
+      "sources": ["S-rutherford", "S-nozzle-model"], "estimate": ["cost_musd"]
     },
     "tank_12_long": {
       "name": "Small first-stage tank", "category": "tank", "family": 1.2,
@@ -100,7 +100,7 @@
       "model": "res://assets/parts/booster_srb.glb",
       "dry_kg": 91000.0, "propellant_kg": 500000.0, "thrust_sl_kn": 12000.0, "isp_sl_s": 242.0, "isp_vac_s": 268.0, "cost_musd": 40.0,
       "desc": "A pair of Space Shuttle-type solid boosters strapped to the first stage. Enormous push for two minutes, then they fall away. Values per booster.",
-      "sources": ["S22", "S19"], "estimate": ["cost_musd"]
+      "sources": ["S-srb", "S-srb-model"], "estimate": ["cost_musd"]
     }
   },
   "presets": {

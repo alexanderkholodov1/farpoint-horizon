@@ -31,9 +31,15 @@ agents bring evidence, alternatives and a recommendation.
 | 2026-11-14 | Everything from outside is cited (numbers, formulas, facts, data, assets), presentable to the judges, through one bibliography `docs/sources.md` | Lead |
 | 2026-11-14 | Languages: English is the default everywhere (the repository, the game, the global platform); the platform's description and the deliverables also exist in Spanish, as the local venue requires; the live pitch in Sangolquí is in Spanish; the game offers Spanish as an option | Lead |
 | 2026-11-14 | No AI-generated images: models come from our scripts, textures and imagery from cited sources (NASA first), so no watermark is needed | Lead |
+| 2026-11-14 | Parallel work: each piece on its own branch with no version number; a lead agent integrates it into the version branch without asking, once CI is green, as the next numbered step (`tools/integrate.sh`); pull requests into any branch other than `main` are allowed; `main` takes only the version pull request, which a person merges | Lead |
+| 2026-11-14 | Four stations, to match up to four players; with fewer players, bots take the free stations, working with you as people would | Lead |
+| 2026-11-14 | An online room with a code (Firebase), plus a mode on one shared screen | Lead |
+| 2026-11-14 | First one complete mission playable on the web with two people; the lead approves it and corrects it before the game widens | Lead |
+| 2026-11-14 | NASA data inside the game: the photos each mission returns, shown at the end; positions from JPL Horizons and constants from the NSSDC fact sheets; NASA imagery used only as decoration needs a good argument first | Lead |
+| 2026-11-14 | The look: the identity and the UI are futuristic space, of the present (not a 1960s-70s control center); the graphics (craft, rockets, places) are as real as a documentary and resemble real spacecraft; characters may be stylized 3D; no Telltale-like style. The two or three characteristic colors belong to the game's brand marks (logo and what identifies the game), not to every graphic | Lead |
 
 ## Open
 | # | Question | Why it matters | Status |
 |---|---|---|---|
-| D2 | The plot and the visual direction | The name and the vision are settled; these complete the design round | Design round in progress |
-| D4 | Multiplayer form for up to four players: what is shared, who acts when | Core requirement C4 | After the design round |
+| D2 | The plot and the rest of the visual direction (the identity's colors and type, the UI) | The name, the vision and the look's base are settled; these complete the design round | Design round in progress |
+| D4 | Which four stations, and what each one does at each step | The stations' number and the bots are decided; the split is proposed in `docs/plan/v0.2.0.md` | To confirm with the team |

@@ -60,9 +60,11 @@ the same texture-leak warnings at exit as on the lead's laptop. The safe mode is
 
 ## How work is shared
 
-Nobody owns a part: each piece is claimed through its GitHub issue before starting (`AGENTS.md`). The shared contracts
-(data formats, the mission model, `GameState`, `project.godot`, `AGENTS.md`) change only by agreement of both team
-members.
+Nobody owns a part: each piece is claimed through its GitHub issue and built on its own branch; a lead agent
+integrates it into `v0.2.0` with `tools/integrate.sh`, which checks the merged result before pushing and adds a line to
+the list below (`AGENTS.md`, "The cycle of a version"). Pull requests into branches other than `main` are optional;
+`main` takes only the version pull request, merged by a person. The shared contracts (data formats, the mission model,
+`GameState`, `project.godot`, `AGENTS.md`) change only by agreement of both team members.
 
 ## Pending
 
@@ -75,3 +77,23 @@ members.
 - Pitch deck of at most 7 slides, a 30-second video, and the submission form: see `docs/team/pitch-outline.md` and `kb/challenge/event-and-judging.md`.
 - Optionally remove the `[SKH]` traces before the final delivery.
 - Deadline: everything frozen by 07:00 on Sunday 2026-11-15 (team decision); pitch and repository upload close at 09:00.
+
+## Steps on v0.2.0
+
+Every piece integrated into the version branch, oldest first. `tools/integrate.sh` adds a line here at each
+integration; nobody edits this list by hand on a work branch.
+
+- 0.1.1: The plan of v0.2.0 (skeleton first, then parallel packages, priority tiers)
+- 0.1.2: Knowledge base, the mission catalog with real twins and the in-flight failures that become mini-games
+- (no number) The teammate's laptop runs the game; `tools/godot.sh` finds Steam in Program Files (x86)
+- (no number) C7: 3U CubeSat model with deploying wings and antennas (glTF from a Blender script)
+- 0.1.3: The name Farpoint HORIZON, no owners, everything cited in one bibliography, the venue's rules and rubric,
+  English by default with Spanish, no AI images, the service key kept out of git
+- 0.1.4: Skeleton B1, every screen in its own script, a small flow controller, `GameState` and the UI kit
+- 0.1.5: Parallel work: each piece on its own branch, pull requests allowed except into main, integration that checks the merged result before pushing; four stations with bots, NASA data and the look decided (`work/15-parallel-work`, 2026-11-14)
+- 0.1.6: Modeled launchers on the pad, light, medium and heavy, at real proportions and cited (`c7-launchers`, 2026-11-14)
+- 0.1.7: NASA data pipeline: the photos each mission returns (GIBS, LROC, Voyager), planet positions from JPL Horizons and NSSDC constants, every item cited (`work/19-nasa-data`, 2026-11-14)
+- 0.1.8: Data apart and in English: the catalogs in data files with their sources, English by default with Spanish as an option, the name Farpoint HORIZON in the game; the telescope starts in L2 and launch fires once (`work/4-data`, 2026-11-14)
+- 0.1.9: Sharper photos the mission returns: Ecuadorian volcanoes from Landsat 8, EO-1 and ASTER, Shackleton crater from LRO and ShadowCam (`work/19-nasa-data`, 2026-11-14)
+- 0.1.10: The mission photos' import files committed, so branches never collide on them (`work/19-photo-imports`, 2026-11-14)
+- 0.1.11: Honest citations: three values the cross-vendor review found unsupported are labeled as our game estimates (`work/4-honest-citations`, 2026-11-14)

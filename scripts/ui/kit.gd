@@ -206,7 +206,7 @@ static func overlay(parent: Control, title: String, w := 900.0, h := 640.0, on_c
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hh.add_child(t)
 	var close: Callable = on_close if on_close.is_valid() else shade.queue_free
-	hh.add_child(btn("Cerrar ×", close, 14))
+	hh.add_child(btn(TranslationServer.translate("Close ×"), close, 14))
 	return v
 
 

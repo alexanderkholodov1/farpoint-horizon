@@ -1,0 +1,71 @@
+{
+ "doc": "Team roles in the design stations.",
+ "entries": {
+  "director": {
+   "name": "Mission Director",
+   "color": [
+    1.0,
+    0.75,
+    0.25
+   ],
+   "goal": "Keep at least 10 % of the budget as reserve",
+   "why": "Real missions almost always cost more than planned, and the reserve keeps them from being canceled.",
+   "source": [
+    "S5",
+    "S-gsfc-std-1000"
+   ],
+   "simplified": "The goals use one margin for every phase, where the standard gives different margins at each review."
+  },
+  "cientifico": {
+   "name": "Principal Scientist",
+   "color": [
+    0.449999988079071,
+    0.850000023841858,
+    1.0
+   ],
+   "goal": "Cover every science objective and reach ≥ 80 % of the science target",
+   "why": "Without useful science, a mission can't justify its cost.",
+   "source": [
+    "S5",
+    "S-gsfc-std-1000"
+   ],
+   "simplified": "The goals use one margin for every phase, where the standard gives different margins at each review. The 80 % science target is game balance, not a value from these sources."
+  },
+  "ingeniero": {
+   "name": "Systems Engineer",
+   "color": [
+    0.5,
+    1.0,
+    0.550000011920929
+   ],
+   "goal": "Mass margin ≥ 10 % and power margin ≥ 15 %",
+   "why": "Designs grow as they get built, and margins soak up the surprises.",
+   "source": [
+    "S5",
+    "S-gsfc-std-1000"
+   ],
+   "simplified": "The goals use one margin for every phase, where the standard gives different margins at each review."
+  },
+  "operaciones": {
+   "name": "Operations and Communications",
+   "color": [
+    1.0,
+    0.5,
+    0.800000011920929
+   ],
+   "goal": "Download 100 % of the data and keep the craft alive for its whole design life",
+   "why": "Data that never reaches Earth is data lost.",
+   "source": [
+    "S5",
+    "S-gsfc-std-1000"
+   ],
+   "simplified": "The goals use one margin for every phase, where the standard gives different margins at each review."
+  }
+ },
+ "order": [
+  "director",
+  "cientifico",
+  "ingeniero",
+  "operaciones"
+ ]
+}

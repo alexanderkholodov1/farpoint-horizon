@@ -28,9 +28,9 @@ func enter(_args: Dictionary) -> void:
 	var hv := Kit.vbox(2)
 	hv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(hv)
-	hv.add_child(Kit.lbl("INFORME DE MISIÓN · " + S.name.to_upper(), 14, Kit.C_ACCENT, Kit.FONT_B))
+	hv.add_child(Kit.lbl(tr("MISSION REPORT") + " · " + S.name.to_upper(), 14, Kit.C_ACCENT, Kit.FONT_B))
 	hv.add_child(Kit.lbl(s.label, 34, Color.WHITE, Kit.FONT_T))
-	hv.add_child(Kit.lbl("%d / 1000 puntos   ·   Costo final %s de %s   ·   %d de %d meses en operación" % [s.total, Kit.money(s.final_cost), Kit.money(r.budget), last_sim.months, mission.years * 12], 15, Kit.C_DIM))
+	hv.add_child(Kit.lbl(tr("%d / 1000 points   ·   Final cost %s of %s   ·   %d of %d months in operation") % [s.total, Kit.money(s.final_cost), Kit.money(r.budget), last_sim.months, mission.years * 12], 15, Kit.C_DIM))
 	var cols := Kit.hbox(18)
 	cols.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	outer.add_child(cols)
@@ -38,13 +38,13 @@ func enter(_args: Dictionary) -> void:
 	var c1 := Kit.vbox(8)
 	c1.custom_minimum_size.x = 360
 	cols.add_child(c1)
-	c1.add_child(Kit.lbl("Puntaje", 18, Color.WHITE, Kit.FONT_B))
-	_score_row(c1, "Objetivos cumplidos", s.objectives, 400, "Objetivos científicos cubiertos y tiempo en operación.")
-	_score_row(c1, "Ciencia obtenida", s.science, 300, "%d de %d puntos de ciencia." % [int(last_sim.science), int(S.science_target)])
-	_score_row(c1, "Uso eficiente de recursos", s.efficiency, 200, "Reserva de presupuesto y márgenes de masa y energía.")
-	_score_row(c1, "Trabajo en equipo", s.team, 100, "Metas de cada rol cumplidas.")
+	c1.add_child(Kit.lbl(tr("Score"), 18, Color.WHITE, Kit.FONT_B))
+	_score_row(c1, tr("Goals met"), s.objectives, 400, tr("Science goals covered and time in operation."))
+	_score_row(c1, tr("Science gathered"), s.science, 300, tr("%d of %d science points.") % [int(last_sim.science), int(S.science_target)])
+	_score_row(c1, tr("Efficient use of resources"), s.efficiency, 200, tr("Budget reserve and mass and power margins."))
+	_score_row(c1, tr("Teamwork"), s.team, 100, tr("Each role's goals met."))
 	c1.add_child(Kit.spacer(6))
-	c1.add_child(Kit.lbl("Metas por rol", 16, Color.WHITE, Kit.FONT_B))
+	c1.add_child(Kit.lbl(tr("Goals by role"), 16, Color.WHITE, Kit.FONT_B))
 	for role in GameData.ROLE_ORDER:
 		var R: Dictionary = GameData.ROLES[role]
 		var ok: bool = r.goals[role]
@@ -59,7 +59,7 @@ func enter(_args: Dictionary) -> void:
 	var c2 := Kit.vbox(6)
 	c2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	c2sc.add_child(c2)
-	c2.add_child(Kit.lbl("¿Por qué pasó lo que pasó?", 18, Color.WHITE, Kit.FONT_B))
+	c2.add_child(Kit.lbl(tr("Why it went the way it did"), 18, Color.WHITE, Kit.FONT_B))
 	var lessons := 0
 	for c in r.checks:
 		if c.level == "warn":
@@ -68,28 +68,28 @@ func enter(_args: Dictionary) -> void:
 			lessons += 1
 	for e in last_sim.events:
 		if e.kind == "bad" and e.month > 1:
-			c2.add_child(Kit.lbl("✗ Mes %d: %s" % [e.month, e.title], 14, Kit.C_BAD, Kit.FONT_B, true))
+			c2.add_child(Kit.lbl(tr("✗ Month %d · %s") % [e.month, e.title], 14, Kit.C_BAD, Kit.FONT_B, true))
 			c2.add_child(Kit.lbl(e.text, 13, Kit.C_DIM, Kit.FONT_R, true))
 			lessons += 1
 	if lessons == 0:
-		c2.add_child(Kit.lbl("✓ El diseño estaba equilibrado: energía, datos, masa y combustible con margen. ¡Así se diseña una misión!", 14, Kit.C_OK, Kit.FONT_B, true))
+		c2.add_child(Kit.lbl(tr("✓ The design was balanced, with margin in power, data, mass and fuel. That's how a mission gets designed!"), 14, Kit.C_OK, Kit.FONT_B, true))
 	c2.add_child(Kit.spacer(6))
-	c2.add_child(Kit.lbl("Lo que salió bien", 18, Color.WHITE, Kit.FONT_B))
+	c2.add_child(Kit.lbl(tr("What went well"), 18, Color.WHITE, Kit.FONT_B))
 	for e in last_sim.events:
 		if e.kind == "good":
-			c2.add_child(Kit.lbl("✓ Mes %d: %s" % [e.month, e.title], 14, Kit.C_OK, Kit.FONT_B, true))
+			c2.add_child(Kit.lbl(tr("✓ Month %d · %s") % [e.month, e.title], 14, Kit.C_OK, Kit.FONT_B, true))
 	c2.add_child(Kit.spacer(6))
-	c2.add_child(Kit.lbl("Misiones reales parecidas", 18, Color.WHITE, Kit.FONT_B))
+	c2.add_child(Kit.lbl(tr("Similar real missions"), 18, Color.WHITE, Kit.FONT_B))
 	for t in mission.real_missions():
 		c2.add_child(Kit.lbl("• " + t, 14, Kit.C_DIM, Kit.FONT_R, true))
 	c2.add_child(Kit.spacer(6))
-	c2.add_child(Kit.lbl("No existe un diseño perfecto: otra combinación de plataforma, órbita e instrumentos podría cumplir el mismo objetivo. ¡Prueba otra!", 14, Kit.C_ACCENT, Kit.FONT_R, true))
+	c2.add_child(Kit.lbl(tr("There is no perfect design. Another mix of platform, orbit and instruments could meet the same goal. Try another!"), 14, Kit.C_ACCENT, Kit.FONT_R, true))
 	# buttons
 	var bh := Kit.hbox(10)
 	outer.add_child(bh)
-	bh.add_child(Kit.accent_btn(Kit.btn("Rediseñar misión", func(): _back_to_design(), 16), Kit.C_ACCENT))
-	bh.add_child(Kit.btn("↻ Volver a volar (otra suerte)", func(): _fly_again(), 16))
-	bh.add_child(Kit.btn("Nueva misión", func(): go("missions"), 16))
+	bh.add_child(Kit.accent_btn(Kit.btn(tr("Redesign mission"), func(): _back_to_design(), 16), Kit.C_ACCENT))
+	bh.add_child(Kit.btn(tr("↻ Fly again (new luck)"), func(): _fly_again(), 16))
+	bh.add_child(Kit.btn(tr("New mission"), func(): go("missions"), 16))
 	var sp := Control.new()
 	sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bh.add_child(sp)
@@ -98,14 +98,14 @@ func enter(_args: Dictionary) -> void:
 	name_e.text = "SK Horizon" if not team_mode else " / ".join(PackedStringArray(GameState.players.map(func(pp): return pp.name)))
 	bh.add_child(name_e)
 	var save := Button.new()
-	save.text = "Guardar en ranking"
+	save.text = tr("Save to ranking")
 	save.add_theme_font_size_override("font_size", 16)
 	save.pressed.connect(func():
 		if GameState.saved_to_ranking:
 			return
 		GameState.saved_to_ranking = true
 		GameState.add_ranking(name_e.text, s.total, s.grade)
-		save.text = "Guardado ✓"
+		save.text = tr("Saved ✓")
 		save.disabled = true)
 	save.disabled = GameState.saved_to_ranking
 	bh.add_child(save)

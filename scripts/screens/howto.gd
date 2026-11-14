@@ -3,31 +3,31 @@ extends "res://scripts/screens/screen.gd"
 
 
 func enter(_args: Dictionary) -> void:
-	var v := Kit.overlay(self, "Cómo se juega", 960, 680, queue_free)
+	var v := Kit.overlay(self, tr("How to play"), 960, 680, queue_free)
 	var rt := RichTextLabel.new()
 	rt.bbcode_enabled = true
 	rt.fit_content = false
 	rt.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	rt.text = """[b]1. Elige un objetivo[/b] (CML 1). Cada misión nace de una pregunta científica: ¿cuándo va a erupcionar un volcán? ¿Llega El Niño?
+	rt.text = tr("""[b]1. Choose a goal[/b] (CML 1). Every mission starts with a science question. When will a volcano erupt? Is El Niño coming?
 
-[b]2. Diseña la misión paso a paso[/b] (CML 2 a 4), como en el Mission Design Lab de la NASA: órbita, plataforma, instrumentos, energía, comunicaciones, control, propulsión y lanzador. Cada decisión cambia las demás: el tablero de la derecha lo muestra en vivo.
+[b]2. Design the mission step by step[/b] (CML 2 to 4), like NASA's Mission Design Lab: orbit, platform, instruments, power, communications, control, propulsion and launcher. Every decision changes the others, and the board on the right shows it live.
 
-[b]3. Revisa y lanza.[/b] Lo rojo impide lanzar (no cabe, no alcanza el dinero). Lo amarillo se puede lanzar… pero tendrá consecuencias en la operación.
+[b]3. Review and launch.[/b] Red blocks the launch (it doesn't fit, or the money isn't there). Yellow can launch… but will have consequences in operations.
 
-[b]4. Opera la misión.[/b] Mira los meses pasar: tormentas solares, basura espacial, fallas… y descubrimientos. Un buen diseño resiste los imprevistos.
+[b]4. Operate the mission.[/b] Watch the months go by with solar storms, space debris, failures… and discoveries. A good design rides out the surprises.
 
-[b]5. Aprende del informe[/b] y rediseña. No hay una única respuesta correcta.
+[b]5. Learn from the report[/b] and redesign. There is no single right answer.
 
-[b]Recursos clave[/b]
-• [b]Masa:[/b] todo pesa. La plataforma y el cohete tienen un límite.
-• [b]Energía:[/b] los paneles no producen en la sombra de la Tierra; la batería debe cubrir ese tiempo.
-• [b]Datos:[/b] un instrumento que genera más datos de los que la antena puede enviar desperdicia ciencia.
-• [b]Delta-v:[/b] el «cambio de velocidad» que da la propulsión. Ir a la Luna o a GEO exige mucho.
-• [b]Presupuesto y tiempo:[/b] más años de operación = más ciencia y más costo.
+[b]Key resources[/b]
+• [b]Mass.[/b] Everything weighs. The platform and the rocket both have a limit.
+• [b]Power.[/b] Panels make nothing in Earth's shadow, and the battery must cover that time.
+• [b]Data.[/b] An instrument that makes more data than the antenna can send wastes science.
+• [b]Delta-v.[/b] The “change of speed” propulsion gives you. Going to the Moon or GEO takes a lot.
+• [b]Budget and time.[/b] More years in operation means more science and more cost.
 
-[b]Modo equipo:[/b] hasta 4 jugadores con roles (Dirección, Ciencia, Ingeniería y Operaciones). Cada rol tiene su meta; todos deben aprobar el diseño antes de lanzar.
+[b]Team mode.[/b] Up to 4 players with roles (Direction, Science, Engineering and Operations). Each role has its goal, and everyone must approve the design before launch.
 
-[b]Controles:[/b] arrastra con el mouse para girar la cámara, rueda para acercar.
+[b]Controls.[/b] Drag with the mouse to turn the camera, scroll to zoom.
 
-Basado en recursos de la NASA: «Design and Develop Science Missions», «CubeSat 101» y los Concept Maturity Levels (CML) del JPL."""
+Based on NASA resources, “Design and Develop Science Missions”, “CubeSat 101”, and JPL's Concept Maturity Levels (CML).""")
 	v.add_child(rt)

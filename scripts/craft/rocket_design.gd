@@ -10,7 +10,7 @@ extends RefCounted
 ## parallel with the first stage until they are empty. The first stage uses the mean of its sea-level and vacuum
 ## values (it starts in air and ends near vacuum); upper stages use vacuum values. A sea-level engine keeps its mass
 ## flow in vacuum, so its vacuum thrust is its sea-level thrust x Isp_vac / Isp_sl. Simplified: no trajectory; the
-## losses to gravity and drag are inside the delta-v targets [S23]; the fairing is carried to the end (conservative).
+## losses to gravity and drag are inside the delta-v targets [S-delta-v]; the fairing is carried to the end (conservative).
 
 const PARTS_PATH := "res://data/parts.json"
 const CUSTOM := "custom"   ## The launcher id the mission uses for the player's rocket.

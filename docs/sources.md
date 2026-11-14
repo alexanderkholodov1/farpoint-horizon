@@ -8,6 +8,10 @@ Format of an entry: **ID**, who published it, title, year, link, and what we use
 so where it is used and cites what it simplifies. Research notes in `kb/` keep their own links; a value moves here
 when the game or the pitch uses it.
 
+New entries go at the end of their section with a short unique word as ID (`S-horizons`, `S-gibs-viirs`), never a
+new number: branches built in parallel would collide on numbers. S1-S15 keep theirs. Git keeps both sides when two
+branches add entries at the same place (`.gitattributes`).
+
 ## Challenge and NASA resources
 - **S1** NASA Space Apps Challenge. *Space Mission Design Game* (challenge statement and resources). 2026.
   https://www.spaceappschallenge.org/2026/challenges/space-mission-design-game/ (copy in `docs/challenge/`). The brief.
@@ -38,6 +42,29 @@ when the game or the pitch uses it.
   https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/ideal-rocket-equation/. Fuel needed for a change of
   velocity.
 
+- **S-nasa-soa** NASA Small Spacecraft Systems Virtual Institute. *State-of-the-Art of Small Spacecraft Technology*.
+  https://www.nasa.gov/smallsat-institute/sst-soa/. Typical mass, power, data rate, pointing and delta-v of small
+  spacecraft platforms, solar arrays, batteries, radios, attitude control and propulsion (chapters on platforms,
+  power, communications, guidance and navigation, in-space propulsion). The game's parts are rounded from it.
+- **S-eoportal** European Space Agency. *eoPortal, Satellite Missions Directory*. https://www.eoportal.org/satellite-missions.
+  Mass, power and data of the real instruments (Landsat 8 OLI and TIRS, Sentinel-2 MSI, Sentinel-1, TROPOMI, ICESat-2,
+  TESS and others, listed in `kb/data/reference.json`, category instrument) that the game's instrument archetypes round.
+- **S-gsfc-std-1000** NASA Goddard Space Flight Center. *GSFC-STD-1000 Rev I, Rules for the Design, Development,
+  Verification and Operation of Flight Systems*, Rule 1.06 and Table 1.06-1.
+  https://standards.nasa.gov/system/files/tmp/GSFC-STD-1000RevI_Approved_0.pdf. Mass margin above 10 % and power margin
+  above 15 %, the margins of the Systems Engineer's goal.
+- **S-ntrs-dod** NASA Technical Reports Server. *Lithium-ion battery depth of discharge in low Earth orbit*, 2007.
+  https://ntrs.nasa.gov/citations/20070022412. Why the game uses 60 % of the battery per eclipse.
+- **S-wiki-geo** Wikipedia. *Geostationary orbit*. https://en.wikipedia.org/wiki/Geostationary_orbit. Altitude 35,786 km,
+  period 1,436 min, continuous view of one hemisphere.
+- **S-wiki-dv** Wikipedia. *Delta-v budget*. https://en.wikipedia.org/wiki/Delta-v_budget. Delta-v from low Earth orbit to
+  geostationary and lunar orbits.
+- **S-wiki-iss** Wikipedia. *International Space Station*. https://en.wikipedia.org/wiki/International_Space_Station.
+  Altitude near 400 km and inclination 51.6 degrees of the low orbit.
+- **S-wiki-sso** Wikipedia. *Sun-synchronous orbit*. https://en.wikipedia.org/wiki/Sun-synchronous_orbit. Altitude near
+  700 km and inclination near 98 degrees, same local solar time on every pass.
+- **S-webb-orbit** NASA. *Webb's orbit*. https://science.nasa.gov/mission/webb/orbit/. The Sun-Earth L2 point, 1.5 million
+  km from Earth, and why a telescope sits there.
 ## Launchers
 - **S13** Rocket Lab. *Electron*. https://rocketlabcorp.com/launch/electron/; figures as given in Wikipedia, *Rocket Lab
   Electron* (infobox, checked 2026-11-14), https://en.wikipedia.org/wiki/Rocket_Lab_Electron. Height 18 m, diameter
@@ -49,29 +76,33 @@ when the game or the pitch uses it.
   Heavy* (infobox, checked 2026-11-14), https://en.wikipedia.org/wiki/Falcon_Heavy. Height 70 m, width 12.2 m, three
   cores of 3.7 m: the heavy launcher model.
 
+- **S-rideshare-price** New Space Economy. *SpaceX rideshare pricing as of February 2026*, 2026.
+  https://newspaceeconomy.ca/2026/02/27/spacex-rideshare-pricing-as-of-february-2026-what-it-costs-whats-included-and-how-buyers-budget-a-mission/.
+  About 7,000 $/kg for a rideshare to low orbit; the game uses 6,500 $/kg.
+
 ## Rocket parts (the builder)
-- **S16** hoahluke. *Merlin Engine* (3D model). Sketchfab, CC BY 4.0.
+- **S-merlin-model** hoahluke. *Merlin Engine* (3D model). Sketchfab, CC BY 4.0.
   https://sketchfab.com/3d-models/merlin-engine-b6725717165c4c0db0e4e2d744370a51. The sea-level engines of the large
   first stage (`assets/parts/engine_merlin_x9.glb`).
-- **S17** MartianDays. *Merlin 1D Vacuum* (3D model). Sketchfab, CC BY 4.0.
+- **S-mvac-model** MartianDays. *Merlin 1D Vacuum* (3D model). Sketchfab, CC BY 4.0.
   https://sketchfab.com/3d-models/merlin-1d-vacuum-f20ebb6e857b405cbdc66568d48d2fcb. The large vacuum engine
   (`assets/parts/engine_merlin_vac.glb`).
-- **S18** Zachary (corncob_127). *Rocket Nozzle Part* (3D model). Sketchfab, CC BY 4.0.
+- **S-nozzle-model** Zachary (corncob_127). *Rocket Nozzle Part* (3D model). Sketchfab, CC BY 4.0.
   https://sketchfab.com/3d-models/rocket-nozzle-part-e86374e66a4d462684b9826cedafe815. The small engines
   (`assets/parts/engine_small_x9.glb`, `engine_small_vac.glb`).
-- **S19** NASA 3D Resources. *Space Shuttle Parts: Solid Rocket Booster* (3D model). Public domain (NASA media usage
+- **S-srb-model** NASA 3D Resources. *Space Shuttle Parts: Solid Rocket Booster* (3D model). Public domain (NASA media usage
   guidelines). https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Space%20Shuttle%20Parts. The side
   boosters (`assets/parts/booster_srb.glb`); no insignia on its texture.
-- **S20** Wikipedia. *SpaceX Merlin* (infobox, checked 2026-11-14). https://en.wikipedia.org/wiki/SpaceX_Merlin.
+- **S-merlin** Wikipedia. *SpaceX Merlin* (infobox, checked 2026-11-14). https://en.wikipedia.org/wiki/SpaceX_Merlin.
   Merlin 1D: 845 kN at sea level, Isp 282 s (sea level) and 311 s (vacuum), 470 kg, 0.92 m; Merlin 1D Vacuum: 981 kN,
   348 s, 3.3 m nozzle.
-- **S21** Wikipedia. *Rutherford (rocket engine)* (infobox, checked 2026-11-14).
+- **S-rutherford** Wikipedia. *Rutherford (rocket engine)* (infobox, checked 2026-11-14).
   https://en.wikipedia.org/wiki/Rutherford_(rocket_engine). 25 kN at sea level, 26 kN in vacuum, Isp 311 s and 343 s,
   35 kg.
-- **S22** Wikipedia. *Space Shuttle Solid Rocket Booster* (infobox and text, checked 2026-11-14).
+- **S-srb** Wikipedia. *Space Shuttle Solid Rocket Booster* (infobox and text, checked 2026-11-14).
   https://en.wikipedia.org/wiki/Space_Shuttle_Solid_Rocket_Booster. 45.46 m by 3.71 m, 91 t empty, 500 t of
   propellant, about 12 MN at liftoff, Isp 242 s (sea level) and 268 s (vacuum), 123 s burn.
-- **S23** Wikipedia. *Delta-v budget* (checked 2026-11-14). https://en.wikipedia.org/wiki/Delta-v_budget. Earth to low
+- **S-delta-v** Wikipedia. *Delta-v budget* (checked 2026-11-14). https://en.wikipedia.org/wiki/Delta-v_budget. Earth to low
   orbit 9.3-10 km/s with losses; low orbit to the geostationary transfer orbit 2.3 km/s; translunar injection 3.20 km/s.
 - [S13] and [S14] also give the stage lengths and masses the parts are cut from: Falcon 9 first stage 25.6 t empty and
   395.7 t of propellant, second stage 3.9 t and 92.67 t, fairing about 1.9 t; Electron 13.0 t at liftoff, stages of
@@ -82,9 +113,65 @@ when the game or the pitch uses it.
 - **S12** European Space Agency, Copernicus. *Sentinel-2 mission*. https://sentiwiki.copernicus.eu/web/s2-mission.
   Orbit and coverage of an Earth-imaging twin.
 
+- **S-sentinel5p** European Space Agency, eoPortal. *Copernicus Sentinel-5P*.
+  https://www.eoportal.org/satellite-missions/copernicus-sentinel-5p. Measures gases such as SO2 (volcano scenario).
+- **S-aster** Wikipedia. *Advanced Spaceborne Thermal Emission and Reflection Radiometer*.
+  https://en.wikipedia.org/wiki/Advanced_Spaceborne_Thermal_Emission_and_Reflection_Radiometer. Thermal images (volcano scenario).
+- **S-sentinel6** Wikipedia. *Sentinel-6 Michael Freilich*. https://en.wikipedia.org/wiki/Sentinel-6_Michael_Freilich.
+  Sea level height and the Jason series it continues (ocean scenario).
+- **S-smap** Wikipedia. *Soil Moisture Active Passive*. https://en.wikipedia.org/wiki/Soil_Moisture_Active_Passive.
+  Microwave radiometer of the ocean scenario.
+- **S-lro** NASA. *Lunar Reconnaissance Orbiter*. https://science.nasa.gov/mission/lro/. Real twin of the lunar scenario.
+- **S-chandrayaan2** Wikipedia. *Chandrayaan-2*. https://en.wikipedia.org/wiki/Chandrayaan-2. Real twin of the lunar scenario.
+- **S-hubble** ESA and NASA. *Hubble Space Telescope fact sheet*. https://esahubble.org/about/general/fact_sheet/. Low orbit
+  telescope of the astronomy scenario.
+- **S-pegaso** Wikipedia. *NEE-01 Pegaso*. https://en.wikipedia.org/wiki/NEE-01_Pegaso. The first Ecuadorian satellite, a
+  1U CubeSat launched in 2013 (shown in the report of a CubeSat mission).
+- **S-capstone** Wikipedia. *CAPSTONE*. https://en.wikipedia.org/wiki/CAPSTONE. A 12U CubeSat in lunar orbit, 2022 (shown in
+  the report of a lunar CubeSat mission).
+
 ## Still to add
-- Every value in the game's catalogs (`scripts/game_data.gd` today, `data/*.json` after step B2), from
-  `kb/data/reference.json` and `kb/data/missions.json`, checked against agency pages where they came from secondary
-  sources.
+- The sources of `data/*.json` are listed above. Each value of an entry that mixes sources still has to be checked
+  against the agency page (the catalogs cite the family of sources and say what they simplify; the values are rounded
+  and not yet checked one by one).
 - The source and license of `textures/earth_albedo.jpg`.
 - The fonts, the engine and every library, model, image and sound, with their licenses.
+
+## NASA data used by the mission photos and the route numbers (issue 19; pipeline in `tools/data/`)
+All checked 2026-11-14. NASA media are used under the NASA Media Usage Guidelines
+(https://www.nasa.gov/nasa-brand-center/images-and-media/): no NASA logo or insignia, no implied endorsement.
+- **S-gibs** NASA ESDIS, Global Imagery Browse Services (GIBS), NASA Worldview, WMS
+  https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi. Tested for the volcano photos (VIIRS 250 m) and replaced by
+  S-eo for being soft; kept as the source of the Earth texture recommended in `kb/research/nasa-data.md`
+  (layer `BlueMarble_NextGeneration`). Credit: "NASA GIBS / Worldview".
+- **S-eo** NASA Earth Observatory (science.nasa.gov/earth/earth-observatory), image pages with their full-size files:
+  Sangay (Landsat 8 OLI, 5 Nov 2022, https://science.nasa.gov/earth/earth-observatory/a-line-of-ash-from-sangay-150650/),
+  Cotopaxi (Landsat 8 OLI, 15 Sep 2015, https://science.nasa.gov/earth/earth-observatory/cotopaxi-volcano-ecuador-86618/),
+  Tungurahua (EO-1 ALI natural and short-wave infrared, 1 Jan 2011,
+  https://science.nasa.gov/earth/earth-observatory/ongoing-eruption-of-tungurahua-ecuador-48337/). In
+  `assets/mission_photos/volcano_watch/`. Credits as the pages print them: "NASA Earth Observatory images by Lauren
+  Dauphin / Jesse Allen, using Landsat data from the U.S. Geological Survey" (Landsat data are public domain, USGS);
+  "NASA Earth Observatory image created by Jesse Allen, using EO-1 ALI data provided courtesy of the NASA EO-1 team and
+  the U.S. Geological Survey". Our processing: cropped to the volcano, resized.
+- **S-nasa-science** NASA Science (science.nasa.gov) resource and image pages, for the Moon: Shackleton crater rim,
+  credit "NASA/GSFC/Arizona State University" (https://science.nasa.gov/resource/shackleton-craters-illuminated-rim-shadowed-interior/);
+  Shackleton floor seen by ShadowCam, a NASA instrument on the Korean KPLO orbiter, credit as printed "NASA, ShadowCam,
+  Korea Aerospace Research Institute, Arizona State University" (https://science.nasa.gov/image-article/apod-2023-may-5-shackleton-from-shadowcam/;
+  the Korean partner is named in the credit; no separate terms found). In `assets/mission_photos/moon_south_pole/`.
+- **S-lroc-wac** NASA/GSFC/Arizona State University, Lunar Reconnaissance Orbiter Camera (LROC) Wide Angle Camera global
+  mosaic (100 m), served by NASA Moon Trek, https://trek.nasa.gov/tiles/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd_v02/1.0.0/WMTSCapabilities.xml.
+  Photos in `assets/mission_photos/moon_south_pole/`. Credit: "NASA/GSFC/Arizona State University, LRO". Our processing:
+  tiles joined and re-projected to a view from above the south pole.
+- **S-nasa-images** NASA Image and Video Library, https://images.nasa.gov (API https://images-api.nasa.gov), records
+  PIA00022 (Jupiter, Voyager 1), PIA01374 (Saturn, Voyager 1), PIA18182 (Uranus, Voyager 2), PIA00049 (Neptune,
+  Voyager 2); catalogued by NASA/JPL Photojournal. Photos in `assets/mission_photos/grand_tour/`. Credit: "NASA/JPL-Caltech".
+  Our processing: resized. Also the ASTER pictures in `assets/mission_photos/volcano_watch/`: PIA23914 (Sangay, night
+  thermal infrared, 11 Jun 2020, credit "NASA/METI/AIST/Japan Space Systems, and U.S./Japan ASTER Science Team") and
+  PIA15151 (Cotopaxi, false colour, 22 Aug 2015, credit "NASA/GSFC/METI/ERSDAC/JAROS, and U.S./Japan ASTER Science
+  Team"); ASTER is a joint Japanese (METI) and NASA instrument on Terra, hence the credit.
+- **S-horizons** NASA/JPL Solar System Dynamics. *Horizons System API*. https://ssd-api.jpl.nasa.gov/doc/horizons.html
+  (endpoint https://ssd.jpl.nasa.gov/api/horizons.api). Orbital elements of the eight planets at 2026-11-15 and the Moon
+  around the Earth for a month, in `data/nasa/horizons_*.json`. Credit: "NASA/JPL Horizons".
+- **S-nssdc-planets** NASA Space Science Data Coordinated Archive. *Planetary Fact Sheets*.
+  https://nssdc.gsfc.nasa.gov/planetary/factsheet/ . Mass, radius, gravity, escape velocity, orbit radius and day length
+  of the planets and the Moon, in `data/nasa/nssdc_factsheets.json`. Credit: "NASA NSSDC Planetary Fact Sheets".

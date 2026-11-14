@@ -1,13 +1,13 @@
 ; Engine configuration file.
-; SK Horizon - Mission Architect
+; Farpoint HORIZON
 ; NASA Space Apps Challenge 2026 - Space Mission Design Game
 
 config_version=5
 
 [application]
 
-config/name="SK Horizon - Mission Architect"
-config/description="Juego 3D para diseñar, lanzar y operar una misión espacial completa."
+config/name="Farpoint HORIZON"
+config/description="A 3D game to design, launch and operate a complete space mission."
 run/main_scene="res://scenes/main.tscn"
 config/icon="res://icon.svg"
 run/flush_stdout_on_print=true
@@ -24,6 +24,11 @@ window/size/viewport_width=1600
 window/size/viewport_height=900
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
+
+[internationalization]
+
+locale/fallback="en"
+locale/translations=PackedStringArray("res://i18n/translations.es.translation")
 
 [rendering]
 

@@ -4,9 +4,9 @@ Run (Blender 4.2 or newer, background):
     blender -b --factory-startup --python assets/source/parts.py -- [--render <dir>]
 
 Downloaded models come first; we model only what no source offers with a usable license (searched 2026-11-14):
-- Engines from Sketchfab, CC BY (credited in docs/sources.md): "Merlin Engine" by hoahluke [S16], "Merlin 1D Vacuum"
-  by MartianDays [S17], "Rocket Nozzle Part" by Zachary [S18]. Copies in assets/source/vendor/.
-- Side booster from NASA 3D Resources, public domain: the Space Shuttle Solid Rocket Booster [S19].
+- Engines from Sketchfab, CC BY (credited in docs/sources.md): "Merlin Engine" by hoahluke [S-merlin-model], "Merlin 1D Vacuum"
+  by MartianDays [S-mvac-model], "Rocket Nozzle Part" by Zachary [S-nozzle-model]. Copies in assets/source/vendor/.
+- Side booster from NASA 3D Resources, public domain: the Space Shuttle Solid Rocket Booster [S-srb-model].
 - Ours (no usable download exists): tanks, interstages and fairings, simple shapes of revolution at real sizes
   [S13] [S14].
 

@@ -11,11 +11,11 @@ into the interstage or below the rocket. The booster's origin is its base; the b
 
 | Part | Model | License |
 |---|---|---|
-| `engine_merlin_x9` | nine copies of "Merlin Engine" by hoahluke [S16] under our thrust section | CC BY 4.0 (credit hoahluke) |
-| `engine_merlin_vac` | "Merlin 1D Vacuum" by MartianDays [S17] | CC BY 4.0 (credit MartianDays) |
-| `engine_small_x9`, `engine_small_vac` | "Rocket Nozzle Part" by Zachary [S18], simplified for the web | CC BY 4.0 (credit Zachary) |
-| `booster_srb` | NASA's Space Shuttle Solid Rocket Booster [S19] | Public domain (credit NASA) |
+| `engine_merlin_x9` | nine copies of "Merlin Engine" by hoahluke [S-merlin-model] under our thrust section | CC BY 4.0 (credit hoahluke) |
+| `engine_merlin_vac` | "Merlin 1D Vacuum" by MartianDays [S-mvac-model] | CC BY 4.0 (credit MartianDays) |
+| `engine_small_x9`, `engine_small_vac` | "Rocket Nozzle Part" by Zachary [S-nozzle-model], simplified for the web | CC BY 4.0 (credit Zachary) |
+| `booster_srb` | NASA's Space Shuttle Solid Rocket Booster [S-srb-model] | Public domain (credit NASA) |
 | tanks, interstages, fairings | ours: no source offered them with a usable license (searched 2026-11-14) | MIT |
 
-Downloaded models are scaled to their real sizes: the engines by their nozzle exit (0.92 m and 3.3 m [S20]; the small
-engines to fit nine under a 1.2 m stage, our estimate), the booster by its 45.46 m length [S22].
+Downloaded models are scaled to their real sizes: the engines by their nozzle exit (0.92 m and 3.3 m [S-merlin]; the small
+engines to fit nine under a 1.2 m stage, our estimate), the booster by its 45.46 m length [S-srb].
