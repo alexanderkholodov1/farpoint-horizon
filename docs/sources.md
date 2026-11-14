@@ -175,3 +175,32 @@ All checked 2026-11-14. NASA media are used under the NASA Media Usage Guideline
 - **S-nssdc-planets** NASA Space Science Data Coordinated Archive. *Planetary Fact Sheets*.
   https://nssdc.gsfc.nasa.gov/planetary/factsheet/ . Mass, radius, gravity, escape velocity, orbit radius and day length
   of the planets and the Moon, in `data/nasa/nssdc_factsheets.json`. Credit: "NASA NSSDC Planetary Fact Sheets".
+
+## The pilot's flight and the Moon's south pole (issue 8)
+All checked 2026-11-14.
+- **S-lola** Smith, D. E., et al. (NASA Goddard Space Flight Center), Lunar Orbiter Laser Altimeter (LOLA) on the Lunar
+  Reconnaissance Orbiter. *LRO-L-LOLA-4-GDR-V1.0, product LDEM_875S_20M* (south polar elevation map, 20 m per pixel,
+  version 2.0, 2017), NASA Planetary Data System, Geosciences Node.
+  https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/img/ldem_875s_20m.lbl.
+  The ground of the landing: a 12 km square around the south pole and Shackleton's rim, averaged to 60 m, in
+  `data/nasa/lola_south_pole.json` (made by `tools/data/fetch_lola_terrain.py`). Credit: "NASA/GSFC LOLA team, NASA PDS".
+- **S-svs-south-pole** NASA Scientific Visualization Studio. *Shadows near the Moon's South Pole*, 2021.
+  https://svs.gsfc.nasa.gov/4893. At the poles the Sun is never more than 1.5 degrees above or below the horizon;
+  places it never reaches are permanently shadowed and trap water ice.
+- **S-chandrayaan3** Wikipedia. *Chandrayaan-3* (infobox and text). https://en.wikipedia.org/wiki/Chandrayaan-3.
+  Launched 14 July 2023 on LVM3 M4, landed 23 August 2023 at 69.373 S; lander Vikram 1,726 kg; the hop of about 40 cm
+  (ISRO, 4 September 2023, as cited there). Real twin of the south pole mission.
+- **S-im1** Wikipedia. *IM-1* (text). https://en.wikipedia.org/wiki/IM-1. Intuitive Machines' Odysseus, launched
+  15 February 2024 on Falcon 9, landed 22 February 2024 at Malapert A (80.13 S); landed faster than planned on a
+  12-degree slope, broke a leg, tipped onto its side and kept returning data until the lunar night, about a week.
+  Real twin of the south pole mission; the game's tipping slope.
+- **S-apollo11** Wikipedia. *Apollo 11* (mission timeline). https://en.wikipedia.org/wiki/Apollo_11. Launched
+  16 July 1969 13:32 UTC, entered lunar orbit 19 July 17:21 UTC (about 76 hours), landed 20 July; the 1201 and 1202
+  alarms began about five minutes into the descent burn. The trip time of the coast to the Moon.
+- **S-alsj-1202** Adler, P. *Apollo 11 Program Alarms*, Apollo Lunar Surface Journal (NASA), 1998.
+  https://www.nasa.gov/wp-content/uploads/static/history/alsj/a11/a11.1201-pa.html. What the 1202 alarm meant (no free
+  core sets for new jobs), why the computer kept steering after its restarts, and why Mission Control could call go.
+  The descent alarm the pilot and ground control face.
+- **S-apollo-gear** Rogers, W. F. (NASA Johnson Space Center). *Apollo Lunar Module Landing Gear*, 1972. NASA Technical
+  Reports Server 19730010151, https://ntrs.nasa.gov/citations/19730010151. A landing is decided mainly by the touchdown
+  speed and the slope of the ground under the legs; the game's touchdown bands use those two (their values are ours).
