@@ -42,37 +42,44 @@ def save_jpeg(img, path, source, query, note, mission=None, quality=85):
     print("wrote", path.relative_to(ROOT), path.stat().st_size, "bytes")
 
 
-# ------------------------------------------------ 1. Volcano watch (NASA GIBS, source S-gibs)
-GIBS = "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi"
-VOLCANOES = {  # summit (lon, lat), rounded by us from common maps
-    "sangay": (-78.34, -2.00), "cotopaxi": (-78.44, -0.68), "reventador": (-77.656, -0.077)}
-# (volcano, date, with thermal layer). Dates picked by scanning 2024 for the clearest sky (README, step 1).
-VOLCANO_SHOTS = [("sangay", "2024-08-31", True), ("reventador", "2024-08-31", True), ("cotopaxi", "2024-08-31", False)]
+# ------------------------------------------------ 1. Volcano watch (Landsat 8, ASTER, EO-1 pictures published by NASA)
+EO = "https://assets.science.nasa.gov/content/dam/science/esd/eo/images/imagerecords/"
+IMG = "https://images-assets.nasa.gov/image/"
+Image.MAX_IMAGE_PIXELS = None  # the Landsat scene is 6009 x 4751 pixels; it comes from NASA, so it is safe
+# (file name, url, crop box in source pixels or None, source id, what it is, credit line printed by the publisher)
+VOLCANO_PHOTOS = [
+    ("sangay_landsat8_2022-11-05_truecolor.jpg", EO + "150000/150650/sangay_oli_2022309_lrg.jpg", (2300, 1950, 4500, 3250),
+     "S-eo", "Sangay ash plume, Landsat 8 OLI natural colour, 5 Nov 2022 (30 m pixels), page: https://science.nasa.gov/earth/earth-observatory/a-line-of-ash-from-sangay-150650/",
+     "NASA Earth Observatory images by Lauren Dauphin, using Landsat data from the U.S. Geological Survey"),
+    ("cotopaxi_landsat8_2015-09-15_truecolor.jpg", EO + "86000/86618/cotopaxi_oli_2015258_lrg.jpg", (1600, 1600, 4000, 4000),
+     "S-eo", "Cotopaxi after its first eruption in 70 years, Landsat 8 OLI natural colour, 15 Sep 2015, page: https://science.nasa.gov/earth/earth-observatory/cotopaxi-volcano-ecuador-86618/",
+     "NASA Earth Observatory image by Jesse Allen, using Landsat data from the U.S. Geological Survey"),
+    ("tungurahua_eo1_2011-01-01_truecolor.jpg", EO + "48000/48337/tungurahua_ali_2011001_lrg.jpg", (215, 1100, 1215, 2100),
+     "S-eo", "Tungurahua summit plume, EO-1 ALI natural colour, 1 Jan 2011 (30 m), page: https://science.nasa.gov/earth/earth-observatory/ongoing-eruption-of-tungurahua-ecuador-48337/",
+     "NASA Earth Observatory image created by Jesse Allen, using EO-1 ALI data provided courtesy of the NASA EO-1 team and the U.S. Geological Survey"),
+    ("tungurahua_eo1_2011-01-01_swir.jpg", EO + "48000/48337/tungurahua_ali_2011001_swir_lrg.jpg", (215, 1100, 1215, 2100),
+     "S-eo", "Tungurahua, EO-1 ALI short-wave infrared false colour: the hot crater glows red, 1 Jan 2011 (30 m); same page as above",
+     "NASA Earth Observatory image created by Jesse Allen, using EO-1 ALI data provided courtesy of the NASA EO-1 team and the U.S. Geological Survey"),
+    ("sangay_aster_2020-06-11_thermal.jpg", IMG + "PIA23914/PIA23914~orig.jpg", None,
+     "S-nasa-images", "Sangay night thermal infrared (ASTER on Terra), 11 Jun 2020: lava flows white, ash plume dark red-brown; library record PIA23914",
+     "NASA/METI/AIST/Japan Space Systems, and U.S./Japan ASTER Science Team"),
+    ("cotopaxi_aster_2015-08-22_falsecolor.jpg", IMG + "PIA15151/PIA15151~orig.jpg", None,
+     "S-nasa-images", "Cotopaxi ash columns, ASTER on Terra false colour, 22 Aug 2015 (15 m); library record PIA15151",
+     "NASA/GSFC/METI/ERSDAC/JAROS, and U.S./Japan ASTER Science Team"),
+]
 
 
-def gibs(layer, bbox, size, date, fmt):
-    q = (f"SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&LAYERS={layer}&SRS=EPSG:4326&BBOX={bbox}"
-         f"&WIDTH={size}&HEIGHT={size}&FORMAT={fmt}&TIME={date}" + ("&TRANSPARENT=TRUE" if "png" in fmt else ""))
-    url = GIBS + "?" + q
-    return url, Image.open(io.BytesIO(http(url)))
+def photo(mission, name, url, crop, source, desc, credit):
+    img = Image.open(io.BytesIO(http(url)))
+    note = ("cropped to the volcano" if crop else "no crop") + f", resized to at most {MAXSIDE} px; {desc}; credit: {credit}"
+    if crop:
+        img = img.crop(crop)
+    save_jpeg(img, PHOTOS / mission / name, source, url, note, mission)
 
 
 def volcanoes():
-    half = 0.35  # degrees: a box about 78 km wide
-    for name, date, thermal in VOLCANO_SHOTS:
-        lon, lat = VOLCANOES[name]
-        bbox = f"{lon-half},{lat-half},{lon+half},{lat+half}"
-        url, tc = gibs("VIIRS_SNPP_CorrectedReflectance_TrueColor", bbox, 700, date, "image/jpeg")
-        tc = tc.convert("RGB")
-        out = PHOTOS / "volcano_watch"
-        save_jpeg(tc, out / f"{name}_{date}_truecolor.jpg", "S-gibs", url, "none (as served)", "volcano_watch")
-        if thermal:
-            url2, th = gibs("VIIRS_SNPP_Thermal_Anomalies_375m_All", bbox, 700, date, "image/png")
-            a = th.convert("RGBA").getchannel("A").filter(ImageFilter.MaxFilter(7))  # grow each 375 m hot pixel so it shows
-            comp = tc.convert("RGBA")
-            comp.paste(Image.new("RGBA", tc.size, (255, 60, 20, 255)), (0, 0), a)
-            save_jpeg(comp, out / f"{name}_{date}_thermal.jpg", "S-gibs", url + "  +  " + url2,
-                      "hot-spot pixels enlarged 7x and drawn in red over the true-colour image", "volcano_watch")
+    for name, url, crop, source, desc, credit in VOLCANO_PHOTOS:
+        photo("volcano_watch", name, url, crop, source, desc, credit)
 
 
 # ------------------------------------------------ 2. Moon south pole (NASA Moon Trek, LROC WAC mosaic)
@@ -112,9 +119,21 @@ def moon_polar(zoom, half_deg, name):
               "moon_south_pole")
 
 
+SH = "https://assets.science.nasa.gov/content/dam/science/"
+MOON_PHOTOS = [
+    ("shackleton_rim_lroc.jpg", SH + "psd/lunar-science/2023/08/shackleton-1.png", "S-nasa-science",
+     "Shackleton crater rim in sunlight, its floor in permanent shadow; page: https://science.nasa.gov/resource/shackleton-craters-illuminated-rim-shadowed-interior/",
+     "NASA/GSFC/Arizona State University"),
+    ("shackleton_floor_shadowcam.jpg", SH + "cds/apod/apod/2023/may/shackleton_arrow.png", "S-nasa-science",
+     "Inside Shackleton, seen by ShadowCam (NASA instrument on the Korean KPLO orbiter); the arrow marks a boulder track; page: https://science.nasa.gov/image-article/apod-2023-may-5-shackleton-from-shadowcam/",
+     "NASA, ShadowCam, Korea Aerospace Research Institute, Arizona State University"),
+]
+
+
 def moon():
     moon_polar(5, 11.0, "south_pole_wide_lroc_wac.jpg")
-    moon_polar(7, 2.8, "south_pole_shackleton_lroc_wac.jpg")
+    for name, url, source, desc, credit in MOON_PHOTOS:
+        photo("moon_south_pole", name, url, None, source, desc, credit)
 
 
 # ------------------------------------------------ 3. Grand Tour (NASA Image and Video Library, Voyager)

@@ -8,7 +8,29 @@ Blue Marble source site (eoimages.gsfc.nasa.gov) timed out from this machine, so
 
 All queries were run on 2026-11-14 and returned data. Source IDs are in `docs/sources.md` (end of file).
 
-## 1. Photos each mission returns
+## Update: second pass on the photos (2026-11-14)
+The first volcano set (GIBS VIIRS, 250 m, 2024-08-31) was cloudy and soft, so it was replaced. How the candidates compared:
+- GIBS VIIRS true colour: 250 m, whole scene under cloud near the summit, swath edge in the frame. Rejected.
+- GIBS HLS Landsat layer: no tiles for the dates tried. Rejected.
+- NASA Earth Observatory full-size Landsat 8 OLI scenes (30 m), found with the science.nasa.gov search API
+  (`https://science.nasa.gov/wp-json/wp/v2/search?search=Sangay`), whose pages link the full-resolution file. Chosen: Sangay
+  5 Nov 2022 (a long ash plume from the summit, partly cloudy) and Cotopaxi 15 Sep 2015 (ash plume west of the summit, dark debris
+  on the flank, the Quito valley around). No account needed.
+- Tungurahua EO-1 ALI, 1 Jan 2011, natural colour plus SWIR false colour with the crater glowing red (EO-1 is Landsat-class, 30 m;
+  it is not Landsat 9, and the credit says so).
+- ASTER on Terra, from the NASA Image and Video Library: Sangay night thermal infrared (11 Jun 2020; only 530 px wide because that is
+  what is published, scan lines visible) and Cotopaxi false colour (22 Aug 2015). These are the special-instrument bonus photos.
+- Reventador: the only Earth Observatory page found (Terra MODIS, 2002) is a 1232 px overview; not used.
+- No Copernicus/Sentinel data used, so no extra terms. Landsat is U.S. Geological Survey data; the Earth Observatory and ASTER
+  credits are quoted in `docs/sources.md` (S-eo, S-nasa-images). ASTER is a joint Japanese (METI) and NASA instrument.
+- Moon: the polar mosaic keeps its faint seams, so it stays as the wide view only; the seamed 2.8-degree close-up was replaced by two
+  clean NASA pages: Shackleton's rim (credit NASA/GSFC/Arizona State University) and Shackleton's floor by ShadowCam (credit NASA,
+  ShadowCam, Korea Aerospace Research Institute, Arizona State University; the arrow is part of the published image). The SVS Moon
+  Kit (4720) has only global maps, no south-pole still.
+- Files now: `volcano_watch/` 6, `moon_south_pole/` 3, `grand_tour/` 4; `assets/mission_photos/` about 1.6 MB.
+  The section below describes the first pass; where they disagree, this update wins.
+
+## 1. Photos each mission returns (first pass)
 Reasoning for the game: the photos are what the craft "saw"; the game picks by instrument (true color = camera,
 thermal = infrared sensor). Output: 11 JPEG, 834 KB in total.
 

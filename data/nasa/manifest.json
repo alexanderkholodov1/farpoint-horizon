@@ -27,49 +27,58 @@
   "bytes": 8848
  },
  {
-  "file": "assets/mission_photos/volcano_watch/sangay_2024-08-31_truecolor.jpg",
+  "file": "assets/mission_photos/volcano_watch/sangay_landsat8_2022-11-05_truecolor.jpg",
   "mission": "volcano_watch",
-  "source_id": "S-gibs",
-  "query": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&LAYERS=VIIRS_SNPP_CorrectedReflectance_TrueColor&SRS=EPSG:4326&BBOX=-78.69,-2.35,-77.99000000000001,-1.65&WIDTH=700&HEIGHT=700&FORMAT=image/jpeg&TIME=2024-08-31",
+  "source_id": "S-eo",
+  "query": "https://assets.science.nasa.gov/content/dam/science/esd/eo/images/imagerecords/150000/150650/sangay_oli_2022309_lrg.jpg",
   "date_checked": "2026-11-14",
-  "processing": "none (as served)",
-  "bytes": 49395
+  "processing": "cropped to the volcano, resized to at most 1024 px; Sangay ash plume, Landsat 8 OLI natural colour, 5 Nov 2022 (30 m pixels), page: https://science.nasa.gov/earth/earth-observatory/a-line-of-ash-from-sangay-150650/; credit: NASA Earth Observatory images by Lauren Dauphin, using Landsat data from the U.S. Geological Survey",
+  "bytes": 188382
  },
  {
-  "file": "assets/mission_photos/volcano_watch/sangay_2024-08-31_thermal.jpg",
+  "file": "assets/mission_photos/volcano_watch/cotopaxi_landsat8_2015-09-15_truecolor.jpg",
   "mission": "volcano_watch",
-  "source_id": "S-gibs",
-  "query": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&LAYERS=VIIRS_SNPP_CorrectedReflectance_TrueColor&SRS=EPSG:4326&BBOX=-78.69,-2.35,-77.99000000000001,-1.65&WIDTH=700&HEIGHT=700&FORMAT=image/jpeg&TIME=2024-08-31  +  https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&LAYERS=VIIRS_SNPP_Thermal_Anomalies_375m_All&SRS=EPSG:4326&BBOX=-78.69,-2.35,-77.99000000000001,-1.65&WIDTH=700&HEIGHT=700&FORMAT=image/png&TIME=2024-08-31&TRANSPARENT=TRUE",
+  "source_id": "S-eo",
+  "query": "https://assets.science.nasa.gov/content/dam/science/esd/eo/images/imagerecords/86000/86618/cotopaxi_oli_2015258_lrg.jpg",
   "date_checked": "2026-11-14",
-  "processing": "hot-spot pixels enlarged 7x and drawn in red over the true-colour image",
-  "bytes": 50220
+  "processing": "cropped to the volcano, resized to at most 1024 px; Cotopaxi after its first eruption in 70 years, Landsat 8 OLI natural colour, 15 Sep 2015, page: https://science.nasa.gov/earth/earth-observatory/cotopaxi-volcano-ecuador-86618/; credit: NASA Earth Observatory image by Jesse Allen, using Landsat data from the U.S. Geological Survey",
+  "bytes": 239214
  },
  {
-  "file": "assets/mission_photos/volcano_watch/reventador_2024-08-31_truecolor.jpg",
+  "file": "assets/mission_photos/volcano_watch/tungurahua_eo1_2011-01-01_truecolor.jpg",
   "mission": "volcano_watch",
-  "source_id": "S-gibs",
-  "query": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&LAYERS=VIIRS_SNPP_CorrectedReflectance_TrueColor&SRS=EPSG:4326&BBOX=-78.006,-0.427,-77.30600000000001,0.27299999999999996&WIDTH=700&HEIGHT=700&FORMAT=image/jpeg&TIME=2024-08-31",
+  "source_id": "S-eo",
+  "query": "https://assets.science.nasa.gov/content/dam/science/esd/eo/images/imagerecords/48000/48337/tungurahua_ali_2011001_lrg.jpg",
   "date_checked": "2026-11-14",
-  "processing": "none (as served)",
-  "bytes": 43868
+  "processing": "cropped to the volcano, resized to at most 1024 px; Tungurahua summit plume, EO-1 ALI natural colour, 1 Jan 2011 (30 m), page: https://science.nasa.gov/earth/earth-observatory/ongoing-eruption-of-tungurahua-ecuador-48337/; credit: NASA Earth Observatory image created by Jesse Allen, using EO-1 ALI data provided courtesy of the NASA EO-1 team and the U.S. Geological Survey",
+  "bytes": 168531
  },
  {
-  "file": "assets/mission_photos/volcano_watch/reventador_2024-08-31_thermal.jpg",
+  "file": "assets/mission_photos/volcano_watch/tungurahua_eo1_2011-01-01_swir.jpg",
   "mission": "volcano_watch",
-  "source_id": "S-gibs",
-  "query": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&LAYERS=VIIRS_SNPP_CorrectedReflectance_TrueColor&SRS=EPSG:4326&BBOX=-78.006,-0.427,-77.30600000000001,0.27299999999999996&WIDTH=700&HEIGHT=700&FORMAT=image/jpeg&TIME=2024-08-31  +  https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&LAYERS=VIIRS_SNPP_Thermal_Anomalies_375m_All&SRS=EPSG:4326&BBOX=-78.006,-0.427,-77.30600000000001,0.27299999999999996&WIDTH=700&HEIGHT=700&FORMAT=image/png&TIME=2024-08-31&TRANSPARENT=TRUE",
+  "source_id": "S-eo",
+  "query": "https://assets.science.nasa.gov/content/dam/science/esd/eo/images/imagerecords/48000/48337/tungurahua_ali_2011001_swir_lrg.jpg",
   "date_checked": "2026-11-14",
-  "processing": "hot-spot pixels enlarged 7x and drawn in red over the true-colour image",
-  "bytes": 44101
+  "processing": "cropped to the volcano, resized to at most 1024 px; Tungurahua, EO-1 ALI short-wave infrared false colour: the hot crater glows red, 1 Jan 2011 (30 m); same page as above; credit: NASA Earth Observatory image created by Jesse Allen, using EO-1 ALI data provided courtesy of the NASA EO-1 team and the U.S. Geological Survey",
+  "bytes": 163930
  },
  {
-  "file": "assets/mission_photos/volcano_watch/cotopaxi_2024-08-31_truecolor.jpg",
+  "file": "assets/mission_photos/volcano_watch/sangay_aster_2020-06-11_thermal.jpg",
   "mission": "volcano_watch",
-  "source_id": "S-gibs",
-  "query": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&LAYERS=VIIRS_SNPP_CorrectedReflectance_TrueColor&SRS=EPSG:4326&BBOX=-78.78999999999999,-1.03,-78.09,-0.33000000000000007&WIDTH=700&HEIGHT=700&FORMAT=image/jpeg&TIME=2024-08-31",
+  "source_id": "S-nasa-images",
+  "query": "https://images-assets.nasa.gov/image/PIA23914/PIA23914~orig.jpg",
   "date_checked": "2026-11-14",
-  "processing": "none (as served)",
-  "bytes": 38580
+  "processing": "no crop, resized to at most 1024 px; Sangay night thermal infrared (ASTER on Terra), 11 Jun 2020: lava flows white, ash plume dark red-brown; library record PIA23914; credit: NASA/METI/AIST/Japan Space Systems, and U.S./Japan ASTER Science Team",
+  "bytes": 27471
+ },
+ {
+  "file": "assets/mission_photos/volcano_watch/cotopaxi_aster_2015-08-22_falsecolor.jpg",
+  "mission": "volcano_watch",
+  "source_id": "S-nasa-images",
+  "query": "https://images-assets.nasa.gov/image/PIA15151/PIA15151~orig.jpg",
+  "date_checked": "2026-11-14",
+  "processing": "no crop, resized to at most 1024 px; Cotopaxi ash columns, ASTER on Terra false colour, 22 Aug 2015 (15 m); library record PIA15151; credit: NASA/GSFC/METI/ERSDAC/JAROS, and U.S./Japan ASTER Science Team",
+  "bytes": 193908
  },
  {
   "file": "assets/mission_photos/moon_south_pole/south_pole_wide_lroc_wac.jpg",
@@ -81,13 +90,22 @@
   "bytes": 295819
  },
  {
-  "file": "assets/mission_photos/moon_south_pole/south_pole_shackleton_lroc_wac.jpg",
+  "file": "assets/mission_photos/moon_south_pole/shackleton_rim_lroc.jpg",
   "mission": "moon_south_pole",
-  "source_id": "S-lroc-wac",
-  "query": "https://trek.nasa.gov/tiles/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd_v02/1.0.0//default/default028mm/7/{row}/{col}.jpg for row 126..127, column 0..255",
+  "source_id": "S-nasa-science",
+  "query": "https://assets.science.nasa.gov/content/dam/science/psd/lunar-science/2023/08/shackleton-1.png",
   "date_checked": "2026-11-14",
-  "processing": "tiles joined, re-projected to a view from above the south pole (azimuthal equidistant, 2.8 deg radius)",
-  "bytes": 116483
+  "processing": "no crop, resized to at most 1024 px; Shackleton crater rim in sunlight, its floor in permanent shadow; page: https://science.nasa.gov/resource/shackleton-craters-illuminated-rim-shadowed-interior/; credit: NASA/GSFC/Arizona State University",
+  "bytes": 28527
+ },
+ {
+  "file": "assets/mission_photos/moon_south_pole/shackleton_floor_shadowcam.jpg",
+  "mission": "moon_south_pole",
+  "source_id": "S-nasa-science",
+  "query": "https://assets.science.nasa.gov/content/dam/science/cds/apod/apod/2023/may/shackleton_arrow.png",
+  "date_checked": "2026-11-14",
+  "processing": "no crop, resized to at most 1024 px; Inside Shackleton, seen by ShadowCam (NASA instrument on the Korean KPLO orbiter); the arrow marks a boulder track; page: https://science.nasa.gov/image-article/apod-2023-may-5-shackleton-from-shadowcam/; credit: NASA, ShadowCam, Korea Aerospace Research Institute, Arizona State University",
+  "bytes": 228528
  },
  {
   "file": "assets/mission_photos/grand_tour/jupiter_voyager1_1979.jpg",

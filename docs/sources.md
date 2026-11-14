@@ -68,11 +68,24 @@ branches add entries at the same place (`.gitattributes`).
 ## NASA data used by the mission photos and the route numbers (issue 19; pipeline in `tools/data/`)
 All checked 2026-11-14. NASA media are used under the NASA Media Usage Guidelines
 (https://www.nasa.gov/nasa-brand-center/images-and-media/): no NASA logo or insignia, no implied endorsement.
-- **S-gibs** NASA ESDIS, Global Imagery Browse Services (GIBS), NASA Worldview. Layers
-  `VIIRS_SNPP_CorrectedReflectance_TrueColor` and `VIIRS_SNPP_Thermal_Anomalies_375m_All` (instrument VIIRS on Suomi NPP,
-  a real twin of Volcano Watch), WMS https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi. Photos of Sangay,
-  Reventador and Cotopaxi, 2024-08-31, in `assets/mission_photos/volcano_watch/`. Credit: "NASA GIBS / Worldview,
-  VIIRS Suomi NPP". Our processing: hot-spot pixels enlarged and drawn in red.
+- **S-gibs** NASA ESDIS, Global Imagery Browse Services (GIBS), NASA Worldview, WMS
+  https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi. Tested for the volcano photos (VIIRS 250 m) and replaced by
+  S-eo for being soft; kept as the source of the Earth texture recommended in `kb/research/nasa-data.md`
+  (layer `BlueMarble_NextGeneration`). Credit: "NASA GIBS / Worldview".
+- **S-eo** NASA Earth Observatory (science.nasa.gov/earth/earth-observatory), image pages with their full-size files:
+  Sangay (Landsat 8 OLI, 5 Nov 2022, https://science.nasa.gov/earth/earth-observatory/a-line-of-ash-from-sangay-150650/),
+  Cotopaxi (Landsat 8 OLI, 15 Sep 2015, https://science.nasa.gov/earth/earth-observatory/cotopaxi-volcano-ecuador-86618/),
+  Tungurahua (EO-1 ALI natural and short-wave infrared, 1 Jan 2011,
+  https://science.nasa.gov/earth/earth-observatory/ongoing-eruption-of-tungurahua-ecuador-48337/). In
+  `assets/mission_photos/volcano_watch/`. Credits as the pages print them: "NASA Earth Observatory images by Lauren
+  Dauphin / Jesse Allen, using Landsat data from the U.S. Geological Survey" (Landsat data are public domain, USGS);
+  "NASA Earth Observatory image created by Jesse Allen, using EO-1 ALI data provided courtesy of the NASA EO-1 team and
+  the U.S. Geological Survey". Our processing: cropped to the volcano, resized.
+- **S-nasa-science** NASA Science (science.nasa.gov) resource and image pages, for the Moon: Shackleton crater rim,
+  credit "NASA/GSFC/Arizona State University" (https://science.nasa.gov/resource/shackleton-craters-illuminated-rim-shadowed-interior/);
+  Shackleton floor seen by ShadowCam, a NASA instrument on the Korean KPLO orbiter, credit as printed "NASA, ShadowCam,
+  Korea Aerospace Research Institute, Arizona State University" (https://science.nasa.gov/image-article/apod-2023-may-5-shackleton-from-shadowcam/;
+  the Korean partner is named in the credit; no separate terms found). In `assets/mission_photos/moon_south_pole/`.
 - **S-lroc-wac** NASA/GSFC/Arizona State University, Lunar Reconnaissance Orbiter Camera (LROC) Wide Angle Camera global
   mosaic (100 m), served by NASA Moon Trek, https://trek.nasa.gov/tiles/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd_v02/1.0.0/WMTSCapabilities.xml.
   Photos in `assets/mission_photos/moon_south_pole/`. Credit: "NASA/GSFC/Arizona State University, LRO". Our processing:
@@ -80,7 +93,10 @@ All checked 2026-11-14. NASA media are used under the NASA Media Usage Guideline
 - **S-nasa-images** NASA Image and Video Library, https://images.nasa.gov (API https://images-api.nasa.gov), records
   PIA00022 (Jupiter, Voyager 1), PIA01374 (Saturn, Voyager 1), PIA18182 (Uranus, Voyager 2), PIA00049 (Neptune,
   Voyager 2); catalogued by NASA/JPL Photojournal. Photos in `assets/mission_photos/grand_tour/`. Credit: "NASA/JPL-Caltech".
-  Our processing: resized.
+  Our processing: resized. Also the ASTER pictures in `assets/mission_photos/volcano_watch/`: PIA23914 (Sangay, night
+  thermal infrared, 11 Jun 2020, credit "NASA/METI/AIST/Japan Space Systems, and U.S./Japan ASTER Science Team") and
+  PIA15151 (Cotopaxi, false colour, 22 Aug 2015, credit "NASA/GSFC/METI/ERSDAC/JAROS, and U.S./Japan ASTER Science
+  Team"); ASTER is a joint Japanese (METI) and NASA instrument on Terra, hence the credit.
 - **S-horizons** NASA/JPL Solar System Dynamics. *Horizons System API*. https://ssd-api.jpl.nasa.gov/doc/horizons.html
   (endpoint https://ssd.jpl.nasa.gov/api/horizons.api). Orbital elements of the eight planets at 2026-11-15 and the Moon
   around the Earth for a month, in `data/nasa/horizons_*.json`. Credit: "NASA/JPL Horizons".
