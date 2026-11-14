@@ -192,7 +192,12 @@ class BigButton extends Control:
 		var face := color.darkened(0.55 - glow * 0.35) if lit else Color(0.22, 0.2, 0.2)
 		draw_circle(c + Vector2(0, _down * 3.0), r - 6.0, face)
 		draw_arc(c + Vector2(0, _down * 3.0), r - 6.0, 0, TAU, 40, Color(1, 1, 1, 0.25), 2.0, true)
-		draw_string(Kit.FONT_T, c + Vector2(-r, 7 + _down * 3.0), TranslationServer.translate(label), HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, 18, Color.WHITE if lit else Color(1, 1, 1, 0.55))
+		# the word shrinks to fit inside the face (CORRECT, CORREGIR)
+		var word := TranslationServer.translate(label)
+		var fs := 18
+		while fs > 10 and Kit.FONT_T.get_string_size(word, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > (r - 10.0) * 2.0:
+			fs -= 1
+		draw_string(Kit.FONT_T, c + Vector2(-r, fs * 0.38 + _down * 3.0), word, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, fs, Color.WHITE if lit else Color(1, 1, 1, 0.55))
 
 
 ## A button that reports while it is held (hold-to-steer for touch screens and mice). `held` is true while down.

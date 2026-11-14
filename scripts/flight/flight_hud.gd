@@ -221,7 +221,7 @@ func _show_warp() -> void:
 			Kit.accent_btn(b, Kit.C_ACCENT)
 		else:
 			_plain(b)
-	var t := TranslationServer.translate("Real time") if warp <= 1.0 else TranslationServer.translate("Time runs %s times faster") % _thousands(warp)
+	var t: String = TranslationServer.translate("Real time") if warp <= 1.0 else TranslationServer.translate("Time runs %s times faster") % _thousands(warp)
 	if _cap_why != "":
 		t += " · " + _cap_why
 	warp_note.text = t

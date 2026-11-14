@@ -164,7 +164,9 @@ func kick(dv: float) -> void:
 ## {"points": PackedVector2Array (metres, every step), "times": PackedFloat64Array, "closest" (metres from the Moon's
 ## centre), "t_closest" (absolute), "side" (+1 or -1: which side of the Moon it passes), "v_rel" (speed past the Moon,
 ## m/s), "impact" (it hits the Moon), "moon_at" ([x, y] of the Moon at the closest moment)}.
-func predict(s: Array, time: float, horizon := 7.0 * DAY, keep := true) -> Dictionary:
+## While the craft is still bound to the Earth below the Moon's distance (mid-burn), one lap is enough: max_laps stops
+## the prediction after that many turns around the Earth (0: no limit).
+func predict(s: Array, time: float, horizon := 7.0 * DAY, keep := true, max_laps := 1.0) -> Dictionary:
 	var pts := PackedVector2Array()
 	var ts := PackedFloat64Array()
 	var best := INF
@@ -172,6 +174,8 @@ func predict(s: Array, time: float, horizon := 7.0 * DAY, keep := true) -> Dicti
 	var best_s := s
 	var t0 := time
 	var impact := false
+	var swept := 0.0
+	var ang0 := atan2(s[1], s[0])
 	while time - t0 < horizon:
 		var h := _h(s, time)
 		s = _rk4(s, time, h)
@@ -179,6 +183,11 @@ func predict(s: Array, time: float, horizon := 7.0 * DAY, keep := true) -> Dicti
 		if keep:
 			pts.append(Vector2(s[0], s[1]))
 			ts.append(time)
+		var ang := atan2(s[1], s[0])
+		swept += absf(wrapf(ang - ang0, -PI, PI))
+		ang0 = ang
+		if max_laps > 0.0 and swept > TAU * max_laps:
+			break
 		var m := moon(time)
 		var d := sqrt((s[0] - m[0]) * (s[0] - m[0]) + (s[1] - m[1]) * (s[1] - m[1]))
 		if d < best:
