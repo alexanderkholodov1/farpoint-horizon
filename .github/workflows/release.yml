@@ -77,4 +77,11 @@ jobs:
           [ -f "$notes" ] || notes=/dev/null
           gh release create "$v" --target "${{ github.sha }}" --title "$v" --notes-file "$notes" "web-build-$v.zip"
 
-      # Deploying the web build to Firebase Hosting is added once the Firebase project exists (see docs/STATE.md).
+      - name: Deploy to production on Firebase Hosting
+        if: steps.version.outputs.version != ''
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_FARPOINT_HORIZON }}
+          projectId: farpoint-horizon
+          channelId: live

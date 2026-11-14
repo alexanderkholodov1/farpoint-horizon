@@ -111,6 +111,9 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
 - `tools/godot.sh` finds the Godot binary (or set `GODOT`); `tools/check.sh` runs what CI runs: import, a short
   headless run of the main scene, the fuzz test, the web export. `tools/shots.sh` plays the scripted walkthrough with
   a window and saves screenshots to `shots/` (headless runs draw nothing).
+- Every pull request gets its own temporary page on Firebase Hosting, linked on the pull request by CI (it expires
+  after 7 days); production (https://farpoint-horizon.web.app) is deployed only when the version pull request is
+  merged into `main`.
 - Commit the `.import` and `.uid` files Godot creates beside the files you add (run `tools/check.sh` first: its import
   step creates them). They carry random IDs, so a file left for someone else to import collides between branches.
 - GDScript is Godot 4 syntax (`await`, `@onready`, `@export`, typed signals); the project's own pitfalls are in
