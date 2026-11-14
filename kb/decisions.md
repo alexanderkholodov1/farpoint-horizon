@@ -19,11 +19,16 @@ agents bring evidence, alternatives and a recommendation.
 | 2026-11-14 | The teammate's sketch (about 70% there) is the base; it needs a stronger plot and game design, well-made 3D models and a more unique UI | Team |
 | 2026-11-14 | Several mission types | Team |
 | 2026-11-14 | Audience: the general public; one complete, satisfying mission, simpler than Kerbal; the main takeaway is that there is no perfect design | Team |
+| 2026-11-14 | Only a person merges, the lead or the teammate; agents prepare one pull request per functional version and never merge | Team |
+| 2026-11-14 | Versions: v0.1.0 is the first playable sketch with the base; steps toward the next version are 0.1.1, 0.1.2, ... on the version branch; v0.2.0 is the second version with everything corrected; tags come from the release workflow | Team |
+| 2026-11-14 | Repository layout: `docs/challenge/` (challenge material), `docs/team/` (team notes), `docs/design/`, `docs/agents/`, `kb/`, `tools/`; one rulebook `AGENTS.md`, imported by `CLAUDE.md` | Team |
+| 2026-11-14 | Vision of v0.2.0 (`docs/design/vision.md`): fun and satisfaction first, humor, explosions possible on purpose, stations including a pilot and ground control, varied missions (Earth, Moon, Mars, Venus, one-way and returning, real and imagined), launches from the equator, random extra objectives and role bonuses, in-flight failures as mini-games, a leaderboard and gallery with no head-to-head competition | Team |
+| 2026-11-14 | Blender may join the pipeline for 3D models when they are needed (the teammate researched how to connect it) | Team |
 
 ## Open
 | # | Question | Why it matters | Status |
 |---|---|---|---|
 | D2 | The game idea, its plot and its name | Everything else follows from it | Design round in progress |
 | D4 | Multiplayer form for up to four players: what is shared, who acts when | Core requirement C4 | After the design round |
-| D5 | Who owns which part, and the git workflow (branches, pull requests, who merges) | Keeps two people's agents from colliding | Open |
-| D6 | The repository's open-source license | The event's terms point to open source | Open |
+| D5 | Who owns which part of the game | Keeps two people's agents from colliding | Open; written in `docs/STATE.md` once agreed |
+| D6 | The repository's open-source license | The event's terms point to open source | MIT proposed in the v0.1.0 pull request |

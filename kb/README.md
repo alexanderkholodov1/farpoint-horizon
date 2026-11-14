@@ -19,10 +19,11 @@ Read `AGENTS.md` first. Then read only what your task needs; the table says what
 | `decisions.md` | Decisions taken (with who decided and when) and decisions still open | Always; a decision here overrides anything older |
 
 ## Sources
-The raw material gathered from the challenge page lives in `docs/` (challenge text, resources, three NASA PDFs, the
-local schedule). Every fact in this folder cites its source; anything inferred is labeled "(inference)".
+The raw material gathered from the challenge page lives in `docs/challenge/` (challenge text, resources, three NASA
+PDFs); the team's notes and the local schedule are in `docs/team/`. Every fact in this folder cites its source;
+anything inferred is labeled "(inference)".
 
 ## Keeping it current
 - A new decision goes to `decisions.md` with its date and who took it.
 - A fact that turns out wrong is corrected where it lives, with the correct source.
-- Game design documents will live in `design/` once the design round starts.
+- The game's vision and design criteria live in `docs/design/`; the project's state in `docs/STATE.md`.
