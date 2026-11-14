@@ -34,7 +34,7 @@ and judgment, cheaper ones for mechanical work.
 - Verify every result yourself before you integrate it: run the game, play the part, look at the screenshots, read the
   test changes for weakened checks.
 - Ask an agent that did not build it to review it; treat each finding as a claim to reproduce before fixing.
-- Keep `docs/STATE.md` true after each step; record decisions in `kb/decisions.md` with who decided and when.
+- Keep the notes of your pieces in `docs/state/` true (one file per topic) and delete them when they stop being true; record decisions in `kb/decisions.md` with who decided and when.
 - Report to your person in their language: what was done and how it was checked, what is open, which agents did the
   work (tool, model, account if relevant). Each message stands on its own; links are full and tested.
 - Integrate finished pieces into the version branch with `tools/integrate.sh` (no need to ask). Open the version's
