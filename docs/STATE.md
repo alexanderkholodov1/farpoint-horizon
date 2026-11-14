@@ -98,3 +98,4 @@ integration; nobody edits this list by hand on a work branch.
 - 0.1.10: The mission photos' import files committed, so branches never collide on them (`work/19-photo-imports`, 2026-11-14)
 - 0.1.11: Honest citations: three values the cross-vendor review found unsupported are labeled as our game estimates (`work/4-honest-citations`, 2026-11-14)
 - 0.1.12: Rocket builder: assemble the launcher from real parts that snap together, gauges that react to each part, and the rocket you build is the one that flies and separates its stages (`work/6-builder`, 2026-11-14)
+- 0.1.13: Firebase Hosting: a temporary preview page for every pull request, production deployed only when the version pull request is merged (`work/13-firebase`, 2026-11-14)
