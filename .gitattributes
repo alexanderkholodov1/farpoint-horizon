@@ -1,0 +1,18 @@
+# One line ending in the repository whatever each person's system uses, so Windows and Linux never show phantom changes.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.otf binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
+*.glb binary
+*.blend binary
+*.wav binary
+*.ogg binary
+*.mp3 binary
+*.pdf binary
+*.zip binary
+*.tpz binary

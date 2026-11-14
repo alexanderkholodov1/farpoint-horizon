@@ -1,10 +1,12 @@
 extends Node
-## Prueba automática: recorre el juego y guarda capturas en /tmp/shots (solo para desarrollo).
+## Scripted walkthrough: plays through the game and saves screenshots to the project's shots/ folder (development only; needs a window).
 var g
 
 func shot(name: String) -> void:
 	await RenderingServer.frame_post_draw
-	get_viewport().get_texture().get_image().save_png("/tmp/shots/%s.png" % name)
+	var dir := ProjectSettings.globalize_path("res://shots")
+	DirAccess.make_dir_recursive_absolute(dir)
+	get_viewport().get_texture().get_image().save_png("%s/%s.png" % [dir, name])
 	print("shot ", name)
 
 func wait(t: float) -> void:

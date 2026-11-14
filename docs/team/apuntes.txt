@@ -41,3 +41,18 @@ Team notes (lead), 2026-11-14:
 - Audience: the general public. One complete, satisfying mission, not a 5-minute minigame, and simpler than Kerbal.
 - Main takeaway for the player: there is no perfect design.
 - The game's name is decided in the brainstorm.
+
+Team notes (lead), 2026-11-14, on the vision and the base:
+- Roles differ: a pilot does depend on reflexes and control panels.
+- Nothing should feel like a lost opportunity or a failure; the focus is fun and the satisfaction of your work, shown through sound effects, animation and effects. The feeling to aim for: wonder and the pride of watching your own craft lift off, deploy, arrive and land.
+- Blowing up should be possible, hard for a normal player to cause by accident, and fun for anyone who does it on purpose.
+- Do not follow the sketch blindly: varied missions. Launching from Ecuador, yes, plus international and even fictional missions (Mars, the Moon, Venus).
+- More missions to choose from, and more entertaining. Besides the mission, bonuses: extra objectives (for example, information only a special instrument can get) and success in your role (doing something well adds points for the team; not reaching it never feels bad, reaching a lot feels great). The mission plus extra objectives, chosen among random ones offered.
+- Nothing against other teams: you can see other teams, watch them try and see a leaderboard, but nobody competes to win.
+- What inspires us in Kerbal: the builder, route and orbit planning, the whole journey to the end, the freedom to invent, the humor (friendly, satisfying, and funny together), and the spectacle of launch and landing.
+- Missions that come back and missions that never do (like Voyager). Communication and signal reception matter a lot: for example, a player on Earth follows the mission from the control center and the map and plays mini-games reading the data while others do other work.
+- Failures can appear in flight and need solving on the way, as has happened in history; they give extra points and are a source of mini-games.
+- Only a person merges (the lead or the teammate), never agents; agents prepare one pull request with the next functional version.
+- The teammate researched connecting Blender to the pipeline; integrate it if 3D models need it.
+- Versions: v0.1.0 was the first playable sketch; steps 0.1.1, 0.1.2, ... lead to v0.2.0, the second version with everything corrected.
+- The base game is done but is still a sketch far from perfect: everything needs adjusting. The design criteria (nothing that looks AI-made) still apply.

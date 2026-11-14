@@ -1,8 +1,8 @@
 # Challenge requirements, traceable
 
-Source: the challenge page as captured on 2026-11-14 (`docs/mission_details.txt`, `docs/mission_resources.txt`),
+Source: the challenge page as captured on 2026-11-14 (`docs/challenge/mission_details.txt`, `docs/challenge/mission_resources.txt`),
 https://www.spaceappschallenge.org/2026/challenges/space-mission-design-game/?tab=details. Event schedule:
-`docs/horario.txt`. Judging criteria and official rules: `kb/challenge/event-and-judging.md`.
+`docs/team/horario.txt`. Judging criteria and official rules: `kb/challenge/event-and-judging.md`.
 
 Every design document, plan item and pitch claim cites the IDs below, so the team can show the judges that each
 expectation is met. The challenge text says almost everything is optional ("You may (but are not required to)
@@ -98,11 +98,11 @@ section names as a strong solution; "Considered" is from Potential Consideration
 | F13 | Post-mission analysis explaining why the mission succeeded or failed |
 
 ## Resources the challenge points to
-Summarized in `docs/mission_resources.txt`; studied in `kb/research/prior-art.md` (games and tools) and
+Summarized in `docs/challenge/mission_resources.txt`; studied in `kb/research/prior-art.md` (games and tools) and
 `kb/domain/` (mission lifecycle, trade-offs). The four mission segments of the NASA document (launch, space, ground,
 user) and the JPL Concept Maturity Levels are natural structures for the game's stages.
 
-## Event constraints (local event, `docs/horario.txt`)
+## Event constraints (local event, `docs/team/horario.txt`)
 - Pitch upload (PowerPoint, at most 7 slides) and the repository link (marked "(?)" in the notes) close at 9:00 AM.
 - Teams present at 11:00 AM: 5 minutes of pitch, 2 minutes of questions.
 - The day is not written in the notes; the team must confirm it (see `kb/decisions.md`).

@@ -1,0 +1,26 @@
+name: PR title
+
+# A pull request's title leads with the version its branch delivers: `v0.2.0: <what it delivers>`.
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  title:
+    name: Title leads with the branch's version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the title against the branch
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          if [[ "$BRANCH" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            if [[ "$TITLE" == "$BRANCH: "?* ]]; then
+              echo "OK: $TITLE"
+            else
+              echo "The title must lead with '$BRANCH: '. Got: $TITLE"; exit 1
+            fi
+          else
+            echo "Pull requests come from a version branch (vX.Y.Z); this one is '$BRANCH'"; exit 1
+          fi
