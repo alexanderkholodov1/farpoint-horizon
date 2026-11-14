@@ -4,6 +4,7 @@ extends SceneTree
 ## by one who never touches the throttle. Prints what happened; fails if the generous cases do not end well or the
 ## deliberate ones do not end badly.
 ## Run: tools/godot.sh --headless --path . -s res://tests/flight.gd
+## check: flight test: 0 failure
 
 const Ascent := preload("res://scripts/flight/ascent.gd")
 const GD := preload("res://scripts/game_data.gd")

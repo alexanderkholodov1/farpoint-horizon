@@ -3,6 +3,7 @@ extends SceneTree
 ## is the same in both languages, which means it has no Spanish translation (names and numbers aside).
 ## Run: tools/godot.sh --headless --path . -s res://tests/i18n.gd
 ## It also reports the data texts of GameData and the texts of the mission checks and events found by 300 random designs.
+## check: 0 texts without a Spanish version
 
 const GD := preload("res://scripts/game_data.gd")
 ## Texts that must appear in the Spanish run and in the English run (proof that each language was really played).
@@ -15,7 +16,7 @@ var GS: Node
 ## Texts that are the same in every language on purpose.
 const SAME := ["Farpoint HORIZON", "Farpoint", "HORIZON", "NASA SPACE APPS CHALLENGE 2026", "SK Horizon", "● Ecuador", "CubeSat", "CubeSat 3U", "CubeSat 6U",
 	"CubeSat 12U", "SmallSat (~200 kg)", "Ranking", "Normal", "CML 1 · Idea", "L2", "GEO", "LEO", "SSO", "English", "Español", "Ka band high gain",
-	"UHF radio", "Magnetómetro", "CML 4", "SAR", "Solo", "Bot · Rivet", "Bot · Quark", "Bot · Skip", "Bot · Echo"]
+	"UHF radio", "Magnetómetro", "CML 4", "SAR", "Solo", "Bot · Rivet", "Bot · Quark", "Bot · Skip", "Bot · Echo", "Bot", "%s (bot) · %s"]
 
 var main_node: Node
 
@@ -37,6 +38,12 @@ func _initialize() -> void:
 	for t in seen["en"]:
 		if seen["es"].has(t) and _has_words(t) and not SAME.has(t) and not SAME.has(t.substr(2)):
 			missing.append(t)
+	# every tr("...") written in the code, so a new screen is checked without being added to _play() (#26)
+	TranslationServer.set_locale("es")
+	for t in _code_texts():
+		if TranslationServer.translate(t) == t and _has_words(t) and not SAME.has(t) and not missing.has(t):
+			missing.append(t)
+	TranslationServer.set_locale("en")
 	missing.sort()
 	for lang in PROBES:
 		print("probe ", lang, ": ", seen[lang].has(PROBES[lang]))
@@ -45,6 +52,26 @@ func _initialize() -> void:
 		print("UNTRANSLATED: ", t.replace("\n", "\\n"))
 	print("i18n check: ", missing.size(), " texts without a Spanish version")
 	quit(1 if missing.size() > 0 else 0)
+
+
+## The literal texts of every tr("...") in scripts/, escapes read as GDScript reads them.
+func _code_texts() -> Array:
+	var out: Array = []
+	var rx := RegEx.new()
+	rx.compile(r'\btr\("((?:[^"\\]|\\.)*)"\)')
+	var dirs: Array = ["res://scripts"]
+	while not dirs.is_empty():
+		var d: String = dirs.pop_back()
+		for f in DirAccess.get_directories_at(d):
+			dirs.append(d + "/" + f)
+		for f in DirAccess.get_files_at(d):
+			if not f.ends_with(".gd"):
+				continue
+			for m in rx.search_all(FileAccess.get_file_as_string(d + "/" + f)):
+				var t := m.get_string(1).c_unescape()
+				if not out.has(t):
+					out.append(t)
+	return out
 
 
 func _has_words(t: String) -> bool:

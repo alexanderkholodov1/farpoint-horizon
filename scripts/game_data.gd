@@ -44,6 +44,7 @@ static var CML_NAMES: Dictionary
 
 
 func _init() -> void:
+	preload("res://scripts/found.gd").load_translations()   # every i18n/<piece>.csv, found by folder (#26)
 	var cfg := ConfigFile.new()
 	if cfg.load(SETTINGS_PATH) == OK:
 		language = str(cfg.get_value("game", "language", "en"))
