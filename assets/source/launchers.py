@@ -16,6 +16,8 @@ heights: simplified.
 
 Units are metres; Blender +Z (up) becomes Godot +Y. Origin: the base of the first-stage tank on the rocket's axis,
 engines below it (as the old primitive rocket). Each file's root node carries the vehicle; the launch screen scales it.
+No invented markings: colours and details follow the real vehicles (white paint, black composite and interstage,
+heat-darkened nozzles, the cable raceway along the Falcon 9-type stages).
 """
 import bpy, bmesh, math, os, sys
 from mathutils import Vector, Matrix
@@ -43,11 +45,11 @@ def mats():
         "carbon": material("Carbon composite", (0.025, 0.025, 0.028), 0.15, 0.38),
         "black": material("Black interstage", (0.03, 0.03, 0.032), 0.0, 0.6),
         "soot": material("Engine soot", (0.06, 0.055, 0.05), 0.4, 0.7),
-        "nozzle": material("Nozzle niobium", (0.42, 0.40, 0.38), 1.0, 0.45),
+        "nozzle": material("Nozzle, heat-darkened", (0.16, 0.15, 0.14), 0.85, 0.5),
         "titanium": material("Titanium", (0.36, 0.35, 0.34), 1.0, 0.5),
         "leg": material("Leg composite", (0.09, 0.09, 0.1), 0.2, 0.5),
         "steel": material("Steel", (0.62, 0.62, 0.62), 1.0, 0.35),
-        "accent": material("Warm accent", (0.82, 0.38, 0.12), 0.0, 0.5),
+        "raceway": material("Raceway", (0.30, 0.30, 0.31), 0.2, 0.55),
     }
 
 
@@ -195,6 +197,15 @@ def fairing(prefix, R, z, cyl_len, nose_len, parent, m, mat_key="white", boat_fr
         box(f"{prefix}_seamv{s}", (0.04, 0.03, cyl_len), (0, s * R * 1.002, z + cyl_len / 2), m["black"], parent)
 
 
+def raceway(name, R, z0, z1, parent, m, angle=-math.pi / 2):
+    """The cable raceway that runs along a Falcon 9-type stage: a low, flat-topped fairing on one side."""
+    w, d = 0.22, 0.09
+    ob = box(name, (d, w, z1 - z0), (0, 0, 0), m["raceway"], parent)
+    ob.location = (math.cos(angle) * (R + d / 2 - 0.01), math.sin(angle) * (R + d / 2 - 0.01), (z0 + z1) / 2)
+    ob.rotation_euler = (0, 0, angle)
+    return ob
+
+
 # ---------------------------------------------------------------- vehicles
 def medium_core(prefix, parent, m, with_upper=True, x=0.0, nose=False):
     """A Falcon 9-type first stage (and optionally the second stage and fairing) with its axis at (x, 0)."""
@@ -205,9 +216,9 @@ def medium_core(prefix, parent, m, with_upper=True, x=0.0, nose=False):
     S1 = 41.2        # first stage tank, to the interstage (estimate from the 70 m total)
     INTER = 6.7      # interstage, black
     tube(prefix + "_s1", R, 0, S1, m["white"], core, 64)
-    # sooty band above the engines, as after a flight; a warm accent ring for the team's colour
+    # sooty band above the engines, as on a flown booster
     tube(prefix + "_s1_band", R * 1.002, 0.0, 2.2, m["soot"], core, 64)
-    tube(prefix + "_s1_accent", R * 1.004, S1 - 9.0, S1 - 8.4, m["accent"], core, 64)
+    raceway(prefix + "_s1_raceway", R, 2.2, S1, core, m)
     octaweb(prefix, R, 0.0, core, m, r_exit=0.46)
     landing_legs(prefix, R, -0.6, 9.5, core, m)
     if with_upper:
@@ -215,6 +226,7 @@ def medium_core(prefix, parent, m, with_upper=True, x=0.0, nose=False):
         grid_fins(prefix, R, S1 + INTER - 1.3, core, m, 1.4)
         S2 = 9.0
         tube(prefix + "_s2", R, S1 + INTER, S1 + INTER + S2, m["white"], core, 64)
+        raceway(prefix + "_s2_raceway", R, S1 + INTER, S1 + INTER + S2, core, m)
         fairing(prefix, 5.2 / 2, S1 + INTER + S2 + 0.9, 6.6, 6.5, core, m, boat_from=R)
         return core, S1 + INTER + S2 + 0.9 + 6.6 + 6.5
     if nose:  # side booster: a black interstage-like ring and a nose cone
@@ -252,7 +264,6 @@ def build_light(m):
     R = 1.2 / 2
     S1, INTER, S2 = 12.1, 0.9, 2.4   # estimates from the 18 m total
     tube("s1", R, 0, S1, m["carbon"], root, 48)
-    tube("s1_accent", R * 1.004, S1 - 2.0, S1 - 1.8, m["accent"], root, 48)
     tube("inter", R * 1.004, S1, S1 + INTER, m["soot"], root, 48)
     tube("s2", R, S1 + INTER, S1 + INTER + S2, m["carbon"], root, 48)
     # nine engines in a ring of eight plus one, small
