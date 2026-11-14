@@ -1,4 +1,6 @@
 extends "res://scripts/screens/screen.gd"
+
+const RocketDesign := preload("res://scripts/craft/rocket_design.gd")
 ## Design (CML 2-4): the eight steps of GameData.STEPS (orbit, platform, instruments, energy, communications, control
 ## and propulsion, launcher and lifetime, review), the mission dashboard on the right, and the "why it matters" box.
 ## args: {"step": index of GameData.STEPS} (default 0). Every change redraws the screen and refreshes the 3D craft.
@@ -232,6 +234,14 @@ func _fill_step(id: String, r: Dictionary) -> void:
 		"lanzador":
 			var O: Dictionary = GameData.ORBITS[mission.orbit]
 			step_box.add_child(Kit.lbl(tr("Your craft weighs %s and is headed to %s. The farther the destination, the less a rocket can carry.") % [Kit.kg(r.mass_total), O.short], 14, Kit.C_DIM, Kit.FONT_R, true))
+			var build_btn := Kit.accent_btn(Kit.btn(tr("Build your own rocket, part by part ▶"), func(): go("builder", {"back_step": step_idx}), 15), Kit.C_WARN)
+			step_box.add_child(build_btn)
+			if RocketDesign.current != null:
+				var CL: Dictionary = RocketDesign.current.launcher_info()
+				var ccap: float = CL.cap[mission.orbit]
+				var cok: bool = ccap >= r.mass_total and ccap > 0.0
+				var cbadge := tr("Can't reach") if ccap <= 0.0 else (tr("Fits") if cok else tr("Too heavy"))
+				step_box.add_child(card(tr(CL.name), tr("Up to %s to %s · %s · reliability %s") % [Kit.kg(ccap), O.short, Kit.money(CL.cost), Kit.pct(1.0 - CL.fail)], mission.launcher == RocketDesign.CUSTOM, func(): mission.launcher = RocketDesign.CUSTOM; on_change(), tr(CL.desc), cbadge, Kit.C_OK if cok else Kit.C_BAD, ccap <= 0.0))
 			for l in GameData.LAUNCHERS:
 				var L: Dictionary = GameData.LAUNCHERS[l]
 				var cap: float = L.cap[mission.orbit]

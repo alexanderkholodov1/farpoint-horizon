@@ -3,11 +3,14 @@ extends "res://scripts/screens/screen.gd"
 ## to the operation (or to the report after a failure). The outcome was decided at launch (GameState.last_sim).
 
 const Space := preload("res://scripts/space_builder.gd")
+const RocketDesign := preload("res://scripts/craft/rocket_design.gd")
 
 var rocket: Node3D
 var launch_t := 0.0
 var exploded := false
 var launch_done := false
+var dropped: Array = []     ## Stages and boosters falling away: [node, velocity, spin, age].
+var sep_at := -1.0          ## Time after liftoff of the last stage separation, for its caption.
 var telemetry: Label
 var big: Label
 
@@ -33,7 +36,7 @@ func enter(_args: Dictionary) -> void:
 	add_child(p)
 	var v := Kit.vbox(4)
 	p.add_child(v)
-	v.add_child(Kit.lbl(tr("LAUNCH") + " · " + GameData.LAUNCHERS[mission.launcher].name, 15, Kit.C_ACCENT, Kit.FONT_B))
+	v.add_child(Kit.lbl(tr("LAUNCH") + " · " + tr(RocketDesign.launcher(mission.launcher).name), 15, Kit.C_ACCENT, Kit.FONT_B))
 	telemetry = Kit.lbl("T-00:03", 26, Color.WHITE, Kit.FONT_T)
 	v.add_child(telemetry)
 	v.add_child(Kit.lbl(tr("Destination") + " · " + GameData.ORBITS[mission.orbit].name, 14, Kit.C_DIM))
@@ -60,7 +63,7 @@ func process(delta: float) -> void:
 				f.emitting = launch_t > 2.4
 		return
 	var tt := launch_t - 3.0
-	big.text = tr("LIFTOFF!") if tt < 1.5 else ""
+	big.text = tr("LIFTOFF!") if tt < 1.5 else (tr("STAGE SEPARATION") if sep_at >= 0.0 and tt - sep_at < 1.6 else "")
 	var alt := 0.6 * tt * tt * 2.2
 	if not exploded:
 		rocket.position.y = 0.2 + alt
@@ -83,6 +86,9 @@ func process(delta: float) -> void:
 		var follow := rp + Vector3(6.0 + tt * 0.6, 1.5 - min(tt, 4.0) * 0.6, 8.0 + tt * 0.5)
 		cam.position = cam.position.lerp(follow, clamp(delta * 2.0, 0.0, 1.0))
 		cam.look_at(rp + Vector3(0, 2.5, 0), Vector3.UP)
+	if not exploded:
+		_staging(tt)
+	_fall(delta)
 	if GameState.last_sim.launch_failed and tt > 3.2 and not exploded:
 		_explode()
 	if exploded and tt > 7.0 and not launch_done:
@@ -91,6 +97,49 @@ func process(delta: float) -> void:
 	elif not exploded and tt > 6.5 and not launch_done:
 		launch_done = true
 		main.go_faded("operation", 0.6, 0.8)
+
+
+## The player's rocket sheds what it built to shed: the boosters, then each lower stage at its separator.
+func _staging(tt: float) -> void:
+	var asm := rocket.find_child("Assembled", true, false) as Node3D
+	if asm == null:
+		return
+	var b := asm.get_node_or_null("Boosters") as Node3D
+	if b and tt > 2.6:
+		_drop(b, Vector3(0, -0.4, 0))
+		for f in rocket.get_node("Flames").get_children():
+			if f.has_meta("booster"):
+				f.queue_free()
+	var s0 := asm.get_node_or_null("Stage0") as Node3D
+	if s0 and asm.get_child_count() > 1 and tt > 4.2:
+		_drop(s0, Vector3(0, -0.8, 0))
+		var flames := rocket.get_node("Flames") as Node3D
+		flames.position.y = rocket.get_meta("stage1_y", 0.0)
+		sep_at = tt
+		big.add_theme_font_size_override("font_size", 64)
+
+
+func _drop(n: Node3D, vel: Vector3) -> void:
+	var xf := n.global_transform
+	n.get_parent().remove_child(n)
+	world.stage.add_child(n)
+	n.global_transform = xf
+	dropped.append([n, vel, randf_range(-0.6, 0.6), 0.0])
+
+
+func _fall(delta: float) -> void:
+	for d in dropped.duplicate():
+		var n: Node3D = d[0]
+		if not is_instance_valid(n):
+			dropped.erase(d)
+			continue
+		d[3] += delta
+		d[1] += Vector3(0, -3.0, 0) * delta
+		n.global_position += d[1] * delta
+		n.rotate_z(d[2] * delta)
+		if d[3] > 5.0:
+			n.queue_free()
+			dropped.erase(d)
 
 
 func _explode() -> void:

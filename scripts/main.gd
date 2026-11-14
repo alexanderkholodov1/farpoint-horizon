@@ -1,6 +1,6 @@
 extends Node3D
 ## Farpoint HORIZON. The flow controller: it owns the 3D world and the UI root, and switches screens.
-## Flow: menu -> team -> missions (CML 1) -> design (CML 2-4) -> launch -> operation -> report.
+## Flow: menu -> team -> missions (CML 1) -> design (CML 2-4, with the rocket builder) -> launch -> operation -> report.
 ## Each screen is a script in scripts/screens/ (see screen.gd); the shared state is the autoload GameState.
 
 const World := preload("res://scripts/world.gd")
@@ -13,6 +13,7 @@ const SCREENS := {
 	"team": preload("res://scripts/screens/team.gd"),
 	"missions": preload("res://scripts/screens/missions.gd"),
 	"design": preload("res://scripts/screens/design.gd"),
+	"builder": preload("res://scripts/screens/builder.gd"),
 	"launch": preload("res://scripts/screens/launch.gd"),
 	"operation": preload("res://scripts/screens/operation.gd"),
 	"report": preload("res://scripts/screens/report.gd"),

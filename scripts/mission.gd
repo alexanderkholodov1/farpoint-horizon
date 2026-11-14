@@ -3,6 +3,8 @@ extends RefCounted
 ## that the parts fit together and simulates the operation. Every text a player sees goes through tr().
 ## Margins used in the checks: mass 10 % and power 15 %, simplified from [S-gsfc-std-1000].
 
+const RocketDesign := preload("res://scripts/craft/rocket_design.gd")
+
 var scenario := "volcanes"
 var difficulty := "normal"
 var orbit := "sso"
@@ -55,7 +57,7 @@ func compute() -> Dictionary:
 	var C: Dictionary = GameData.COMMS[comms]
 	var A: Dictionary = GameData.ADCS[adcs]
 	var PR: Dictionary = GameData.PROPULSION[propulsion]
-	var L: Dictionary = GameData.LAUNCHERS[launcher]
+	var L: Dictionary = RocketDesign.launcher(launcher)  # a catalog launcher or the player's rocket
 	var D: Dictionary = GameData.DIFFICULTY[difficulty]
 	var r := {}
 
@@ -310,7 +312,7 @@ func simulate(seed_value: int = -1) -> Dictionary:
 	var S: Dictionary = GameData.SCENARIOS[scenario]
 	var B: Dictionary = GameData.BUSES[bus]
 	var O: Dictionary = GameData.ORBITS[orbit]
-	var L: Dictionary = GameData.LAUNCHERS[launcher]
+	var L: Dictionary = RocketDesign.launcher(launcher)  # a catalog launcher or the player's rocket
 	var A: Dictionary = GameData.ADCS[adcs]
 	var PR: Dictionary = GameData.PROPULSION[propulsion]
 	var D: Dictionary = GameData.DIFFICULTY[difficulty]
