@@ -1,6 +1,7 @@
 extends "res://scripts/screens/screen.gd"
 
 const RocketDesign := preload("res://scripts/craft/rocket_design.gd")
+const Bots := preload("res://scripts/crew/bots.gd")
 ## Design (CML 2-4): the eight steps of GameData.STEPS (orbit, platform, instruments, energy, communications, control
 ## and propulsion, launcher and lifetime, review), the mission dashboard on the right, and the "why it matters" box.
 ## args: {"step": index of GameData.STEPS} (default 0). Every change redraws the screen and refreshes the 3D craft.
@@ -14,12 +15,25 @@ var step_scroll: ScrollContainer
 
 
 func enter(args: Dictionary) -> void:
+	GameState.room.changed.connect(_on_room_changed)
 	show_step(args.get("step", 0))
+
+
+func exit() -> void:
+	if GameState.room.changed.is_connected(_on_room_changed):
+		GameState.room.changed.disconnect(_on_room_changed)
+
+
+## Somebody else changed the room (a teammate online, or the host's bots): draw the step again.
+func _on_room_changed(by_me: bool) -> void:
+	if not by_me and is_inside_tree():
+		show_step.call_deferred(step_idx)
 
 
 ## Draws the screen at step idx.
 func show_step(idx: int) -> void:
 	step_idx = idx
+	GameState.room.enter_step(GameData.STEPS[idx].id)   # the bot that holds this step's station decides now
 	clear()
 	info_title = null
 	info_text = null
@@ -62,8 +76,16 @@ func show_step(idx: int) -> void:
 	left.add_child(lv)
 	var R: Dictionary = GameData.ROLES[STEP.role]
 	lv.add_child(Kit.lbl(STEP.title, 26, Color.WHITE, Kit.FONT_T))
-	var turn: String = tr("%s decides · %s") % [GameState.player_for_role(STEP.role), R.name] if GameState.team_mode else tr("Role") + " · " + R.name
+	var room = GameState.room
+	var turn: String = (tr("%s (bot) · %s") if room.is_bot(STEP.role) else tr("%s decides · %s")) % [room.holder_name(STEP.role), R.name]
 	lv.add_child(Kit.lbl(turn, 14, R.color, Kit.FONT_B))
+	var said: Dictionary = room.state.bot_lines.get(STEP.id, {})
+	if room.is_bot(STEP.role) and STEP.id != "revision":
+		if said.has("line"):
+			lv.add_child(Kit.lbl(room.holder_name(STEP.role) + ": " + Bots.say(said.line), 14, Kit.C_TEXT, Kit.FONT_R, true))
+		lv.add_child(Kit.lbl(tr("A bot holds this station. Change anything you like, it will not mind."), 12, Kit.C_DIM, Kit.FONT_R, true))
+	elif not room.can_edit(STEP.role):
+		lv.add_child(Kit.lbl(tr("This is %s's station. You can watch their choices here.") % room.holder_name(STEP.role), 13, Kit.C_WARN, Kit.FONT_B, true))
 	step_scroll = ScrollContainer.new()
 	step_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	step_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -72,6 +94,13 @@ func show_step(idx: int) -> void:
 	step_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	step_scroll.add_child(step_box)
 	_fill_step(STEP.id, r)
+	if not room.can_edit(STEP.role):
+		step_box.modulate.a = 0.6
+		for c in step_box.find_children("*", "Control", true, false):
+			if c is Button:
+				c.disabled = true
+			elif c is PanelContainer:
+				c.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var nav := Kit.hbox(8)
 	lv.add_child(nav)
 	var prev := Kit.btn(tr("◀ Previous"), func(): show_step(max(0, idx - 1)))
@@ -118,8 +147,7 @@ func show_step(idx: int) -> void:
 
 ## After a choice: approvals are void, the craft is rebuilt (unless rebuild_3d is false), the screen redrawn.
 func on_change(rebuild_3d := true) -> void:
-	if not GameState.approvals.is_empty():
-		GameState.approvals = {}
+	GameState.room.design_edited(GameData.STEPS[step_idx].id)
 	if rebuild_3d:
 		world.rebuild_ship()
 	GameState.changed.emit()
@@ -280,34 +308,35 @@ func _fill_review(r: Dictionary) -> void:
 		v.add_child(Kit.lbl(icon + c.title, 15, col, Kit.FONT_B, true))
 		v.add_child(Kit.lbl(c.detail, 13, Kit.C_DIM, Kit.FONT_R, true))
 		step_box.add_child(pc)
-	section(tr("Team approval"), tr("Each role checks its goal and approves. If anyone changes the design, approval starts over.") if team_mode else tr("Check each role's goal, because meeting them adds team points."))
+	var room = GameState.room
+	section(tr("Crew sign-off"), tr("Every station checks its goal and signs off. If anyone changes the design, the sign-offs start over.") if team_mode else tr("The bots sign off by themselves. Your own sign-off is the launch button."))
 	for role in GameData.ROLE_ORDER:
 		var R: Dictionary = GameData.ROLES[role]
 		var ok: bool = r.goals[role]
-		var pc := PanelContainer.new()
-		pc.add_theme_stylebox_override("panel", Kit.flat(Kit.C_CARD, R.color.darkened(0.3), 8, 1, 10, 8))
+		var pc := Kit.tile(R.color, 10.0, 8.0)
 		var h := Kit.hbox(8)
 		pc.add_child(h)
 		var v := Kit.vbox(1)
 		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		h.add_child(v)
-		var who := (GameState.player_for_role(role) + " · ") if team_mode else ""
-		v.add_child(Kit.lbl(who + R.name, 14, R.color, Kit.FONT_B, true))
+		v.add_child(Kit.lbl(room.holder_name(role) + " · " + R.name, 14, R.color, Kit.FONT_B, true))
 		v.add_child(Kit.lbl(("✓ " if ok else "✗ ") + R.goal, 13, Kit.C_OK if ok else Kit.C_WARN, Kit.FONT_R, true))
-		if team_mode:
-			var approved: bool = GameState.approvals.get(role, false)
-			var b := Kit.btn(tr("Approved ✓") if approved else (tr("Approve") if ok else tr("Approve anyway")), func():
-				GameState.approvals[role] = not GameState.approvals.get(role, false)
-				GameState.changed.emit()
-				show_step(step_idx), 13)
-			if approved:
-				Kit.accent_btn(b, Kit.C_OK)
-			h.add_child(b)
+		var approved: bool = GameState.approvals.get(role, false)
+		var said: Dictionary = room.state.bot_lines.get("revision_" + role, {})
+		if room.is_bot(role) and said.has("line"):
+			v.add_child(Kit.lbl(Bots.say(said.line), 13, Kit.C_TEXT, Kit.FONT_R, true))
+		var b := Kit.btn(tr("Approved ✓") if approved else (tr("Approve") if ok else tr("Approve anyway")), func():
+			room.sign(role, not GameState.approvals.get(role, false))
+			show_step(step_idx), 13)
+		b.disabled = not room.can_edit(role) or room.is_bot(role)
+		if approved:
+			Kit.accent_btn(b, Kit.C_OK)
+		h.add_child(b)
 		step_box.add_child(pc)
 	if r.fatal:
 		step_box.add_child(Kit.lbl(tr("Fix the red items to launch."), 14, Kit.C_BAD, Kit.FONT_B, true))
-	elif team_mode and not GameState.all_approved():
-		step_box.add_child(Kit.lbl(tr("The whole team still has to approve."), 14, Kit.C_WARN, Kit.FONT_B, true))
+	elif not GameState.crew_ready():
+		step_box.add_child(Kit.lbl(tr("The whole crew still has to sign off."), 14, Kit.C_WARN, Kit.FONT_B, true))
 
 
 # ===================================================================================== DASHBOARD

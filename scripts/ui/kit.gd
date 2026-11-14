@@ -120,6 +120,13 @@ static func panel_box(pad := 16.0) -> PanelContainer:
 	return p
 
 
+## A card-like panel with a tinted border (a station's color, a status): the one place screens get that look from.
+static func tile(border: Color, pad_x := 12.0, pad_y := 10.0) -> PanelContainer:
+	var p := PanelContainer.new()
+	p.add_theme_stylebox_override("panel", flat(C_CARD, border.darkened(0.3), 8, 1, pad_x, pad_y))
+	return p
+
+
 static func vbox(sep := 8) -> VBoxContainer:
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", sep)

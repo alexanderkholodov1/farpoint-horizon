@@ -294,10 +294,10 @@ func _ck(level: String, title: String, detail: String) -> Dictionary:
 
 func role_goals(r: Dictionary) -> Dictionary:
 	return {
-		"director": r.reserve >= 0.10,
-		"cientifico": r.needs_frac >= 1.0 and r.expected_science >= 0.8 * r.science_target,
-		"ingeniero": r.mass_margin >= 0.10 and r.power_margin >= 0.15,
-		"operaciones": r.data_ratio >= 1.0 and r.life_years >= years,
+		"engineer": r.mass_margin >= 0.10 and r.power_margin >= 0.15 and r.reserve >= 0.10,
+		"scientist": r.needs_frac >= 1.0 and r.expected_science >= 0.8 * r.science_target,
+		"pilot": r.insertion_ok and r.launch_cap >= r.mass_total,
+		"ground": r.data_ratio >= 1.0 and r.life_years >= years,
 	}
 
 

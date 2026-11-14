@@ -11,8 +11,7 @@ func enter(_args: Dictionary) -> void:
 	box.add_child(Kit.lbl("Farpoint HORIZON", 66, Color.WHITE, Kit.FONT_T))
 	box.add_child(Kit.lbl(tr("Design, launch and operate your own space mission. Every decision has consequences, in mass, power, data, budget and time."), 18, Kit.C_DIM, Kit.FONT_R, true))
 	box.add_child(Kit.spacer(14))
-	box.add_child(Kit.accent_btn(Kit.btn(tr("▶  One player"), func(): _start_solo(), 20, 340), Kit.C_ACCENT))
-	box.add_child(Kit.accent_btn(Kit.btn(tr("Team (2 to 4 players)"), func(): go("team"), 20, 340), Color(0.5, 1.0, 0.6)))
+	box.add_child(Kit.accent_btn(Kit.btn(tr("▶  Play"), func(): go("team"), 20, 340), Kit.C_ACCENT))
 	box.add_child(Kit.spacer(4))
 	box.add_child(Kit.lbl(tr("Difficulty"), 14, Kit.C_DIM, Kit.FONT_B))
 	var dh := Kit.hbox(8)
@@ -49,8 +48,3 @@ func enter(_args: Dictionary) -> void:
 func _set_language(code: String) -> void:
 	GameData.set_language(code)
 	go("menu")
-
-
-func _start_solo() -> void:
-	GameState.start_solo()
-	go("missions")
