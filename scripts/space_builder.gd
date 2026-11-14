@@ -210,33 +210,37 @@ static func make_flame(scale: float) -> CPUParticles3D:
 	return p
 
 
+## Modeled launchers (assets/source/launchers.py): which model each launcher flies on, and each model's real height
+## in metres and the centre-to-centre offset of its side boosters, as printed by that script.
+const LAUNCHER_MODEL := {"ride": "medium", "light": "light", "medium": "medium", "heavy": "heavy"}
+const LAUNCHER_MODEL_INFO := {
+	"light": {"height": 17.9, "boosters": 0.0},
+	"medium": {"height": 70.9, "boosters": 0.0},
+	"heavy": {"height": 70.9, "boosters": 4.25},
+}
+
+
+## The launcher on the pad: its model, scaled to the size the launch screen frames (4.8 x the launcher's `height`),
+## with a `Flames` child for every engine cluster and the `height` meta. Origin at the base of the first stage.
 static func make_rocket(launcher_id: String) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Rocket"
 	var L: Dictionary = GameData.LAUNCHERS[launcher_id]
 	var h: float = L.height
-	if launcher_id == "ride":
+	if launcher_id == "ride":  # rideshare flies on a medium launcher, as before
 		h = 1.3
-	var r := 0.16 * h
-	var white := Ship.mat(Color(0.93, 0.93, 0.93), 0.1, 0.45)
-	var black := Ship.mat(Color(0.08, 0.08, 0.09), 0.3, 0.5)
-	var grey := Ship.mat(Color(0.35, 0.35, 0.37), 0.9, 0.4)
-	var s1 := 2.6 * h
-	var s2 := 0.9 * h
-	Ship.cyl(root, r, r, s1, Vector3(0, s1 / 2.0, 0), white)
-	Ship.cyl(root, r, r, 0.25 * h, Vector3(0, s1 + 0.125 * h, 0), black)
-	Ship.cyl(root, r, r, s2, Vector3(0, s1 + 0.25 * h + s2 / 2.0, 0), white)
-	var fz := s1 + 0.25 * h + s2
-	Ship.cyl(root, r * 1.15, r * 1.15, 0.5 * h, Vector3(0, fz + 0.25 * h, 0), white)
-	Ship.cyl(root, 0.0, r * 1.15, 0.55 * h, Vector3(0, fz + 0.5 * h + 0.275 * h, 0), white)
-	# aletas de rejilla y motores
-	for i in 4:
-		var a := i * PI / 2.0
-		Ship.box(root, Vector3(0.02, 0.18 * h, 0.14 * h), Vector3(cos(a) * r * 1.05, s1 - 0.2 * h, sin(a) * r * 1.05), black, Vector3(0, -rad_to_deg(a), 0))
-	Ship.cyl(root, r * 0.6, r * 0.95, 0.18 * h, Vector3(0, -0.09 * h, 0), grey)
+	var key: String = LAUNCHER_MODEL[launcher_id]
+	var info: Dictionary = LAUNCHER_MODEL_INFO[key]
+	var total := 4.8 * h
+	var k: float = total / float(info.height)
+	var model: Node3D = load("res://assets/models/launcher_%s.glb" % key).instantiate()
+	model.name = "Model"
+	model.scale = Vector3.ONE * k
+	root.add_child(model)
 	var flames := Node3D.new()
 	flames.name = "Flames"
 	root.add_child(flames)
+	var r := 0.16 * h
 	var f := make_flame(h)
 	f.position = Vector3(0, -0.2 * h, 0)
 	flames.add_child(f)
@@ -244,16 +248,12 @@ static func make_rocket(launcher_id: String) -> Node3D:
 	gm.shader = GLOW
 	var plume := Ship.cyl(flames, r * 0.7, r * 0.35, 1.2 * h, Vector3(0, -0.8 * h, 0), gm)
 	plume.name = "Plume"
-	if launcher_id == "heavy":
+	if float(info.boosters) > 0.0:
 		for sx in [-1, 1]:
-			var bx: float = sx * r * 2.1
-			Ship.cyl(root, r, r, s1, Vector3(bx, s1 / 2.0, 0), white)
-			Ship.cyl(root, 0.0, r, 0.4 * h, Vector3(bx, s1 + 0.2 * h, 0), white)
-			Ship.cyl(root, r * 0.6, r * 0.95, 0.18 * h, Vector3(bx, -0.09 * h, 0), grey)
 			var fb := make_flame(h)
-			fb.position = Vector3(bx, -0.2 * h, 0)
+			fb.position = Vector3(sx * float(info.boosters) * k, -0.2 * h, 0)
 			flames.add_child(fb)
-	root.set_meta("height", fz + 1.05 * h)
+	root.set_meta("height", total)
 	return root
 
 

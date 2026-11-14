@@ -29,6 +29,10 @@ the same texture-leak warnings at exit as on the lead's laptop. The safe mode is
 
 - `assets/models/cubesat_3u.glb`: a 3U CubeSat at real scale with four wings and four antennas that deploy (animation
   `deploy`), built from `assets/source/cubesat_3u.py`. Not yet used by any screen; see `assets/models/README.md`.
+- `assets/models/launcher_light|medium|heavy.glb`: modeled launchers at real proportions [S13-S15], built from
+  `assets/source/launchers.py`, now on the launch screen (`Space.make_rocket()`), replacing the primitive rocket at the
+  same size on the pad. Checked: `tools/check.sh` green, `tools/shots.sh` launch screenshots, and all three rendered
+  in Godot through `make_rocket()` (heights 3.84, 6.24, 7.2 as before; flames 2, 2, 4).
 
 ## The skeleton (Phase B of the plan)
 
@@ -74,3 +78,4 @@ integration; nobody edits this list by hand on a work branch.
   English by default with Spanish, no AI images, the service key kept out of git
 - 0.1.4: Skeleton B1, every screen in its own script, a small flow controller, `GameState` and the UI kit
 - 0.1.5: Parallel work: each piece on its own branch, pull requests allowed except into main, integration that checks the merged result before pushing; four stations with bots, NASA data and the look decided (`work/15-parallel-work`, 2026-11-14)
+- 0.1.6: Modeled launchers on the pad, light, medium and heavy, at real proportions and cited (`c7-launchers`, 2026-11-14)
