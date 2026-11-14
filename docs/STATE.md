@@ -15,16 +15,19 @@ screenshots; the only messages were GPU texture-leak warnings at exit. `tools/ch
 for 120 frames headless with no script errors, the fuzz test (600 random designs, all simulated), and the web export
 (`index.pck` 1.8 MB, `index.wasm` 37.7 MB raw, about 9.7 MB compressed).
 
-## Open problem (teammate's laptop)
+## Resolved: the teammate's laptop runs the game
 
-Asus VivoBook Go, integrated AMD Radeon, Windows, Godot 4.7.2 Steam. Version 1 (Forward+ with Vulkan) closed on start
-and the editor then asked for recovery mode. The project now uses `gl_compatibility` without 3D MSAA. **Not yet
-confirmed that the current version reaches the menu on that laptop.**
+Asus VivoBook Go, integrated AMD Radeon, Windows, Godot 4.7.2 Steam (in `Program Files (x86)`, now found by
+`tools/godot.sh`). Version 1 (Forward+ with Vulkan) closed on start; with `gl_compatibility` and no 3D MSAA it works.
+Checked on 2026-11-14 on branch `v0.2.0`: Godot reports `OpenGL API 3.3.0 Core Profile ... AMD Radeon(TM) Graphics`,
+every `[SKH]` startup step through `menu listo` and the first frames print, 600 frames in a window end with exit 0;
+`tools/shots.sh` produced all 16 screenshots (menu and launch looked at); `tools/check.sh` passed. The only messages are
+the same texture-leak warnings at exit as on the lead's laptop. The safe mode is no longer needed for this laptop.
 
-How to investigate:
-- Log: `%APPDATA%\Godot\app_userdata\SK Horizon - Mission Architect\logs\godot.log`.
-- `main.gd` prints `[SKH]` trace lines at each startup step (stdout is flushed on every print). The last line shows where it stops.
-- If it still crashes, suspects in order: the sky shader (`shaders/sky.gdshader`, star loops); clouds and atmosphere (transparency); `Environment` glow; `DirectionalLight3D` shadows; `CPUParticles3D`. Disable them one by one. A "safe mode" that turns them all off would help.
+## Models (C7, branch `c7-models`)
+
+- `assets/models/cubesat_3u.glb`: a 3U CubeSat at real scale with four wings and four antennas that deploy (animation
+  `deploy`), built from `assets/source/cubesat_3u.py`. Not yet used by any screen; see `assets/models/README.md`.
 
 ## Who owns what
 
@@ -34,7 +37,6 @@ files. The shared contracts (`scripts/game_data.gd` formats, `scripts/mission.gd
 
 ## Pending
 
-- Confirm the open problem above, or implement the safe mode.
 - Rebuild as v0.2.0 per `docs/design/vision.md`: stronger plot and game design, better 3D models, a more distinctive UI, web export, Firebase hosting and online multiplayer, complete mission (build, orbit, reach target, land), several mission types.
 - Cite every formula and value at its definition in `scripts/game_data.gd` and `scripts/mission.gd`, and in `kb/data/reference.json`.
 - Interface language: v0.1.0 text is Spanish; the team decided that the game and every material are in English (`kb/decisions.md`).

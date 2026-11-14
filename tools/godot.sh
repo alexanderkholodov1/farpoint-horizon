@@ -6,6 +6,7 @@ find_godot() {
   if command -v godot >/dev/null 2>&1; then command -v godot; return; fi
   for c in \
     "/c/Program Files/Steam/steamapps/common/Godot Engine/godot.windows.opt.tools.64.exe" \
+    "/c/Program Files (x86)/Steam/steamapps/common/Godot Engine/godot.windows.opt.tools.64.exe" \
     "$HOME/.steam/steam/steamapps/common/Godot Engine/godot.x11.opt.tools.64" \
     "$HOME/.local/share/Steam/steamapps/common/Godot Engine/godot.linuxbsd.editor.x86_64" \
     "$HOME/godot/godot"; do
