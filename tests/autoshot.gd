@@ -99,6 +99,25 @@ func _ready() -> void:
 	g.overlay("howto")
 	await wait(0.5)
 	await shot("16_howto")
+	# The crew (issue #5): the lobby, the stations, a bot's choice and the crew sign-off
+	g.go("team")
+	await wait(0.5)
+	await shot("30_lobby")
+	g.go("team", {"view": "solo"})
+	await wait(0.5)
+	await shot("31_pick_station")
+	GameState.start_solo("pilot")
+	GameState.start_mission("volcanes")
+	g.world.stage_design()
+	g.go("design", {"step": 1})
+	await wait(1.2)
+	await shot("32_bot_choice")
+	for i in range(2, 8):   # the bots decide their steps as the crew reaches them
+		g.go("design", {"step": i})
+		await wait(0.4)
+	await wait(0.8)
+	await shot("33_crew_signoff")
+	GameState.start_solo()
 	# The rocket builder (issue #6): the launcher step, the builder, a part that snaps, the player's rocket flying
 	var RD := preload("res://scripts/craft/rocket_design.gd")
 	RD.current = null

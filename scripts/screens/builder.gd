@@ -26,8 +26,9 @@ func enter(args: Dictionary) -> void:
 	design = RocketDesign.current.copy() if RocketDesign.current != null else RocketDesign.from_preset("medium")
 	world.clear_stage()
 	var env: Environment = world.world_env.environment
-	env.sky = Space.make_day_sky()
-	env.ambient_light_energy = 0.9
+	Space.apply_day(env)
+	world.cam.far = 6000.0
+	env.ambient_light_energy = 0.6
 	world.sun.rotation_degrees = Vector3(-42, -35, 0)
 	world.stage.add_child(Space.make_pad())
 	world.cam_free = true
@@ -205,7 +206,7 @@ func _rebuild(snap: bool) -> void:
 	if model and is_instance_valid(model):
 		model.queue_free()
 	model = Node3D.new()
-	model.position = Vector3(0, 0.2, 0)
+	model.position = Vector3(0, Space.PAD_TOP, 0)
 	world.stage.add_child(model)
 	var assembled: Node3D = design.build_model()
 	assembled.scale = Vector3.ONE * SCALE

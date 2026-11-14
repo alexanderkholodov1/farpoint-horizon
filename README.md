@@ -111,7 +111,7 @@ No watermarks are used. Instead, every source (information, formula, data) is ci
 
 - Engine: [Godot Engine](https://godotengine.org) (MIT).
 - Font: Inter by Rasmus Andersson, [SIL Open Font License 1.1](https://rsms.me/inter/) (see `fonts/FONTS_LICENSE.txt`).
-- Earth texture (`textures/earth_albedo.jpg`): the previous README says the team generated it from a public land and ocean mask (the `global-land-mask` package, NOAA GLOBE data). No file in the repository states this, so it is **TODO: confirm the source and license with the teammate**.
+- Earth and Moon textures: NASA Blue Marble, Black Marble, VIIRS and the SVS CGI Moon Kit, made by `assets/source/planet_textures.py` (sources S-gibs-earth and S-moon-kit in `docs/sources.md`); the old `earth_albedo.jpg` of unknown source is gone.
 - Spacecraft and space scenes are built in code from Godot primitives and shaders (`scripts/`, `shaders/`); this was not independently checked for third-party assets.
 
 ## Team

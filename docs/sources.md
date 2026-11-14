@@ -130,11 +130,31 @@ branches add entries at the same place (`.gitattributes`).
 - **S-capstone** Wikipedia. *CAPSTONE*. https://en.wikipedia.org/wiki/CAPSTONE. A 12U CubeSat in lunar orbit, 2022 (shown in
   the report of a lunar CubeSat mission).
 
+## The look: Earth, Moon, the Andes and the launch site (issue 12; scripts in `assets/source/`)
+- **S-moon-kit** NASA Goddard Space Flight Center, Scientific Visualization Studio. *CGI Moon Kit* (2019).
+  https://svs.gsfc.nasa.gov/4720. LRO LROC WAC colour map (`lroc_color_2k.jpg`, colour enhanced from LROC and Kaguya) and
+  LOLA elevation (`ldem_4.tif`); the game's Moon colour and relief (`textures/moon_color.jpg`, `moon_normal.jpg`, made by
+  `assets/source/planet_textures.py`). Credit: "NASA/GSFC/Scientific Visualization Studio, LRO". NASA media guidelines.
+- **S-gibs-earth** NASA GIBS WMS (see S-gibs), whole globe at 4096 x 2048: `BlueMarble_NextGeneration` and
+  `BlueMarble_ShadedRelief` (August 2004, NASA Earth Observatory, Reto Stockli, MODIS), `VIIRS_Black_Marble` (2016,
+  Suomi NPP VIIRS) and `VIIRS_SNPP_CorrectedReflectance_TrueColor` of 2024-08-31 (the day of the volcano photos). The
+  Earth by day, its relief, its city lights and its clouds (`textures/earth_*.jpg`, `assets/source/planet_textures.py`).
+  Replaces `textures/earth_albedo.jpg`, whose source was unknown. Credit: "NASA Earth Observatory / NASA GIBS".
+- **S-terrain-tiles** Mapzen/Tilezen. *Terrain Tiles* on the Registry of Open Data on AWS,
+  https://registry.opendata.aws/terrain-tiles/ (terrarium encoding), which in the Andes is NASA SRTM elevation (NASA/
+  USGS, public domain); attribution as the registry asks. Sixteen zoom-11 tiles around Cotopaxi; the launch site's
+  relief (`textures/terrain_cotopaxi.png`, `assets/source/terrain_cotopaxi.py`). Our check: the summit comes out at
+  5,876 m against the published 5,897 m.
+- **S-cotopaxi-belts** Our simplification of the altitude belts painted on that relief: valley farmland, paramo grass
+  from about 3,500 m, volcanic sand from about 4,500 m, glacier from about 4,850 m (`shaders/terrain.gdshader`). To be
+  checked against a published source; the glacier line of Cotopaxi is near 4,800-5,000 m in recent surveys.
+- The launch site (`assets/source/launch_site.py`) and the craft components (`assets/source/craft_kit.py`) are our own
+  models after photographs of the East Coast pads and of real spacecraft hardware; their sizes are our estimates.
+
 ## Still to add
 - The sources of `data/*.json` are listed above. Each value of an entry that mixes sources still has to be checked
   against the agency page (the catalogs cite the family of sources and say what they simplify; the values are rounded
   and not yet checked one by one).
-- The source and license of `textures/earth_albedo.jpg`.
 - The fonts, the engine and every library, model, image and sound, with their licenses.
 
 ## NASA data used by the mission photos and the route numbers (issue 19; pipeline in `tools/data/`)

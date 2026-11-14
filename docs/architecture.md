@@ -16,7 +16,12 @@ code on 2026-11-14.
 | `scripts/ui/kit.gd` | 256 | The UI kit, all static: colors `C_*`, fonts `FONT_R/B/T`, `build_theme()`, `flat()` style boxes, `place()` anchors, `lbl`, `btn`, `accent_btn`, `panel_box`, `vbox`, `hbox`, `spacer`, `card`, `toast`, `overlay`, and number formatting `pct`, `money`, `kg`, `watts`, `gb`, `mins` |
 | `scripts/screens/screen.gd` | 51 | The base every screen and overlay extends: `enter(args)`, `exit()`, `process(delta)`, `go()`, `clear()`, `toast()`; the members `main`, `world`, `mission` and the constants `Kit`, `World` |
 | `scripts/screens/menu.gd` | 42 | Main menu: one player or a team, difficulty, how to play, ranking |
-| `scripts/screens/team.gd` | 75 | Team setup: number of players, then names and roles (`ROLE_SPLIT`). `args.players` opens the names step |
+| `scripts/screens/team.gd` | 270 | The lobby: Solo (pick a station), Same screen (names and who holds which station) and Online (create or join a room, then the room view with the four stations). `args.view` or `args.players` |
+| `scripts/net/room.gd`, `room_local.gd`, `room_online.gd` | | The Room (below) |
+| `scripts/net/transport_web.gd`, `transport_memory.gd` | | The online room's two links: Firebase through the page (`web/room_bridge.js`), and an in-memory one for tests |
+| `scripts/crew/bots.gd` | | The crew's bots (below) |
+| `web/room_bridge.js`, `web/build_head.py` | | The page's JavaScript for Firebase; `build_head.py` writes it into the Web preset's `html/head_include` (Godot's export copies only `index.html`) |
+| `database.rules.json` | | Realtime Database rules: only `rooms/<code>` |
 | `scripts/screens/missions.gd` | 51 | Choice of the scenario (CML 1) |
 | `scripts/screens/design.gd` | 378 | The eight design steps (CML 2-4), the review with the team's approvals, the mission dashboard, the "why it matters" box. `args.step` is the step |
 | `scripts/screens/launch.gd` | 121 | Countdown, liftoff from the pad, ascent or the launcher's failure; it drives the camera itself |
@@ -30,7 +35,7 @@ code on 2026-11-14.
 | `scripts/space_builder.gd` | 282 | Sky, Earth (texture and an Ecuador marker), procedural Moon, orbit rings, rocket, launch pad with Andean volcanoes, particles, `Label3D` |
 | `shaders/` | | `earth`, `clouds`, `atmosphere`, `moon`, `sky`, `solar_cell`, `engine_glow`, and the include `noise.gdshaderinc` |
 | `fonts/` | | Inter Regular, SemiBold and Display Bold, with `FONTS_LICENSE.txt` |
-| `textures/` | | `earth_albedo.jpg` |
+| `textures/` | | `earth_day/night/relief/clouds.jpg`, `moon_color/normal.jpg`, `terrain_cotopaxi.png` (NASA data, made by `assets/source/planet_textures.py` and `terrain_cotopaxi.py`) |
 | `tests/fuzz.gd` | 34 | 600 random designs across all scenarios (see below) |
 | `tests/autoshot.gd`, `tests/autoshot.tscn` | 97, 6 | Automatic walkthrough that saves screenshots |
 
@@ -105,8 +110,8 @@ fields as its neighbors, cite the source, and run `tools/check.sh`. New sources 
 | `propulsion.json` | `name`, `desc`, `dv` (m/s the craft carries), `mass_pct`, `cost_pct` (of the dry craft), `electric` |
 | `orbits.json` | `name`, `short`, `desc`; `period_min`, `eclipse_min`, `eclipse_frac`, `contact_min` (per day), `comm_factor` (signal loss), `insert_dv`, `maint_dv` (per year), `drag_life` (years without propulsion, 999 means no drag), `radiation` (1 to 3), `body`, `radius`, `incl` (3D drawing), `ops` (operations cost per year) |
 | `launchers.json` | `name`, `desc`; `cap` (orbit id to kg it can carry, 0 means it cannot go), `cost`, `cost_per_kg`, `min_cost` (M$), `fail`, `delay` (chances), `height` (3D) |
-| `roles.json` | `order` (the roles in turn order) and entries with `name`, `goal`, `why`, `color` |
-| `steps.json` | `entries` is a list: `id`, `title`, `role`, `cml` (the maturity level the step reaches) |
+| `roles.json` | The four stations: `order` (engineer, scientist, pilot, ground) and entries with `name`, `goal`, `why`, `color` |
+| `steps.json` | `entries` is a list: `id`, `title`, `role` (the station that decides it), `cml` (the maturity level the step reaches) |
 | `difficulty.json` | `name`, `desc`, `budget`, `events`, `launch_fail` (multipliers) |
 | `labels.json` | `size_names` and `cml_names` (number to name) |
 
@@ -133,14 +138,54 @@ The autoload `GameState` (`scripts/game_state.gd`) holds what lives across scree
 |---|---|
 | `mission` | The `Mission` being designed (`scripts/mission.gd`); `start_mission(scenario)` replaces it with the scenario's starting parts and keeps the difficulty |
 | `difficulty` | The difficulty id of `GameData.DIFFICULTY`; it is stored in `mission.difficulty` because the numbers use it |
-| `players`, `team_mode` | The team: `[{"name", "roles"}]`; `team_mode` is true for 2 to 4 players. `start_solo()`, `set_team(list)`, `player_for_role(role)` |
-| `approvals` | Role id to true once that role signed off the design; any design change clears it. `all_approved()`, `approve_all()` |
+| `room` | The shared state of the crew (the Room, below). Every screen reads and changes crew state through it |
+| `players`, `team_mode` | The people (not bots) as `[{"name", "roles"}]`, rebuilt from the room; `team_mode` is true with two or more people or online. `start_solo(station)`, `start_crew(mode, humans)`, `new_online_room()`, `player_for_role(station)` |
+| `approvals` | Station id to true once that station signed off (the room's state); setting `{}` clears it; any design change clears it. `crew_ready()`, `all_approved()`, `approve_all()` |
 | `phase` | The id of the current screen, set by `main.go()` |
-| `last_report`, `last_sim` | `mission.compute()` and `mission.simulate()` of the last launch (`begin_flight(r)`); the sim holds events, timeline, months and `score` |
+| `last_report`, `last_sim` | `mission.compute()` and `mission.simulate()` of the last launch (`begin_flight(r, seed)`); the sim holds events, timeline, months and `score` |
 | `ranking`, `saved_to_ranking` | Local ranking in `user://ranking.json`, best first; `add_ranking()` saves it |
 
 It emits `changed` whenever its methods or setters change something; a screen that edits `mission` directly emits it
-after the edit (`design.gd` does in `on_change()`). Nothing listens yet; the shared room (plan step B3) will.
+after the edit (`design.gd` does in `on_change()`). The room's `changed` makes `GameState` copy the shared design into `mission`.
+
+## The room and the stations
+
+**Stations.** Four, in `data/roles.json`: engineer (platform, power, launcher), scientist (instruments), pilot (orbit,
+control and propulsion, the review's launch call) and ground control (communications). `data/steps.json` gives each
+step its `role`. A station is held by a person or by its bot (Rivet, Quark, Skip, Echo).
+
+**The Room** (`scripts/net/room.gd`) is the one interface for shared state. Screens call `submit(op)` (shortcuts:
+`take`, `release`, `sign`, `design_edited(step)`, `enter_step(step)`, `start_design`, `request_launch`) and read
+`state`, whose shape is at the top of `room.gd`; `changed(by_me)` fires after every change. Two implementations:
+`RoomLocal` (same screen and solo, no network, always used in the editor and on desktop) and `RoomOnline`
+(Firebase Realtime Database; `TransportWeb` in the browser, `TransportMemory` in tests).
+
+**Authority.** The host (the room's creator; the only machine in a local room) runs `apply_op`, the bots and the
+rules, and is the only one that writes `rooms/<code>/state`. A guest writes its op under `rooms/<code>/ops` and
+mirrors `state`; the host reads the op, applies it and deletes it. A guest's edit therefore shows up after a round trip
+(about 0.2 s measured with the emulator). Members are `rooms/<code>/members/<pid>` with `onDisconnect().remove()`: when a
+guest's tab closes, the host hands its stations back to the bots. If the host leaves, the room stops (guests keep their
+last state). On a launch, the room carries one seed, so every machine flies the same random events; the flight itself
+runs locally on each machine (the pilot's inputs are not shared yet).
+
+**Rules** (`database.rules.json`, deployed by the lead with `firebase deploy --only database`): nothing readable or
+writable except `rooms/<code>` (code 4 to 6 capitals or digits, so rooms cannot be listed), `state` a string of at most
+20,000 characters, `host` write-once, `members` and `ops` with fixed fields and sizes, no other child. What they cannot
+prevent without sign-in: anyone who knows a code can read and write that room (a guest could publish a false state or
+delete the room), and ops are not limited in number. The code is the only key; rooms are not secret.
+
+**Bots** (`scripts/crew/bots.gd`). When a step is shown (`room.enter_step`), the host's bot of that step's station plans
+the design from that step on over a copy, using `Mission.compute()` as the judge (the smallest platform on which the
+plan closes with 10 % reserve, the cheapest panels, radio, propulsion and rocket that meet the numbers), adopts only
+its own fields, and records one line in `state.bot_lines`. A step a person edited is never touched again. At the review
+every bot signs unless something is red, with a line. Lines are English msgids with id arguments, translated by each
+reader. Data is in `data/*.json`; the bot adds no numbers of its own except the margins it asks for (20 % power, 15 %
+data, 10 % reserve), which are our own game choices.
+
+**Testing online.** `tests/room.gd` (host and guest over the in-memory transport, bots, sign-off, launch) and
+`tests/crew.gd` (the bots launch every scenario). Against the real database code: start `firebase emulators:start
+--only database --project demo-farpoint`, serve `build/web`, and open two pages with `?emulator=127.0.0.1:9000`
+(done with Playwright and headless Edge, `--use-angle=swiftshader`).
 
 ## GDScript notes
 

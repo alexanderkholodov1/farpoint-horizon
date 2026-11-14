@@ -15,7 +15,7 @@ var GS: Node
 ## Texts that are the same in every language on purpose.
 const SAME := ["Farpoint HORIZON", "NASA SPACE APPS CHALLENGE 2026", "SK Horizon", "● Ecuador", "CubeSat", "CubeSat 3U", "CubeSat 6U",
 	"CubeSat 12U", "SmallSat (~200 kg)", "Ranking", "Normal", "CML 1 · Idea", "L2", "GEO", "LEO", "SSO", "English", "Español", "Ka band high gain",
-	"UHF radio", "Magnetómetro", "CML 4", "SAR"]
+	"UHF radio", "Magnetómetro", "CML 4", "SAR", "Solo", "Bot · Rivet", "Bot · Quark", "Bot · Skip", "Bot · Echo"]
 
 var main_node: Node
 
@@ -64,6 +64,8 @@ func _play() -> Dictionary:
 	await _visit("menu", {}, texts)
 	await _visit("team", {}, texts)
 	await _visit("team", {"players": 3}, texts)
+	await _visit("team", {"view": "solo"}, texts)
+	await _visit("team", {"view": "online"}, texts)
 	for sc in GD.SCENARIOS:
 		GS.start_mission(sc)
 		if sc == "volcanes":

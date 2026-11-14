@@ -587,3 +587,78 @@ Bullseye burn,Encendido perfecto
 "End the burn toward the Moon within 1 % of the speed it needs, so no correction is needed on the way.","Termina el encendido hacia la Luna a menos del 1 % de la velocidad que necesita, para no tener que corregir en el camino."
 Ride the marker,Sigue la marca
 "Fly the climb yourself and keep the rocket within 5 degrees of the guidance marker, on average, all the way to orbit.","Vuela tú el ascenso y mantén el cohete a menos de 5 grados de la marca de guiado, en promedio, hasta la órbita."
+Engineer,Ingeniero/a
+Scientist,Científico/a
+Pilot,Piloto
+Ground control,Control de tierra
+"Mass margin ≥ 10 %, power margin ≥ 15 % and a budget reserve ≥ 10 %","Margen de masa ≥ 10 %, margen de energía ≥ 15 % y reserva de presupuesto ≥ 10 %"
+"Designs grow as they get built, and margins soak up the surprises; real missions almost always cost more than planned.",Los diseños crecen al construirse y los márgenes absorben las sorpresas; las misiones reales casi siempre cuestan más de lo planeado.
+"Reach the orbit with the fuel on board, on a rocket that can carry the craft","Llegar a la órbita con el combustible a bordo, en un cohete que pueda cargar la nave"
+A route that does not close on paper will not close in flight: the burns and the rocket have to add up.,Una ruta que no cierra en el papel no cerrará en vuelo: los encendidos y el cohete tienen que sumar.
+Your crew,Tu tripulación
+"A mission is a team effort. You have four stations: engineer, scientist, pilot and ground control. Friends take the stations they like, and bots take the rest, so you never fly alone.","Una misión es trabajo en equipo. Tienes cuatro estaciones: ingeniería, ciencia, piloto y control de tierra. Tus amigos toman las que quieran y los bots toman el resto, así que nunca vuelas solo."
+Solo,Solo
+Same screen,Misma pantalla
+Online,En línea
+You take one station. Three bots take the others and work with you.,Tomas una estación. Tres bots toman las otras y trabajan contigo.
+"Two to four people on one computer, passing the screen. Free stations get a bot.","De dos a cuatro personas en un computador, pasándose la pantalla. Las estaciones libres reciben un bot."
+"Create a room, share its code, and up to four friends join from their own browsers.","Crea una sala, comparte su código y hasta cuatro amigos se unen desde sus navegadores."
+Pick your station,Elige tu estación
+"You run one station. The bots take the other three, and you can open any station and change what a bot chose.",Manejas una estación. Los bots toman las otras tres y puedes abrir cualquier estación y cambiar lo que eligió un bot.
+Take this station,Tomar esta estación
+Decides,Decide
+Type your names and choose who takes each station. Pass the screen when it is your station's turn. Stations nobody takes are held by a bot.,Escribe tus nombres y elige quién toma cada estación. Pasen la pantalla cuando sea el turno de su estación. Las estaciones que nadie toma las ocupa un bot.
+Bot,Bot
+Someone has to take at least one station.,Alguien tiene que tomar al menos una estación.
+Online room,Sala en línea
+One of you creates a room and shares its code. The others type it and join. Everybody picks a station; bots take the free ones.,Uno de ustedes crea una sala y comparte su código. Los demás lo escriben y se unen. Cada quien elige una estación; los bots toman las libres.
+Online rooms work in the web version of the game. This build can play solo or on one screen.,Las salas en línea funcionan en la versión web del juego. Esta versión puede jugar solo o en una misma pantalla.
+Your name,Tu nombre
+Create a room,Crear una sala
+or join a friend's room,o únete a la sala de un amigo
+Room code,Código de sala
+Join,Unirse
+Type the room code first.,Escribe primero el código de la sala.
+Room,Sala
+Share this code with your friends. Each one takes a station; the free ones stay with their bot.,Comparte este código con tus amigos. Cada uno toma una estación; las libres se quedan con su bot.
+In the room,En la sala
+connecting...,conectando...
+You,Tú
+Give it to the bot,Dárselo al bot
+◀ Leave,◀ Salir
+Pick the mission ▶,Elegir la misión ▶
+Waiting for the host to pick the mission...,Esperando a que el anfitrión elija la misión...
+Could not create a room. Try again.,No se pudo crear la sala. Inténtalo de nuevo.
+No room with that code.,No hay ninguna sala con ese código.
+The room is not reachable right now: ,No se puede llegar a la sala ahora mismo: 
+▶  Play,▶  Jugar
+%s (bot) · %s,%s (bot) · %s
+"A bot holds this station. Change anything you like, it will not mind.","Un bot ocupa esta estación. Cambia lo que quieras, no se molestará."
+This is %s's station. You can watch their choices here.,Esta es la estación de %s. Aquí puedes ver sus decisiones.
+Crew sign-off,Firma de la tripulación
+"Every station checks its goal and signs off. If anyone changes the design, the sign-offs start over.","Cada estación revisa su meta y firma. Si alguien cambia el diseño, las firmas empiezan de nuevo."
+The bots sign off by themselves. Your own sign-off is the launch button.,Los bots firman solos. Tu firma es el botón de lanzamiento.
+The whole crew still has to sign off.,Toda la tripulación todavía tiene que firmar.
+Search,Buscar
+"Build your own rocket, part by part ▶","Construye tu propio cohete, pieza por pieza ▶"
+Something in the review is still red. Fix it and I will sign right away.,Algo en la revisión sigue en rojo. Arréglalo y firmo de inmediato.
+"My goal is met. Signed, and I am already humming the countdown.","Mi meta está cumplida. Firmado, y ya estoy tarareando la cuenta regresiva."
+All my numbers are green. Signed. Let it fly.,Todos mis números están en verde. Firmado. Que vuele.
+"My goal is not fully met, but nothing blocks the launch, and flying teaches more than waiting. Signed.","Mi meta no está del todo cumplida, pero nada bloquea el lanzamiento y volar enseña más que esperar. Firmado."
+"Not perfect, and that is fine: there is no perfect design. Signed.",No es perfecto y está bien: no existe el diseño perfecto. Firmado.
+"I chose %s: for this goal it multiplies the science by %.1f. Fewer burns, fewer prayers.","Elegí %s: para esta meta multiplica la ciencia por %.1f. Menos encendidos, menos plegarias."
+"%s it is, with science at x%.1f. The best seat in the house for this goal.","Será %s, con la ciencia a x%.1f. El mejor asiento de la casa para esta meta."
+"I picked %s: the smallest platform where everything fits and the budget still sleeps. Bigger is not better, just heavier.","Escogí %s: la plataforma más pequeña donde todo cabe y el presupuesto aún duerme tranquilo. Más grande no es mejor, solo más pesado."
+%s. It carries what the mission needs and not a gram of ego.,%s. Lleva lo que la misión necesita y ni un gramo de ego.
+"No instrument is needed for this goal, so I left the shelf alone.","Esta meta no pide instrumentos, así que dejé el estante en paz."
+"I put on board: %s. They cover what the goal asks for, and nothing else wants a ride.",Subí a bordo: %s. Cubren lo que pide la meta y nadie más quiere viajar.
+On the list: %s. Each one earns its slot.,En la lista: %s. Cada uno se gana su espacio.
+"%s with %s: enough power for the whole mission, shadow included. Nobody likes working in the dark.","%s con %s: energía suficiente para toda la misión, sombra incluida. A nadie le gusta trabajar a oscuras."
+"Panels %s and battery %s. We keep the lights on, even behind the Earth.","Paneles %s y batería %s. Mantenemos las luces encendidas, incluso detrás de la Tierra."
+I chose %s: it sends down everything the instruments make. Data that never reaches Earth is data lost.,Elegí %s: envía todo lo que producen los instrumentos. Los datos que nunca llegan a la Tierra son datos perdidos.
+"%s, because the science only counts once Earth has heard it.","%s, porque la ciencia solo cuenta cuando la Tierra la ha escuchado."
+"I set %s for pointing and %s for the burns. Enough to arrive and stay, with a little to spare.","Puse %s para apuntar y %s para los encendidos. Suficiente para llegar y quedarnos, con un poco de sobra."
+"%s keeps us aimed and %s gets us there. Simple, and it fits.","%s nos mantiene apuntando y %s nos lleva. Simple, y cabe."
+"%s: the cheapest rocket that can lift us to this orbit, for %d year(s) of mission. We do not hire more rocket than we need.","%s: el cohete más barato que nos sube a esta órbita, para %d año(s) de misión. No contratamos más cohete del necesario."
+"%s is the one. It lifts the craft, it fits the wallet, and %d year(s) of work are ahead.","%s es el indicado. Sube la nave, cabe en el bolsillo y hay %d año(s) de trabajo por delante."
+Done.,Listo.

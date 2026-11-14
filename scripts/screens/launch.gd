@@ -43,20 +43,26 @@ var craft: Node3D
 var rocket_h := 6.0
 var old_far := 2000.0
 var cam_off := Vector3(-5.0, 2.0, 12.0)
+var smoke: CPUParticles3D       ## Steam and smoke thrown sideways at ignition (the look of #12).
 
 
 func enter(_args: Dictionary) -> void:
 	world.cam_free = false
 	world.clear_stage()
 	var env: Environment = world.world_env.environment
-	env.sky = Space.make_day_sky()
-	env.ambient_light_energy = 0.8
+	Space.apply_day(env)
+	env.ambient_light_energy = 0.55
+	world.cam.far = 6000.0
 	world.sun.rotation_degrees = Vector3(-50, -30, 0)
 	pad = Space.make_pad()
 	world.stage.add_child(pad)
 	rocket = Space.make_rocket(mission.launcher)
-	rocket.position = Vector3(0, 0.2, 0)
+	rocket.position = Vector3(0, Space.PAD_TOP, 0)
 	world.stage.add_child(rocket)
+	# the cloud of steam and smoke the deluge water and the exhaust throw sideways at ignition
+	smoke = Space.make_pad_smoke()
+	smoke.position = Vector3(1.0, 0.5, 0)
+	world.stage.add_child(smoke)
 	rocket_h = rocket.get_meta("height", 6.0)
 	old_far = world.cam.far
 	world.cam.far = 9000.0
@@ -110,6 +116,7 @@ func process(delta: float) -> void:
 	if rocket == null or not is_instance_valid(rocket):
 		return
 	phase_t += delta
+	smoke.emitting = (phase == "countdown" and phase_t > COUNTDOWN - 0.5) or (phase == "climb" and phase_t < 3.0)
 	match phase:
 		"countdown":
 			_countdown()
@@ -238,7 +245,7 @@ func _place_rocket() -> void:
 		if sky_m is ProceduralSkyMaterial:
 			sky_m.sky_top_color = Color(0.18, 0.4, 0.78).lerp(Color(0, 0, 0.02), k)
 			sky_m.sky_horizon_color = Color(0.62, 0.74, 0.88).lerp(Color(0.05, 0.08, 0.15), k)
-		env.ambient_light_energy = lerpf(0.8, 0.3, k)
+		env.ambient_light_energy = lerpf(0.55, 0.3, k)
 		if model.h > 55000.0:
 			in_space = true
 			env.sky = Space.make_space_sky()
@@ -413,18 +420,12 @@ func _explode(big_text: String, small_text: String) -> void:
 	GameState.flight_moment("launch_lost", {"t": roundi(model.t), "height_km": snappedf(model.h / 1000.0, 0.1)})
 	var pos: Vector3 = rocket.position + rocket.global_transform.basis.y * rocket_h * 0.4
 	rocket.visible = false
-	var boom := Space.make_flame(1.2 * rocket_h / 6.0)
+	var boom := Space.make_explosion()
 	boom.position = pos
-	boom.direction = Vector3.UP
-	boom.spread = 180.0
-	boom.one_shot = true
-	boom.explosiveness = 0.9
-	boom.amount = 220
-	boom.lifetime = 2.0
-	boom.initial_velocity_min = 2.0
-	boom.initial_velocity_max = 7.0
+	boom.scale = Vector3.ONE * maxf(rocket_h / 6.0, 0.6)
 	world.stage.add_child(boom)
-	boom.emitting = true
+	for e in boom.get_children():
+		(e as CPUParticles3D).emitting = true
 	world.stage.add_child(Scene3D.debris(pos, rocket_h * 0.06))
 	var flash := OmniLight3D.new()
 	flash.position = pos
