@@ -49,3 +49,26 @@ when the game or the pitch uses it.
   sources.
 - The source and license of `textures/earth_albedo.jpg`.
 - The fonts, the engine and every library, model, image and sound, with their licenses.
+
+## NASA data used by the mission photos and the route numbers (issue 19; pipeline in `tools/data/`)
+All checked 2026-11-14. NASA media are used under the NASA Media Usage Guidelines
+(https://www.nasa.gov/nasa-brand-center/images-and-media/): no NASA logo or insignia, no implied endorsement.
+- **S-gibs** NASA ESDIS, Global Imagery Browse Services (GIBS), NASA Worldview. Layers
+  `VIIRS_SNPP_CorrectedReflectance_TrueColor` and `VIIRS_SNPP_Thermal_Anomalies_375m_All` (instrument VIIRS on Suomi NPP,
+  a real twin of Volcano Watch), WMS https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi. Photos of Sangay,
+  Reventador and Cotopaxi, 2024-08-31, in `assets/mission_photos/volcano_watch/`. Credit: "NASA GIBS / Worldview,
+  VIIRS Suomi NPP". Our processing: hot-spot pixels enlarged and drawn in red.
+- **S-lroc-wac** NASA/GSFC/Arizona State University, Lunar Reconnaissance Orbiter Camera (LROC) Wide Angle Camera global
+  mosaic (100 m), served by NASA Moon Trek, https://trek.nasa.gov/tiles/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd_v02/1.0.0/WMTSCapabilities.xml.
+  Photos in `assets/mission_photos/moon_south_pole/`. Credit: "NASA/GSFC/Arizona State University, LRO". Our processing:
+  tiles joined and re-projected to a view from above the south pole.
+- **S-nasa-images** NASA Image and Video Library, https://images.nasa.gov (API https://images-api.nasa.gov), records
+  PIA00022 (Jupiter, Voyager 1), PIA01374 (Saturn, Voyager 1), PIA18182 (Uranus, Voyager 2), PIA00049 (Neptune,
+  Voyager 2); catalogued by NASA/JPL Photojournal. Photos in `assets/mission_photos/grand_tour/`. Credit: "NASA/JPL-Caltech".
+  Our processing: resized.
+- **S-horizons** NASA/JPL Solar System Dynamics. *Horizons System API*. https://ssd-api.jpl.nasa.gov/doc/horizons.html
+  (endpoint https://ssd.jpl.nasa.gov/api/horizons.api). Orbital elements of the eight planets at 2026-11-15 and the Moon
+  around the Earth for a month, in `data/nasa/horizons_*.json`. Credit: "NASA/JPL Horizons".
+- **S-nssdc-planets** NASA Space Science Data Coordinated Archive. *Planetary Fact Sheets*.
+  https://nssdc.gsfc.nasa.gov/planetary/factsheet/ . Mass, radius, gravity, escape velocity, orbit radius and day length
+  of the planets and the Moon, in `data/nasa/nssdc_factsheets.json`. Credit: "NASA NSSDC Planetary Fact Sheets".
