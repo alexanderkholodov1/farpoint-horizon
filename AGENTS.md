@@ -101,6 +101,10 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
   describe your piece in its issue and in your package's own notes). `docs/sources.md` only grows: add entries at the
   end of the right section with a short unique word as ID (`S-gibs-viirs`), never a new number; git keeps both sides
   when two branches add entries at the same place.
+- No shared lists: a piece adds its own files and never edits a list every piece edits, so parallel branches do not
+  conflict (issue #26). Its Spanish texts go in its own `i18n/<piece>.csv` (`keys,es`; `translations.csv` is the old
+  base and takes no new lines); a new screen is only `scripts/screens/<id>.gd`; a new test is only `tests/<name>.gd`
+  with a `## check: <pattern>` line. The game and `tools/check.sh` find them by folder.
 - Never rewrite, reformat or revert someone else's work, and never push to someone else's branch; ask in the issue,
   or propose your change with a pull request into their branch.
 - Leave every branch better than you found it: the game runs and the checks pass.
