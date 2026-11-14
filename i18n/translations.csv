@@ -516,3 +516,74 @@ Limit,Límite
 Margin %s,Margen %s
 %d year,%d año
 %d years,%d años
+STAGE,SEPARAR
+← → lean · W S throttle · Space stage,← → inclinar · W S potencia · Espacio separar
+Height,Altura
+Speed,Velocidad
+Speed toward orbit,Velocidad para la órbita
+Fuel in this stage,Combustible en esta etapa
+Stress on the structure,Esfuerzo en la estructura
+The bot pilot is flying. Touch the arrows or the throttle to take the controls.,El piloto bot está volando. Toca las flechas o la potencia para tomar los mandos.
+"Your rocket, your stick. Lean with ← → to keep the needle on the green marker, W and S move the throttle, Space drops what is empty.","Tu cohete, tus mandos. Inclina con ← → para mantener la aguja en la marca verde; W y S mueven la potencia; Espacio suelta lo que está vacío."
+Launching east from the equator: the Earth's spin gives you %d m/s for free.,Lanzando hacia el este desde el ecuador: el giro de la Tierra te regala %d m/s.
+The boosters are empty. Press STAGE to drop them and fly lighter.,Los propulsores laterales están vacíos. Pulsa SEPARAR para soltarlos y volar más ligero.
+This stage is empty! Press STAGE (Space) to drop it and light the next engine.,¡Esta etapa está vacía! Pulsa SEPARAR (Espacio) para soltarla y encender el siguiente motor.
+STAGE SEPARATION,SEPARACIÓN DE ETAPA
+The flight computer staged for you.,La computadora de vuelo separó la etapa por ti.
+LAUNCHER FAILURE,FALLA DEL LANZADOR
+"Not your flying. Rockets fail now and then, which is why their reliability matters.","No fue tu pilotaje. Los cohetes fallan de vez en cuando, por eso importa su fiabilidad."
+RAPID UNPLANNED DISASSEMBLY,DESARME RÁPIDO NO PLANIFICADO
+"Steer hard across the airflow at full speed and a rocket comes apart. Impressive, if that was the plan!","Gira fuerte contra el aire a toda velocidad y un cohete se desarma. ¡Impresionante, si ese era el plan!"
+The rocket came apart in flight,El cohete se desarmó en vuelo
+"The pilot swung the rocket hard across the airflow while the air pushed hardest, and it broke up. Spectacular, and the craft went with it.","El piloto giró el cohete con fuerza contra el aire justo cuando el aire empujaba más, y se partió. Espectacular, y la nave se fue con él."
+The flight computer is holding the marker for you. Steer any time to take over.,La computadora de vuelo sigue la marca por ti. Dirige cuando quieras para tomar el control.
+"Max-Q, the moment the air pushes hardest. Stay on the green marker or the stress climbs.","Max-Q, el momento en que el aire empuja más fuerte. Quédate en la marca verde o el esfuerzo sube."
+The air is thin now. Lean over flat: reaching orbit means flying sideways at about %.1f km/s.,El aire ya es muy delgado. Inclínate hasta quedar horizontal: llegar a órbita es volar de lado a unos %.1f km/s.
+STRESS!,¡ESFUERZO!
+Ease back toward the green marker.,Vuelve con suavidad hacia la marca verde.
+high,alto
+rising,subiendo
+calm,tranquilo
+BOOSTERS AWAY,PROPULSORES FUERA
+"Staging drops an empty tank and its engines, so the rest of the rocket is lighter and goes faster on the fuel it has left.","Separar una etapa suelta un tanque vacío y sus motores, así el resto del cohete es más ligero y acelera más con el combustible que le queda."
+"You are falling around the Earth, fast enough to keep missing it.","Estás cayendo alrededor de la Tierra, tan rápido que nunca llegas a tocarla."
+"The craft's own engine added the last %d m/s. You are falling around the Earth, fast enough to keep missing it.","El motor de la propia nave puso los últimos %d m/s. Estás cayendo alrededor de la Tierra, tan rápido que nunca llegas a tocarla."
+ORBIT!,¡ÓRBITA!
+Average distance from the marker %.1f degrees. Fuel left in the last stage %d %%.,Distancia media a la marca %.1f grados. Combustible restante en la última etapa %d %%.
+CRAFT AWAY,NAVE LIBERADA
+Your craft is on its own now.,Tu nave ya vuela por su cuenta.
+Autopilot on. It flies a clean climb; touch any control to fly it yourself.,Piloto automático activado. Hace un ascenso limpio; toca cualquier mando para volar tú.
+You have the controls.,Tienes los mandos.
+Needle on the green,Aguja en el verde
+Autopilot,Piloto automático
+Sound off,Sonido apagado
+Sound on,Sonido activado
+Autopilot on,Piloto automático activado
+UP,ARRIBA
+FLAT,HORIZONTAL
+"Ground here. We're go on that alarm, keep flying.","Aquí control de tierra. Seguimos adelante con esa alarma, sigue volando."
+Extra objective · %s,Objetivo extra · %s
+Ice at the Moon's South Pole,Hielo en el polo sur de la Luna
+Moon landing,Alunizaje
+"Lunar scientists and the crews planning the first Moon base ask you to land beside Shackleton crater. At the south pole the Sun never climbs more than 1.5 degrees above the horizon, so the crater's rim stays lit almost all the time while its floor has stayed dark for billions of years. Ice may hide in that dark, and ice means water to drink and fuel for rockets. Land on the sunlit rim, look into the shadow and tell Earth what is there.","Científicos lunares y las tripulaciones que planean la primera base en la Luna te piden alunizar junto al cráter Shackleton. En el polo sur el Sol nunca sube más de 1,5 grados sobre el horizonte, así que el borde del cráter está iluminado casi siempre mientras su fondo lleva miles de millones de años a oscuras. En esa oscuridad puede esconderse hielo, y el hielo es agua para beber y combustible para cohetes. Aluniza en el borde soleado, mira hacia la sombra y cuéntale a la Tierra qué hay allí."
+Look for ice in the shadows,Buscar hielo en las sombras
+Photograph the landing site,Fotografiar el sitio de alunizaje
+"Chandrayaan-3 (India, 2023) landed near the south pole, at 69 degrees south. IM-1 Odysseus (Intuitive Machines, 2024) landed at Malapert A, tipped onto its side and kept sending data. LRO's laser altimeter LOLA measured the ground you fly over, and ShadowCam photographed Shackleton's dark floor.","Chandrayaan-3 (India, 2023) alunizó cerca del polo sur, a 69 grados sur. IM-1 Odysseus (Intuitive Machines, 2024) alunizó en Malapert A, se volcó de lado y siguió enviando datos. El altímetro láser LOLA de LRO midió el terreno sobre el que vuelas, y ShadowCam fotografió el fondo oscuro de Shackleton."
+Program alarm 1202,Alarma de programa 1202
+"The guidance computer has more jobs than room to run them. On Apollo 11 it dropped the unimportant ones and kept steering, and Houston called go.","La computadora de guiado tiene más tareas que espacio para ejecutarlas. En el Apolo 11 dejó de lado las que no importaban y siguió guiando, y Houston dio luz verde."
+Look into the dark,Mirar en la oscuridad
+"Land within 300 m of the edge of the permanent shadow and photograph the crater floor that has not seen the Sun for billions of years, the way ShadowCam does from orbit.","Aluniza a menos de 300 m del borde de la sombra permanente y fotografía el fondo del cráter que no ha visto el Sol en miles de millones de años, como hace ShadowCam desde la órbita."
+Bullseye on the rim,"En el blanco, sobre el borde"
+"Touch down within 60 m of the target on Shackleton's sunlit rim, where the Sun shines almost all month long.","Toca suelo a menos de 60 m del objetivo en el borde soleado de Shackleton, donde el Sol brilla casi todo el mes."
+Never lose Earth,Nunca pierdas la Tierra
+"Keep Earth in view of the antenna through the whole descent. From the pole Earth hangs low on the horizon, so a hill or the crater wall can hide it.","Mantén la Tierra a la vista de la antena durante todo el descenso. Desde el polo la Tierra cuelga baja sobre el horizonte, así que una colina o la pared del cráter pueden taparla."
+Feather touch,Toque de pluma
+"Touch down slower than 1.5 m/s, gently enough not to spill a cup of coffee.","Toca suelo a menos de 1,5 m/s, tan suave que no se derrame una taza de café."
+Fuel for a hop,Combustible para un salto
+Land with a third of the lander's fuel left. Chandrayaan-3's lander used its spare fuel to rise 40 cm and land again a little farther on.,Aluniza con un tercio del combustible del módulo. El módulo de Chandrayaan-3 usó su combustible sobrante para elevarse 40 cm y volver a posarse un poco más allá.
+The bottom of the world,El fondo del mundo
+"Touch down within 250 m of the geographic south pole, 90 degrees south, the spot every line of longitude meets.","Toca suelo a menos de 250 m del polo sur geográfico, a 90 grados sur, el punto donde se juntan todas las líneas de longitud."
+Bullseye burn,Encendido perfecto
+"End the burn toward the Moon within 1 % of the speed it needs, so no correction is needed on the way.","Termina el encendido hacia la Luna a menos del 1 % de la velocidad que necesita, para no tener que corregir en el camino."
+Ride the marker,Sigue la marca
+"Fly the climb yourself and keep the rocket within 5 degrees of the guidance marker, on average, all the way to orbit.","Vuela tú el ascenso y mantén el cohete a menos de 5 grados de la marca de guiado, en promedio, hasta la órbita."
