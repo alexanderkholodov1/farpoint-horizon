@@ -51,7 +51,7 @@
     "S-sentinel5p",
     "S-aster"
    ],
-   "simplified": "Budget, science target, instrument relevance and orbit multipliers are our own game balance. The mission idea follows the real missions named in the entry."
+   "simplified": "Budget, science target, instrument relevance and orbit multipliers are our own game balance. The mission idea follows the real missions named in the entry. That Andean clouds cover the area most of the year is our assumption from the cloudy satellite passes the data pipeline had to skip (tools/data/README.md), not a climatology figure."
   },
   "clima": {
    "name": "Ocean Guardians and El Niño",
