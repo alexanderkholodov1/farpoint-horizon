@@ -19,10 +19,12 @@ var launcher := "ride"
 var years := 2
 var redundancy := false
 var shielding := false
+var extras_offered: Array = []   ## Extra objective ids drawn for this mission (data/objectives.json).
+var extras: Array = []           ## The ones the team goes for.
 
 const DOD := 0.6            # safe battery depth of discharge in low orbit, simplified from [S-ntrs-dod]
 const KEYS := ["scenario", "difficulty", "orbit", "bus", "instruments", "panels", "battery", "comms",
-	"adcs", "propulsion", "launcher", "years", "redundancy", "shielding"]
+	"adcs", "propulsion", "launcher", "years", "redundancy", "shielding", "extras_offered", "extras"]
 
 
 func to_dict() -> Dictionary:
@@ -487,7 +489,7 @@ func _discovery(working: Array, idx: int) -> Array:
 				if idx == 0:
 					return [tr("El Niño is coming!"), tr("The sea rose and warmed off the South American coast. The alert came months ahead, in time to prepare the Coast.")]
 				return [tr("Galápagos currents"), tr("You measured how the Humboldt current shifts around Galápagos, key data to protect its marine life.")]
-		"luna":
+		"luna", "moon_south_pole":
 			if tags.has("composicion") or tags.has("termico"):
 				return [tr("Possible ice in a polar crater"), tr("The data show hydrogen in a crater that never sees the Sun, a key resource for future lunar bases.")]
 			if tags.has("optico"):

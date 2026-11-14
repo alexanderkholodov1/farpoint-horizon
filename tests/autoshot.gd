@@ -17,6 +17,10 @@ func _ready() -> void:
 	g = load("res://scenes/main.tscn").instantiate()
 	add_child(g)
 	await wait(1.5)
+	if OS.get_cmdline_user_args().has("pilot"):
+		await _pilot()
+		get_tree().quit()
+		return
 	await shot("01_menu")
 	GameState.start_solo()
 	g.go("missions")
@@ -81,6 +85,7 @@ func _ready() -> void:
 	s.score = GameState.mission.score(GameState.last_report, s)
 	GameState.last_sim = s
 	g.go("launch")
+	g.screen.fail_at = 28.0
 	await wait(7.0)
 	await shot("13_explosion")
 	while g.screen_id != "report":
@@ -145,6 +150,39 @@ func _ready() -> void:
 	g.go("launch")
 	await wait(4.4)
 	await shot("22_custom_liftoff")
-	await wait(2.9)
+	await wait(2.0)
+	g.screen._on_stage()
+	await wait(0.9)
 	await shot("23_custom_separation")
+	await _pilot()
 	get_tree().quit()
+
+
+## The pilot's flight to the Moon's south pole (issue #8): the launch panel, the climb, staging, orbit.
+func _pilot() -> void:
+	var RD := preload("res://scripts/craft/rocket_design.gd")
+	RD.current = null
+	GameState.start_solo()
+	GameState.start_mission("moon_south_pole")
+	GameState.mission.from_dict({"bus": "medium", "instruments": ["cam_ms", "gamma"], "panels": "dep_m", "battery": "b1k", "comms": "ka", "adcs": "st", "propulsion": "chem", "launcher": "medium", "orbit": "lunar", "years": 1, "redundancy": true, "shielding": true})
+	GameState.begin_flight(GameState.mission.compute())
+	GameState.last_sim.launch_failed = false
+	g.go("launch")
+	await wait(1.2)
+	await shot("24_pilot_countdown")
+	await wait(4.0)
+	await shot("25_pilot_liftoff")
+	await wait(6.0)
+	await shot("26_pilot_maxq")
+	while g.screen_id == "launch" and g.screen.phase == "climb" and not g.screen.model.wants_stage():
+		await wait(0.2)
+	await wait(0.4)
+	await shot("27_pilot_stage_now")
+	await wait(4.0)
+	await shot("28_pilot_upper_stage")
+	while g.screen_id == "launch" and g.screen.phase == "climb":
+		await wait(0.2)
+	await wait(2.4)
+	await shot("29_pilot_orbit")
+	await wait(1.4)
+	await shot("30_pilot_craft_away")

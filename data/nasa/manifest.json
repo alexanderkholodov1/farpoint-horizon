@@ -142,5 +142,14 @@
   "date_checked": "2026-11-14",
   "processing": "resized to at most 1024 px; Neptune and its Great Dark Spot, Voyager 2, 1989; library record PIA00049, credit NASA/JPL",
   "bytes": 57209
+ },
+ {
+  "file": "data/nasa/lola_south_pole.json",
+  "mission": "moon_south_pole",
+  "source_id": "S-lola",
+  "query": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/img/ldem_875s_20m.img (HTTP range of lines 3592-4191); label https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/img/ldem_875s_20m.lbl",
+  "date_checked": "2026-11-14",
+  "processing": "12 km square around the south pole and the rim of Shackleton cut from the 20 m LOLA polar map, 3 x 3 pixels averaged to 60 m, numbers turned into metres with the label's scaling factor (0.5) and rounded to whole metres",
+  "bytes": 198976
  }
 ]

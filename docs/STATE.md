@@ -101,3 +101,4 @@ integration; nobody edits this list by hand on a work branch.
 - 0.1.13: Firebase Hosting: a temporary preview page for every pull request, production deployed only when the version pull request is merged (`work/13-firebase`, 2026-11-14)
 - 0.1.14: The room: four stations with bots on the free ones, a lobby for solo, same screen and online with a code, crew sign-off (`work/5-room`, 2026-11-14)
 - 0.1.15: A visual pass toward realism: NASA Earth and Moon, a modeled craft, the launch site on the real relief of Cotopaxi (`work/12-look`, 2026-11-14)
+- 0.1.16: The Moon's south pole mission with random extra objectives, and the launch flown by the pilot with throttle, guidance marker and staging; real LOLA terrain data for the landing (`work/8-pilot`, 2026-11-14)
