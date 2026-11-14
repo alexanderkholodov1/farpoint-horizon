@@ -68,6 +68,17 @@ the list below (`AGENTS.md`, "The cycle of a version"). Pull requests into branc
 
 ## Pending
 
+**Priority now (alexanderkholodov1, 2026-11-14): the mechanics before any more missions** (`AGENTS.md`, How we work).
+Everything that moves must behave as in real life, in real time with a visible time warp. Known wrong and being redone:
+- The flight to the Moon integrated in 0.1.18 (`scripts/screens/flight.gd`: the burn and the coast) is wrong (no
+  physics, wrong scale, no phasing, no stated time) and is being rebuilt on `work/8-pilot` (#8) with real two-body
+  physics, the Moon from JPL Horizons, planned departure, mid-course correction and lunar orbit capture. Do not build
+  on it until that lands.
+- The launch climb runs 8 times faster than real time without saying so (`TIME_SCALE` in `scripts/flight/ascent.gd`);
+  it moves to real time with the time warp of the flight panel (#8).
+- Other screens that show motion (the orbit views of `scripts/world.gd` used by the menu, the design and the
+  operation) must be checked against the same rule.
+
 - Rebuild as v0.2.0 per `docs/design/vision.md`: stronger plot and game design, better 3D models, a more distinctive UI, web export, Firebase hosting and online multiplayer, complete mission (build, orbit, reach target, land), several mission types.
 - Cite every formula and value at its definition in `scripts/game_data.gd` and `scripts/mission.gd`, and in `kb/data/reference.json`.
 - Interface language: v0.1.0 text is Spanish; the team decided that the game and every material are in English (`kb/decisions.md`).
@@ -106,3 +117,4 @@ integration; nobody edits this list by hand on a work branch.
 - 0.1.18: The flight to the Moon's south pole: the burn the pilot cuts by hand, the coast, and the landing on NASA's LOLA ground with long shadows, the 1202 alarm and touchdown grades; the extra objectives are settled at touchdown (`work/8-pilot`, 2026-11-14)
 - 0.1.19: No shared lists: screens, translations and tests are found by folder, and translations merge by union, so pieces built in parallel never conflict on them (`work/26-found-by-folder`, 2026-11-14)
 - 0.1.20: The UI theme with dark and light appearances, the horizon-arc logo and a formal menu, interface sounds (`work/12-ui`, 2026-11-14)
+- 0.1.21: Rules for every agent: real behavior and real time with a visible warp, true scale made readable, mechanics before more missions, judge it as a player before integrating (`work/27-agent-rules`, 2026-11-14)
