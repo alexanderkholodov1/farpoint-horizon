@@ -29,6 +29,7 @@ var root_ui: Control
 var fade_rect: ColorRect
 var screen: Screen          ## The current screen.
 var screen_id := ""
+var launching := false      ## A launch is fading in: a second click on the launch button does nothing.
 
 
 func _ready() -> void:
@@ -112,12 +113,16 @@ func fade(to: float, time: float) -> Tween:
 
 ## Launches GameState's mission if it can fly: records the flight (GameState.begin_flight) and fades to the launch.
 func launch() -> void:
+	if launching:
+		return
 	var r: Dictionary = GameState.mission.compute()
 	if not GameState.can_launch(r):
 		screen.toast(tr("Fix the red items first"), Kit.C_BAD)
 		return
+	launching = true
 	GameState.begin_flight(r)
-	go_faded("launch", 0.5, 0.6)
+	await go_faded("launch", 0.5, 0.6)
+	launching = false
 
 
 var _frames_traced := 0
