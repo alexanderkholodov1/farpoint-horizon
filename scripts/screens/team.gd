@@ -36,7 +36,7 @@ func _frame(w: float, h: float, title: String, intro: String) -> VBoxContainer:
 	add_child(p)
 	var v := Kit.vbox(10)
 	p.add_child(v)
-	v.add_child(Kit.lbl(title, 30, Color.WHITE, Kit.FONT_T))
+	v.add_child(Kit.lbl(title, 30, Kit.C_TEXT, Kit.FONT_T))
 	if intro != "":
 		v.add_child(Kit.lbl(intro, 15, Kit.C_DIM, Kit.FONT_R, true))
 	return v

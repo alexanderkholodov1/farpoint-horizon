@@ -75,7 +75,7 @@ func show_step(idx: int) -> void:
 	var lv := Kit.vbox(8)
 	left.add_child(lv)
 	var R: Dictionary = GameData.ROLES[STEP.role]
-	lv.add_child(Kit.lbl(STEP.title, 26, Color.WHITE, Kit.FONT_T))
+	lv.add_child(Kit.lbl(STEP.title, 26, Kit.C_TEXT, Kit.FONT_T))
 	var room = GameState.room
 	var turn: String = (tr("%s (bot) · %s") if room.is_bot(STEP.role) else tr("%s decides · %s")) % [room.holder_name(STEP.role), R.name]
 	lv.add_child(Kit.lbl(turn, 14, R.color, Kit.FONT_B))
@@ -139,7 +139,7 @@ func show_step(idx: int) -> void:
 	iv.add_child(info_title)
 	info_text = Kit.lbl(tr("Hover an option to see what it is and how it affects the mission. Drag to turn the craft, scroll to zoom."), 14, Kit.C_DIM, Kit.FONT_R, true)
 	iv.add_child(info_text)
-	var dims_lbl := Kit.lbl(tr("Platform") + " · " + GameData.BUSES[mission.bus].name + "  ·  " + Kit.kg(r.mass_total), 14, Kit.C_DIM, Kit.FONT_B)
+	var dims_lbl := Kit.lbl(tr("Platform") + " · " + GameData.BUSES[mission.bus].name + "  ·  " + Kit.kg(r.mass_total), 14, Color(Kit.C_ON_DARK, 0.8), Kit.FONT_B)
 	Kit.place(dims_lbl, 0, 0, 1, 0, 510, 84, -420, 110)
 	dims_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(dims_lbl)
@@ -342,7 +342,7 @@ func _fill_review(r: Dictionary) -> void:
 # ===================================================================================== DASHBOARD
 func _fill_dashboard(r: Dictionary) -> void:
 	var S: Dictionary = GameData.SCENARIOS[mission.scenario]
-	dash_box.add_child(Kit.lbl(tr("Mission board"), 20, Color.WHITE, Kit.FONT_T))
+	dash_box.add_child(Kit.lbl(tr("Mission board"), 20, Kit.C_TEXT, Kit.FONT_T))
 	_bar(tr("Budget"), tr("%s of %s") % [Kit.money(r.cost_total), Kit.money(r.budget)], r.cost_total / r.budget, 0.9, 1.0,
 		tr("Reserve %s") % Kit.pct(r.reserve) if r.reserve >= 0.0 else tr("Over budget!"), tr("Covers building, launch (%s) and operations for %d years (%s).") % [Kit.money(r.cost.launch), mission.years, Kit.money(r.cost.ops)])
 	var lim_txt := tr("platform %s · rocket %s") % [Kit.kg(r.mass_bus_max), Kit.kg(r.launch_cap) if r.launch_cap > 0.0 else tr("can't reach")]
