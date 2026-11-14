@@ -670,3 +670,61 @@ EARTH,TIERRA
 Sound,Sonido
 On,Activado
 Off,Apagado
+TO THE MOON,RUMBO A LA LUNA
+BURN,ENCENDER
+Space burn and cut · W S throttle,Espacio enciende y corta · W S potencia
+Speed added,Velocidad sumada
+The burn needs,El encendido necesita
+Burn toward the Moon,Encendido hacia la Luna
+Earth orbit,Órbita terrestre
+You are circling the Earth. Press BURN to fire the engine and head for the Moon; press CUT when the gauge reaches %d m/s.,Estás dando vueltas a la Tierra. Pulsa ENCENDER para prender el motor y salir hacia la Luna; pulsa CORTAR cuando el indicador llegue a %d m/s.
+The flight computer starts the burn for you.,La computadora de vuelo enciende el motor por ti.
+Engine on. Watch the gauge.,Motor encendido. Mira el indicador.
+"Ease the throttle down (S) as you near the mark, then press CUT (Space). Within 1 % is a perfect burn.","Baja la potencia (S) al acercarte a la marca y pulsa CORTAR (Espacio). Con menos de 1 % de error, el encendido es perfecto."
+"Hands off: the flight computer will cut the engine. It cuts a little late, to be safe.","Manos libres: la computadora de vuelo cortará el motor. Corta un poco tarde, por seguridad."
+PERFECT BURN,ENCENDIDO PERFECTO
+Off by %.1f %%. Straight to the Moon.,Error de %.1f %%. Directo a la Luna.
+A LITTLE SHORT,UN POCO CORTO
+Off by %.1f %%. A correction on the way spends some of the lander's fuel.,Error de %.1f %%. Una corrección en el camino gasta parte del combustible del módulo de alunizaje.
+A LITTLE LONG,UN POCO LARGO
+"Now the long coast: no engine, just falling toward the Moon. Apollo 11 took about %d hours.","Ahora el largo crucero: sin motor, solo cayendo hacia la Luna. El Apolo 11 tardó unas %d horas."
+%d h of %d,%d h de %d
+Halfway there. The Earth's pull has been slowing you down; soon the Moon's pull takes over.,Mitad del camino. La gravedad de la Tierra te ha ido frenando; pronto manda la de la Luna.
+ARRIVING,LLEGANDO
+A short burn behind the Moon slows you into orbit. Get ready to land.,Un encendido corto detrás de la Luna te frena hasta quedar en órbita. Prepárate para alunizar.
+LANDING,ALUNIZAJE
+Shackleton's rim,Borde del Shackleton
+HOVER,FLOTAR
+W S throttle · arrows push across · Space hover,W S potencia · flechas desplazan · Espacio flotar
+Falling at,Cayendo a
+Drifting at,Deriva
+To the target,Al objetivo
+Fuel,Combustible
+Autopilot on. It sets you down on the target; touch any control to fly it yourself.,Piloto automático activado. Te posa en el objetivo; toca cualquier control para pilotar tú.
+The bot pilot is landing. Touch the throttle or the arrows to take the controls.,El piloto bot está alunizando. Toca la potencia o las flechas para tomar los mandos.
+Fly down to the green ring. More throttle slows your fall; the arrows push you across the ground. Touch down slower than 3 m/s.,Baja hasta el anillo verde. Más potencia frena tu caída; las flechas te desplazan sobre el suelo. Toca el suelo a menos de 3 m/s.
+Landing site,Sitio de alunizaje
+Hands off: the flight computer is holding the descent. Touch any control to fly it again.,Manos libres: la computadora de vuelo sostiene el descenso. Toca cualquier control para volver a pilotar.
+Engine set to hold you still in the air.,Motor ajustado para mantenerte quieto en el aire.
+NO FUEL,SIN COMBUSTIBLE
+The engine is dry. Brace for touchdown.,El motor está seco. Prepárate para el impacto.
+Fuel is low. Set down soon: anywhere flat will do.,Queda poco combustible. Posa pronto: cualquier sitio plano sirve.
+TOO FAST,DEMASIADO RÁPIDO
+"More throttle, now!","¡Más potencia, ya!"
+ALARM %s,ALARMA %s
+GO!,¡ADELANTE!
+TOUCHDOWN!,¡CONTACTO!
+"Touchdown at %.1f m/s, as soft as a feather.","Contacto a %.1f m/s, suave como una pluma."
+LANDED!,¡ALUNIZAJE!
+Touchdown at %.1f m/s. A clean landing.,Contacto a %.1f m/s. Un alunizaje limpio.
+"LANDED, FIRMLY",ALUNIZAJE FIRME
+Touchdown at %.1f m/s. The legs took it.,Contacto a %.1f m/s. Las patas lo aguantaron.
+"DOWN, A LITTLE BENT","EN EL SUELO, UN POCO TORCIDO"
+"Touchdown at %.1f m/s. It leans, but it works.","Contacto a %.1f m/s. Está inclinado, pero funciona."
+%d m from the target.,A %d m del objetivo.
+Extra objectives met: %d. Their photos will come home with the report.,Objetivos extra cumplidos: %d. Sus fotos llegarán con el informe.
+NEW CRATER,CRÁTER NUEVO
+"Touchdown at %d m/s. Shackleton has one more crater, and it is yours.","Contacto a %d m/s. El Shackleton tiene un cráter más, y es tuyo."
+Lost at touchdown,Perdido al alunizar
+The lander reached the ground too fast and broke. Next time: more throttle as the ground comes up.,El módulo llegó al suelo demasiado rápido y se rompió. La próxima vez: más potencia cuando se acerque el suelo.
+CUT,CORTAR

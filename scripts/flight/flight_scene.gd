@@ -5,6 +5,7 @@ extends RefCounted
 ##   const Scene3D := preload("res://scripts/flight/flight_scene.gd")
 
 const Space := preload("res://scripts/space_builder.gd")
+const Ship := preload("res://scripts/ship_builder.gd")
 
 
 ## The Earth under a rocket in the climb: a globe of radius r (scene units), turned so that Ecuador is straight below.
@@ -116,3 +117,42 @@ static func dust_ring(pos: Vector3, s: float, amount := 140) -> CPUParticles3D:
 	p.color_ramp = g
 	p.emitting = false
 	return p
+
+
+## The lander: the team's own craft (Ship.build) riding on a descent stage of our own design: an octagonal deck wrapped
+## in gold foil, four splayed legs with footpads, and the engine bell underneath. About `size` metres across; the
+## footpads sit Descent.LEG metres below the node's origin. The engine bell's mouth is the child "Nozzle".
+static func lander(m, size := 3.2, leg := 1.6) -> Node3D:
+	var root := Node3D.new()
+	root.name = "Lander"
+	var foil := Ship.mli_mat()
+	var metal := Ship.mat(Color(0.62, 0.62, 0.64), 0.85, 0.35)
+	var dark := Ship.mat(Color(0.16, 0.16, 0.17), 0.6, 0.5)
+	var deck := CylinderMesh.new()
+	deck.top_radius = size * 0.42
+	deck.bottom_radius = size * 0.42
+	deck.height = size * 0.32
+	deck.radial_segments = 8
+	Ship.add_mesh(root, deck, Vector3(0, -leg * 0.25, 0), foil)
+	Ship.cyl(root, size * 0.12, size * 0.2, size * 0.26, Vector3(0, -leg * 0.25 - size * 0.27, 0), dark)
+	var nozzle := Node3D.new()
+	nozzle.name = "Nozzle"
+	nozzle.position = Vector3(0, -leg * 0.25 - size * 0.4, 0)
+	root.add_child(nozzle)
+	for i in 4:
+		var a := PI * 0.25 + i * PI * 0.5
+		var out := Vector3(cos(a), 0, sin(a))
+		var top := out * size * 0.38 + Vector3(0, -leg * 0.15, 0)
+		var foot := out * size * 0.78 + Vector3(0, -leg, 0)
+		var mid := (top + foot) * 0.5
+		var strut := Ship.cyl(root, size * 0.025, size * 0.025, top.distance_to(foot), mid, metal)
+		var ay := (foot - top).normalized()           # the strut's own axis runs from the deck to the footpad
+		var ax := ay.cross(Vector3.UP).normalized()
+		strut.basis = Basis(ax, ay, ax.cross(ay))
+		Ship.cyl(root, size * 0.11, size * 0.13, size * 0.03, foot + Vector3(0, size * 0.015, 0), metal)
+	var craft := Ship.build(m)
+	var r: float = craft.get_meta("radius", 1.0)
+	craft.scale = Vector3.ONE * (size * 0.4 / maxf(r, 0.01))
+	craft.position = Vector3(0, -leg * 0.25 + size * 0.16 + size * 0.3, 0)
+	root.add_child(craft)
+	return root
