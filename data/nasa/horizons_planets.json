@@ -1,0 +1,118 @@
+{
+ "meta": {
+  "source_id": "S-horizons",
+  "date_checked": "2026-11-14",
+  "frame": "ICRF axes, ecliptic plane J2000",
+  "epoch": "2026-11-15 00:00 TDB",
+  "units": "km, km/s, degrees, seconds",
+  "centre": "Sun (500@10)",
+  "queries": {
+   "mercury": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='199'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='ELEMENTS'&CENTER='500@10'&START_TIME='2026-11-15'&STOP_TIME='2026-11-16'&STEP_SIZE='1d'&REF_SYSTEM='ICRF'&REF_PLANE='ECLIPTIC'&OUT_UNITS='KM-S'&CSV_FORMAT='YES'",
+   "venus": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='299'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='ELEMENTS'&CENTER='500@10'&START_TIME='2026-11-15'&STOP_TIME='2026-11-16'&STEP_SIZE='1d'&REF_SYSTEM='ICRF'&REF_PLANE='ECLIPTIC'&OUT_UNITS='KM-S'&CSV_FORMAT='YES'",
+   "earth": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='399'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='ELEMENTS'&CENTER='500@10'&START_TIME='2026-11-15'&STOP_TIME='2026-11-16'&STEP_SIZE='1d'&REF_SYSTEM='ICRF'&REF_PLANE='ECLIPTIC'&OUT_UNITS='KM-S'&CSV_FORMAT='YES'",
+   "mars": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='499'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='ELEMENTS'&CENTER='500@10'&START_TIME='2026-11-15'&STOP_TIME='2026-11-16'&STEP_SIZE='1d'&REF_SYSTEM='ICRF'&REF_PLANE='ECLIPTIC'&OUT_UNITS='KM-S'&CSV_FORMAT='YES'",
+   "jupiter": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='599'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='ELEMENTS'&CENTER='500@10'&START_TIME='2026-11-15'&STOP_TIME='2026-11-16'&STEP_SIZE='1d'&REF_SYSTEM='ICRF'&REF_PLANE='ECLIPTIC'&OUT_UNITS='KM-S'&CSV_FORMAT='YES'",
+   "saturn": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='699'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='ELEMENTS'&CENTER='500@10'&START_TIME='2026-11-15'&STOP_TIME='2026-11-16'&STEP_SIZE='1d'&REF_SYSTEM='ICRF'&REF_PLANE='ECLIPTIC'&OUT_UNITS='KM-S'&CSV_FORMAT='YES'",
+   "uranus": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='799'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='ELEMENTS'&CENTER='500@10'&START_TIME='2026-11-15'&STOP_TIME='2026-11-16'&STEP_SIZE='1d'&REF_SYSTEM='ICRF'&REF_PLANE='ECLIPTIC'&OUT_UNITS='KM-S'&CSV_FORMAT='YES'",
+   "neptune": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='899'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='ELEMENTS'&CENTER='500@10'&START_TIME='2026-11-15'&STOP_TIME='2026-11-16'&STEP_SIZE='1d'&REF_SYSTEM='ICRF'&REF_PLANE='ECLIPTIC'&OUT_UNITS='KM-S'&CSV_FORMAT='YES'"
+  }
+ },
+ "planets": {
+  "mercury": {
+   "horizons_id": 199,
+   "jd_tdb": 2461359.5,
+   "eccentricity": 0.2056375050606276,
+   "perihelion_km": 46000726.94103478,
+   "inclination_deg": 7.003369346664196,
+   "ascending_node_deg": 48.29719587103779,
+   "arg_perihelion_deg": 29.20057477351206,
+   "mean_anomaly_deg": 19.01466049634896,
+   "semi_major_axis_km": 57908986.43137182,
+   "period_s": 7600513.954105514
+  },
+  "venus": {
+   "horizons_id": 299,
+   "jd_tdb": 2461359.5,
+   "eccentricity": 0.006743577604898202,
+   "perihelion_km": 107479981.2028446,
+   "inclination_deg": 3.394452157031367,
+   "ascending_node_deg": 76.60306344951503,
+   "arg_perihelion_deg": 54.98501428093049,
+   "mean_anomaly_deg": 294.4983160355361,
+   "semi_major_axis_km": 108209701.7240234,
+   "period_s": 19414348.42861601
+  },
+  "earth": {
+   "horizons_id": 399,
+   "jd_tdb": 2461359.5,
+   "eccentricity": 0.01716067885093302,
+   "perihelion_km": 147087560.1004361,
+   "inclination_deg": 0.004704017354028587,
+   "ascending_node_deg": 193.6930266515565,
+   "arg_perihelion_deg": 269.1484758825017,
+   "mean_anomaly_deg": 310.9231275113486,
+   "semi_major_axis_km": 149655754.4405851,
+   "period_s": 31576466.53479577
+  },
+  "mars": {
+   "horizons_id": 499,
+   "jd_tdb": 2461359.5,
+   "eccentricity": 0.09339448209386561,
+   "perihelion_km": 206659934.0930511,
+   "inclination_deg": 1.847431150178563,
+   "ascending_node_deg": 49.48010015886297,
+   "arg_perihelion_deg": 286.6692937334315,
+   "mean_anomaly_deg": 122.4272714759093,
+   "semi_major_axis_km": 227949124.5214853,
+   "period_s": 59358220.67601896
+  },
+  "jupiter": {
+   "horizons_id": 599,
+   "jd_tdb": 2461359.5,
+   "eccentricity": 0.04840138990789174,
+   "perihelion_km": 740494580.0922176,
+   "inclination_deg": 1.303911017002645,
+   "ascending_node_deg": 100.5273127988656,
+   "arg_perihelion_deg": 273.3986161035829,
+   "mean_anomaly_deg": 115.9360478281313,
+   "semi_major_axis_km": 778158534.7424402,
+   "period_s": 374213103.1127573
+  },
+  "saturn": {
+   "horizons_id": 699,
+   "jd_tdb": 2461359.5,
+   "eccentricity": 0.05520458569249723,
+   "perihelion_km": 1347737098.735745,
+   "inclination_deg": 2.487341217171545,
+   "ascending_node_deg": 113.5657976408624,
+   "arg_perihelion_deg": 339.3325626170359,
+   "mean_anomaly_deg": 285.6495268298262,
+   "semi_major_axis_km": 1426485647.925781,
+   "period_s": 929101381.8142388
+  },
+  "uranus": {
+   "horizons_id": 799,
+   "jd_tdb": 2461359.5,
+   "eccentricity": 0.04764210223478566,
+   "perihelion_km": 2744043048.613038,
+   "inclination_deg": 0.7712373639101399,
+   "ascending_node_deg": 74.03774496526869,
+   "arg_perihelion_deg": 92.64799985879505,
+   "mean_anomaly_deg": 261.8322258864756,
+   "semi_major_axis_km": 2881314950.033133,
+   "period_s": 2667476918.710438
+  },
+  "neptune": {
+   "horizons_id": 899,
+   "jd_tdb": 2461359.5,
+   "eccentricity": 0.009673207327455087,
+   "perihelion_km": 4452735392.240719,
+   "inclination_deg": 1.771158260140709,
+   "ascending_node_deg": 131.8235818568494,
+   "arg_perihelion_deg": 283.685570931586,
+   "mean_anomaly_deg": 308.3014575314111,
+   "semi_major_axis_km": 4496228341.176497,
+   "period_s": 5199785229.174371
+  }
+ }
+}

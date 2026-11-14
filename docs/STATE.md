@@ -79,3 +79,4 @@ integration; nobody edits this list by hand on a work branch.
 - 0.1.4: Skeleton B1, every screen in its own script, a small flow controller, `GameState` and the UI kit
 - 0.1.5: Parallel work: each piece on its own branch, pull requests allowed except into main, integration that checks the merged result before pushing; four stations with bots, NASA data and the look decided (`work/15-parallel-work`, 2026-11-14)
 - 0.1.6: Modeled launchers on the pad, light, medium and heavy, at real proportions and cited (`c7-launchers`, 2026-11-14)
+- 0.1.7: NASA data pipeline: the photos each mission returns (GIBS, LROC, Voyager), planet positions from JPL Horizons and NSSDC constants, every item cited (`work/19-nasa-data`, 2026-11-14)
