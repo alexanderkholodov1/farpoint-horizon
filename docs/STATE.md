@@ -68,6 +68,17 @@ the list below (`AGENTS.md`, "The cycle of a version"). Pull requests into branc
 
 ## Pending
 
+**Priority now (alexanderkholodov1, 2026-11-14): the mechanics before any more missions** (`AGENTS.md`, How we work).
+Everything that moves must behave as in real life, in real time with a visible time warp. Known wrong and being redone:
+- The flight to the Moon integrated in 0.1.18 (`scripts/screens/flight.gd`: the burn and the coast) is wrong (no
+  physics, wrong scale, no phasing, no stated time) and is being rebuilt on `work/8-pilot` (#8) with real two-body
+  physics, the Moon from JPL Horizons, planned departure, mid-course correction and lunar orbit capture. Do not build
+  on it until that lands.
+- The launch climb runs 8 times faster than real time without saying so (`TIME_SCALE` in `scripts/flight/ascent.gd`);
+  it moves to real time with the time warp of the flight panel (#8).
+- Other screens that show motion (the orbit views of `scripts/world.gd` used by the menu, the design and the
+  operation) must be checked against the same rule.
+
 - Rebuild as v0.2.0 per `docs/design/vision.md`: stronger plot and game design, better 3D models, a more distinctive UI, web export, Firebase hosting and online multiplayer, complete mission (build, orbit, reach target, land), several mission types.
 - Cite every formula and value at its definition in `scripts/game_data.gd` and `scripts/mission.gd`, and in `kb/data/reference.json`.
 - Interface language: v0.1.0 text is Spanish; the team decided that the game and every material are in English (`kb/decisions.md`).
