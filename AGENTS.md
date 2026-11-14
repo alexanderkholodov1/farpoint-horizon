@@ -1,10 +1,10 @@
-# Agent guide: SK Horizon, Mission Architect
+# Agent guide: Farpoint HORIZON
 
 The one rulebook for every agent in this repository, whoever runs it (Claude Code, Codex, Cursor, Gemini or any
 other) and whichever team member it works for. `CLAUDE.md` only imports this file.
 
-The game: a 3D space-mission game in Godot 4.7 for the 2026 NASA Space Apps Challenge, challenge "Space Mission
-Design Game", by team SK Horizon (Quito, Ecuador). Alone or with up to three friends, players build a craft, plan its
+The game: **Farpoint HORIZON** (always written this way), a 3D space-mission game in Godot 4.7 for the 2026 NASA Space
+Apps Challenge, challenge "Space Mission Design Game", by team SK Horizon (Quito, Ecuador). Alone or with up to three friends, players build a craft, plan its
 route, launch it, fly it to its target, land it or keep it talking to Earth, and enjoy what they achieved.
 
 ## Read first
@@ -19,8 +19,9 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
 - **The two team members decide**: the idea, the design, scope, accounts, anything public. Agents bring evidence,
   alternatives and a recommendation, and are free to propose anything, concepts included.
 - **Only a person merges**, either team member. Agents prepare one pull request per functional version and never merge.
-- Agents talk with their person in that person's language. Everything written into the repository and the game is in
-  English.
+- Agents talk with their person in that person's language. The repository and the game are in English by default; the
+  game also offers Spanish, and the project description and deliverables for the platform exist in Spanish too
+  (the local venue requires both; the live pitch in Sangolquí is in Spanish).
 
 ## How we work
 - **Fun and satisfaction first.** The player should feel the pride of watching their own craft lift off, deploy,
@@ -29,9 +30,11 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
   spectacle of launch and landing); its difficulty and its fail-and-retry loop are not.
 - **Nothing that looks AI-made.** `docs/design/criteria.md` holds the team's design criteria; they apply to models,
   UI, motion, sound and copy.
-- **Real data at the core.** The judges score how much NASA data is part of the game. Values come from
-  `kb/data/reference.json` or another cited source; every formula and value is cited where it is defined, and the
-  game's credits list them. A simplified value says so.
+- **Real data at the core, and everything cited.** The judges score how much NASA data is part of the game, and they
+  will read our sources. Every number, formula, fact, dataset, image, model or sound that comes from outside carries
+  its source where it is used (a data field, a code comment, a document line) and is listed once in
+  `docs/sources.md` with an ID, in a form fit to show the judges. Our own simplifications say so and cite what they
+  simplify. The README and the game's credits are built from that list. Research notes in `kb/` keep their URLs.
 - **Data apart from code.** Missions, parts, launchers, orbits, events and texts live in data (today
   `scripts/game_data.gd`), so content and balance change without touching logic.
 - **Measure before you claim.** Run it, read the log, look at the screenshot; cite the file and line or the command.
@@ -72,8 +75,10 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
   off for Claude Code; set the same in other tools). AI use is disclosed in the README instead.
 
 ## Working beside other agents
-- Each person owns parts of the game (listed in `docs/STATE.md`); their agents work there. A change to something both
-  sides use (data formats, the mission model, project settings, this file) is agreed with the other person first.
+- Nobody owns a part: both team members work side by side. Before starting a piece, claim its issue by assigning it
+  to your person, so two agents never take the same piece; if your piece must change files that another open issue
+  is changing, say so in both issues first. A change to something everyone uses (data formats, the mission model,
+  `GameState`, project settings, this file) is agreed by both team members.
 - Never rewrite, reformat or revert someone else's work to suit yours; ask in the issue.
 - Several agents on one machine work in separate git worktrees of the same branch.
 - Leave the branch better than you found it: the game runs, the checks pass, `docs/STATE.md` says what changed.
@@ -87,13 +92,16 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
 - GDScript is Godot 4 syntax (`await`, `@onready`, `@export`, typed signals); the project's own pitfalls are in
   `docs/architecture.md`. Tools that let agents drive Godot, Blender and the browser: `kb/tech/godot-agent-tooling.md`.
 
-## What the event requires (sources in `kb/challenge/event-and-judging.md`)
+## What the event requires (sources: `kb/challenge/event-and-judging.md`, global; `kb/challenge/local-event.md`, the venue)
 - AI tools are allowed and their use is disclosed: the README names the agents used and cites every source.
 - No NASA logos, insignia, flags or mission identifiers in anything generated, and nothing implying NASA endorses us;
   crediting NASA data in text is expected.
 - No image, video, voice or likeness of anyone under 18.
+- No AI-generated images: models come from our scripts, textures and imagery from cited sources, so no watermark is
+  needed (the venue deducts a point for an AI image without one).
 - Every outside asset (code, fonts, images, sounds, models, data) is listed with its source and license.
-- English for the game, the repository, the pitch deck and the submission.
+- English by default; Spanish versions of the description and deliverables for the venue. At most 7 slides; a demo
+  video of at most 30 s; every link opens in a private window.
 
 ## Layout
 - Godot project at the root: `project.godot`, `scenes/`, `scripts/`, `shaders/`, `fonts/`, `textures/`, `tests/`.

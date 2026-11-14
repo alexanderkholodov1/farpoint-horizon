@@ -1,4 +1,4 @@
-# SK Horizon, Mission Architect
+# Farpoint HORIZON
 
 Entry of team **SK Horizon** (Quito, Ecuador) to the NASA Space Apps Challenge 2026, challenge
 [Space Mission Design Game](https://www.spaceappschallenge.org/2026/challenges/space-mission-design-game/).
@@ -86,8 +86,8 @@ PDFs are in `docs/challenge/`.
 
 ## Sources
 
-Every formula and value is cited at its definition and in [`kb/data/reference.json`](kb/data/reference.json). The main
-sources already collected there include:
+Every formula and value is cited where it is used and listed once in [`docs/sources.md`](docs/sources.md), the
+project's bibliography. The main sources so far:
 
 - NASA Space Science Data Coordinated Archive, [Earth fact sheet](https://nssdc.gsfc.nasa.gov/planetary/factsheet/earthfact.html) (radius, GM, solar constant).
 - NASA Orbital Debris Program Office [FAQ](https://orbitaldebris.jsc.nasa.gov/faq/) (orbital lifetime against altitude) and the NASA 25-year disposal guideline.

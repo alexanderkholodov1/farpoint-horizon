@@ -11,3 +11,14 @@
 .DS_Store
 Thumbs.db
 /shots/
+
+# Credentials: never committed, never exported
+private/
+*firebase-adminsdk*.json
+*.pem
+.env
+.env.*
+
+# Local event documents that name mentors and staff: kept on the team machines, summarized in kb/challenge/local-event.md
+docs/challenge/GUIA PARTICIPANTES Y RUBRICA.pdf
+docs/challenge/Mentores NASA Space Apps.pdf

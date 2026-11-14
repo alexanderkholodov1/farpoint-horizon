@@ -8,7 +8,7 @@ agents bring evidence, alternatives and a recommendation.
 |---|---|---|
 | 2026-11-14 | The team enters the 2026 NASA Space Apps Challenge with the challenge "Space Mission Design Game" | Team |
 | 2026-11-14 | Two human members, each with their own AI agents across several accounts, working from this GitHub repository | Team |
-| 2026-11-14 | Every material is in English: the game, the repository, the pitch deck, the submission | Team |
+| 2026-11-14 | Every material is in English: the game, the repository, the pitch deck, the submission (refined below: Spanish versions too, English by default) | Team |
 | 2026-11-14 | Kerbal Space Program is the main inspiration: we take what is relevant and build our own product | Team |
 | 2026-11-14 | The team defines the game idea; agents help with the brainstorm and are free to propose anything | Team |
 | 2026-11-14 | Firebase (the lead's account) for online multiplayer and for hosting the playable link; the Firebase project is created once the brainstorm names the game | Team |
@@ -25,10 +25,15 @@ agents bring evidence, alternatives and a recommendation.
 | 2026-11-14 | Vision of v0.2.0 (`docs/design/vision.md`): fun and satisfaction first, humor, explosions possible on purpose, stations including a pilot and ground control, varied missions (Earth, Moon, Mars, Venus, one-way and returning, real and imagined), launches from the equator, random extra objectives and role bonuses, in-flight failures as mini-games, a leaderboard and gallery with no head-to-head competition | Team |
 | 2026-11-14 | Blender may join the pipeline for 3D models when they are needed (the teammate researched how to connect it) | Team |
 | 2026-11-14 | The repository is open source under the MIT license | Team |
+| 2026-11-14 | The game is called **Farpoint HORIZON** (written exactly so); the repository is `alexanderkholodov1/farpoint-horizon`; the Firebase project is `farpoint-horizon` (its service key stays outside git, in the ignored `private/` folder) | Lead |
+| 2026-11-14 | Nobody owns a part: both team members work side by side, each piece claimed through its issue | Lead |
+| 2026-11-14 | The first three missions: volcano watch (Earth orbit), the Moon's south pole (landing), the Grand Tour (never returns); more to come | Lead |
+| 2026-11-14 | Everything from outside is cited (numbers, formulas, facts, data, assets), presentable to the judges, through one bibliography `docs/sources.md` | Lead |
+| 2026-11-14 | Languages: English is the default everywhere (the repository, the game, the global platform); the platform's description and the deliverables also exist in Spanish, as the local venue requires; the live pitch in Sangolquí is in Spanish; the game offers Spanish as an option | Lead |
+| 2026-11-14 | No AI-generated images: models come from our scripts, textures and imagery from cited sources (NASA first), so no watermark is needed | Lead |
 
 ## Open
 | # | Question | Why it matters | Status |
 |---|---|---|---|
-| D2 | The game idea, its plot and its name | Everything else follows from it | Design round in progress |
+| D2 | The plot and the visual direction | The name and the vision are settled; these complete the design round | Design round in progress |
 | D4 | Multiplayer form for up to four players: what is shared, who acts when | Core requirement C4 | After the design round |
-| D5 | Who owns which part of the game | Keeps two people's agents from colliding | Open; written in `docs/STATE.md` once agreed |
