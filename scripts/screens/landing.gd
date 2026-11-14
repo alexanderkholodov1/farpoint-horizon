@@ -103,6 +103,8 @@ func _build_hud() -> void:
 	add_child(hud)
 	hud.build(tr("LANDING") + " · " + tr("Shackleton's rim"), tr("HOVER"),
 		tr("W S throttle · arrows push across · Space hover"), true, false)
+	hud.add_time_warp(1.0)
+	hud.cap_warp(1.0, tr("near the ground"))
 	hud.add_readout("alt", tr("Height"))
 	hud.add_readout("vs", tr("Falling at"))
 	hud.add_readout("hs", tr("Drifting at"))

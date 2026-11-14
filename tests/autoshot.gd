@@ -174,6 +174,7 @@ func _pilot() -> void:
 	await shot("24_pilot_countdown")
 	await wait(4.0)
 	await shot("25_pilot_liftoff")
+	g.screen.hud.set_warp(10.0)     # the climb is real time; a player speeds it up
 	await wait(6.0)
 	await shot("26_pilot_maxq")
 	while g.screen_id == "launch" and g.screen.phase == "climb" and not g.screen.model.wants_stage():

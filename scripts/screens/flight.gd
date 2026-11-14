@@ -44,6 +44,7 @@ var job := {}                        ## The planners at work (Transfer.plan_star
 var plan := {}                       ## {angle, time, pass}
 var shown := {}                      ## The path drawn for the plan as shifted: a predict() result.
 var burn_start := 0.0                ## When the burn should start (half of it before the planned point).
+var burn_t0 := 0.0                   ## When the burn did start (mission time).
 var phase := "plan"                  ## plan, burn, coast, capture, lunar
 var phase_t := 0.0
 var throttle := 1.0
@@ -360,6 +361,7 @@ func _on_action() -> void:
 func _start_burn() -> void:
 	phase = "burn"
 	phase_t = 0.0
+	burn_t0 = m.t
 	m.dv_used = 0.0
 	throttle = 1.0
 	hud.lever.value = 1.0
@@ -401,7 +403,7 @@ func _burn_phase(dt: float) -> void:
 func _cut(by_computer: bool) -> void:
 	var error: float = (float(m.dv_used) - dv_plan) / dv_plan
 	GameState.flight["tli"] = {"dv": roundi(m.dv_used), "target": roundi(dv_plan), "error": snappedf(error, 0.0001),
-		"by": "computer" if by_computer else "pilot", "shift_deg": shift_deg, "burn_s": roundi(phase_t)}
+		"by": "computer" if by_computer else "pilot", "shift_deg": shift_deg, "burn_s": roundi(m.t - burn_t0)}
 	GameState.flight_moment("tli", GameState.flight.tli)
 	phase = "coast"
 	phase_t = 0.0
@@ -483,6 +485,7 @@ func _correct(by_computer: bool) -> void:
 	GameState.flight["correction"] = {"dv": snappedf(dv, 0.1), "by": "computer" if by_computer else "pilot"}
 	GameState.flight.tli["lander_fuel_used"] = snappedf(clampf(dv / 1000.0, 0.0, 0.4), 0.001)
 	hud.action.lit = false
+	hud.action.label = "BRAKE"
 	hud.message(tr("CORRECTED"), tr("%.1f m/s burned. You will pass %d km over the Moon.") % [dv, roundi(m.pass_height(correction.pass) / 1000.0)], Kit.C_OK, 3.0)
 	sfx.clunk.play()
 	pred_age = 99.0
@@ -633,13 +636,17 @@ func _draw() -> void:
 	var s := cam.distance_to(cp) * 0.009
 	craft.scale = Vector3.ONE * s
 	moon_dot.position = mp
-	moon_dot.scale = Vector3.ONE * maxf(m.r_m / u * 1.02, cam.distance_to(mp) * 0.007)
+	moon_dot.scale = Vector3.ONE * cam.distance_to(mp) * 0.007
+	moon_dot.visible = moon_dot.scale.x > m.r_m / u      # only while the Moon itself is too small to see
 	(craft.material_override as StandardMaterial3D).albedo_color = Color(1.0, 0.62, 0.22) if (phase == "burn" or braking) and throttle > 0.02 else Color.WHITE
 	craft_lbl.position = cp + Vector3(0, s * 3.5, 0)
 	mark.scale = Vector3.ONE * cam.distance_to(mark.position) * 0.008
 	mark_lbl.position = mark.position + Vector3(0, mark.scale.x * 3.5, 0)
 	var showing_plan: bool = phase == "plan" and not plan.is_empty()
-	mark.visible = showing_plan
+	# in the whole-trip view, markers still hugging the Earth would only blot it out
+	var near_earth: bool = view == "trip" and cp.length() < EARTH_U * 3.0
+	mark.visible = showing_plan and not near_earth
+	craft.visible = not near_earth
 	# labels that would sit on top of each other at this scale stay hidden: near the Earth in the trip view, the Earth
 	# itself in the Earth view
 	mark_lbl.visible = showing_plan and view == "earth"
@@ -657,7 +664,7 @@ func _draw() -> void:
 		ghost.position = gp
 		ghost.scale = Vector3.ONE * maxf(m.r_m / u, cam.distance_to(gp) * 0.008)
 		ghost_lbl.position = gp - Vector3(0, ghost.scale.x * 2.5, 0)
-		ghost_lbl.text = tr("The Moon when you pass it (%s)") % _span(float(p.t_closest) - m.t)
+		ghost_lbl.text = tr("The Moon when you pass it")
 	# the track flown so far
 	trail_t += get_process_delta_time()
 	# (inside the Moon's sphere the Moon moves under the craft, so there the predicted path shows the orbit instead)
@@ -682,6 +689,8 @@ func _dot(col: Color) -> MeshInstance3D:
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.albedo_color = col
+	mat.no_depth_test = true          # a map marker: drawn over the bodies, as map views do
+	mat.render_priority = 2
 	if col.a < 1.0:
 		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mi.material_override = mat
@@ -701,6 +710,8 @@ func _line_node(col: Color) -> MeshInstance3D:
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.albedo_color = col
+	mat.no_depth_test = true          # paths and orbits are a map layer over the bodies
+	mat.render_priority = 1
 	if col.a < 1.0:
 		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mi.material_override = mat
@@ -723,7 +734,7 @@ func _set_line(mi: MeshInstance3D, pts: PackedVector3Array, strip := true) -> vo
 func _readouts() -> void:
 	hud.clock.text = FlightHud.met_text(m.t - t_launch)
 	var dt := Time.get_datetime_dict_from_unix_time(UNIX_DAY0 + int(m.t))
-	hud.value("utc", "%d %s %02d:%02d" % [dt.day, ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][dt.month - 1], dt.hour, dt.minute])
+	hud.value("utc", "%d-%02d-%02d %02d:%02d" % [dt.year, dt.month, dt.day, dt.hour, dt.minute])
 	var next := ""
 	match phase:
 		"plan":
@@ -818,6 +829,8 @@ func _camera(delta: float, snap := false) -> void:
 			var r: float = m.about_moon().r / u
 			want_d = clampf(r * 2.6, 34.0, 220.0)
 	want_d *= zoom
+	if view == "trip":
+		want_c += Vector3(-want_d * 0.16, 0.0, want_d * 0.05)   # content to the right of the readouts, above the hint
 	var k := 1.0 if snap else clampf(delta * 2.0, 0.0, 1.0)
 	cam_center = cam_center.lerp(want_c, k)
 	cam_dist = lerpf(cam_dist, want_d, k)

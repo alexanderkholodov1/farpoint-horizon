@@ -97,6 +97,8 @@ func _build_hud() -> void:
 	add_child(hud)
 	hud.build(tr("LAUNCH") + " · " + tr(RocketDesign.launcher(mission.launcher).name), tr("STAGE"),
 		tr("← → lean · W S throttle · Space stage"))
+	# real time, as the rules ask; the pilot may speed it up to ×10 while the engines burn
+	hud.add_time_warp(1.0)
 	hud.add_readout("alt", tr("Height"))
 	hud.add_readout("speed", tr("Speed"))
 	hud.add_gauge("orbit", tr("Speed toward orbit"), 2.0, 2.0, Color(0.45, 0.85, 1.0))
@@ -133,7 +135,7 @@ func process(delta: float) -> void:
 			if phase_t > 4.2 and not leaving:
 				leaving = true
 				main.go_faded("report", 0.8, 0.6)
-	_fall(delta)
+	_fall(delta * hud.warp)
 	_camera(delta)
 	_flames()
 	_sound(delta)
@@ -168,7 +170,8 @@ func _climb(delta: float) -> void:
 		throttle = hud.throttle_keys(throttle, delta)
 	model.throttle = throttle
 	model.autopilot = hud.autopilot
-	model.step(delta, steer)
+	hud.cap_warp(10.0, tr("engine on"))
+	model.step(delta, steer, hud.warp)
 	# staging: the pilot's job; the autopilot does it at once, the flight computer after a few seconds
 	if model.wants_stage():
 		stage_wait += delta
@@ -218,7 +221,7 @@ func _hints() -> void:
 
 
 func _telemetry() -> void:
-	hud.clock.text = "T+%02d:%02d" % [int(model.t) / 60, int(model.t) % 60]
+	hud.clock.text = FlightHud.met_text(model.t)
 	hud.value("alt", ("%.1f km" % (model.h / 1000.0)) if model.h >= 1000.0 else ("%d m" % int(model.h)))
 	var v: float = sqrt(model.vx * model.vx + model.vy * model.vy)
 	hud.value("speed", ("%.2f km/s" % (v / 1000.0)) if v >= 1000.0 else ("%d m/s" % int(v)))
@@ -488,7 +491,7 @@ func _skip() -> void:
 		if model.orbit or model.broken or model.crashed:
 			break
 		model.throttle = 1.0
-		model.step(1.0 / 30.0, clampf((model.marker - model.pitch) * 0.5, -1.0, 1.0))
+		model.step(1.0 / 30.0, clampf((model.marker - model.pitch) * 0.5, -1.0, 1.0), 8.0)
 		if model.wants_stage():
 			var what: String = model.stage()
 			if what != "":

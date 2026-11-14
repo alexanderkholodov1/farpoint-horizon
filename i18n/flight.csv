@@ -3,7 +3,7 @@ Earth,Tierra
 Moon,Luna
 Burn here,Encender aquí
 Your craft,Tu nave
-Space: act · W S throttle · , . time · V view · ← → ↑ ↓ plan · R reset,Espacio: actuar · W S potencia · , . tiempo · V vista · ← → ↑ ↓ plan · R restaurar
+"Space: act · W S throttle · , . time · V view · ← → ↑ ↓ plan · R reset","Espacio: actuar · W S potencia · , . tiempo · V vista · ← → ↑ ↓ plan · R restaurar"
 Date (UTC),Fecha (UTC)
 Next,Siguiente
 Burn,Encendido
@@ -69,3 +69,6 @@ The whole trip,Todo el viaje
 Real time,Tiempo real
 Time runs %s times faster,El tiempo corre %s veces más rápido
 arrived,llegaste
+near the ground,cerca del suelo
+The Moon,La Luna
+The Moon when you pass it,La Luna cuando pases junto a ella
