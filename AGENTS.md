@@ -70,7 +70,8 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
 ## The cycle of a version
 1. The version branch (now `v0.2.0`) collects finished pieces. Its pull request into `main` opens only when the
    version is complete.
-2. Every piece of work is a GitHub issue. Claim it by assigning it to your person before starting.
+2. Every piece of work is a GitHub issue, written with `.github/ISSUE_TEMPLATE/piece.md` (what the player gets, the
+   files it owns, the real values to check, the done-when list). Claim it by assigning it to your person before starting.
 3. Build it on a branch of your own, made from the version branch and named after the issue:
    `git fetch origin && git switch -c work/12-rockets origin/v0.2.0`. Commit small working steps in English, with no
    version numbers, and push often (CI runs on every push and must stay green; a red check is fixed first).
