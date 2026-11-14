@@ -36,6 +36,7 @@ static var C_LINE := Color(0.6, 0.75, 1.0, 0.16)      ## Hairlines: borders, div
 static var C_SHADE := Color(0.0, 0.01, 0.03, 0.55)    ## Behind an overlay.
 const C_ON_DARK := Color(0.96, 0.97, 1.0)             ## Text drawn straight on the 3D scene (space, sky).
 const FROST := preload("res://shaders/ui_frost.gdshader")
+const UiSound := preload("res://scripts/ui/ui_sound.gd")
 
 static var _frost: ShaderMaterial
 static var _num_font: FontVariation
@@ -145,6 +146,8 @@ static func flat(bg: Color, border := Color(0, 0, 0, 0), radius := 8, bw := 0, m
 ## The theme of the whole UI in the current appearance; main.gd sets it on the UI root, so every screen inherits it.
 static func build_theme() -> Theme:
 	load_mode()
+	UiSound.load_settings()
+	UiSound.play("click", 0.0)   # makes the sound players early (the first call only prepares them)
 	var t := Theme.new()
 	t.default_font = FONT_R
 	t.default_font_size = 16
@@ -241,6 +244,7 @@ static func btn(text: String, cb: Callable, size := 16, min_w := 0.0) -> Button:
 	var b := Button.new()
 	b.text = text
 	b.add_theme_font_size_override("font_size", size)
+	b.pressed.connect(func(): UiSound.play("click"))
 	b.pressed.connect(cb)
 	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	if min_w > 0.0:
@@ -320,6 +324,7 @@ static func card(title: String, body: String, selected: bool, on_click: Callable
 		pc.modulate = Color(1, 1, 1, 0.55)
 	pc.gui_input.connect(func(e: InputEvent):
 		if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
+			UiSound.play("select")
 			on_click.call())
 	pc.mouse_entered.connect(func():
 		sb.bg_color = C_CARD_HOVER if not selected else base_bg.lightened(0.04)
@@ -331,6 +336,7 @@ static func card(title: String, body: String, selected: bool, on_click: Callable
 
 ## A short message at the top center that fades out; it lives in `parent` (a screen), so it goes with it.
 static func toast(parent: Control, text: String, col := C_ACCENT, time := 2.5) -> void:
+	UiSound.play("error" if col == C_BAD else "notify")
 	var p := PanelContainer.new()
 	p.add_theme_stylebox_override("panel", flat(Color(C_BG.r, C_BG.g, C_BG.b, 0.97), col, 10, 2, 18, 12))
 	p.add_child(lbl(text, 16, col, FONT_B))

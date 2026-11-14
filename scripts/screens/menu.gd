@@ -48,14 +48,29 @@ func enter(_args: Dictionary) -> void:
 		dh.add_child(b)
 	box.add_child(Kit.lbl(GameData.DIFFICULTY[GameState.difficulty].desc, 13, Kit.C_DIM))
 	box.add_child(Kit.spacer(4))
-	box.add_child(caps(tr("Appearance")))
+	# appearance and sound side by side
+	var prefs := Kit.hbox(24)
+	box.add_child(prefs)
+	var av := Kit.vbox(8)
+	prefs.add_child(av)
+	av.add_child(caps(tr("Appearance")))
 	var mh := segmented()
-	box.add_child(mh)
+	av.add_child(mh)
 	for m in Kit.MODES:
-		var b := Kit.btn(tr("Dark") if m == "dark" else tr("Light"), func(): _set_mode(m), 15, 120)
+		var b := Kit.btn(tr("Dark") if m == "dark" else tr("Light"), func(): _set_mode(m), 15, 110)
 		if Kit.mode == m:
 			Kit.accent_btn(b, Kit.C_ACCENT)
 		mh.add_child(b)
+	var sv := Kit.vbox(8)
+	prefs.add_child(sv)
+	sv.add_child(caps(tr("Sound")))
+	var sh := segmented()
+	sv.add_child(sh)
+	for on in [true, false]:
+		var b := Kit.btn(tr("On") if on else tr("Off"), func(): Kit.UiSound.set_muted(not on); go("menu"), 15, 110)
+		if Kit.UiSound.is_muted() != on:
+			Kit.accent_btn(b, Kit.C_ACCENT)
+		sh.add_child(b)
 	box.add_child(rule())
 	var hh := Kit.hbox(8)
 	box.add_child(hh)

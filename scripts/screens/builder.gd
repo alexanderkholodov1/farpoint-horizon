@@ -188,6 +188,7 @@ func _add(id: String) -> void:
 		_rebuild(false)
 		return
 	design.stack.append(id)
+	preload("res://scripts/ui/ui_sound.gd").play("snap", 0.08)
 	_rebuild(true)
 
 

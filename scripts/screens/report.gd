@@ -23,6 +23,8 @@ func enter(_args: Dictionary) -> void:
 	outer.add_child(head)
 	var gcol: Color = {"S": Color(1.0, 0.85, 0.3), "A": Kit.C_OK, "B": Kit.C_ACCENT, "C": Kit.C_WARN, "D": Kit.C_BAD}[s.grade]
 	var gl := Kit.lbl(s.grade, 88, gcol, Kit.FONT_T)
+	if s.grade == "S" or s.grade == "A":
+		Kit.UiSound.play("success", 0.0)
 	gl.custom_minimum_size.x = 90
 	head.add_child(gl)
 	var hv := Kit.vbox(2)

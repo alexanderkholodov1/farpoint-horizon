@@ -85,6 +85,7 @@ func go(id: String, args := {}) -> void:
 
 ## Fades to black in out_time, goes to screen `id`, and fades back in in_time.
 func go_faded(id: String, out_time: float, in_time: float, args := {}) -> void:
+	preload("res://scripts/ui/ui_sound.gd").play("whoosh", 0.1)
 	await fade(1.0, out_time).finished
 	go(id, args)
 	fade(0.0, in_time)
