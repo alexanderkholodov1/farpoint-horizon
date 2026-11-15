@@ -54,6 +54,7 @@ var auto_note := ""        ## Set by a screen that runs time by itself ("Auto"),
 
 
 var _top_right: HBoxContainer
+var _hint_tw: Tween
 
 
 func _init() -> void:
@@ -129,7 +130,8 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 	action.label = action_label
 	action.pressed.connect(func(): action_pressed.emit())
 	av.add_child(action)
-	keys_lbl = Kit.lbl(keys_text, Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true)
+	keys_lbl = Kit.lbl(keys_text, Kit.T_CAPS, Kit.C_DIM, Kit.FONT_R, true)
+	keys_lbl.modulate.a = 0.75
 	keys_lbl.custom_minimum_size.x = 132
 	keys_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	av.add_child(keys_lbl)
@@ -245,7 +247,7 @@ func _show_warp() -> void:
 	if _cap_why != "":
 		t += " · " + _cap_why
 	warp_note.text = t
-	warp_note.visible = warp > 1.0 or auto_note != "" or _cap_why != ""   # "real time" alone says nothing new
+	warp_note.visible = warp > 1.0 or auto_note != ""   # at real time there is nothing to add
 
 
 ## 100000 as "100,000".
@@ -330,7 +332,13 @@ func hint(text: String) -> void:
 	if hint_lbl.text != text:
 		hint_lbl.text = text
 		hint_panel.modulate.a = 0.0
-		hint_panel.create_tween().tween_property(hint_panel, "modulate:a", 1.0, 0.3)
+		# it comes in, stays long enough to be read (longer for a longer text) and steps aside: the screen stays clear
+		if _hint_tw and _hint_tw.is_valid():
+			_hint_tw.kill()
+		_hint_tw = hint_panel.create_tween()
+		_hint_tw.tween_property(hint_panel, "modulate:a", 1.0, 0.3)
+		_hint_tw.tween_interval(6.0 + text.length() * 0.06)
+		_hint_tw.tween_property(hint_panel, "modulate:a", 0.0, 1.0)
 
 
 func set_autopilot(on: bool, by_pilot := false) -> void:

@@ -68,6 +68,7 @@ var leaving := false
 var auto_fly := false                  ## This try is flown by the flight computer (after Skip on a missed Moon).
 var missed_ms := 0
 var steps_row: HBoxContainer
+var cam_idle := 0.0
 var now_lbl: Label
 var minimap: MiniMap
 var steps_shown := ""
@@ -1102,7 +1103,12 @@ func _camera(delta: float, snap := false) -> void:
 	# the arrows (keys or the panel's buttons) turn the camera around what it looks at
 	var st: Vector2 = hud.steer()
 	yaw += st.x * delta * 1.4
-	pitch = clampf(pitch + st.y * delta * 1.0, -1.2, 1.35)
+	pitch = clampf(pitch + st.y * delta * 1.0, -1.2, 1.1)
+	# left alone for a while, the camera comes back behind the craft by itself
+	cam_idle = 0.0 if st.length() > 0.01 else cam_idle + delta
+	if cam_idle > 5.0 and not snap:
+		yaw = lerp_angle(yaw, 0.0, clampf(delta * 1.5, 0.0, 1.0))
+		pitch = lerpf(pitch, 0.0, clampf(delta * 1.5, 0.0, 1.0))
 	var k := 1.0 if snap else clampf(delta * 2.0, 0.0, 1.0)
 	if view == "craft":
 		var dist := 34.0 * zoom
@@ -1122,7 +1128,9 @@ func _camera(delta: float, snap := false) -> void:
 		var dir := (behind * cos(pitch + 0.22) + up * sin(pitch + 0.22)).normalized()
 		world.cam.near = 0.1
 		world.cam.position = dir * dist + side * 0.0
-		world.cam.look_at(ahead * dist * 0.6, up)
+		# it looks past the craft, along the line from the camera through it, so the craft stays in view however far
+		# the arrows turn the camera (looking along the path alone left the craft behind the camera at half a turn)
+		world.cam.look_at(ahead.rotated(up, yaw) * dist * 0.6, up)
 		stars.position = world.cam.global_position
 		return
 	world.cam.near = 0.05

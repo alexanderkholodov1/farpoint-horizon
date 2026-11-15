@@ -234,7 +234,7 @@ func _log_event(e: Dictionary) -> void:
 	pc.modulate.a = 0.0
 	pc.create_tween().tween_property(pc, "modulate:a", 1.0, 0.4)
 	if e.kind != "info" and month_f < 9000.0:
-		toast(e.title, col, 1.8)
+		Kit.toast(self, e.title, col, 1.8, 196.0)   # below the top bar, never over the science
 	# scroll to the newest entry once the log has its new size (next frame); freed with the screen if it leaves first
 	if not get_tree().process_frame.is_connected(_scroll_log_to_end):
 		get_tree().process_frame.connect(_scroll_log_to_end, CONNECT_ONE_SHOT)

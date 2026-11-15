@@ -359,12 +359,12 @@ static func card(title: String, body: String, selected: bool, on_click: Callable
 
 
 ## A short message at the top center that fades out; it lives in `parent` (a screen), so it goes with it.
-static func toast(parent: Control, text: String, col := C_ACCENT, time := 2.5) -> void:
+static func toast(parent: Control, text: String, col := C_ACCENT, time := 2.5, top := 122.0) -> void:
 	UiSound.play("error" if col == C_BAD else "notify")
 	var p := PanelContainer.new()
 	p.add_theme_stylebox_override("panel", flat(Color(C_BG.r, C_BG.g, C_BG.b, 0.97), col, 10, 2, 18, 12))
 	p.add_child(lbl(text, 16, col, FONT_B))
-	place(p, 0.5, 0, 0.5, 0, -300, 122, 300, 176)
+	place(p, 0.5, 0, 0.5, 0, -300, top, 300, top + 54.0)
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(p)
 	var tw := p.create_tween()
