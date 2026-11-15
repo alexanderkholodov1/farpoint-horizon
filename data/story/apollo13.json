@@ -1,0 +1,26 @@
+{
+ "doc": "Chapter 1, Apollo 13 (April 1970): the cuyes' scenes (issue #66; story: docs/design/story-v0.3.0.md). Every fact is from NASA's own pages, its source id in docs/sources.md. The cuyes never change history: they react; the outcome is NASA's.",
+ "scenes": {
+  "briefing": [
+   {"who": "wayra", "mood": "sleepy", "text": "Houston here. Well, a cuy in Houston. Apollo 13 is going to the Moon.", "fact": "Apollo 13 lifted off on April 11, 1970.", "source": "S-apollo13-nasa"},
+   {"who": "inti", "mood": "proud", "text": "Three astronauts, a command module, a lunar module. And us, who are not on any list."},
+   {"who": "killa", "mood": "curious", "text": "I packed a thermometer, a notebook and snacks. Mostly snacks."},
+   {"who": "rumi", "mood": "flat", "text": "Nothing will go wrong. I checked the tanks."}
+  ],
+  "problem": [
+   {"who": "wayra", "mood": "alert", "text": "Rumi. About the tanks.", "fact": "On April 13, 1970 (Houston time), oxygen tank no. 2 exploded, about 200,000 miles from Earth.", "source": "S-apollo13-nasa"},
+   {"who": "rumi", "mood": "flat", "text": "I checked them. I did not check them enough."},
+   {"who": "inti", "mood": "calm", "text": "Everyone into the lunar module. It is a lifeboat now."},
+   {"who": "killa", "mood": "worried", "text": "The air is filling with carbon dioxide. We need the command module's filters in here.", "fact": "The command module's square CO2 canisters did not fit the lunar module's round openings.", "source": "S-apollo13-nasa"},
+   {"who": "rumi", "mood": "flat", "text": "Square peg, round hole. Classic."},
+   {"who": "wayra", "mood": "alert", "text": "Mission Control sent a recipe: plastic bags, cardboard and tape.", "fact": "Mission Control worked out an adapter from plastic bags, cardboard and tape.", "source": "S-apollo13-nasa"},
+   {"who": "rumi", "mood": "pleased", "text": "Finally. My kind of engineering."}
+  ],
+  "home": [
+   {"who": "wayra", "mood": "relieved", "text": "Splashdown. All three astronauts are home.", "fact": "Apollo 13 splashed down on April 17, 1970.", "source": "S-apollo13-nasa"},
+   {"who": "killa", "mood": "thoughtful", "text": "Nobody landed on the Moon. Everybody came back. That counts."},
+   {"who": "inti", "mood": "tired", "text": "Next time, can we just land somewhere?"},
+   {"who": "rumi", "mood": "flat", "text": "Mars. On airbags. What could go wrong."}
+  ]
+ }
+}

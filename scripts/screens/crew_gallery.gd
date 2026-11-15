@@ -5,6 +5,7 @@ extends "res://scripts/screens/screen.gd"
 ## Names and lines are proposals for the team to confirm (story: docs/design/story-v0.3.0.md).
 
 const Space := preload("res://scripts/space_builder.gd")
+const Dialogue := preload("res://scripts/story/dialogue.gd")
 
 ## [file id, name, station, one line]
 const CREW := [
@@ -119,7 +120,20 @@ func _build_ui() -> void:
 	var row := Kit.hbox(Kit.GAP)
 	v.add_child(row)
 	row.add_child(Kit.btn(tr("All four"), func(): _focus(-1), Kit.T_BODY))
+	v.add_child(Kit.btn(tr("Play the Apollo 13 scene"), func(): _play_story(), Kit.T_BODY))
 	row.add_child(Kit.btn(tr("◀ Menu"), func(): go("menu"), Kit.T_BODY))
+
+
+## Chapter 1's scenes one after another, over the turntable (issue #66); Esc ends the run.
+func _play_story(k := 0) -> void:
+	const SCENES := ["briefing", "problem", "home"]
+	if k < SCENES.size():
+		Dialogue.play(main, "apollo13", SCENES[k], func(skipped: bool): _story_next(skipped, k + 1))
+
+
+func _story_next(skipped: bool, k: int) -> void:
+	if not skipped:
+		_play_story(k)
 
 
 func _focus(i: int) -> void:

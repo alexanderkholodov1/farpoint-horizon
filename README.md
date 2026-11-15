@@ -102,6 +102,9 @@ design decisions and the balance are the team's.
 
 - **Claude Code** (Anthropic), models Claude Opus 5.5 and Claude Sonnet: code, documents and research notes.
 - **Cursor**, model Composer 2.5: a feasibility test of the web build (kept outside this repository).
+- **Meshy** and **TRELLIS** (Microsoft, run on Hugging Face): 3D drafts the team used as references for the four cuy
+  crew models; Rumi's body is a TRELLIS mesh, the heads and the other three cuyes were modelled in Blender by script
+  (`assets/source/crew_*.py`). The story portraits are renders of those models.
 - **TODO (teammate):** add here the other AI agents and models you used.
 
 No AI-generated images are used, so no watermark is needed: models come from our scripts and from the cited

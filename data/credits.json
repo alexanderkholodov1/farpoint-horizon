@@ -25,7 +25,8 @@
  ],
  "ai": [
   "Claude Code (Anthropic), models Claude Opus 5.5 and Claude Sonnet: code, documents and research notes.",
-  "Cursor, model Composer 2.5: a feasibility test of the web build (kept outside this repository)."
+  "Cursor, model Composer 2.5: a feasibility test of the web build (kept outside this repository).",
+  "Meshy and TRELLIS (Microsoft, run on Hugging Face): 3D drafts the team used as references for the four cuy crew models; Rumi's body is a TRELLIS mesh, the heads and the other three cuyes were modelled in Blender by script (assets/source/crew_*.py). The story portraits are renders of those models."
  ],
  "ai_note": [
   "Artificial intelligence (AI) tools helped build this project, as the challenge rules ask us to disclose. The game idea, the design decisions and the balance are the team's.",
@@ -231,6 +232,10 @@
     {
      "id": "S-capstone",
      "text": "Wikipedia. CAPSTONE. https://en.wikipedia.org/wiki/CAPSTONE. A 12U CubeSat in lunar orbit, 2022 (shown in the report of a lunar CubeSat mission)."
+    },
+    {
+     "id": "S-apollo13-nasa",
+     "text": "NASA. Apollo 13 Mission Details. https://www.nasa.gov/missions/apollo/apollo-13-mission-details/. Launched April 11, 1970; oxygen tank no. 2 exploded on April 13 (Houston time), 200,000 miles from Earth; the crew used the lunar module as a lifeboat; the command module's square CO2 canisters did not fit the lunar module's round openings, and Mission Control devised an adapter of plastic bags, cardboard and tape; splashdown April 17, 1970. The facts the cuyes cite in chapter 1 (data/story/apollo13.json)."
     }
    ]
   },
@@ -239,7 +244,7 @@
    "entries": [
     {
      "id": "S-moon-kit",
-     "text": "NASA Goddard Space Flight Center, Scientific Visualization Studio. CGI Moon Kit (2019). https://svs.gsfc.nasa.gov/4720. LRO LROC WAC colour map (lroc_color_2k.jpg, colour enhanced from LROC and Kaguya) and LOLA elevation (ldem_4.tif); the game's Moon colour and relief (textures/moon_color.jpg, moon_normal.jpg, made by assets/source/planet_textures.py). Credit: \"NASA/GSFC/Scientific Visualization Studio, LRO\". NASA media guidelines."
+     "text": "NASA Goddard Space Flight Center, Scientific Visualization Studio. CGI Moon Kit (2019). https://svs.gsfc.nasa.gov/4720. LRO LROC WAC colour map (lroc_color_poles_4k.tif, colour enhanced from LROC and Kaguya) and LOLA elevation (ldem_16.tif, 16 pixels per degree); the game's Moon colour and relief (textures/moon_color.jpg, moon_normal.jpg, made by assets/source/planet_textures.py). Credit: \"NASA/GSFC/Scientific Visualization Studio, LRO\". NASA media guidelines."
     },
     {
      "id": "S-gibs-earth",
@@ -363,5 +368,5 @@
    ]
   }
  ],
- "count": 69
+ "count": 70
 }

@@ -129,6 +129,11 @@ branches add entries at the same place (`.gitattributes`).
   1U CubeSat launched in 2013 (shown in the report of a CubeSat mission).
 - **S-capstone** Wikipedia. *CAPSTONE*. https://en.wikipedia.org/wiki/CAPSTONE. A 12U CubeSat in lunar orbit, 2022 (shown in
   the report of a lunar CubeSat mission).
+- **S-apollo13-nasa** NASA. *Apollo 13 Mission Details*. https://www.nasa.gov/missions/apollo/apollo-13-mission-details/.
+  Launched April 11, 1970; oxygen tank no. 2 exploded on April 13 (Houston time), 200,000 miles from Earth; the crew
+  used the lunar module as a lifeboat; the command module's square CO2 canisters did not fit the lunar module's round
+  openings, and Mission Control devised an adapter of plastic bags, cardboard and tape; splashdown April 17, 1970. The
+  facts the cuyes cite in chapter 1 (data/story/apollo13.json).
 
 ## The look: Earth, Moon, the Andes and the launch site (issue 12; scripts in `assets/source/`)
 - **S-moon-kit** NASA Goddard Space Flight Center, Scientific Visualization Studio. *CGI Moon Kit* (2019).
