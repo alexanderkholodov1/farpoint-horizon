@@ -181,7 +181,7 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 	var hb: Array = Kit.hint_box()
 	hint_panel = hb[0]
 	hint_lbl = hb[1]
-	Kit.place(hint_panel, 0.5, 1, 0.5, 1, -440, -128, 300, -Kit.MARGIN)
+	Kit.place(hint_panel, 0.5, 1, 0.5, 1, -400, -128, 330, -Kit.MARGIN)   # clear of the mini-map on narrower screens (#76)
 	add_child(hint_panel)
 	hint_panel.visible = false
 

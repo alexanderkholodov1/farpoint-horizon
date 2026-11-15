@@ -33,6 +33,8 @@ func _ready() -> void:
 	world.setup()
 	GameState.trace("mundo listo")
 	_setup_ui()
+	_fit_screen()
+	get_window().size_changed.connect(_fit_screen)
 	GameState.trace("interfaz lista")
 	go("menu")
 	GameState.trace("menu listo")
@@ -54,6 +56,56 @@ func _setup_ui() -> void:
 	fade_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	fade_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	top.add_child(fade_rect)
+
+
+# ===================================================================================== SCREENS OF EVERY SIZE (issue #76)
+var turn_card: Control
+
+## The interface grows on small screens so its text stays readable (a phone in landscape is about 390 CSS pixels tall:
+## the 1600 x 900 layout shrunk to it makes 13 px text about 6 px), and a phone held upright is asked to turn: the
+## game's panels are laid out for a wide screen. Layouts were checked at 1.25 (shots/dev_phone125_*).
+func _fit_screen() -> void:
+	var px: Vector2 = Vector2(DisplayServer.window_get_size())
+	var css_h: float = px.y / maxf(DisplayServer.screen_get_scale(), 1.0)
+	if OS.has_feature("web"):
+		var h = JavaScriptBridge.eval("window.innerHeight", true)
+		if h != null and float(h) > 0.0:
+			css_h = float(h)
+	var factor := 1.0
+	if css_h < 600.0:
+		factor = 1.25     # phones in landscape
+	elif css_h < 800.0:
+		factor = 1.12     # small tablets and laptops
+	var upright: bool = px.x < px.y * 1.05
+	if upright:
+		factor = 3.0   # only the turn card is seen: big enough to read on a phone held upright
+	if absf(get_window().content_scale_factor - factor) > 0.01:
+		get_window().content_scale_factor = factor
+	if upright and turn_card == null:
+		turn_card = _make_turn_card()
+	if turn_card:
+		turn_card.visible = upright
+
+
+func _make_turn_card() -> Control:
+	var layer := CanvasLayer.new()
+	layer.layer = 20
+	add_child(layer)
+	var shade := ColorRect.new()
+	shade.color = Color(0.0, 0.01, 0.04, 1.0)
+	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	shade.mouse_filter = Control.MOUSE_FILTER_STOP
+	shade.theme = Kit.build_theme()
+	layer.add_child(shade)
+	var v := Kit.vbox(16)
+	v.alignment = BoxContainer.ALIGNMENT_CENTER
+	v.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	shade.add_child(v)
+	for t in [["⟲", 120, Kit.C_GOLD], [tr("Turn your device sideways"), Kit.T_STAT + 10, Kit.C_ON_DARK], [tr("Farpoint HORIZON is made for a wide screen."), Kit.T_LEAD + 6, Color(Kit.C_ON_DARK, 0.75)]]:
+		var l := Kit.lbl(t[0], t[1], t[2], Kit.FONT_T, true)
+		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		v.add_child(l)
+	return shade
 
 
 ## Esc pauses a mission (a screen that uses Esc itself handles it first and this never sees it).
