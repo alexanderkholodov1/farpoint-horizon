@@ -71,7 +71,8 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
 ## The cycle of a version
 1. The version branch collects finished pieces. Its pull request into `main` opens only when the version is complete.
    Two lines run now (issue #72, `docs/state/versions.md`): **`v0.2.1`** takes every fix or adjustment to v0.2.0
-   (no new story or missions); **`v0.3.0`** takes the story campaign, minigames and the crew of friends. Pick the
+   (no new story or missions), and its pull request into `main` opens only once every issue in milestone v0.2.1 is
+   closed; **`v0.3.0`** takes the story campaign, minigames and the crew of friends. Pick the
    branch by what your issue is (its milestone says it). `tools/pr-when-green.sh` and `tools/state.sh` default to
    the newest version branch, so for a fix pass `v0.2.1` to them.
 2. Every piece of work is a GitHub issue, written with `.github/ISSUE_TEMPLATE/piece.md` (what the player gets, the
