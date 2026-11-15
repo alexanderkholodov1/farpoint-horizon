@@ -25,11 +25,12 @@
  ],
  "ai": [
   "Claude Code (Anthropic), models Claude Opus 5.5 and Claude Sonnet: code, documents and research notes.",
-  "Cursor, model Composer 2.5: a feasibility test of the web build (kept outside this repository)."
+  "Cursor, model Composer 2.5: a feasibility test of the web build (kept outside this repository).",
+  "Claude (Anthropic): the game's music (audio/music_horizon.ogg, audio/music_horizon_drive.ogg) was generated with AI. Its files say so in their metadata and the in-game credits say so too."
  ],
  "ai_note": [
   "Artificial intelligence (AI) tools helped build this project, as the challenge rules ask us to disclose. The game idea, the design decisions and the balance are the team's.",
-  "No AI-generated images are used, so no watermark is needed: models come from our scripts and from the cited libraries, imagery from NASA. Every source (information, formula, data) is cited where it is used and in docs/sources.md."
+  "No AI-generated images or videos are used, so no watermark is needed: models come from our scripts and from the cited libraries, imagery from NASA. Every source (information, formula, data) is cited where it is used and in docs/sources.md."
  ],
  "built_with": [
   "Engine: Godot Engine (https://godotengine.org) (MIT).",
