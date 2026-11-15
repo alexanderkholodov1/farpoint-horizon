@@ -37,3 +37,12 @@ tools, knee pads, boots, tape, backpack) is `assets/source/rumi_trellis_body.glb
 image-to-3D model, Hugging Face Space trellis-community/TRELLIS) from a screenshot of the team's **Meshy** (AI) model;
 the head, the face and the patches are built in Blender by the script (no helmet: the face is in the open, a team decision for expression and animation), measured on the reference (side by side: `crew_rumi_head_compare.png`, the reference on the left). Both tools are AI: if this model
 is used, the README's "Use of AI" and `docs/sources.md` say so. About 40,000 faces.
+
+## Wayra matched to the Meshy reference
+
+![Wayra, four sides](crew_wayra_meshy.png)
+
+`assets/models/crew/crew_wayra_meshy.glb`, built entirely in Blender by `assets/source/crew_wayra.py` (no generated
+mesh), measured on screenshots of the team's **Meshy** (AI) model from the front, the sides and the back (side by
+side with the reference: `crew_wayra_compare.png`). No helmet. If used, the README's "Use of AI" names Meshy as the
+reference.
