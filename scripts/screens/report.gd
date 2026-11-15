@@ -88,7 +88,7 @@ func process(delta: float) -> void:
 		counted = minf(target, counted + maxf(target, 1.0) * delta / 1.3) if intro_t > 0.9 else 0.0
 		if int(counted) / 25 != before / 25:
 			Kit.UiSound.play("tick", 0.0)
-		pts_lbl.text = tr("%d points") % int(counted)
+		pts_lbl.text = tr("%d points") % int(counted) + ("  " + tr("+ %d bonus") % bonus if bonus > 0 and counted >= target else "")
 		if intro_t > 4.6:
 			_end_intro()
 
@@ -128,7 +128,7 @@ func _unhandled_input(e: InputEvent) -> void:
 ## rolling up, a burst of the brand's colours and a fanfare. A lost mission gets a calm version, never a failure screen.
 func _celebrate(s: Dictionary, last_sim: Dictionary) -> void:
 	var lost: bool = last_sim.launch_failed or last_sim.status == "lost"
-	total_pts = s.total + bonus
+	total_pts = s.total   # the score the grade comes from; the bonus is said apart, so a B never reads as 832 of 1000
 	intro = Control.new()
 	intro.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	intro.mouse_filter = Control.MOUSE_FILTER_STOP   # the click that ends it must not reach the report under it
