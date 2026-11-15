@@ -1130,11 +1130,39 @@ void fragment() {
 	planet.position = Vector3(-260, -60, -900)
 	st.add_child(planet)
 	var craft := Node3D.new()
+	craft.name = "Cruise"
 	st.add_child(craft)
-	cyl(craft, 1.3, 1.3, 0.25, Vector3(0, 0.4, 0), mat(Color(0.12, 0.14, 0.2), 0.3, 0.5), 32)
-	cyl(craft, 1.32, 1.32, 0.08, Vector3(0, 0.53, 0), mat(Color(0.75, 0.75, 0.78), 0.4, 0.7), 32)
-	cyl(craft, 0.4, 1.32, 0.9, Vector3(0, -0.2, 0), mat(Color(0.82, 0.8, 0.74), 0.5, 0.3), 32)
-	cyl(craft, 1.32, 1.1, 0.25, Vector3(0, -0.75, 0), mat(Color(0.45, 0.3, 0.2), 0.8), 32)
+	var spin := Node3D.new()
+	craft.add_child(spin)
+	# the cruise stage: a ring of solar cells with a metal rim and struts
+	cyl(spin, 1.3, 1.3, 0.12, Vector3(0, 0.45, 0), mat(Color(0.75, 0.75, 0.78), 0.4, 0.7), 48)
+	cyl(spin, 1.24, 1.24, 0.03, Vector3(0, 0.52, 0), mat(Color(0.1, 0.13, 0.25), 0.25, 0.6), 48)
+	for i in 12:
+		var a := i * TAU / 12.0
+		var strip := box(spin, Vector3(0.02, 0.035, 1.2), Vector3(sin(a) * 0.62, 0.53, cos(a) * 0.62), mat(Color(0.85, 0.65, 0.25), 0.4, 0.8))
+		strip.rotation.y = a
+	cyl(spin, 0.18, 0.18, 0.4, Vector3(0, 0.75, 0), mat(Color(0.7, 0.7, 0.72), 0.4, 0.7), 16)
+	var dish := ball(spin, 0.28, Vector3(0, 1.0, 0), mat(Color(0.92, 0.92, 0.9), 0.4), Vector3(1, 0.3, 1))
+	dish.name = "Dish"
+	# the backshell and the heat shield, the lander folded inside
+	cyl(spin, 0.4, 1.32, 0.9, Vector3(0, -0.05, 0), mat(Color(0.86, 0.84, 0.78), 0.45, 0.3), 48)
+	cyl(spin, 1.33, 1.05, 0.28, Vector3(0, -0.62, 0), mat(Color(0.42, 0.27, 0.17), 0.85), 48)
+	craft.rotation = Vector3(0.35, 0, 0.25)
+	# the glow of entry, wrapped around the heat shield (shown by the story's "fireball")
+	var plasma := MeshInstance3D.new()
+	var psm := SphereMesh.new()
+	psm.radius = 1.0
+	psm.height = 2.0
+	plasma.mesh = psm
+	var pmat := StandardMaterial3D.new()
+	pmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	pmat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	pmat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	pmat.albedo_color = Color(1.0, 0.5, 0.18, 0.0)
+	plasma.material_override = pmat
+	plasma.position = Vector3(0, -1.5, 0)
+	plasma.scale = Vector3(1.5, 2.0, 1.5)
+	craft.add_child(plasma)
 	# inside: the crew ride in the folded lander, a small warm room among the airbags and the folded petals, a little
 	# window toward Mars (the room sits apart from the craft drawn outside, so each shot shows one or the other)
 	var room := Node3D.new()
@@ -1169,7 +1197,20 @@ void fragment() {
 	for i in 5:
 		var aa := 0.6 + i * 1.0
 		ball(room, 0.22, Vector3(sin(aa) * 0.85, 0.2, cos(aa) * 0.85), lining, Vector3(1.4, 0.8, 1.0))
-	omni(room, Vector3(0, 1.0, 0.2), Color(1.0, 0.82, 0.6), 1.1, 3.0)
+	var cabin_light := omni(room, Vector3(0, 1.0, 0.2), Color(1.0, 0.82, 0.6), 1.1, 3.0)
+	# the window's glow when the craft enters the atmosphere (the story's "heat")
+	var glow := MeshInstance3D.new()
+	var gq := QuadMesh.new()
+	gq.size = Vector2(0.5, 0.5)
+	glow.mesh = gq
+	var gm := StandardMaterial3D.new()
+	gm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	gm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	gm.albedo_color = Color(1.0, 0.45, 0.12, 0.0)
+	glow.material_override = gm
+	glow.position = Vector3(0, 0.62, -1.06)
+	room.add_child(glow)
+	var heat_light := omni(room, Vector3(0, 0.62, -0.8), Color(1.0, 0.45, 0.15), 0.0, 3.0)
 	return {
 		"marks": marks({"inti": [CABIN.x - 0.35, 0.0, CABIN.z + 0.1, 180], "killa": [CABIN.x + 0.05, 0.0, CABIN.z - 0.15, 180], "rumi": [CABIN.x + 0.4, 0.0, CABIN.z + 0.15, 180], "wayra": [0, 0, 3, 0]}),
 		"cast": ["rumi", "killa", "inti"],
@@ -1178,8 +1219,16 @@ void fragment() {
 			"wide": {"from": CABIN + Vector3(0.2, 0.75, -0.85), "to": CABIN + Vector3(0, 0.3, 0.2)},
 			"window": {"from": CABIN + Vector3(0.15, 0.6, 0.8), "to": CABIN + Vector3(0, 0.55, -1.1), "from2": CABIN + Vector3(0.05, 0.62, 0.2), "to2": Vector3(-260, -60, -900), "time": 6.0},
 			"approach": {"from": Vector3(2.5, 1.8, 4.5), "to": Vector3(0, 0.5, 0), "from2": Vector3(1.4, 1.2, 2.6), "to2": Vector3(-260, -60, -900), "time": 7.0},
+			"behind": {"from": Vector3(0.6, 2.4, 3.2), "to": Vector3(-260, -60, -900)},
+			"entry": {"from": Vector3(4.5, 2.0, 3.5), "to": Vector3(0, 0, 0), "track": "cruise", "offset": Vector3.ZERO},
 		},
 		"act": "idle",
+		"cruise": craft,
+		"cruise_spin": spin,
+		"plasma": plasma,
+		"cabin_light": cabin_light,
+		"heat_light": heat_light,
+		"window_glow": glow,
 	}
 
 

@@ -49,6 +49,8 @@ var splash_t := -1.0         ## Seconds since the capsule started coming down (-
 var splashed := false        ## The capsule is on the water (kept when the film cuts away and back).
 var _t := 0.0
 var _saved := {}
+var heat := false              ## Mars entry: the cabin's window glows and shakes (Mars's chapter).
+var fireball_t := -1.0         ## Seconds since the craft outside started its plunge into Mars's air.
 
 
 func enter(args: Dictionary) -> void:
@@ -248,6 +250,9 @@ func _go_to_set(id: String) -> void:
 	alarm_light.position = Vector3(0, 3.0, 1.0)
 	world.stage.add_child(alarm_light)
 	alarm = false
+	heat = false
+	fireball_t = -1.0
+	rumble = 0.0
 	dim = 0.0
 	dim_goal = 0.0
 	liftoff = -1.0
@@ -307,6 +312,17 @@ func _fx(fx: String) -> void:
 			Kit.UiSound.play("whoosh", 0.0)
 		"splashdown":
 			splash_t = 0.0
+		"heat":
+			# entering Mars's air: the window glows orange, the cabin shakes and rumbles
+			heat = true
+			shake = 0.8
+			Kit.UiSound.play("whoosh", 0.0)
+			for k in actors:
+				actors[k].shake(2.5)
+		"fireball":
+			heat = true
+			fireball_t = 0.0
+			Kit.UiSound.play("whoosh", 0.0)
 
 
 ## Sets the shot the camera glides to.
@@ -390,6 +406,26 @@ func process(delta: float) -> void:
 ## The set's own life: the fire, the alarm, the power going down, the launch, the splashdown.
 func _animate_set(delta: float) -> void:
 	var pulse := 0.5 + 0.5 * sin(_t * 6.0)
+	# on the way to Mars: the craft turns slowly in the sunlight; at entry it glows and plunges
+	if S.has("cruise_spin"):
+		(S.cruise_spin as Node3D).rotate_y(delta * 0.25)
+	if S.has("plasma"):
+		var pm := (S.plasma as MeshInstance3D).material_override as StandardMaterial3D
+		pm.albedo_color.a = lerpf(pm.albedo_color.a, (0.42 + 0.12 * sin(_t * 25.0)) if fireball_t >= 0.0 else 0.0, clampf(delta * 3.0, 0.0, 1.0))
+		(S.plasma as Node3D).scale = Vector3(1.5, 2.0, 1.5) * (1.0 + 0.06 * sin(_t * 31.0))
+	if fireball_t >= 0.0 and S.has("cruise"):
+		fireball_t += delta
+		var c: Node3D = S.cruise
+		var to_mars := (Vector3(-260, -60, -900) - c.global_position).normalized()
+		c.global_position += to_mars * delta * (0.6 + fireball_t * 0.8)
+		rumble = 0.4
+	if S.has("window_glow"):
+		var wg := (S.window_glow as MeshInstance3D).material_override as StandardMaterial3D
+		wg.albedo_color.a = lerpf(wg.albedo_color.a, (0.75 + 0.25 * sin(_t * 18.0)) if heat else 0.0, clampf(delta * 3.0, 0.0, 1.0))
+		(S.heat_light as OmniLight3D).light_energy = lerpf((S.heat_light as OmniLight3D).light_energy, (1.8 + randf_range(-0.4, 0.4)) if heat else 0.0, clampf(delta * 6.0, 0.0, 1.0))
+		(S.cabin_light as OmniLight3D).light_energy = 1.1 * (0.55 if heat and randf() < 0.1 else 1.0)
+		if heat:
+			rumble = maxf(rumble, 0.35)
 	if alarm_light:
 		alarm_light.light_energy = lerpf(alarm_light.light_energy, (2.4 * pulse) if alarm else 0.0, clampf(delta * 8.0, 0.0, 1.0))
 	vignette.color.a = lerpf(vignette.color.a, (0.12 * pulse) if alarm else 0.0, clampf(delta * 8.0, 0.0, 1.0))

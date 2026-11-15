@@ -23,7 +23,7 @@
    },
    {
     "who": "narrator",
-    "shot": "approach",
+    "shot": "behind",
     "text": "Four years after Hubble, the cuyes went farther than ever: seven months to Mars, inside a lander wrapped in airbags.",
     "fact": "Mars Pathfinder launched on December 4, 1996, and landed on Mars on July 4, 1997.",
     "source": "S-mpf-nasa"
@@ -39,19 +39,12 @@
     "source": "S-mpf-nssdc"
    },
    {
-    "set": "mars_approach",
-    "who": "inti",
-    "mood": "scared",
-    "act": "scared",
-    "shot": "close",
-    "text": "Calm at the stick, they said. Nobody said anything about airbags."
-   },
-   {
     "who": "killa",
     "mood": "happy",
     "act": "point",
     "text": "A flood plain! Old water made all these rocks. I want to see every one.",
-    "shot": "window"
+    "shot": "window",
+    "set": "mars_approach"
    },
    {
     "who": "rumi",
@@ -61,22 +54,40 @@
     "shot": "close"
    },
    {
+    "who": "inti",
+    "mood": "scared",
+    "act": "scared",
+    "shot": "close",
+    "text": "Calm at the stick, they said. Nobody said anything about airbags.",
+    "fx": "heat",
+    "all": "scared"
+   },
+   {
+    "set": "mars_approach",
+    "shot": "entry",
+    "cut": true,
+    "fx": "fireball",
+    "wait": 4.0
+   },
+   {
     "set": "houston",
     "who": "wayra",
     "mood": "determined",
     "act": "talk",
     "text": "Steady the lander, fire the rockets, cut the bridle. Then hold on.",
     "fact": "The parachute slowed the craft to about 70 m/s; the radar found the ground at about 1.6 km.",
-    "source": "S-mpf-nssdc"
+    "source": "S-mpf-nssdc",
+    "shot": "close"
    }
   ],
   "mission": [
    {
     "set": "mars_approach",
     "title": "Your turn",
-    "shot": "window",
+    "shot": "entry",
     "wait": 2.5,
-    "play": "pathfinder"
+    "play": "pathfinder",
+    "fx": "fireball"
    }
   ],
   "outro": [
