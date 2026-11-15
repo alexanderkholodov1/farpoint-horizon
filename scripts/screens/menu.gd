@@ -87,6 +87,7 @@ func _main_list(box: VBoxContainer) -> void:
 	var items := [
 		[tr("First mission · guided"), func(): Coach.start(main)],
 		[tr("How to play"), func(): main.overlay("howto")],
+		[tr("The crew"), func(): go("crew_gallery")],
 		[tr("Credits"), func(): go("credits_film")],
 		[tr("Settings"), func(): go("menu", {"settings": true})]]
 	if not OS.has_feature("web"):
