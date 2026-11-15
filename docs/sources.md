@@ -144,6 +144,22 @@ branches add entries at the same place (`.gitattributes`).
   adapter game is won (assets/missions/apollo13/as13-62-9004.jpg). The same mission page [S-apollo13-nasa] gives the
   game's other facts: the CO2 warning after a day and a half in the lunar module, and the lunar module made for two
   men for two days, asked to keep three for about four.
+- **S-hubble-sm1** NASA Science. *Hubble Servicing Mission 1*.
+  https://science.nasa.gov/mission/hubble/observatory/missions-to-hubble/servicing-mission-1/. Endeavour launched
+  Dec 2, 1993; the mirror's flaw (spherical aberration: many foci instead of one, fuzzy first images); five
+  back-to-back spacewalks totaling 35 hours and 28 minutes; the parts installed (solar arrays, their drive electronics,
+  magnetometers, co-processors, two Rate Sensor Units, two gyroscope control units, the GHRS redundancy kit, WFPC2,
+  COSTAR). Mission 2 (data/missions/sts61.json, data/story/sts61.json).
+- **S-sts61-nasa** NASA. *STS-61*. https://www.nasa.gov/mission/sts-61/. Launch Dec 2, 1993, landing Dec 13, 1993
+  (10 days, 19 hours, 58 minutes); Hubble grappled and stood upright in the bay on flight day three by Claude
+  Nicollier with the robot arm; each spacewalk's crew, work and length (7 h 54, 6 h 35, 6 h 48, 6 h 50, 7 h 21).
+- **S-m100-pia22913** NASA/JPL. *M100 Through 3 Cameras*, PIA22913 (public domain).
+  https://images.nasa.gov/details/PIA22913. M100 with WFPC1 in 1993, blurry from the mirror's flaw, and with WFPC2
+  after STS-61, "snapped into sharp focus". Cropped for mission 2's first image
+  (assets/missions/sts61/m100_wfpc1_1993.jpg, m100_wfpc2_1993.jpg).
+- **S-nasa-9408670** NASA Marshall Space Flight Center. *History of Hubble Space Telescope (HST)*, image 9408670.
+  https://images.nasa.gov/details/9408670. Hubble launched by Discovery (STS-31) in April 1990; two months later a
+  2-micron spherical aberration found in the primary mirror, one-fiftieth of the width of a human hair.
 
 ## The look: Earth, Moon, the Andes and the launch site (issue 12; scripts in `assets/source/`)
 - **S-moon-kit** NASA Goddard Space Flight Center, Scientific Visualization Studio. *CGI Moon Kit* (2019).

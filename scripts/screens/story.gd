@@ -75,7 +75,7 @@ func enter(args: Dictionary) -> void:
 
 ## What the sets change in the shared world, put back when the film ends.
 ## The story so far, in order: the prologue, then each chapter (its intro, the mission, its outro), as scene refs.
-static func story(chapters := ["prologue", "apollo13"]) -> Array:
+static func story(chapters := ["prologue", "apollo13", "sts61"]) -> Array:
 	var out := []
 	for c in chapters:
 		var data = JSON.parse_string(FileAccess.get_file_as_string("res://data/story/%s.json" % c))

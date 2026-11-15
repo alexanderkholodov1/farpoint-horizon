@@ -38,6 +38,8 @@ static func build(id: String, world) -> Dictionary:
 			S = _houston(world, env)
 		"ocean":
 			S = _ocean(world, env)
+		"hubble":
+			S = _hubble(world, env)
 		_:
 			S = _andes(world, env)
 	S["id"] = id
@@ -702,6 +704,114 @@ void fragment() {
 		},
 		"act": "idle",
 	}
+
+
+# ===================================================================================== HUBBLE IN THE BAY
+## STS-61, December 1993: Hubble stands upright in Endeavour's payload bay, the Earth below, the Sun bright. True
+## size around the crew: Hubble is 13.2 m long and 4.2 m wide [S-hubble-sm1]; the bay about 18 m long. "spots" are
+## where each part of the five spacewalks goes (data/missions/sts61.json), in the set's own coordinates.
+static func _hubble(world, env: Environment) -> Dictionary:
+	var st: Node3D = world.stage
+	env.sky = Space.make_space_sky()
+	env.background_energy_multiplier = 1.0
+	env.ambient_light_color = Color(0.55, 0.62, 0.8)
+	env.ambient_light_energy = 0.4
+	world.sun.light_energy = 1.6
+	world.sun.light_color = Color(1.0, 0.97, 0.92)
+	world.sun.rotation_degrees = Vector3(-35, 35, 0)
+	world.cam.far = 6000.0
+	# the Earth below, filling the lower sky
+	var earth: Node3D = Space.make_earth(1500.0, false)
+	earth.position = Vector3(0, -1620, -300)
+	earth.rotation_degrees = Vector3(0, 80, 20)
+	st.add_child(earth)
+	world.planet = earth
+	# the payload bay: a white floor, the side walls, the open doors, the tail at the back
+	var white := mat(Color(0.7, 0.7, 0.68), 0.7)
+	var lining := mat(Color(0.62, 0.62, 0.6), 0.95)
+	var bay := Node3D.new()
+	bay.name = "Bay"
+	st.add_child(bay)
+	box(bay, Vector3(16, 1.0, 62), Vector3(0, -1.0, 0), lining)
+	for sx in [-1, 1]:
+		box(bay, Vector3(1.0, 6, 62), Vector3(sx * 8.5, 1.5, 0), white)
+		var door := box(bay, Vector3(0.4, 15, 62), Vector3(sx * 15.5, 6.0, 0), white)
+		door.rotation.z = sx * -1.05
+	box(bay, Vector3(4, 22, 14), Vector3(0, 9, 40), white)
+	# the berthing platform and Hubble standing on it
+	var hub := Node3D.new()
+	hub.name = "Hubble"
+	hub.position = Vector3(0, 1.5, -6)
+	st.add_child(hub)
+	cyl(hub, 6.5, 6.5, 1.2, Vector3(0, -0.6, 0), mat(Color(0.5, 0.52, 0.55), 0.5, 0.6), 48)
+	var foil := mat(Color(0.8, 0.8, 0.82), 0.3, 0.85)
+	var dark := mat(Color(0.12, 0.13, 0.15), 0.6, 0.3)
+	cyl(hub, 7.3, 7.3, 11.0, Vector3(0, 5.5, 0), foil, 64)          # the aft shroud: the instruments' bays
+	cyl(hub, 6.9, 7.3, 2.0, Vector3(0, 12.0, 0), foil, 64)
+	cyl(hub, 6.9, 6.9, 30.0, Vector3(0, 28.0, 0), foil, 64)          # the light shield and the mirror's tube
+	cyl(hub, 7.0, 7.0, 0.4, Vector3(0, 43.0, 0), dark, 64)
+	var door := cyl(hub, 7.0, 7.0, 0.3, Vector3(0, 0, 0), foil, 48)   # the aperture door, open
+	door.position = Vector3(0, 46.5, -6.5)
+	door.rotation.x = -1.2
+	for i in 8:
+		var a := i * TAU / 8.0
+		box(hub, Vector3(0.15, 10.5, 0.15), Vector3(sin(a) * 7.32, 5.5, cos(a) * 7.32), dark)
+	# the equipment bay doors (gyros, fuses, the computer), and the radial bay of the camera
+	box(hub, Vector3(4.0, 5.0, 0.4), Vector3(0, 17.0, 7.0), mat(Color(0.7, 0.7, 0.72), 0.4, 0.7))
+	var camera_bay := box(hub, Vector3(0.6, 6.0, 5.0), Vector3(-7.2, 5.5, 0), mat(Color(0.86, 0.86, 0.9), 0.35, 0.3))
+	camera_bay.name = "CameraBay"
+	# two high-gain antennas on booms
+	for sx in [-1, 1]:
+		box(hub, Vector3(0.3, 0.3, 9.0), Vector3(sx * 3.0, 24.0, -11.0), dark)
+		var dish := ball(hub, 2.2, Vector3(sx * 3.0, 24.0, -15.5), mat(Color(0.9, 0.9, 0.88), 0.4), Vector3(1, 1, 0.25))
+		dish.rotation.x = 0.3
+	# the solar arrays: two wings on masts; the old ones until the second spacewalk
+	var wings := Node3D.new()
+	wings.name = "Wings"
+	hub.add_child(wings)
+	_wings(wings, Color(0.25, 0.22, 0.45))
+	# the magnetometers at the top
+	var top := Node3D.new()
+	top.name = "Magnetometers"
+	top.position = Vector3(0, 44.0, 0)
+	hub.add_child(top)
+	# the robot arm, from the bay's side up toward Hubble
+	var arm_m := mat(Color(0.9, 0.9, 0.88), 0.5)
+	rope(st, Vector3(7.5, 1.5, 14), Vector3(5, 18, 8), 0.5, arm_m)
+	rope(st, Vector3(5, 18, 8), Vector3(3.5, 9, 3), 0.45, arm_m)
+	var spots := {
+		"rsu": Vector3(0, 17.0, 7.6), "ecu": Vector3(1.2, 17.6, 7.6), "fuses": Vector3(-1.2, 16.4, 7.6),
+		"arrays": Vector3(9.0, 24.0, 0), "wfpc2": Vector3(-7.8, 5.5, 0), "magnetometers": Vector3(0, 44.8, 2.0),
+		"costar": Vector3(0, 0.6, 7.6), "coprocessor": Vector3(0.6, 18.4, 7.6), "sade": Vector3(-0.6, 15.6, 7.6),
+		"ghrs": Vector3(7.6, 4.5, 0), "covers": Vector3(1.0, 44.8, -1.0),
+	}
+	for k in spots:
+		spots[k] = hub.position + spots[k]
+	return {
+		"marks": marks({"inti": [2.6, 16.5, 9.0, -15], "rumi": [-2.6, 15.6, 9.4, 15], "killa": [0.2, 17.6, 10.6, 0], "wayra": [0, 0, 20, 180]}),
+		"cast": ["rumi", "killa", "inti"],
+		"cams": {
+			"wide": {"from": Vector3(12, 22, 34), "to": Vector3(0, 18, -6)},
+			"hubble_up": {"from": Vector3(26, 10, 44), "to": Vector3(0, 6, -6), "from2": Vector3(32, 22, 64), "to2": Vector3(0, 40, -6), "time": 8.0},
+			"earth": {"from": Vector3(-20, 30, 40), "to": Vector3(0, -60, -200), "from2": Vector3(-14, 38, 30), "to2": Vector3(0, 20, -6), "time": 8.0},
+		},
+		"act": "float",
+		"hubble": hub,
+		"wings": wings,
+		"spots": spots,
+		"camera_bay": camera_bay,
+	}
+
+
+## Hubble's two solar wings on their masts; `cell` is the colour of the cells.
+static func _wings(parent: Node3D, cell: Color) -> void:
+	var cm := mat(cell, 0.35, 0.5)
+	var gold := mat(Color(0.85, 0.65, 0.25), 0.4, 0.8)
+	for sx in [-1, 1]:
+		rope(parent, Vector3(sx * 7.0, 24.0, 0), Vector3(sx * 9.5, 24.0, 0), 0.25, gold)
+		box(parent, Vector3(0.12, 40.0, 8.0), Vector3(sx * 9.8, 24.0, 0), cm)
+		for k in 6:
+			box(parent, Vector3(0.16, 0.18, 8.1), Vector3(sx * 9.8, 6.0 + k * 7.2, 0), gold)
 
 
 # ===================================================================================== THE PACIFIC
