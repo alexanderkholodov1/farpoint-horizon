@@ -53,7 +53,6 @@ func enter(_args: Dictionary) -> void:
 
 	_hero(box)
 	_people(box, data.get("people", []))
-	_bots(box)
 	_made_with(box, data.get("built_with", []))
 	_ai(box, data.get("ai_note", []), data.get("ai", []))
 	_sources(box, data.get("sections", []), int(data.get("count", 0)))
@@ -73,7 +72,7 @@ func _hero(box: VBoxContainer) -> void:
 	var v := Kit.vbox(4)
 	box.add_child(v)
 	reveal.append(v)
-	v.add_child(Kit.caps(tr("Credits")))
+	v.add_child(_head(tr("Credits")))
 	var arc := Horizon.new()
 	arc.custom_minimum_size = Vector2(0, 40)
 	arc.thickness = 2.5
@@ -96,7 +95,7 @@ func _people(box: VBoxContainer, people: Array) -> void:
 	var v := Kit.vbox(Kit.GAP)
 	box.add_child(v)
 	reveal.append(v)
-	v.add_child(Kit.caps(tr("Made by")))
+	v.add_child(_head(tr("Made by")))
 	var row := Kit.hbox(Kit.GAP * 2)
 	v.add_child(row)
 	var cols := [Kit.C_ACCENT, Kit.C_GOLD]
@@ -122,40 +121,21 @@ func _people(box: VBoxContainer, people: Array) -> void:
 		var nv := Kit.vbox(0)
 		nv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		hb.add_child(nv)
-		nv.add_child(Kit.lbl(P.name, Kit.T_STAT, Kit.C_TEXT, Kit.FONT_T, true))
-		nv.add_child(Kit.lbl("SK Horizon · Quito", Kit.T_SMALL, col, Kit.FONT_B))
-		tv.add_child(Kit.lbl(_cap(P.role), Kit.T_BODY, Kit.C_DIM, Kit.FONT_R, true))
+		nv.add_child(Kit.lbl(P.name, Kit.T_STAT + 8, Kit.C_TEXT, Kit.FONT_T, true))
+		nv.add_child(Kit.lbl("SK Horizon · Quito", Kit.T_BODY, col, Kit.FONT_B))
+		tv.add_child(Kit.lbl(_cap(P.role), Kit.T_LEAD + 1, Kit.C_TEXT, Kit.FONT_R, true))
 		var links := Kit.hbox(6)
 		tv.add_child(links)
 		for L in P.get("links", []):
 			var url: String = L.url
-			links.add_child(Kit.btn(L.label + "  ↗", func(): OS.shell_open(url), Kit.T_SMALL))
-
-
-func _bots(box: VBoxContainer) -> void:
-	var v := Kit.vbox(Kit.GAP)
-	box.add_child(v)
-	reveal.append(v)
-	v.add_child(Kit.caps(tr("And the crew")))
-	var row := Kit.hbox(Kit.GAP)
-	v.add_child(row)
-	for role in GameData.ROLE_ORDER:
-		var R: Dictionary = GameData.ROLES[role]
-		var t := Kit.tile(R.color)
-		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(t)
-		var tv := Kit.vbox(0)
-		t.add_child(tv)
-		tv.add_child(Kit.lbl(Bots.NAMES.get(role, "?"), Kit.T_VALUE, R.color, Kit.FONT_T))
-		tv.add_child(Kit.lbl(R.name, Kit.T_SMALL, Kit.C_DIM))
-	v.add_child(Kit.lbl(tr("Rivet, Quark, Skip and Echo take every station nobody else wants. They never complain, never sleep, and never touch Echo's coffee."), Kit.T_BODY, Kit.C_DIM, Kit.FONT_R, true))
+			links.add_child(Kit.btn(L.label + "  ↗", func(): OS.shell_open(url), Kit.T_BODY))
 
 
 func _made_with(box: VBoxContainer, lines: Array) -> void:
 	var v := Kit.vbox(Kit.GAP)
 	box.add_child(v)
 	reveal.append(v)
-	v.add_child(Kit.caps(tr("Made with")))
+	v.add_child(_head(tr("Made with")))
 	var grid := GridContainer.new()
 	grid.columns = 2
 	grid.add_theme_constant_override("h_separation", Kit.GAP)
@@ -170,30 +150,38 @@ func _made_with(box: VBoxContainer, lines: Array) -> void:
 		grid.add_child(t)
 		var tv := Kit.vbox(2)
 		t.add_child(tv)
-		tv.add_child(Kit.lbl(head, Kit.T_BODY, Kit.C_TEXT, Kit.FONT_B, true))
+		tv.add_child(Kit.lbl(head, Kit.T_LEAD, Kit.C_TEXT, Kit.FONT_B, true))
 		if rest != "":
-			tv.add_child(_rich(rest, Kit.T_SMALL, Kit.C_DIM))
+			tv.add_child(_rich(rest, Kit.T_BODY, Kit.C_DIM))
 
 
 func _ai(box: VBoxContainer, notes: Array, agents: Array) -> void:
 	var v := Kit.vbox(Kit.GAP)
 	box.add_child(v)
 	reveal.append(v)
-	v.add_child(Kit.caps(tr("With a little help")))
+	v.add_child(_head(tr("With a little help")))
 	if notes.size() > 0:
 		v.add_child(_rich(notes[0], Kit.T_BODY, Kit.C_TEXT))
 	for a in agents:
 		v.add_child(_rich("•  " + a, Kit.T_BODY, Kit.C_DIM))
 	for i in range(1, notes.size()):
-		v.add_child(_rich(notes[i], Kit.T_SMALL, Kit.C_DIM))
+		v.add_child(_rich(notes[i], Kit.T_BODY, Kit.C_DIM))
+
+
+## A section's heading: the kit's spaced capitals, at a size read from across a room (the credits are read on a video too).
+func _head(text: String) -> Label:
+	var l := Kit.caps(text)
+	l.add_theme_font_size_override("font_size", Kit.T_BODY)
+	l.add_theme_color_override("font_color", Kit.ink(Kit.C_ACCENT))
+	return l
 
 
 func _sources(box: VBoxContainer, sections: Array, count: int) -> void:
 	var v := Kit.vbox(Kit.GAP)
 	box.add_child(v)
 	reveal.append(v)
-	v.add_child(Kit.caps(tr("The sources behind every number") + " · " + str(count)))
-	v.add_child(Kit.lbl(tr("Every value, map, photo and model that is not ours comes from somewhere real. Open a section to see where."), Kit.T_BODY, Kit.C_DIM, Kit.FONT_R, true))
+	v.add_child(_head(tr("The sources behind every number") + " · " + str(count)))
+	v.add_child(Kit.lbl(tr("Every value, map, photo and model that is not ours comes from somewhere real. Open a section to see where."), Kit.T_LEAD, Kit.C_DIM, Kit.FONT_R, true))
 	for sec in sections:
 		var head := Kit.btn("▸  %s   ·   %d" % [sec.title, sec.entries.size()], func(): pass, Kit.T_BODY)
 		head.alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -202,7 +190,7 @@ func _sources(box: VBoxContainer, sections: Array, count: int) -> void:
 		body.visible = false
 		v.add_child(body)
 		for e in sec.entries:
-			body.add_child(_rich("[b]%s[/b]   %s" % [e.id, _links(_esc(e.text))], Kit.T_SMALL, Kit.C_TEXT, false))
+			body.add_child(_rich("[b]%s[/b]   %s" % [e.id, _links(_esc(e.text))], Kit.T_BODY, Kit.C_TEXT, false))
 		var title: String = sec.title
 		var n: int = sec.entries.size()
 		head.pressed.connect(func():
@@ -222,7 +210,7 @@ func _ending(box: VBoxContainer) -> void:
 	var thanks := Kit.lbl(tr("Thank you for flying with us."), Kit.T_STAT, Kit.C_TEXT, Kit.FONT_T)
 	thanks.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(thanks)
-	var fine := Kit.lbl(tr("Farpoint HORIZON uses NASA's open data. NASA does not endorse it."), Kit.T_SMALL, Kit.C_DIM)
+	var fine := Kit.lbl(tr("Farpoint HORIZON uses NASA's open data. NASA does not endorse it."), Kit.T_BODY, Kit.C_DIM)
 	fine.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(fine)
 	v.add_child(Kit.spacer(Kit.GAP))

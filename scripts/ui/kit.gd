@@ -252,6 +252,21 @@ static func ink(c: Color) -> Color:
 	return out
 
 
+## Text drawn straight on the 3D scene (no panel behind it) made readable over anything, bright clouds and white
+## pads included: a dark outline and a soft shadow, both in proportion to its size. Returns the label.
+static func legible(l: Label, k := 1.0) -> Label:
+	var fs: int = l.get_theme_font_size("font_size")
+	if l.has_theme_font_size_override("font_size"):
+		fs = l.get_theme_font_size("font_size")
+	l.add_theme_constant_override("outline_size", maxi(4, int(fs * 0.16 * k)))
+	l.add_theme_color_override("font_outline_color", Color(0.0, 0.01, 0.04, 0.85))
+	l.add_theme_color_override("font_shadow_color", Color(0.0, 0.0, 0.0, 0.6))
+	l.add_theme_constant_override("shadow_offset_x", 0)
+	l.add_theme_constant_override("shadow_offset_y", maxi(2, int(fs * 0.05)))
+	l.add_theme_constant_override("shadow_outline_size", maxi(6, int(fs * 0.3 * k)))
+	return l
+
+
 static func lbl(text: String, size := 16, color := C_TEXT, font: Font = FONT_R, wrap := false) -> Label:
 	var l := Label.new()
 	l.text = text

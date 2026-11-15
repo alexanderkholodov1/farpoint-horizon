@@ -1296,11 +1296,13 @@ class MiniMap:
 			var ma: Array = p.moon_at
 			draw_arc(c + Vector2(ma[0], -ma[1]) * s, 6.0, 0.0, TAU, 20, Color(K.C_ON_DARK, 0.6), 1.0, true)
 		draw_circle(c, 4.0, K.C_ACCENT)
-		draw_string(f, c + Vector2(7, 14), TranslationServer.translate("Earth"), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(K.C_ON_DARK, 0.7))
+		draw_string_outline(f, c + Vector2(7, 14), TranslationServer.translate("Earth"), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, 4, Color(0.0, 0.01, 0.04, 0.9))
+		draw_string(f, c + Vector2(7, 14), TranslationServer.translate("Earth"), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(K.C_ON_DARK, 0.85))
 		var mo: Array = m.moon(m.t)
 		var mp := c + Vector2(mo[0], -mo[1]) * s
 		draw_circle(mp, 3.5, Color(0.82, 0.82, 0.86))
-		draw_string(f, mp + Vector2(7, 4), TranslationServer.translate("Moon"), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(K.C_ON_DARK, 0.7))
+		draw_string_outline(f, mp + Vector2(7, 4), TranslationServer.translate("Moon"), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, 4, Color(0.0, 0.01, 0.04, 0.9))
+		draw_string(f, mp + Vector2(7, 4), TranslationServer.translate("Moon"), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(K.C_ON_DARK, 0.85))
 		var cp := c + Vector2(m.x, -m.y) * s
 		draw_circle(cp, 4.0 + 1.5 * sin(_t * 5.0), K.C_GOLD)
 		draw_arc(cp, 9.0, 0.0, TAU, 20, Color(K.C_GOLD, 0.5), 1.0, true)

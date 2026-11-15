@@ -159,15 +159,13 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 	# the message, straight on the scene, and the hint in its own panel
 	big = Kit.lbl("", Kit.T_SHOUT, Kit.C_ON_DARK, Kit.FONT_T)
 	big.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	big.add_theme_constant_override("outline_size", 12)
-	big.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.55))
+	Kit.legible(big)   # straight on the scene: readable over the white pad, clouds and the Moon
 	Kit.place(big, 0, 0.2, 1, 0.2, 500, -50, -400, 32)
 	big.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(big)
 	sub = Kit.lbl("", Kit.T_ACTION, Kit.C_ON_DARK, Kit.FONT_B, true)
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	sub.add_theme_constant_override("outline_size", 7)
-	sub.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.6))
+	Kit.legible(sub, 1.3)
 	Kit.place(sub, 0, 0.2, 1, 0.2, 520, 38, -420, 110)   # the column between the readouts and the buttons, at any width
 	sub.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(sub)
