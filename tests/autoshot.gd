@@ -17,6 +17,10 @@ func _ready() -> void:
 	g = load("res://scenes/main.tscn").instantiate()
 	add_child(g)
 	await wait(1.5)
+	if OS.get_cmdline_user_args().has("operation"):
+		await _operation()
+		get_tree().quit()
+		return
 	if OS.get_cmdline_user_args().has("panels"):
 		await _panels()
 		get_tree().quit()
@@ -296,3 +300,33 @@ func _panels() -> void:
 	g.go("landing")
 	await wait(2.0)
 	await shot("52_panel_landing_" + mode)
+
+
+## The operation after a landing at the south pole, and after reaching an orbit (issue #30). Quick.
+func _operation() -> void:
+	_moon_mission()
+	GameState.flight["landing"] = {"landed": true, "grade": "soft", "x": 0.0, "z": 0.0, "touchdown_mps": 0.81, "target_m": 0.0}
+	g.go("operation")
+	await wait(2.0)
+	await shot("60_operation_surface")
+	await wait(9.0)
+	await shot("61_operation_surface_later")
+	while g.screen_id != "report":      # the landed mission ends and fades to its report first
+		await wait(0.2)
+	await wait(1.0)
+	await shot("61b_report_after_landing")
+	GameState.start_solo()
+	GameState.start_mission("volcanes")
+	GameState.mission.from_dict({"bus": "small", "instruments": ["ir_adv", "gas_adv"], "panels": "dep_m", "battery": "b1k", "comms": "xband", "adcs": "rw", "propulsion": "cold", "launcher": "ride", "orbit": "sso", "years": 2})
+	for seed in 200:       # a mission that lives its whole time, to see the orbit play out
+		GameState.begin_flight(GameState.mission.compute(), seed)
+		if GameState.last_sim.status != "lost" and GameState.last_sim.months >= 24:
+			break
+	GameState.flight = {}
+	g.go("operation")
+	await wait(3.0)
+	await shot("62_operation_orbit")
+	g.screen._set_speed(0)
+	g.screen.month_f = 0.0
+	await wait(1.0)
+	await shot("63_operation_orbit_slow")

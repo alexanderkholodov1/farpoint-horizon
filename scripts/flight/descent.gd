@@ -110,6 +110,8 @@ func touchdown() -> void:
 		earth_lost = true
 	result = {
 		"landed": grade != "crater",
+		"x": snappedf(pos.x, 0.1),      # where it stands, metres from the target in the terrain's frame
+		"z": snappedf(pos.z, 0.1),
 		"grade": grade,
 		"touchdown_mps": snappedf(vs, 0.01),
 		"side_mps": snappedf(hs, 0.01),
