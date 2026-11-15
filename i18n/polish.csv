@@ -46,3 +46,15 @@ Got it,Entendido
 Your craft grew to %s so the %s fits.,Tu nave creció a %s para que quepa el %s.
 "Your choices changed what the craft needs, so its %s moved to the new best fit.","Tus elecciones cambiaron lo que necesita la nave, así que su %s pasó al nuevo mejor ajuste."
 "Your craft outgrew its body (%s), so it moved to %s.","Tu nave superó su cuerpo (%s), así que pasó a %s."
+Too small for your craft,Muy pequeño para tu nave
+Carries it,La lleva
+Your resources,Tus recursos
+Money,Dinero
+Weight,Peso
+Instrument places,Lugares para instrumentos
+Data link,Enlace de datos
+%s left of %s,quedan %s de %s
+%s of %s,%s de %s
+%d of %d used,%d de %d usados
+uses %s of %s,usa %s de %s
+%s of %s a day,%s de %s al día

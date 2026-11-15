@@ -109,17 +109,58 @@ func _celebrate(s: Dictionary, last_sim: Dictionary) -> void:
 			_end_intro())
 	add_child(intro)
 	var shade := ColorRect.new()
-	shade.color = Color(0.0, 0.01, 0.04, 0.45)
+	shade.color = Color(0.0, 0.01, 0.04, 0.5)
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	intro.add_child(shade)
+	var gcol0: Color = {"S": Color(1.0, 0.85, 0.3), "A": Kit.C_OK, "B": Kit.C_ACCENT, "C": Kit.C_WARN, "D": Kit.C_BAD}[s.grade]
+	# a warm sunrise glow and a glow of the grade's colour, both swelling in from the centre
+	for spec in [[Kit.C_GOLD, 0.5, Vector2(0.5, 0.62)], [gcol0, 0.6, Vector2(0.5, 0.45)]]:
+		var gt := GradientTexture2D.new()
+		gt.fill = GradientTexture2D.FILL_RADIAL
+		gt.fill_from = Vector2(0.5, 0.5)
+		gt.fill_to = Vector2(1.0, 0.5)
+		gt.width = 256
+		gt.height = 256
+		var gr := Gradient.new()
+		gr.set_color(0, Color(spec[0], spec[1]))
+		gr.set_color(1, Color(spec[0], 0.0))
+		gt.gradient = gr
+		var glow := TextureRect.new()
+		glow.texture = gt
+		glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		glow.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		glow.stretch_mode = TextureRect.STRETCH_SCALE
+		glow.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		glow.anchor_left = spec[2].x - 0.42
+		glow.anchor_right = spec[2].x + 0.42
+		glow.anchor_top = spec[2].y - 0.5
+		glow.anchor_bottom = spec[2].y + 0.5
+		glow.offset_left = 0
+		glow.offset_right = 0
+		glow.offset_top = 0
+		glow.offset_bottom = 0
+		glow.modulate.a = 0.0
+		intro.add_child(glow)
+		glow.create_tween().tween_property(glow, "modulate:a", 1.0, 1.2).set_delay(0.5)
+	# the brand's horizon arc sweeps across, lit from the left like a sunrise
+	var arc := Horizon.new()
+	arc.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	arc.thickness = 4.0
+	arc.progress = 0.0
+	arc.anchor_left = 0.1
+	arc.anchor_right = 0.9
+	arc.anchor_top = 0.2
+	arc.anchor_bottom = 0.27
+	intro.add_child(arc)
+	arc.create_tween().tween_property(arc, "progress", 1.0, 1.4).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	var v := Kit.vbox(10)
 	v.alignment = BoxContainer.ALIGNMENT_CENTER
 	v.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	intro.add_child(v)
 	var title_txt: String = tr("MISSION OVER") if lost else (tr("MISSION COMPLETE!") if s.grade in ["S", "A"] else tr("MISSION DONE!"))
-	var t := Kit.lbl(title_txt, Kit.T_SHOUT, Kit.C_ON_DARK, Kit.FONT_T)
+	var t := Kit.lbl(title_txt, Kit.T_SHOUT + 8, Color(1.0, 0.78, 0.42), Kit.FONT_T)
 	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(t)
 	var sub := Kit.lbl(GameData.SCENARIOS[mission.scenario].name + "  ·  " + str(s.label), Kit.T_LEAD, Kit.C_ON_DARK, Kit.FONT_R)
@@ -129,7 +170,7 @@ func _celebrate(s: Dictionary, last_sim: Dictionary) -> void:
 	var g := Kit.lbl(s.grade, 150, Kit.ink(gcol), Kit.FONT_T)
 	g.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(g)
-	pts_lbl = Kit.lbl(tr("%d points") % 0, Kit.T_CLOCK, Kit.C_ON_DARK, Kit.font_num())
+	pts_lbl = Kit.lbl(tr("%d points") % 0, Kit.T_CLOCK, Color(0.62, 0.82, 1.0), Kit.font_num())
 	pts_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(pts_lbl)
 	var skip := Kit.lbl(tr("Click or press any key for your report"), Kit.T_SMALL, Kit.C_ON_DARK, Kit.FONT_R)
@@ -157,7 +198,7 @@ func _celebrate(s: Dictionary, last_sim: Dictionary) -> void:
 
 ## A burst of small bright bits from the centre in the brand's blue and amber and the grade's colour.
 func _burst(col: Color) -> void:
-	for c in [Kit.C_GOLD, Kit.C_ACCENT, col]:
+	for c in [Kit.C_GOLD, Kit.C_ACCENT, col, Color(1.0, 0.86, 0.62), Color(0.35, 0.55, 1.0)]:
 		var p := CPUParticles2D.new()
 		p.position = get_viewport_rect().size * Vector2(0.5, 0.42)
 		p.amount = 70
@@ -232,7 +273,7 @@ func _score_column(cols: HBoxContainer, s: Dictionary, r: Dictionary, S: Diction
 	c1.custom_minimum_size.x = 340
 	cols.add_child(c1)
 	c1.add_child(Kit.caps(tr("Score")))
-	_score_row(c1, tr("Goals met"), s.objectives, 400, tr("Science goals covered and time in operation."))
+	_score_row(c1, tr("Goals met"), s.objectives, 400, "")
 	var sci_note: String = tr("%d of %d science points.") % [int(last_sim.science), int(S.science_target)]
 	if last_sim.science < S.science_target:
 		for c in r.checks:
@@ -240,7 +281,7 @@ func _score_column(cols: HBoxContainer, s: Dictionary, r: Dictionary, S: Diction
 				sci_note += " " + tr("Less than the goal mostly because: %s.") % c.title
 				break
 	_score_row(c1, tr("Science gathered"), s.science, 300, sci_note)
-	_score_row(c1, tr("Efficient use of resources"), s.efficiency, 200, tr("Budget reserve and mass and power margins."))
+	_score_row(c1, tr("Efficient use of resources"), s.efficiency, 200, "")
 	if not GameState.team_mode:
 		return   # alone, the crew's roles are all yours: the four bars above say it all
 	_score_row(c1, tr("Teamwork"), s.team, 100, tr("Each role's goals met."))
@@ -269,7 +310,8 @@ func _score_row(parent: VBoxContainer, nm: String, val: int, mx: int, sub: Strin
 	var f: float = float(val) / mx
 	pb.add_theme_stylebox_override("fill", Kit.flat(Kit.C_OK if f >= 0.75 else (Kit.C_WARN if f >= 0.4 else Kit.C_BAD), Color(0, 0, 0, 0), 4, 0, 0, 0))
 	parent.add_child(pb)
-	parent.add_child(Kit.lbl(sub, Kit.T_SMALL - 1, Kit.C_DIM, Kit.FONT_R, true))
+	if sub != "":
+		parent.add_child(Kit.lbl(sub, Kit.T_SMALL - 1, Kit.C_DIM, Kit.FONT_R, true))
 
 
 # ===================================================================================== PHOTOS AND BONUSES
@@ -298,26 +340,6 @@ func _photo_column(cols: HBoxContainer, flight: Dictionary, last_sim: Dictionary
 		c.add_child(grid)
 		for ph in photos:
 			grid.add_child(_photo_tile(ph, Photos.earned(ph, flight, last_sim)))
-	# the extra objectives drawn for this mission
-	var offered: Array = mission.extras_offered
-	if not offered.is_empty():
-		c.add_child(Kit.spacer(4))
-		c.add_child(Kit.caps(tr("Extra objectives")))
-		var all: Dictionary = Objectives.all()
-		var met: Dictionary = flight.get("extras", {})
-		for id in offered:
-			if not all.has(id):
-				continue
-			var ok: bool = met.get(id, false)
-			var row := Kit.hbox(8)
-			c.add_child(row)
-			var nm := Kit.lbl(("✓ " if ok else "○ ") + str(all[id].name), Kit.T_BODY, Kit.ink(Kit.C_OK) if ok else Kit.C_DIM, Kit.FONT_B, true)
-			nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			row.add_child(nm)
-			row.add_child(Kit.lbl(("+%d" % int(all[id].points)) if ok else tr("not this time"), Kit.T_BODY, Kit.ink(Kit.C_OK) if ok else Kit.C_DIM, Kit.font_num()))
-			c.add_child(Kit.lbl(str(all[id].desc), Kit.T_SMALL - 1, Kit.C_DIM, Kit.FONT_R, true))
-		if bonus > 0:
-			c.add_child(Kit.lbl(tr("Bonus: +%d points on top of your score.") % bonus, Kit.T_BODY, Kit.ink(Kit.C_OK), Kit.FONT_B, true))
 
 
 ## A photo's tile: the picture (click to see it large) or, when it did not come home, what would bring it.
@@ -377,9 +399,14 @@ func _story_column(cols: HBoxContainer, last_sim: Dictionary) -> void:
 	c2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	c2sc.add_child(c2)
 	c2.add_child(Kit.caps(tr("What went well")))
+	var shown := 0
 	for e in last_sim.events:
-		if e.kind == "good":
-			c2.add_child(Kit.lbl(tr("✓ Month %d · %s") % [e.month, e.title], Kit.T_BODY, Kit.ink(Kit.C_OK), Kit.FONT_B, true))
+		if e.kind == "good" and shown < 6:
+			shown += 1
+			var star: bool = str(e.title).begins_with(tr("Extra objective · %s") % "")
+			c2.add_child(Kit.lbl(("★ " if star else "✓ ") + str(e.title), Kit.T_BODY, Kit.ink(Kit.C_GOLD if star else Kit.C_OK), Kit.FONT_B, true))
+	if bonus > 0:
+		c2.add_child(Kit.lbl(tr("Bonus: +%d points on top of your score.") % bonus, Kit.T_BODY, Kit.ink(Kit.C_GOLD), Kit.FONT_B, true))
 	c2.add_child(Kit.spacer(4))
 	c2.add_child(Kit.caps(tr("To do even better next time")))
 	var any_bad := false
@@ -401,8 +428,7 @@ func _story_column(cols: HBoxContainer, last_sim: Dictionary) -> void:
 	c2.add_child(Kit.caps(tr("Similar real missions")))
 	for t in mission.real_missions():
 		c2.add_child(Kit.lbl("• " + t, Kit.T_SMALL + 1, Kit.C_DIM, Kit.FONT_R, true))
-	c2.add_child(Kit.spacer(4))
-	c2.add_child(Kit.lbl(tr("There is no perfect design. Another mix of platform, orbit and instruments could meet the same goal. Try another!"), Kit.T_BODY, Kit.ink(Kit.C_ACCENT), Kit.FONT_R, true))
+
 
 
 # ===================================================================================== WAYS ON

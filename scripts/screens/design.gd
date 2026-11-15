@@ -178,6 +178,7 @@ func _show(i: int) -> void:
 	bar.add_child(main_btn)
 	_fill_question(Q[0], r)
 	_fill_board(r)
+	_fill_resources(r)
 	if not room.can_edit(STEP.role):
 		left_box.modulate.a = 0.6
 		for c in left_box.find_children("*", "Control", true, false):
@@ -488,10 +489,15 @@ func _fill_question(id: String, r: Dictionary) -> void:
 					on_change(false), OO.desc + "\n" + tr("Shadow %s per lap · Contact %s per day · Δv to get there %d m/s") % [Kit.mins(OO.eclipse_min), Kit.mins(OO.contact_min), int(OO.insert_dv)],
 					"★ " + tr("Best fit") if m >= top and _guided() else "", Kit.C_OK))
 		"bus":
+			# once the craft has parts, each body says whether it can carry them (its mass and its instruments)
+			var weigh: bool = _reached > _q_index("instruments")
 			for b in GameData.BUSES:
 				var B: Dictionary = GameData.BUSES[b]
+				var small: bool = weigh and (B.max < r.mass_total or B.slots < mission.instruments.size())
+				var bmark: String = (tr("Too small for your craft") if small else tr("Carries it")) if weigh else ""
 				left_box.add_child(_tile("bus", B.name, [Kit.money(B.cost), (tr("Holds 1 instrument") if B.slots == 1 else tr("Holds %d instruments") % B.slots)], mission.bus == b, func(): mission.bus = b; on_change(true),
-					B.desc + "\n" + tr("Max load %s · %d slot(s) · instruments up to “%s” · %s") % [Kit.kg(B.max), B.slots, GameData.SIZE_NAMES[B.max_size], Kit.money(B.cost)]))
+					B.desc + "\n" + tr("Max load %s · %d slot(s) · instruments up to “%s” · %s") % [Kit.kg(B.max), B.slots, GameData.SIZE_NAMES[B.max_size], Kit.money(B.cost)],
+					bmark, Kit.C_WARN if small else Kit.C_DIM))
 		"instruments":
 			var B: Dictionary = GameData.BUSES[mission.bus]
 			var over: bool = mission.instruments.size() > B.slots
@@ -683,6 +689,52 @@ func _fill_review(r: Dictionary) -> void:
 			left_box.add_child(pc)
 		if not r.fatal and not GameState.crew_ready():
 			left_box.add_child(Kit.lbl(tr("The whole crew still has to sign off."), Kit.T_SMALL + 1, Kit.C_WARN, Kit.FONT_B, true))
+
+
+# ===================================================================================== YOUR RESOURCES
+## Bottom right: what the player has and how much of it the craft already uses, as bars that fill up (the board
+## above says whether each is fine; this says how much is left). A bar past its end turns red.
+func _fill_resources(r: Dictionary) -> void:
+	var p := Kit.panel_box(16)
+	Kit.place(p, 1, 1, 1, 1, -364, -Kit.MARGIN, -Kit.MARGIN, -Kit.MARGIN)
+	p.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	p.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(p)
+	var v := Kit.vbox(7)
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	p.add_child(v)
+	v.add_child(Kit.caps(tr("Your resources")))
+	var B: Dictionary = GameData.BUSES[mission.bus]
+	_meter(v, tr("Money"), r.cost_total, r.budget, tr("%s left of %s") % [Kit.money(maxf(0.0, r.budget - r.cost_total)), Kit.money(r.budget)], true)
+	_meter(v, tr("Weight"), r.mass_total, r.mass_limit, tr("%s of %s") % [Kit.kg(r.mass_total), Kit.kg(r.mass_limit)], true)
+	_meter(v, tr("Instrument places"), mission.instruments.size(), B.slots, tr("%d of %d used") % [mission.instruments.size(), B.slots], true)
+	if _reached >= _q_index("panels"):
+		_meter(v, tr("Power"), r.power_load, r.power_gen, tr("uses %s of %s") % [Kit.watts(r.power_load), Kit.watts(r.power_gen)], true)
+	if _reached >= _q_index("comms"):
+		_meter(v, tr("Data link"), r.data_gen, r.data_down, tr("%s of %s a day") % [Kit.gb(r.data_gen), Kit.gb(r.data_down)], true)
+
+
+## One resource: its name, how much is used of what there is (in words), and a bar.
+func _meter(parent: VBoxContainer, label: String, used: float, have: float, words: String, _less_is_better: bool) -> void:
+	var f: float = used / maxf(have, 0.0001)
+	var col: Color = Kit.C_ACCENT if f <= 0.85 else (Kit.C_WARN if f <= 1.0 else Kit.C_BAD)
+	var h := Kit.hbox(6)
+	h.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	parent.add_child(h)
+	var n := Kit.lbl(label, Kit.T_SMALL + 1, Kit.C_TEXT, Kit.FONT_B)
+	n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	h.add_child(n)
+	h.add_child(Kit.lbl(words, Kit.T_SMALL, Kit.ink(col) if f > 0.85 else Kit.C_DIM, Kit.font_num()))
+	var bar := ProgressBar.new()
+	bar.show_percentage = false
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bar.custom_minimum_size = Vector2(0, 8)
+	bar.max_value = 1.0
+	bar.value = clampf(f, 0.0, 1.0)
+	bar.add_theme_stylebox_override("background", Kit.flat(Kit.C_LINE, Color(0, 0, 0, 0), 4, 0, 0, 0))
+	bar.add_theme_stylebox_override("fill", Kit.flat(col, Color(0, 0, 0, 0), 4, 0, 0, 0))
+	parent.add_child(bar)
 
 
 # ===================================================================================== THE MISSION BOARD
