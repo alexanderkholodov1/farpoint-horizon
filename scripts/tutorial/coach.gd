@@ -77,8 +77,8 @@ func _show() -> void:
 	card.tree_exited.connect(root.queue_free)
 	var in_design := ctx.begins_with("design")
 	if in_design:
-		# over the 3D view, between the design screen's option list (left) and its board (right)
-		Kit.place(card, 0.5, 0, 0.5, 0, -285, 96, 375, 96)
+		# over the 3D view, between the design screen's option list (left) and its board (right), below the craft's name and mass
+		Kit.place(card, 0.5, 0, 0.5, 0, -285, 124, 375, 124)
 	else:
 		# in flight the centre and the bottom belong to the flight panel's own call-outs: the free top-right corner
 		Kit.place(card, 1, 0, 1, 0, -Kit.MARGIN - 360, 90, -Kit.MARGIN, 90)
