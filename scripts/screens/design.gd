@@ -672,7 +672,7 @@ func _fill_board(r: Dictionary) -> void:
 		facts.add_child(fix)
 	if nw > 0:
 		facts.add_child(Kit.chip("! " + tr("%d warning(s)") % nw, Kit.C_WARN))
-	if nf == 0 and nw == 0:
+	if nf == 0 and nw == 0 and _reached >= _q_index("review"):
 		facts.add_child(Kit.chip("✓ " + tr("Ready to fly"), Kit.C_OK))
 
 
