@@ -1022,18 +1022,20 @@ void fragment() {
 		pet.rotation.x = -1.2
 		petals.append(pet)
 	cyl(base, 0.55, 0.55, 0.3, Vector3(0, 0.15, 0), mat(Color(0.8, 0.78, 0.72), 0.5, 0.4), 3)
-	for i in 6:
-		var a := i * TAU / 6.0 + 0.3
-		# the airbags pulled in lie in low heaps around the lander, clear of the crew and the camera
-		var heap := ball(base, rng.randf_range(0.28, 0.4), Vector3(sin(a) * 2.5, 0.12, cos(a) * 2.5), mat(Color(0.88, 0.85, 0.76), 0.9), Vector3(1.3, 0.6, 1.0))
+	for i in 5:
+		# the airbags pulled in lie in low heaps behind the lander (the camera and the ramp are in front, toward +z)
+		var a := PI * 0.55 + i * PI * 0.22
+		var heap := ball(base, rng.randf_range(0.22, 0.3), Vector3(sin(a) * 1.9, 0.1, cos(a) * 1.9), mat(Color(0.74, 0.7, 0.62), 1.0), Vector3(1.3, 0.6, 1.0))
 		heap.rotation = Vector3(rng.randf_range(-0.3, 0.3), rng.randf() * TAU, rng.randf_range(-0.3, 0.3))
 		heap.name = "Heap%d" % i
 	var ramp := Node3D.new()
 	ramp.name = "Ramp"
-	ramp.position = Vector3(0, 0.25, 1.65)
+	# the rear ramp: from the petal's edge (about 0.19 m up) down to the ground, tilted 20 degrees (S-mpf-nasa), so
+	# its far end rests on the ground; its length follows from those two (0.19 / sin 20 = 0.55 m)
+	ramp.position = Vector3(0, RAMP_LEN * sin(deg_to_rad(20.0)), 1.65)
 	base.add_child(ramp)
 	for sx in [-0.17, 0.17]:
-		var rail := box(ramp, Vector3(0.05, 0.03, 1.4), Vector3(sx, 0, 0.7), mat(Color(0.75, 0.75, 0.78), 0.4, 0.7))
+		var rail := box(ramp, Vector3(0.05, 0.03, RAMP_LEN), Vector3(sx, 0, RAMP_LEN * 0.5), mat(Color(0.75, 0.75, 0.78), 0.4, 0.7))
 		rail.name = "Rail"
 	ramp.rotation.x = deg_to_rad(20.0)
 	var rover := Node3D.new()
@@ -1041,11 +1043,23 @@ void fragment() {
 	base.add_child(rover)
 	box(rover, Vector3(0.48, 0.12, 0.62), Vector3(0, 0.2, 0), mat(Color(0.85, 0.82, 0.7), 0.5, 0.4))
 	box(rover, Vector3(0.48, 0.02, 0.62), Vector3(0, 0.27, 0), cell_m)
-	for sx in [-0.28, 0.28]:
-		for wz in [-0.24, 0.0, 0.24]:
-			var wh := cyl(rover, 0.065, 0.065, 0.08, Vector3(sx, 0.07, wz), mat(Color(0.75, 0.75, 0.78), 0.35, 0.8), 14)
+	var wheel_m := mat(Color(0.55, 0.56, 0.6), 0.35, 0.8)
+	var bar_m := mat(Color(0.7, 0.7, 0.72), 0.4, 0.7)
+	for sx in [-0.29, 0.29]:
+		for wz in [-0.25, 0.0, 0.25]:
+			var wh := cyl(rover, 0.065, 0.065, 0.09, Vector3(sx, 0.065, wz), wheel_m, 16)
 			wh.rotation.z = PI / 2
-	rover.position = Vector3(0, 0.35, 1.0)
+			for k in 6:
+				var cleat := box(rover, Vector3(0.095, 0.012, 0.02), Vector3(sx, 0.065, wz) + Vector3(0, sin(k * PI / 3.0), cos(k * PI / 3.0)) * 0.066, mat(Color(0.3, 0.3, 0.32), 0.6))
+				cleat.rotation.x = -k * PI / 3.0
+		# the rocker-bogie: bars from the body down to the wheels
+		rope(rover, Vector3(sx * 0.85, 0.2, -0.05), Vector3(sx, 0.07, -0.25), 0.012, bar_m)
+		rope(rover, Vector3(sx * 0.85, 0.2, -0.05), Vector3(sx, 0.14, 0.12), 0.012, bar_m)
+		rope(rover, Vector3(sx, 0.14, 0.12), Vector3(sx, 0.07, 0.0), 0.012, bar_m)
+		rope(rover, Vector3(sx, 0.14, 0.12), Vector3(sx, 0.07, 0.25), 0.012, bar_m)
+	rope(rover, Vector3(0.18, 0.28, -0.2), Vector3(0.18, 0.55, -0.22), 0.006, bar_m)
+	ball(rover, 0.015, Vector3(0.18, 0.56, -0.22), bar_m)
+	rover.position = Vector3(0, RAMP_LEN * sin(deg_to_rad(20.0)) + 0.01, 1.25)
 	return {
 		"marks": marks({"inti": [-1.1, 0.0, 1.0, 40], "killa": [1.2, 0.0, 0.9, -40], "rumi": [-0.9, 0.0, -0.9, 30], "wayra": [1.1, 0.0, -0.8, -30]}),
 		"actor_scale": 0.3,
@@ -1073,6 +1087,7 @@ void fragment() {
 # ===================================================================================== MARS AHEAD
 ## Seven months out, Mars ahead: the cruise stage (solar cells on a ring) over the aeroshell that hides the lander,
 ## the crew floating beside it at their true size (one unit is one metre; the cuyes are about 30 cm).
+const RAMP_LEN := 0.55               ## Mars Pathfinder's rear ramp in the set (m): petal edge to the ground at 20 deg.
 const CABIN := Vector3(40, 0, 40)    ## Where the room inside the folded lander sits, apart from the craft outside.
 
 

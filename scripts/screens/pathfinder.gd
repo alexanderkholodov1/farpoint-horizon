@@ -489,16 +489,18 @@ func _ramp(delta: float) -> void:
 	if Input.is_physical_key_pressed(KEY_D) or Input.is_physical_key_pressed(KEY_RIGHT):
 		side = 1.0
 	if go_on:
-		ramp_s = minf(1.0, ramp_s + delta * float(L.D.ramp.speed) * 0.5)
+		ramp_s = minf(1.0, ramp_s + delta * float(L.D.ramp.speed) * 0.35)
 		ramp_off += (ramp_drift * 0.12 + side * 0.12 + _mouse_push * 0.0015) * delta
 	_mouse_push = lerpf(_mouse_push, 0.0, delta * 6.0)
 	var rover: Node3D = S.rover
 	var ramp: Node3D = S.ramp
 	# along the ramp, tilted 20 degrees down to the ground
-	var start := ramp.position + Vector3(0, 0.1, 0)
+	# the rover's wheels ride on the rails' top: down the ramp, then on the ground (never below it)
+	var start := ramp.position + Vector3(0, 0.03, 0)
 	var dir := Vector3(0, -sin(deg_to_rad(20.0)), cos(deg_to_rad(20.0)))
-	rover.position = start + dir * (1.4 * ramp_s) + Vector3(ramp_off, 0.0, 0)
-	rover.rotation.x = deg_to_rad(20.0) if ramp_s < 0.97 else 0.0
+	rover.position = start + dir * (Sets.RAMP_LEN * ramp_s) + Vector3(ramp_off, 0.0, 0)
+	rover.position.y = maxf(rover.position.y, 0.0)
+	rover.rotation.x = deg_to_rad(20.0) * (1.0 - smoothstep(0.9, 1.0, ramp_s))
 	(ladder as Ladder).ramp = ramp_off
 	if absf(ramp_off) > 0.17:
 		Engine.time_scale = 1.0
