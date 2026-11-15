@@ -56,7 +56,7 @@ func show_step(idx: int) -> void:
 	var tl := Kit.vbox(0)
 	tl.custom_minimum_size.x = 300
 	th.add_child(tl)
-	tl.add_child(Kit.lbl(S.name, 17, S.color, Kit.FONT_B))
+	tl.add_child(Kit.lbl(S.name, 17, Kit.C_TEXT, Kit.FONT_B))
 	tl.add_child(Kit.lbl(GameData.CML_NAMES[STEP.cml], 13, Kit.C_DIM))
 	var tabs := Kit.hbox(4)
 	tabs.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -122,7 +122,7 @@ func show_step(idx: int) -> void:
 	prev.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	nav.add_child(prev)
 	if STEP.id == "revision":
-		var go_btn := Kit.accent_btn(Kit.btn(tr("LAUNCH!"), func(): main.launch(), 18), Kit.C_OK)
+		var go_btn := Kit.accent_btn(Kit.btn(tr("LAUNCH!"), func(): main.launch(), 18), Kit.C_GOLD)
 		go_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		go_btn.disabled = not GameState.can_launch(r)
 		nav.add_child(go_btn)
@@ -276,7 +276,7 @@ func _fill_step(id: String, r: Dictionary) -> void:
 		"lanzador":
 			var O: Dictionary = GameData.ORBITS[mission.orbit]
 			step_box.add_child(Kit.lbl(tr("Your craft weighs %s and is headed to %s. The farther the destination, the less a rocket can carry.") % [Kit.kg(r.mass_total), O.short], 14, Kit.C_DIM, Kit.FONT_R, true))
-			var build_btn := Kit.accent_btn(Kit.btn(tr("Build your own rocket, part by part ▶"), func(): go("builder", {"back_step": step_idx}), 15), Kit.C_WARN)
+			var build_btn := Kit.accent_btn(Kit.btn(tr("Build your own rocket, part by part ▶"), func(): go("builder", {"back_step": step_idx}), 15), Kit.C_ACCENT)
 			step_box.add_child(build_btn)
 			if RocketDesign.current != null:
 				var CL: Dictionary = RocketDesign.current.launcher_info()
@@ -299,7 +299,7 @@ func _fill_step(id: String, r: Dictionary) -> void:
 			for y in [1, 2, 3, 4, 5, 7, 10]:
 				var b := Kit.btn((tr("%d year") if y == 1 else tr("%d years")) % y, func(): mission.years = y; on_change(false), 14)
 				if mission.years == y:
-					Kit.accent_btn(b, Kit.C_WARN)
+					Kit.accent_btn(b, Kit.C_ACCENT)
 				yh.add_child(b)
 			step_box.add_child(Kit.lbl(tr("The goal asks for at least %d year(s) of operation.") % S.min_years, 13, Kit.C_DIM))
 		"revision":

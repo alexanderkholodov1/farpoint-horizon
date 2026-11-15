@@ -101,9 +101,9 @@ func _build_hud() -> void:
 	hud.add_time_warp(1.0)
 	hud.add_readout("alt", tr("Height"))
 	hud.add_readout("speed", tr("Speed"))
-	hud.add_gauge("orbit", tr("Speed toward orbit"), 2.0, 2.0, Color(0.45, 0.85, 1.0))
-	hud.add_gauge("fuel", tr("Fuel in this stage"), 2.0, 2.0, Color(1.0, 0.72, 0.3))
-	hud.add_gauge("stress", tr("Stress on the structure"), 0.45, 0.85, Color(0.55, 0.9, 0.6))
+	hud.add_gauge("orbit", tr("Speed toward orbit"), 2.0, 2.0, Kit.C_ACCENT)
+	hud.add_gauge("fuel", tr("Fuel in this stage"), 2.0, 2.0, Kit.C_GOLD)
+	hud.add_gauge("stress", tr("Stress on the structure"), 0.45, 0.85, Kit.C_OK)
 	hud.lever.value = 1.0
 	hud.throttle_changed.connect(func(v): throttle = v)
 	hud.action_pressed.connect(_on_stage)

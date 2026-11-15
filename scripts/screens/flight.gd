@@ -254,7 +254,7 @@ func _build_hud() -> void:
 	hud.add_readout("trip", tr("Trip"))
 	hud.add_readout("pass", tr("Pass over the Moon"))
 	hud.add_readout("speed", tr("Speed"))
-	hud.add_gauge("burn", tr("Speed added"), 1.02, 1.08, Color(0.45, 1.0, 0.7))
+	hud.add_gauge("burn", tr("Speed added"), 1.02, 1.08, Kit.C_OK)
 	hud.show_gauge("burn", false)
 	hud.lever.value = 1.0
 	hud.action.lit = false

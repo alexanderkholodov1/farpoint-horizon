@@ -109,7 +109,7 @@ func _build_hud() -> void:
 	hud.add_readout("vs", tr("Falling at"))
 	hud.add_readout("hs", tr("Drifting at"))
 	hud.add_readout("target", tr("To the target"))
-	hud.add_gauge("fuel", tr("Fuel"), 2.0, 2.0, Color(1.0, 0.72, 0.3))
+	hud.add_gauge("fuel", tr("Fuel"), 2.0, 2.0, Kit.C_GOLD)
 	hud.throttle_changed.connect(_on_lever)
 	hud.action_pressed.connect(_hover)
 	hud.autopilot_toggled.connect(func(on): hud.hint(tr("Autopilot on. It sets you down on the target; touch any control to fly it yourself.") if on else tr("You have the controls.")))

@@ -88,7 +88,7 @@ func _build_ui() -> void:
 	bar.alignment = BoxContainer.ALIGNMENT_CENTER
 	add_child(bar)
 	bar.add_child(Kit.btn("◀ Back", func(): go("design", {"step": back_step}), 15))
-	var fly := Kit.accent_btn(Kit.btn("Fly this rocket ▶", _use), Kit.C_OK)
+	var fly := Kit.accent_btn(Kit.btn("Fly this rocket ▶", _use), Kit.C_GOLD)
 	bar.add_child(fly)
 
 
