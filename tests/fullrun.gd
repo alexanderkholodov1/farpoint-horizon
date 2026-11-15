@@ -171,8 +171,6 @@ func _sts61() -> void:
 func _pathfinder() -> void:
 	var s = g.screen
 	await wait(1.5)
-	key(KEY_ENTER)
-	await wait(0.5)
 	await shot("mpf_brief")
 	key(KEY_ENTER)
 	await wait(0.5)

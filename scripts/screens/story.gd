@@ -267,11 +267,6 @@ func _go_to_set(id: String) -> void:
 		(S.base as Node3D).visible = true
 		for p in S.get("petals", []):
 			(p as Node3D).rotation.x = 0.0
-		if S.has("rover") and S.has("ramp"):
-			(S.rover as Node3D).position = Vector3(0.15, 0.0, 1.65 + Sets.RAMP_LEN * cos(deg_to_rad(20.0)) + 0.45)
-			for i in 10:
-				for sx in [-0.29, 0.29]:
-					Sets.box(S.base, Vector3(0.08, 0.004, 0.03), Vector3(0.15 + sx, 0.004, 2.25 + i * 0.045), Sets.mat(Color(0.3, 0.19, 0.12), 1.0))
 	var sc: float = S.get("actor_scale", 1.0)
 	for k in actors:
 		var a = actors[k]
