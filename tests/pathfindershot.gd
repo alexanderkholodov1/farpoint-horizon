@@ -36,6 +36,9 @@ func _ready() -> void:
 	# a descent with no rockets: the airbags burst
 	g.go("pathfinder", {"back": "menu"})
 	await wait(1.5)
+	await shot("brief")
+	key(KEY_ENTER)
+	await wait(1.0)
 	await shot("descent_start")
 	print("fps ", Engine.get_frames_per_second())
 	g.screen.L.alt = 60.0
@@ -47,15 +50,21 @@ func _ready() -> void:
 	await wait(1.5)
 	# flown right
 	var s = g.screen
+	key(KEY_ENTER)
+	await wait(0.5)
 	s.L.alt = 300.0
 	await until(func(): return s.L.airbags)
 	await wait(0.4)
 	await shot("airbags")
+	await until(func(): return s.L.alt <= 120.0)
+	await shot("get_ready")
 	await until(func(): return s.L.alt <= 98.0)
+	await shot("rockets_now")
 	key(KEY_SPACE)
 	await wait(0.3)
 	await shot("rockets")
-	await until(func(): return s.L.alt <= 21.5)
+	await until(func(): return s.L.alt <= 22.5)
+	await shot("cut_now")
 	key(KEY_C)
 	await wait(0.4)
 	await shot("cut")
@@ -83,7 +92,7 @@ func _ready() -> void:
 	await shot("wheel")
 	await wait(3.0)
 	await shot("photo")
-	g.go("story", {"scenes": ["pathfinder/intro", "pathfinder/outro"], "back": "menu"})
+	g.go("story", {"scenes": ["pathfinder/intro", "pathfinder/mission", "pathfinder/outro"], "back": "menu"})
 	for i in 13:
 		await wait(1.6 if i == 0 else 1.3)
 		await shot("intro_%d" % i)

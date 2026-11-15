@@ -870,8 +870,10 @@ float n(vec2 p) {
 }
 void vertex() {
 	vec3 w = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
-	float d = length(w.xz);
-	VERTEX.y += (n(w.xz * 0.004) - 0.5) * 18.0 * smoothstep(60.0, 400.0, d);
+	// flat where the craft lands and the ball bounces and rolls (a corridor along +x); the swells only far off,
+	// so the ground the ball meets is the ground drawn
+	float d = length(vec2(max(max(-120.0 - w.x, w.x - 900.0), 0.0), w.z));
+	VERTEX.y += (n(w.xz * 0.004) - 0.5) * 18.0 * smoothstep(160.0, 600.0, d);
 	wp = w;
 }
 void fragment() {
@@ -1023,7 +1025,8 @@ void fragment() {
 	for i in 6:
 		var a := i * TAU / 6.0 + 0.3
 		# the airbags pulled in lie in low heaps around the lander, clear of the crew and the camera
-		var heap := ball(base, rng.randf_range(0.45, 0.65), Vector3(sin(a) * 2.7, 0.08, cos(a) * 2.7), mat(Color(0.88, 0.85, 0.76), 0.9), Vector3(1.4, 0.3, 1.0))
+		var heap := ball(base, rng.randf_range(0.28, 0.4), Vector3(sin(a) * 2.5, 0.12, cos(a) * 2.5), mat(Color(0.88, 0.85, 0.76), 0.9), Vector3(1.3, 0.6, 1.0))
+		heap.rotation = Vector3(rng.randf_range(-0.3, 0.3), rng.randf() * TAU, rng.randf_range(-0.3, 0.3))
 		heap.name = "Heap%d" % i
 	var ramp := Node3D.new()
 	ramp.name = "Ramp"
@@ -1070,6 +1073,9 @@ void fragment() {
 # ===================================================================================== MARS AHEAD
 ## Seven months out, Mars ahead: the cruise stage (solar cells on a ring) over the aeroshell that hides the lander,
 ## the crew floating beside it at their true size (one unit is one metre; the cuyes are about 30 cm).
+const CABIN := Vector3(40, 0, 40)    ## Where the room inside the folded lander sits, apart from the craft outside.
+
+
 static func _mars_approach(world, env: Environment) -> Dictionary:
 	var st: Node3D = world.stage
 	env.sky = Space.make_space_sky()
@@ -1114,15 +1120,51 @@ void fragment() {
 	cyl(craft, 1.32, 1.32, 0.08, Vector3(0, 0.53, 0), mat(Color(0.75, 0.75, 0.78), 0.4, 0.7), 32)
 	cyl(craft, 0.4, 1.32, 0.9, Vector3(0, -0.2, 0), mat(Color(0.82, 0.8, 0.74), 0.5, 0.3), 32)
 	cyl(craft, 1.32, 1.1, 0.25, Vector3(0, -0.75, 0), mat(Color(0.45, 0.3, 0.2), 0.8), 32)
+	# inside: the crew ride in the folded lander, a small warm room among the airbags and the folded petals, a little
+	# window toward Mars (the room sits apart from the craft drawn outside, so each shot shows one or the other)
+	var room := Node3D.new()
+	room.position = CABIN
+	st.add_child(room)
+	var lining := mat(Color(0.86, 0.82, 0.72), 0.95)
+	var petal := mat(Color(0.55, 0.3, 0.2), 0.6, 0.3)
+	var n := 14
+	for i in n:
+		var ang := i * TAU / n
+		var dir := Vector3(sin(ang), 0, cos(ang))
+		# the window: an opening on the side that faces Mars (toward -z)
+		if dir.z < -0.85:
+			continue
+		var panel := box(room, Vector3(0.52, 1.3, 0.06), dir * 1.1 + Vector3(0, 0.6, 0), lining if i % 3 != 0 else petal)
+		panel.look_at_from_position(panel.position + room.position, room.position + Vector3(0, 0.6, 0), Vector3.UP)
+	cyl(room, 1.15, 1.15, 0.06, Vector3(0, -0.03, 0), mat(Color(0.4, 0.38, 0.36), 0.7, 0.4), 32)
+	cyl(room, 1.15, 1.15, 0.06, Vector3(0, 1.28, 0), lining, 32)
+	var frame := MeshInstance3D.new()
+	var tm := TorusMesh.new()
+	tm.inner_radius = 0.24
+	tm.outer_radius = 0.32
+	frame.mesh = tm
+	frame.material_override = mat(Color(0.6, 0.6, 0.64), 0.4, 0.7)
+	frame.position = Vector3(0, 0.62, -1.08)
+	frame.rotation.x = PI / 2
+	room.add_child(frame)
+	box(room, Vector3(0.9, 0.5, 0.06), Vector3(0, 1.05, -1.1), lining)
+	box(room, Vector3(0.9, 0.32, 0.06), Vector3(0, 0.16, -1.1), lining)
+	box(room, Vector3(0.3, 0.45, 0.06), Vector3(-0.45, 0.62, -1.1), lining)
+	box(room, Vector3(0.3, 0.45, 0.06), Vector3(0.45, 0.62, -1.1), lining)
+	for i in 5:
+		var aa := 0.6 + i * 1.0
+		ball(room, 0.22, Vector3(sin(aa) * 0.85, 0.2, cos(aa) * 0.85), lining, Vector3(1.4, 0.8, 1.0))
+	omni(room, Vector3(0, 1.0, 0.2), Color(1.0, 0.82, 0.6), 1.1, 3.0)
 	return {
-		"marks": marks({"inti": [-0.7, 0.75, 0.6, 20], "killa": [0.2, 0.9, 0.9, -5], "rumi": [0.9, 0.7, 0.5, -25], "wayra": [0, 0, 3, 0]}),
+		"marks": marks({"inti": [CABIN.x - 0.35, 0.0, CABIN.z + 0.1, 180], "killa": [CABIN.x + 0.05, 0.0, CABIN.z - 0.15, 180], "rumi": [CABIN.x + 0.4, 0.0, CABIN.z + 0.15, 180], "wayra": [0, 0, 3, 0]}),
 		"cast": ["rumi", "killa", "inti"],
 		"actor_scale": 0.3,
 		"cams": {
-			"wide": {"from": Vector3(1.0, 1.4, 3.2), "to": Vector3(0, 0.7, 0)},
+			"wide": {"from": CABIN + Vector3(0.2, 0.75, -0.85), "to": CABIN + Vector3(0, 0.3, 0.2)},
+			"window": {"from": CABIN + Vector3(0.15, 0.6, 0.8), "to": CABIN + Vector3(0, 0.55, -1.1), "from2": CABIN + Vector3(0.05, 0.62, 0.2), "to2": Vector3(-260, -60, -900), "time": 6.0},
 			"approach": {"from": Vector3(2.5, 1.8, 4.5), "to": Vector3(0, 0.5, 0), "from2": Vector3(1.4, 1.2, 2.6), "to2": Vector3(-260, -60, -900), "time": 7.0},
 		},
-		"act": "float",
+		"act": "idle",
 	}
 
 

@@ -50,13 +50,15 @@
     "who": "killa",
     "mood": "happy",
     "act": "point",
-    "text": "A flood plain! Old water made all these rocks. I want to see every one."
+    "text": "A flood plain! Old water made all these rocks. I want to see every one.",
+    "shot": "window"
    },
    {
     "who": "rumi",
     "mood": "flat",
     "act": "shrug",
-    "text": "Then we bounce over every one."
+    "text": "Then we bounce over every one.",
+    "shot": "close"
    },
    {
     "set": "houston",
@@ -72,7 +74,7 @@
    {
     "set": "mars_approach",
     "title": "Your turn",
-    "shot": "wide",
+    "shot": "window",
     "wait": 2.5,
     "play": "pathfinder"
    }

@@ -24,7 +24,7 @@ var back := "menu"
 var S := {}
 var saved := {}
 var actors := {}
-var phase := "descent"         ## descent, bounce, deflate, ramp, wheel, done, lost
+var phase := "brief"           ## brief, descent, bounce, deflate, ramp, wheel, done, lost
 var phase_t := 0.0
 var _t := 0.0
 var cam_pos := Vector3.ZERO
@@ -42,6 +42,11 @@ var bubble: Label
 var flash: ColorRect
 var lose_layer: Control
 var photo_shown := false
+var brief: Control
+var steps_box: VBoxContainer
+var step_rows: Array = []
+var now_lbl: Label             ## The big call to act ("SPACE: ROCKETS NOW!").
+var vside := 0.0               ## The ball's sideways speed (steering and rock hits).
 # descent
 var shell_off := Vector3.ZERO
 var shell_v := Vector3.ZERO
@@ -89,6 +94,7 @@ func enter(args: Dictionary) -> void:
 	cam_pos = g[0]
 	cam_look = g[1]
 	houston.text = tr("Radar has the ground: 1.6 km. Steady the lander, then the rockets, then the cut.")
+	_show_brief()
 
 
 func exit() -> void:
@@ -141,6 +147,22 @@ func _build_ui() -> void:
 	ladder.L = L
 	Kit.place(ladder, 0, 0.5, 0, 0.5, Kit.MARGIN, -220, Kit.MARGIN + 170, 260)
 	add_child(ladder)
+	# the three steps of the descent, ticked as they are done
+	steps_box = Kit.vbox(4)
+	Kit.place(steps_box, 0, 0.5, 0, 0.5, Kit.MARGIN, 272, Kit.MARGIN + 420, 380)
+	add_child(steps_box)
+	for t in [tr("1  Keep it steady (A/D)"), tr("2  Rockets at 98 m (SPACE)"), tr("3  Cut at 21.5 m (C)")]:
+		var l := Kit.lbl(t, Kit.T_ACTION - 4, Kit.C_DIM, Kit.FONT_B)
+		l.add_theme_constant_override("outline_size", 8)
+		l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
+		steps_box.add_child(l)
+		step_rows.append(l)
+	now_lbl = Kit.lbl("", Kit.T_SHOUT, Kit.C_GOLD, Kit.FONT_T)
+	now_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	Kit.place(now_lbl, 0, 0.5, 1, 0.5, 0, 60, 0, 140)
+	now_lbl.add_theme_constant_override("outline_size", 12)
+	now_lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
+	add_child(now_lbl)
 	# what to do now, at the bottom
 	hint = Kit.lbl("", Kit.T_ACTION, Kit.C_ON_DARK, Kit.FONT_B, true)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -172,6 +194,48 @@ func _build_ui() -> void:
 	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	flash.color = Color(1, 1, 1, 0)
 	add_child(flash)
+
+
+## How to land, in three steps, before anything moves.
+func _show_brief() -> void:
+	brief = Control.new()
+	brief.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(brief)
+	var shade := ColorRect.new()
+	shade.color = Color(0, 0, 0, 0.55)
+	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	brief.add_child(shade)
+	var p := Kit.panel_box(Kit.PAD)
+	Kit.place(p, 0.5, 0.5, 0.5, 0.5, -420, -230, 420, 230)
+	brief.add_child(p)
+	var v := Kit.vbox(Kit.GAP)
+	p.add_child(v)
+	v.add_child(Kit.caps(tr("How to land")))
+	v.add_child(Kit.lbl(tr("Land by bouncing"), Kit.T_CLOCK, Kit.C_GOLD, Kit.FONT_T))
+	for row in [["1", tr("Keep the lander steady on its rope"), tr("A / D or the mouse, against the swing")],
+			["2", tr("Fire the rockets at 98 m"), tr("SPACE, when the height reaches the gold line")],
+			["3", tr("Cut the rope at 21.5 m"), tr("C, when the height reaches the blue line")]]:
+		var h := Kit.hbox(Kit.PAD)
+		v.add_child(h)
+		h.add_child(Kit.lbl(row[0], Kit.T_CLOCK, Kit.C_GOLD, Kit.FONT_T))
+		var t := Kit.vbox(0)
+		h.add_child(t)
+		t.add_child(Kit.lbl(row[1], Kit.T_ACTION - 2, Kit.C_TEXT, Kit.FONT_B))
+		t.add_child(Kit.lbl(row[2], Kit.T_BODY, Kit.C_DIM))
+	v.add_child(Kit.lbl(tr("Too fast at the ground and the airbags burst. Then: steer the bounces, and drive Sojourner down its ramp."), Kit.T_SMALL + 1, Kit.C_DIM, Kit.FONT_R, true))
+	var go_btn := Kit.btn(tr("Start the descent  ·  Enter"), _start_descent, Kit.T_BODY)
+	Kit.accent_btn(go_btn, Kit.C_GOLD)
+	v.add_child(go_btn)
+	go_btn.grab_focus()
+
+
+func _start_descent() -> void:
+	if phase != "brief":
+		return
+	if brief and is_instance_valid(brief):
+		brief.queue_free()
+	phase = "descent"
+	phase_t = 0.0
 
 
 func _shout(a: String, b := "", col := Kit.C_GOLD) -> void:
@@ -245,12 +309,19 @@ func _descent(delta: float) -> void:
 	note.text = tr(T.slow) if near else tr("Real time")
 	alt_lbl.text = "%d m" % int(round(L.alt))
 	speed_lbl.text = tr("falling at %d m/s") % int(round(L.vz))
-	var hint_text := tr(T.steady)
-	if not L.fired:
-		hint_text += "\n" + tr(T.fire)
-	elif not L.released:
-		hint_text += "\n" + tr(T.cut)
-	hint.text = hint_text
+	hint.text = tr(T.steady)
+	# the checklist and, near each mark, the big call to act
+	var cols := [Kit.C_GOLD if not L.fired else Kit.C_OK, Kit.C_GOLD if not L.fired else Kit.C_OK, Kit.C_DIM if not L.fired else (Kit.C_GOLD if not L.released else Kit.C_OK)]
+	for i in 3:
+		(step_rows[i] as Label).add_theme_color_override("font_color", cols[i])
+	(step_rows[0] as Label).add_theme_color_override("font_color", Kit.C_BAD if absf(L.swing) > 0.17 else Kit.C_OK)
+	var call := ""
+	if not L.fired and L.alt < float(De.rocket_alt) + 40.0:
+		call = tr("SPACE: ROCKETS NOW!") if L.alt <= float(De.rocket_alt) + 8.0 else tr("Get ready: rockets at 98 m")
+	elif L.fired and not L.released and L.alt < float(De.cut_alt) + 25.0:
+		call = tr("C: CUT THE ROPE NOW!") if L.alt <= float(De.cut_alt) + 4.0 else tr("Get ready: cut at 21.5 m")
+	now_lbl.text = call
+	now_lbl.modulate.a = 0.6 + 0.4 * sin(_t * 12.0) if call.ends_with("!") else 1.0
 	if L.alt < 400.0 and not _said.has("400") and not L.fired:
 		_said["400"] = true
 		houston.text = tr("Rockets at 98 meters. Watch the ladder.")
@@ -305,22 +376,32 @@ func _bounces(delta: float) -> void:
 		side = 1.0
 	side = clampf(side + _mouse_push * 0.02, -1.0, 1.0)
 	_mouse_push = lerpf(_mouse_push, 0.0, delta * 6.0)
-	ball.z += side * 3.0 * dt
+	vside = lerpf(vside, side * 4.0, clampf(dt * 1.5, 0.0, 1.0))
+	ball.z += vside * dt
 	ball.x += vx * dt
 	vy -= g * dt
 	ball.y += vy * dt
 	hit_cool -= delta
-	# the big rocks: a hit shoves the ball aside and costs a star
+	# the big rocks are solid: the ball touches one, is pushed out of it and bounces off, losing speed
 	for r in S.rocks:
-		var d := Vector2(ball.x - r.pos.x, ball.z - r.pos.z)
-		if d.length() < BALL_R + r.r * 0.9 and ball.y < BALL_R + r.r * 1.2 and hit_cool <= 0.0:
-			rocks_hit += 1
-			hit_cool = 0.8
-			ball.z += signf(d.y if absf(d.y) > 0.01 else 1.0) * 1.5
-			vx *= 0.7
-			thump.play()
-			bubble.text = tr("Ow! A rock!")
-			shake = 0.6
+		var c := Vector3(r.pos.x, float(r.r) * 0.3, r.pos.z)
+		var rr: float = BALL_R + float(r.r) * 0.85
+		var d3 := ball - c
+		if d3.length() < rr:
+			var nrm := d3.normalized() if d3.length() > 0.01 else Vector3.UP
+			ball = c + nrm * rr
+			var v := Vector3(vx, vy, vside)
+			if v.dot(nrm) < 0.0:
+				v -= 1.6 * v.dot(nrm) * nrm
+			vx = maxf(v.x * 0.8, 0.8)
+			vy = maxf(v.y, 0.0) * 0.8
+			vside = v.z
+			if hit_cool <= 0.0:
+				rocks_hit += 1
+				hit_cool = 0.8
+				thump.play()
+				bubble.text = tr("Ow! A rock!")
+				shake = 0.6
 	if ball.y <= BALL_R and vy < 0.0 and rest_t >= 0.0:
 		ball.y = BALL_R
 		vy = 0.0
@@ -555,7 +636,7 @@ func _show_photo() -> void:
 # ===================================================================================== EVERY FRAME
 func _cam_goal() -> Array:
 	match phase:
-		"descent", "lost":
+		"brief", "descent", "lost":
 			var lander: Node3D = S.lander
 			var at := lander.global_position
 			if L.landed:
@@ -591,7 +672,10 @@ func process(delta: float) -> void:
 			if phase_t > 3.0 and not photo_shown:
 				phase = "done"
 				_show_photo()
-	ladder.visible = phase == "descent" or phase == "ramp"
+	ladder.visible = phase == "descent" or phase == "ramp" or phase == "brief"
+	steps_box.visible = phase == "descent" or phase == "brief"
+	if phase != "descent":
+		now_lbl.text = ""
 	(ladder as Ladder).mode = phase
 	var g := _cam_goal()
 	var k := 1.0 - exp(-delta * (6.0 if phase == "descent" or phase == "bounce" else 2.0))
@@ -624,6 +708,8 @@ func _unhandled_input(e: InputEvent) -> void:
 			_again()
 		else:
 			return
+	elif phase == "brief" and (k == KEY_ENTER or k == KEY_KP_ENTER or k == KEY_SPACE):
+		_start_descent()
 	elif phase == "descent" and k == KEY_SPACE:
 		if L.fire():
 			Kit.UiSound.play("snap")
