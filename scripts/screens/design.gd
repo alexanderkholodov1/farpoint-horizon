@@ -504,7 +504,7 @@ func _fill_question(id: String, r: Dictionary) -> void:
 				left_box.add_child(_tile("orbit", OO.name, [view_word, reach_word], mission.orbit == o, func():
 					mission.orbit = o
 					world.stage_design()
-					on_change(false), OO.desc + "\n" + tr("Shadow %s per lap · Contact %s per day · speed change to get there %d m/s") % [Kit.mins(OO.eclipse_min), Kit.mins(OO.contact_min), int(OO.insert_dv)],
+					on_change(false), OO.desc + "\n" + (tr("Shadow up to %s a day, only near the equinoxes") % Kit.mins(OO.eclipse_min) if o == "geo" else tr("Shadow %s per lap") % Kit.mins(OO.eclipse_min)) + " · " + tr("Contact %s per day · speed change to get there %d m/s") % [Kit.mins(OO.contact_min), int(OO.insert_dv)],
 					"★ " + tr("Best fit") if m >= top and _guided() else "", Kit.C_OK))
 		"bus":
 			# once the craft has parts, each body says whether it can carry them (its mass and its instruments)

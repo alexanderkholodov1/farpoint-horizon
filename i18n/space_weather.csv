@@ -37,3 +37,8 @@ Instruments off until it passes.,Instrumentos apagados hasta que pase.
 Every observation kept.,No se pierde ninguna observación.
 "If you close this card, mission control follows its flight rule: safe mode.","Si cierras esta tarjeta, el control de misión sigue su regla de vuelo: modo seguro."
 Chance of damage: %s,Probabilidad de daño: %s
+Chemical rocket engine (bipropellant),Motor cohete químico (bipropelente)
+Chemical (bipropellant),Química (bipropelente)
+"Shadow up to %s a day, only near the equinoxes","Sombra de hasta %s al día, solo cerca de los equinoccios"
+Shadow %s per lap,Sombra de %s por vuelta
+"Contact %s per day · speed change to get there %d m/s","Contacto %s al día · cambio de velocidad para llegar %d m/s"
