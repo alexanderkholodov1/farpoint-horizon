@@ -965,7 +965,7 @@ void fragment() {
 	shell.add_child(rockets)
 	for i in 3:
 		var a := i * TAU / 3.0
-		var f := Space.make_flame(0.9)
+		var f := Space.make_flame(1.6)
 		f.position = Vector3(sin(a) * 0.9, -0.1, cos(a) * 0.9)
 		rockets.add_child(f)
 	var bridle := MeshInstance3D.new()
@@ -1044,11 +1044,14 @@ void fragment() {
 	box(rover, Vector3(0.48, 0.12, 0.62), Vector3(0, 0.2, 0), mat(Color(0.85, 0.82, 0.7), 0.5, 0.4))
 	box(rover, Vector3(0.48, 0.02, 0.62), Vector3(0, 0.27, 0), cell_m)
 	var wheel_m := mat(Color(0.55, 0.56, 0.6), 0.35, 0.8)
+	var wheels_n := 0
 	var bar_m := mat(Color(0.7, 0.7, 0.72), 0.4, 0.7)
 	for sx in [-0.29, 0.29]:
 		for wz in [-0.25, 0.0, 0.25]:
 			var wh := cyl(rover, 0.065, 0.065, 0.09, Vector3(sx, 0.065, wz), wheel_m, 16)
 			wh.rotation.z = PI / 2
+			wh.name = "Wheel%d" % (wheels_n)
+			wheels_n += 1
 			for k in 6:
 				var cleat := box(rover, Vector3(0.095, 0.012, 0.02), Vector3(sx, 0.065, wz) + Vector3(0, sin(k * PI / 3.0), cos(k * PI / 3.0)) * 0.066, mat(Color(0.3, 0.3, 0.32), 0.6))
 				cleat.rotation.x = -k * PI / 3.0

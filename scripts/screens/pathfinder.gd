@@ -24,7 +24,7 @@ var back := "menu"
 var S := {}
 var saved := {}
 var actors := {}
-var phase := "brief"           ## brief, descent, bounce, deflate, ramp, wheel, done, lost
+var phase := "entry"           ## entry, brief, descent, bounce, deflate, ramp, wheel, done, lost
 var phase_t := 0.0
 var _t := 0.0
 var cam_pos := Vector3.ZERO
@@ -47,6 +47,14 @@ var steps_box: VBoxContainer
 var step_rows: Array = []
 var now_lbl: Label             ## The big call to act ("SPACE: ROCKETS NOW!").
 var vside := 0.0               ## The ball's sideways speed (steering and rock hits).
+var bridle_len := 20.0         ## How far down the bridle the lander hangs (0 while it is still in the backshell).
+var heatshield: Node3D
+var plasma: MeshInstance3D
+var dust: CPUParticles3D
+var wheels: Array = []
+var roll_dist := 0.0
+var track_next := 0.0
+var _caption_t := -1.0
 # descent
 var shell_off := Vector3.ZERO
 var shell_v := Vector3.ZERO
@@ -93,8 +101,8 @@ func enter(args: Dictionary) -> void:
 	var g := _cam_goal()
 	cam_pos = g[0]
 	cam_look = g[1]
-	houston.text = tr("Radar has the ground: 1.6 km. Steady the lander, then the rockets, then the cut.")
-	_show_brief()
+	_build_entry()
+	houston.text = tr("Entering the atmosphere of Mars. Hold on!")
 
 
 func exit() -> void:
@@ -196,6 +204,138 @@ func _build_ui() -> void:
 	add_child(flash)
 
 
+# ===================================================================================== THE ENTRY
+## The entry, before the player's part (about 9 s, Enter skips it): the craft dives in wrapped in the glow of the
+## heat shield at about 7300 m/s, the parachute opens, the heat shield falls away, and the lander slides down its
+## 20 m bridle (S-mpf-nssdc). Then the briefing card, and the descent from the radar's echo at 1.6 km.
+const ENTRY_LEN := 9.0
+
+
+func _build_entry() -> void:
+	var shell: Node3D = S.shell
+	heatshield = Node3D.new()
+	shell.add_child(heatshield)
+	Sets.cyl(heatshield, 1.32, 0.3, 0.45, Vector3(0, -0.3, 0), Sets.mat(Color(0.42, 0.26, 0.16), 0.8), 32)
+	plasma = MeshInstance3D.new()
+	var sm := SphereMesh.new()
+	sm.radius = 1.0
+	sm.height = 2.0
+	plasma.mesh = sm
+	var pm := StandardMaterial3D.new()
+	pm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	pm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	pm.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	pm.albedo_color = Color(1.0, 0.55, 0.2, 0.7)
+	plasma.material_override = pm
+	plasma.position = Vector3(0, -1.2, 0)
+	plasma.scale = Vector3(2.6, 3.6, 2.6)
+	shell.add_child(plasma)
+	(S.chute as Node3D).scale = Vector3.ONE * 0.01
+	bridle_len = 0.0
+	(S.lander as Node3D).visible = false
+	dust = CPUParticles3D.new()
+	dust.one_shot = true
+	dust.emitting = false
+	dust.amount = 60
+	dust.lifetime = 2.2
+	dust.explosiveness = 0.9
+	var q := QuadMesh.new()
+	q.size = Vector2(1.6, 1.6)
+	q.material = Space_particle()
+	dust.mesh = q
+	dust.direction = Vector3(0, 1, 0)
+	dust.spread = 80.0
+	dust.initial_velocity_min = 2.0
+	dust.initial_velocity_max = 6.0
+	dust.gravity = Vector3(0, -1.0, 0)
+	dust.damping_min = 1.5
+	dust.damping_max = 3.0
+	dust.color = Color(0.75, 0.5, 0.32, 0.55)
+	dust.scale_amount_min = 0.6
+	dust.scale_amount_max = 1.6
+	world.stage.add_child(dust)
+
+
+static func Space_particle() -> Material:
+	return load("res://scripts/space_builder.gd").particle_mat()
+
+
+func _entry(delta: float) -> void:
+	var t := phase_t
+	var craft: Node3D = S.craft
+	var shell: Node3D = S.shell
+	# the path: steep and fast through the glow, then hanging under the parachute down to 1.6 km
+	var k := clampf(t / ENTRY_LEN, 0.0, 1.0)
+	var alt := lerpf(5200.0, float(L.D.descent.start_alt), 1.0 - pow(1.0 - k, 1.6))
+	var sideways := lerpf(-900.0, 0.0, 1.0 - pow(1.0 - k, 2.2))
+	craft.position = Vector3(sideways, alt + BALL_R, 0)
+	shell.rotation.z = lerpf(-0.9, 0.0, smoothstep(0.0, 3.4, t))
+	var glow := 1.0 - smoothstep(2.6, 3.6, t)
+	plasma.visible = glow > 0.01
+	plasma.scale = Vector3(2.6, 3.6, 2.6) * (1.0 + 0.08 * sin(_t * 30.0))
+	(plasma.material_override as StandardMaterial3D).albedo_color.a = 0.7 * glow
+	shake = maxf(shake, 0.25 * glow)
+	if t < 3.2:
+		_caption(tr("Entry at about 7,300 m/s"), tr("The heat shield takes the heat"))
+	elif not _said.has("chute"):
+		_said["chute"] = true
+		var ch: Node3D = S.chute
+		ch.create_tween().tween_property(ch, "scale", Vector3.ONE, 0.9).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+		Kit.UiSound.play("whoosh", 0.0)
+		flash.color.a = 0.35
+		shake = 0.6
+		_caption(tr("Parachute open: 12.5 m"), tr("From about 400 m/s down to 70"))
+	if t > 4.6 and not _said.has("shield"):
+		_said["shield"] = true
+		# the heat shield drops away, tumbling
+		var g := heatshield.global_transform
+		heatshield.get_parent().remove_child(heatshield)
+		world.stage.add_child(heatshield)
+		heatshield.global_transform = g
+		var tw := heatshield.create_tween()
+		tw.parallel().tween_property(heatshield, "global_position", g.origin + Vector3(6, -140, 4), 4.0).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		tw.parallel().tween_property(heatshield, "rotation", Vector3(2.5, 1.0, 4.0), 4.0)
+		Kit.UiSound.play("snap", 0.0)
+		_caption(tr("Heat shield away"), "")
+	if t > 5.6:
+		(S.lander as Node3D).visible = true
+		bridle_len = lerpf(0.0, 20.0, smoothstep(5.6, 8.0, t))
+		if not _said.has("bridle"):
+			_said["bridle"] = true
+			_caption(tr("The lander slides down its 20 m bridle"), "")
+	_place_craft()
+	alt_lbl.text = "%d m" % int(round(alt))
+	speed_lbl.text = tr("entering the atmosphere")
+	if t >= ENTRY_LEN:
+		_end_entry()
+
+
+func _end_entry() -> void:
+	if phase != "entry":
+		return
+	bridle_len = 20.0
+	(S.chute as Node3D).scale = Vector3.ONE
+	(S.lander as Node3D).visible = true
+	plasma.visible = false
+	if heatshield.get_parent() == S.shell:
+		heatshield.visible = false
+	phase = "brief"
+	phase_t = 0.0
+	big.text = ""
+	big_sub.text = ""
+	_place_craft()
+	houston.text = tr("Radar has the ground: 1.6 km. Steady the lander, then the rockets, then the cut.")
+	_show_brief()
+
+
+## A caption over the scene for a few seconds (the entry's steps).
+func _caption(a: String, b: String) -> void:
+	if big.text == a:
+		return
+	_shout(a, b)
+	_caption_t = 2.4
+
+
 ## How to land, in three steps, before anything moves.
 func _show_brief() -> void:
 	brief = Control.new()
@@ -254,8 +394,8 @@ func _place_craft() -> void:
 	var lander: Node3D = S.lander
 	var shell: Node3D = S.shell
 	var bridle: MeshInstance3D = S.bridle
-	var lx := sin(L.swing) * 20.0
-	var ly := 20.0 - cos(L.swing) * 20.0
+	var lx := sin(L.swing) * bridle_len
+	var ly := 20.0 - cos(L.swing) * bridle_len
 	craft.position = Vector3(0, L.alt + BALL_R, 0)
 	lander.position = Vector3(lx, ly, 0)
 	lander.rotation.z = L.swing
@@ -409,6 +549,14 @@ func _bounces(delta: float) -> void:
 		ball.y = BALL_R
 		bounce += 1
 		thump.play()
+		# the ball squashes on the ground and springs back; red dust flies
+		var bag: Node3D = S.airbags
+		var hit := clampf(absf(vy) / 12.0, 0.25, 1.0)
+		bag.scale = Vector3(1.0 + 0.2 * hit, 1.0 - 0.28 * hit, 1.0 + 0.2 * hit)
+		bag.create_tween().tween_property(bag, "scale", Vector3.ONE, 0.35).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+		dust.global_position = Vector3(ball.x, 0.2, ball.z)
+		dust.amount = int(30 + 40 * hit)
+		dust.restart()
 		shake = clampf(heights[mini(bounce - 1, heights.size() - 1)] / 12.0, 0.15, 0.8)
 		if bounce < heights.size():
 			vy = sqrt(2.0 * g * heights[bounce])
@@ -445,27 +593,65 @@ func _rest() -> void:
 	hint.text = ""
 	var base: Node3D = S.base
 	base.global_position = Vector3(ball.x, 0.0, ball.z)
-	base.visible = true
+	base.visible = false
 	for p in S.petals:
 		(p as Node3D).rotation.x = -1.2
-	(S.craft as Node3D).visible = false
-	# the crew climb out, dizzy
-	var marks: Dictionary = S.marks
+	for c in base.get_children():
+		if str(c.name).begins_with("Heap"):
+			(c as Node3D).set_meta("full", (c as Node3D).scale)
+			(c as Node3D).scale = Vector3.ONE * 0.01
+	var rover: Node3D = S.rover
+	rover.scale = Vector3(1, 0.3, 1)
 	for k in actors:
-		var a = actors[k]
-		a.visible = true
-		a.scale = Vector3.ONE * float(S.get("actor_scale", 1.0))
-		a.global_position = base.global_position + marks[k].pos
-		a.rotation.y = marks[k].yaw
-		a.set_mood("tired" if k == "inti" else "happy")
-		a.act = "idle"
+		actors[k].visible = false
 
 
+## The airbags pull in, the ball sinks to the ground, the petals open one after the other, Sojourner unfolds on its
+## petal, the crew climb out.
 func _deflate(delta: float) -> void:
-	var k := clampf(phase_t / 2.5, 0.0, 1.0)
-	for p in S.petals:
-		(p as Node3D).rotation.x = lerpf(-1.2, 0.0, smoothstep(0.0, 1.0, k))
-	if phase_t > 3.5:
+	var t := phase_t
+	var bag: Node3D = S.airbags
+	var lander: Node3D = S.lander
+	var base: Node3D = S.base
+	if t < 1.8:
+		var k := smoothstep(0.0, 1.8, t)
+		bag.scale = Vector3(1.0 - 0.75 * k, 1.0 - 0.85 * k, 1.0 - 0.75 * k) * (1.0 + 0.03 * sin(_t * 25.0) * (1.0 - k))
+		lander.position = Vector3(ball.x, lerpf(BALL_R, 0.35, k), ball.z)
+		lander.rotation.z = lerp_angle(lander.rotation.z, 0.0, k)
+	elif not base.visible:
+		(S.craft as Node3D).visible = false
+		base.visible = true
+		Kit.UiSound.play("whoosh", 0.0)
+	if base.visible:
+		var i := 0
+		for p in S.petals:
+			var start := 1.9 + i * 0.45
+			var kk := clampf((t - start) / 1.1, 0.0, 1.0)
+			# open with a little overshoot, as a hinge driven by a motor would settle
+			var ease_k := 1.0 - pow(1.0 - kk, 3.0) + sin(kk * PI) * 0.08
+			(p as Node3D).rotation.x = lerpf(-1.2, 0.0, ease_k)
+			if kk > 0.0 and kk < 0.05:
+				Kit.UiSound.play("click", 0.1)
+			i += 1
+		for c in base.get_children():
+			if str(c.name).begins_with("Heap") and c.has_meta("full"):
+				(c as Node3D).scale = (c as Node3D).scale.lerp(c.get_meta("full"), clampf(delta * 3.0, 0.0, 1.0))
+		var rover: Node3D = S.rover
+		if t > 3.4:
+			rover.scale = rover.scale.lerp(Vector3.ONE, clampf(delta * 4.0, 0.0, 1.0))
+	if t > 3.8 and not _said.has("crew_out"):
+		_said["crew_out"] = true
+		var marks: Dictionary = S.marks
+		for k in actors:
+			var a = actors[k]
+			a.visible = true
+			a.scale = Vector3.ONE * float(S.get("actor_scale", 1.0))
+			a.global_position = base.global_position + marks[k].pos
+			a.rotation.y = marks[k].yaw
+			a.set_mood("tired" if k == "inti" else "happy")
+			a.act = "cheer" if k != "inti" else "idle"
+			a.hop()
+	if phase_t > 5.6:
 		phase = "ramp"
 		phase_t = 0.0
 		ramp_s = 0.0
@@ -498,7 +684,9 @@ func _ramp(delta: float) -> void:
 	# the rover's wheels ride on the rails' top: down the ramp, then on the ground (never below it)
 	var start := ramp.position + Vector3(0, 0.03, 0)
 	var dir := Vector3(0, -sin(deg_to_rad(20.0)), cos(deg_to_rad(20.0)))
+	var before := rover.position
 	rover.position = start + dir * (Sets.RAMP_LEN * ramp_s) + Vector3(ramp_off, 0.0, 0)
+	_spin_wheels((rover.position - before).length())
 	rover.position.y = maxf(rover.position.y, 0.0)
 	rover.rotation.x = deg_to_rad(20.0) * (1.0 - smoothstep(0.9, 1.0, ramp_s))
 	(ladder as Ladder).ramp = ramp_off
@@ -521,16 +709,40 @@ func _wheel() -> void:
 	_shout(tr(T.wheel), tr(T.wheel_sub))
 	hint.text = ""
 	houston.text = tr("JPL here: we have a rover on Mars!")
-	# the first tracks, behind the rover
-	var rover: Node3D = S.rover
-	var base: Node3D = S.base
-	for i in 6:
-		for sx in [-0.28, 0.28]:
-			var tr_m := Sets.box(base, Vector3(0.07, 0.005, 0.12), rover.position + Vector3(sx, -rover.position.y + 0.004, 0.15 + i * 0.16), Sets.mat(Color(0.32, 0.2, 0.13), 1.0))
-			tracks.append(tr_m)
+	roll_dist = 0.0
+	track_next = 0.0
 	for k in actors:
 		actors[k].act = "cheer"
 		actors[k].set_mood("happy")
+
+
+## Sojourner rolls on across the ground, slowly; each wheel prints its track as it goes.
+func _roll_on(delta: float) -> void:
+	if phase_t > 3.2:
+		return
+	var rover: Node3D = S.rover
+	var base: Node3D = S.base
+	var step := delta * 0.12
+	rover.position += Vector3(0, 0, step)
+	rover.position.y = 0.0
+	rover.rotation.x = 0.0
+	roll_dist += step
+	_spin_wheels(step)
+	while track_next <= roll_dist:
+		for sx in [-0.29, 0.29]:
+			for wz in [-0.25, 0.25]:
+				var p := rover.position + Vector3(sx, 0.004, wz - 0.03)
+				var m := Sets.box(base, Vector3(0.08, 0.004, 0.03), p, Sets.mat(Color(0.3, 0.19, 0.12), 1.0))
+				tracks.append(m)
+		track_next += 0.045
+
+
+func _spin_wheels(dist: float) -> void:
+	if wheels.is_empty():
+		for c in (S.rover as Node3D).find_children("Wheel*", "", true, false):
+			wheels.append(c)
+	for w in wheels:
+		(w as Node3D).rotate_object_local(Vector3.UP, dist / 0.065)
 
 
 # ===================================================================================== THE END
@@ -638,30 +850,49 @@ func _show_photo() -> void:
 # ===================================================================================== EVERY FRAME
 func _cam_goal() -> Array:
 	match phase:
+		"entry":
+			var sh: Node3D = S.shell
+			var at0 := sh.global_position
+			# close on the craft, from a little below and to the side, drifting as it falls
+			return [at0 + Vector3(9 + phase_t * 0.4, -3.0 - phase_t * 0.9, 16 + phase_t * 0.9), at0 + Vector3(0, -2.0 - phase_t * 1.4, 0)]
 		"brief", "descent", "lost":
 			var lander: Node3D = S.lander
 			var at := lander.global_position
 			if L.landed:
 				at = lander.global_position
 			var up := clampf(L.alt * 0.05, 4.0, 14.0)
-			return [at + Vector3(16, up * 0.4 + 2.0, 30), at + Vector3(0, up * 0.6, 0)]
+			var sway := sin(_t * 0.25) * 4.0
+			return [at + Vector3(16 + sway, up * 0.4 + 2.0, 30), at + Vector3(0, up * 0.6, 0)]
 		"bounce":
 			return [ball + Vector3(-14, 6, 20), ball + Vector3(6, 0, 0)]
 		"deflate":
 			var base: Node3D = S.base
-			return [base.global_position + Vector3(4.5, 3.0, 7.5), base.global_position + Vector3(0, 0.4, 0.5)]
+			var ang := 0.4 + phase_t * 0.12
+			var r0 := lerpf(9.0, 4.5, smoothstep(0.0, 4.0, phase_t))
+			return [base.global_position + Vector3(sin(ang) * r0, lerpf(4.0, 1.8, smoothstep(0.0, 4.0, phase_t)), cos(ang) * r0), base.global_position + Vector3(0, 0.35, 0.4)]
+		"wheel", "done":
+			var rv: Node3D = S.rover
+			var w := rv.global_position
+			return [w + Vector3(0.55, 0.12, 0.5), w + Vector3(0.25, 0.06, 0.2)]
 		_:
 			var base2: Node3D = S.base
 			var rover: Node3D = S.rover
 			var r := rover.global_position
-			return [base2.global_position + Vector3(1.8, 1.0, 3.6), r + Vector3(0, 0.1, 0.2)]
+			return [base2.global_position + Vector3(1.3, 0.55, 2.7), r + Vector3(0, 0.1, 0.2)]
 
 
 func process(delta: float) -> void:
 	_t += delta
 	phase_t += delta
 	flash.color.a = maxf(0.0, flash.color.a - delta * 1.5)
+	if _caption_t >= 0.0:
+		_caption_t -= delta
+		if _caption_t < 0.0 and phase == "entry":
+			big.text = ""
+			big_sub.text = ""
 	match phase:
+		"entry":
+			_entry(delta)
 		"descent":
 			_descent(delta)
 		"bounce":
@@ -671,16 +902,18 @@ func process(delta: float) -> void:
 		"ramp":
 			_ramp(delta)
 		"wheel":
-			if phase_t > 3.0 and not photo_shown:
+			_roll_on(delta)
+			if phase_t > 4.2 and not photo_shown:
 				phase = "done"
 				_show_photo()
 	ladder.visible = phase == "descent" or phase == "ramp" or phase == "brief"
+	hint.visible = phase != "entry"
 	steps_box.visible = phase == "descent" or phase == "brief"
 	if phase != "descent":
 		now_lbl.text = ""
 	(ladder as Ladder).mode = phase
 	var g := _cam_goal()
-	var k := 1.0 - exp(-delta * (6.0 if phase == "descent" or phase == "bounce" else 2.0))
+	var k := 1.0 - exp(-delta * (6.0 if phase in ["descent", "bounce", "entry"] else 2.0))
 	cam_pos = cam_pos.lerp(g[0], k)
 	cam_look = cam_look.lerp(g[1], k)
 	shake = maxf(0.0, shake - delta)
@@ -710,6 +943,8 @@ func _unhandled_input(e: InputEvent) -> void:
 			_again()
 		else:
 			return
+	elif phase == "entry" and (k == KEY_ENTER or k == KEY_KP_ENTER or k == KEY_SPACE):
+		_end_entry()
 	elif phase == "brief" and (k == KEY_ENTER or k == KEY_KP_ENTER or k == KEY_SPACE):
 		_start_descent()
 	elif phase == "descent" and k == KEY_SPACE:
