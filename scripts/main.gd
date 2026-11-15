@@ -20,6 +20,8 @@ var fade_rect: ColorRect
 var screen: Screen          ## The current screen.
 var screen_id := ""
 var launching := false      ## A launch is fading in: a second click on the launch button does nothing.
+## The screens of a mission where Esc opens the pause card (scripts/screens/pause.gd) and stops time (issue #65).
+const PAUSABLE := ["design", "builder", "launch", "flight", "landing", "operation"]
 
 
 func _ready() -> void:
@@ -52,6 +54,13 @@ func _setup_ui() -> void:
 	fade_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	fade_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	top.add_child(fade_rect)
+
+
+## Esc pauses a mission (a screen that uses Esc itself handles it first and this never sees it).
+func _unhandled_input(e: InputEvent) -> void:
+	if e is InputEventKey and e.pressed and not e.echo and e.physical_keycode == KEY_ESCAPE 			and screen_id in PAUSABLE and not get_tree().paused and not launching:
+		get_viewport().set_input_as_handled()
+		overlay("pause")
 
 
 func _process(delta: float) -> void:
