@@ -85,7 +85,7 @@ func _main_list(box: VBoxContainer) -> void:
 	play.grab_focus.call_deferred()   # the keyboard starts on Play: arrows move along the list, Enter chooses
 	box.add_child(Kit.spacer(10))
 	var items := [
-		[tr("First mission · guided"), func(): Coach.start(main)],
+		[tr("Guided first mission"), func(): Coach.start(main)],
 		[tr("How to play"), func(): main.overlay("howto")],
 		[tr("Credits"), func(): go("credits_film")],
 		[tr("Settings"), func(): go("menu", {"settings": true})]]
@@ -150,7 +150,7 @@ func _settings(box: VBoxContainer) -> void:
 			Kit.UiSound.set_muted(not on)
 			go("menu", again), 130))
 	rows.add_child(Kit.rule())
-	rows.add_child(Kit.lbl(tr("The Earth behind is NASA data: Blue Marble by day, Black Marble city lights at night, and the real clouds of 31 August 2024 from the VIIRS instrument."), 12, Kit.C_DIM, Kit.FONT_R, true))
+	# the imagery behind the menu is credited in Credits, not here (issue #82: short settings)
 	var back := Kit.btn(tr("◀ Menu"), func(): go("menu"), Kit.T_BODY, 340)
 	back.custom_minimum_size.y = Kit.BTN_H
 	rows.add_child(back)
