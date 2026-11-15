@@ -363,9 +363,13 @@
     {
      "id": "S-afj-loi",
      "text": "O'Brien, F. Lunar Orbit Insertion, Apollo Flight Journal (NASA History Office, hosted at apollojournals.org, linked from https://www.nasa.gov/history/afj/). https://apollojournals.org/afj/loiessay.html. The crew had to \"perform and monitor the burn on the far side of the Moon, without assistance from the ground\": the trip's loss of signal when the braking burn happens behind the Moon."
+    },
+    {
+     "id": "S-eo-orbits",
+     "text": "Riebeek, H. Catalog of Earth Satellite Orbits, NASA Earth Observatory, 2009. https://earthobservatory.nasa.gov/features/OrbitsCatalog. Low, Sun-synchronous and geostationary orbits in plain words: the glossary of the game (issue #69) and the plain names of its orbits."
     }
    ]
   }
  ],
- "count": 70
+ "count": 71
 }

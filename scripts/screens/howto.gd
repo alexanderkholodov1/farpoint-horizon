@@ -21,7 +21,10 @@ func enter(_args: Dictionary) -> void:
 	var text := ""
 	for p in PARTS:
 		text += "[b]" + tr(p[0]) + "[/b] " + tr(p[1]) + "\n\n"
-	text += tr("Every number comes from NASA or a real mission; the Credits list every source.")
+	text += "[b]" + tr("Words you will meet") + "[/b]\n"
+	for e in preload("res://scripts/ui/glossary.gd").all():
+		text += "• [b]" + tr(str(e.term)) + "[/b]: " + tr(str(e.meaning)) + "\n"
+	text += "\n" + tr("Every number comes from NASA or a real mission; the Credits list every source.")
 	rt.text = text
 	v.add_child(rt)
 	v.add_child(Kit.lbl(tr("Esc or Enter closes this."), Kit.T_SMALL, Kit.C_DIM))

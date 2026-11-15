@@ -2,8 +2,8 @@
  "doc": "Orbits and destinations.",
  "entries": {
   "leo": {
-   "name": "Low orbit (400 km)",
-   "short": "LEO",
+   "name": "Low orbit, 400 km (LEO)",
+   "short": "low orbit",
    "period_min": 92.0,
    "eclipse_min": 36.0,
    "eclipse_frac": 0.38,
@@ -29,8 +29,8 @@
    }
   },
   "sso": {
-   "name": "Sun-synchronous (700 km)",
-   "short": "SSO",
+   "name": "Over the poles, same sunlight daily (SSO, 700 km)",
+   "short": "polar orbit (SSO)",
    "period_min": 99.0,
    "eclipse_min": 33.0,
    "eclipse_frac": 0.34,
@@ -53,8 +53,8 @@
    "simplified": "Period, eclipse and contact times are rounded from the circular orbit of that altitude; the delta-v to arrive and to hold the orbit are simplified, and the operations cost is our own game balance."
   },
   "geo": {
-   "name": "Geostationary (35,786 km)",
-   "short": "GEO",
+   "name": "Fixed over one spot, 35,786 km (GEO)",
+   "short": "geostationary orbit",
    "period_min": 1436.0,
    "eclipse_min": 72.0,
    "eclipse_frac": 0.01,
@@ -79,8 +79,8 @@
    }
   },
   "lunar": {
-   "name": "Lunar orbit (100 km)",
-   "short": "MOON",
+   "name": "Around the Moon, 100 km",
+   "short": "orbit around the Moon",
    "period_min": 118.0,
    "eclipse_min": 47.0,
    "eclipse_frac": 0.4,
@@ -104,8 +104,8 @@
    }
   },
   "l2": {
-   "name": "Sun-Earth L2 point",
-   "short": "L2",
+   "name": "Far side of the Earth from the Sun, 1.5 million km (L2)",
+   "short": "the L2 point",
    "period_min": 259200.0,
    "eclipse_min": 0.0,
    "eclipse_frac": 0.0,
