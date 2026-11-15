@@ -11,3 +11,6 @@
   Reached from The crew, "Play the Apollo 13 scene".
 - Chapter 1 (Apollo 13) is the first data: three scenes, facts from NASA's mission page (S-apollo13-nasa).
 - Next: hook the scenes into the campaign (#43) and the chapters (#45-#50); the team confirms names and lines.
+- Each mission sits between two films: the chapter's "intro" scenes (context, the problem) play before the mission,
+  its "outro" scenes (what came of it, a hint of the next) after it, then the next chapter's intro, and so on
+  (`data/story/<chapter>.json` keys `intro`, `outro`; `order` plays the whole film). The campaign (#43) chains them.

@@ -1,0 +1,812 @@
+extends RefCounted
+## The story's sets (issue #66), built from primitives and the game's own pieces (the Andes relief, the Earth, the Moon,
+## flames and smoke): the Andes at night, Launch Pad 39A with a Saturn V, inside Odyssey (the command module), inside
+## Aquarius (the lunar module, powered down), Mission Control in Houston, and the Pacific at splashdown.
+## No logos, insignia or mission identifiers are drawn (AGENTS.md); the craft are shapes and colours only.
+## One unit is about 0.3 m, a cuy's height, so the craft and rooms keep their true size around the crew; the Saturn V's
+## stages follow NASA's Saturn V dimensions only roughly (a set, not a model to measure).
+## build(id, world) fills world.stage and returns the set: "marks" (where each cuy stands: [x, y, z, yaw]), "cast"
+## (who is on this set), "cams" (named shots: from, to, and optionally from2/to2 and time for a move), "act" (the
+## crew's body there: float in the capsules), and nodes the stage animates ("rocket", "capsule", "fire_light"...).
+##   var S = Sets.build("pad", world)
+
+const Space := preload("res://scripts/space_builder.gd")
+const K := 3.33              ## Units per metre on the sets.
+
+
+static func build(id: String, world) -> Dictionary:
+	world.clear_stage()
+	world.cam.far = 3000.0
+	world.sun.light_energy = 0.0
+	world.sun.shadow_enabled = true
+	world.sun.light_cull_mask = 0xFFFFF
+	var env: Environment = world.world_env.environment
+	env.glow_enabled = true
+	env.fog_enabled = false
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	var S: Dictionary
+	match id:
+		"andes":
+			S = _andes(world, env)
+		"pad":
+			S = _pad(world, env)
+		"capsule":
+			S = _capsule(world, env, false)
+		"lm":
+			S = _capsule(world, env, true)
+		"houston":
+			S = _houston(world, env)
+		"ocean":
+			S = _ocean(world, env)
+		_:
+			S = _andes(world, env)
+	S["id"] = id
+	return S
+
+
+# ===================================================================================== HELPERS
+static func mat(c: Color, rough := 0.7, metal := 0.0, emit := 0.0) -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.albedo_color = c
+	m.roughness = rough
+	m.metallic = metal
+	if emit > 0.0:
+		m.emission_enabled = true
+		m.emission = c
+		m.emission_energy_multiplier = emit
+	return m
+
+
+static func box(parent: Node3D, size: Vector3, pos: Vector3, m: Material, rot := Vector3.ZERO) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	var b := BoxMesh.new()
+	b.size = size
+	mi.mesh = b
+	mi.material_override = m
+	mi.position = pos
+	mi.rotation = rot
+	parent.add_child(mi)
+	return mi
+
+
+static func cyl(parent: Node3D, r_top: float, r_bottom: float, h: float, pos: Vector3, m: Material, seg := 48) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	var c := CylinderMesh.new()
+	c.top_radius = r_top
+	c.bottom_radius = r_bottom
+	c.height = h
+	c.radial_segments = seg
+	mi.mesh = c
+	mi.material_override = m
+	mi.position = pos
+	parent.add_child(mi)
+	return mi
+
+
+static func ball(parent: Node3D, r: float, pos: Vector3, m: Material, squash := Vector3.ONE) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	var s := SphereMesh.new()
+	s.radius = r
+	s.height = r * 2.0
+	mi.mesh = s
+	mi.material_override = m
+	mi.position = pos
+	mi.scale = squash
+	parent.add_child(mi)
+	return mi
+
+
+static func omni(parent: Node3D, pos: Vector3, c: Color, energy: float, rng: float) -> OmniLight3D:
+	var l := OmniLight3D.new()
+	l.position = pos
+	l.light_color = c
+	l.light_energy = energy
+	l.omni_range = rng
+	parent.add_child(l)
+	return l
+
+
+static func shader_mat(code: String) -> ShaderMaterial:
+	var sh := Shader.new()
+	sh.code = code
+	var m := ShaderMaterial.new()
+	m.shader = sh
+	return m
+
+
+## The Moon as it looks from the ground or through a window: its real map (textures/moon_color.jpg), lit evenly.
+static func bright_moon(r: float) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	var s := SphereMesh.new()
+	s.radius = r
+	s.height = r * 2.0
+	s.radial_segments = 64
+	s.rings = 32
+	mi.mesh = s
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.albedo_texture = Space.MOON_COLOR
+	m.albedo_color = Color(1.1, 1.1, 1.05)
+	mi.material_override = m
+	mi.rotation.y = PI
+	return mi
+
+
+## A thin cylinder from a to b (parachute lines, cables).
+static func rope(parent: Node3D, a: Vector3, b: Vector3, r: float, m: Material) -> MeshInstance3D:
+	var mi := cyl(parent, r, r, (b - a).length(), (a + b) * 0.5, m, 4)
+	mi.basis = Basis(Quaternion(Vector3.UP, (b - a).normalized()))
+	return mi
+
+
+## A soft daylight sky over the sea or the Florida coast (the game's own day sky is the deep blue of 3,300 m).
+static func low_sky() -> Sky:
+	var sky := Sky.new()
+	var p := ProceduralSkyMaterial.new()
+	p.sky_top_color = Color(0.36, 0.55, 0.8)
+	p.sky_horizon_color = Color(0.78, 0.84, 0.9)
+	p.sky_curve = 0.18
+	p.ground_bottom_color = Color(0.25, 0.3, 0.35)
+	p.ground_horizon_color = Color(0.78, 0.84, 0.9)
+	sky.sky_material = p
+	return sky
+
+
+## Puts every mesh under n on layer 2 as well, so a light that lights only layer 2 reaches it.
+static func layer2(n: Node) -> void:
+	if n is VisualInstance3D:
+		(n as VisualInstance3D).layers = 3
+	for c in n.get_children():
+		layer2(c)
+
+
+static func marks(list: Dictionary) -> Dictionary:
+	var out := {}
+	for k in list:
+		var a: Array = list[k]
+		out[k] = {"pos": Vector3(a[0], a[1], a[2]), "yaw": deg_to_rad(a[3])}
+	return out
+
+
+# ===================================================================================== THE ANDES AT NIGHT
+## A clearing on the paramo below Cotopaxi (the game's real relief, NASA SRTM [S-terrain-tiles]), under a big Moon,
+## around a small fire.
+static func _andes(world, env: Environment) -> Dictionary:
+	var st: Node3D = world.stage
+	env.sky = Space.make_space_sky()
+	env.background_energy_multiplier = 0.8
+	env.ambient_light_color = Color(0.32, 0.38, 0.6)
+	env.ambient_light_energy = 0.45
+	env.fog_enabled = true
+	env.fog_light_color = Color(0.06, 0.08, 0.14)
+	env.fog_density = 0.0015
+	env.fog_sky_affect = 0.0
+	# moonlight
+	world.sun.light_energy = 0.8
+	world.sun.light_color = Color(0.62, 0.72, 1.0)
+	world.sun.rotation_degrees = Vector3(-32, 160, 0)
+	var t := MeshInstance3D.new()
+	t.mesh = Space._terrain()
+	var tm := ShaderMaterial.new()
+	tm.shader = Space.TERRAIN_SHADER
+	tm.set_shader_parameter("k", Space.SITE_K)
+	tm.set_shader_parameter("base_alt", Space._terrain_base)
+	t.material_override = tm
+	t.rotation_degrees.y = Space.TERRAIN_YAW + 180.0
+	t.position.y = -0.05
+	st.add_child(t)
+	# the clearing: grass, rocks
+	var grass := MeshInstance3D.new()
+	var gd := CylinderMesh.new()
+	gd.top_radius = 9.0
+	gd.bottom_radius = 9.5
+	gd.height = 0.1
+	grass.mesh = gd
+	grass.material_override = mat(Color(0.33, 0.33, 0.18), 0.95)
+	grass.position.y = -0.05
+	st.add_child(grass)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	var rock := mat(Color(0.24, 0.24, 0.25), 0.95)
+	for i in 14:
+		var a := rng.randf() * TAU
+		var r := rng.randf_range(2.6, 8.0)
+		var rk := ball(st, rng.randf_range(0.15, 0.5), Vector3(cos(a) * r, -0.05, sin(a) * r - 1.0), rock, Vector3(1.0, rng.randf_range(0.55, 0.9), rng.randf_range(0.7, 1.2)))
+		rk.rotation = Vector3(rng.randf(), rng.randf() * TAU, rng.randf())
+	# paramo grass: tufts of thin blades
+	var blade := mat(Color(0.36, 0.38, 0.2), 1.0)
+	var dry := mat(Color(0.5, 0.46, 0.27), 1.0)
+	for i in 70:
+		var a := rng.randf() * TAU
+		var r := rng.randf_range(1.0, 8.5)
+		var at := Vector3(cos(a) * r, 0.0, sin(a) * r - 1.0)
+		for b in 7:
+			var hgt := rng.randf_range(0.18, 0.38)
+			var c := cyl(st, 0.0, 0.012, hgt, at + Vector3(rng.randf_range(-0.06, 0.06), hgt * 0.5, rng.randf_range(-0.06, 0.06)), blade if rng.randf() < 0.6 else dry, 3)
+			c.rotation = Vector3(rng.randf_range(-0.45, 0.45), 0, rng.randf_range(-0.45, 0.45))
+	# the fire: logs, flame, a warm flickering light
+	var fire := Node3D.new()
+	fire.position = Vector3(1.9, 0, 0.9)
+	st.add_child(fire)
+	var log_m := mat(Color(0.28, 0.17, 0.1), 0.9)
+	for i in 3:
+		var l := cyl(fire, 0.06, 0.06, 0.7, Vector3(0, 0.07, 0), log_m, 8)
+		l.rotation = Vector3(PI / 2, i * 1.05, 0)
+	ball(fire, 0.12, Vector3(0, 0.08, 0), mat(Color(1.0, 0.45, 0.1), 0.5, 0.0, 3.0))
+	var flame := Space.make_flame(0.22)
+	flame.direction = Vector3(0, 1, 0)
+	flame.initial_velocity_min = 0.6
+	flame.initial_velocity_max = 1.2
+	flame.lifetime = 0.7
+	flame.emitting = true
+	fire.add_child(flame)
+	var fl := omni(fire, Vector3(0, 0.6, 0), Color(1.0, 0.62, 0.3), 2.6, 7.0)
+	fl.shadow_enabled = true
+	# the old radio by Wayra: a wooden box, a dial, a long antenna
+	var radio := Node3D.new()
+	radio.position = Vector3(1.55, 0, 0.75)
+	radio.rotation.y = -0.6
+	st.add_child(radio)
+	box(radio, Vector3(0.5, 0.32, 0.26), Vector3(0, 0.16, 0), mat(Color(0.42, 0.26, 0.14), 0.7))
+	box(radio, Vector3(0.3, 0.14, 0.02), Vector3(-0.05, 0.2, 0.135), mat(Color(1.0, 0.75, 0.35), 0.4, 0.0, 1.5))
+	var knob := cyl(radio, 0.04, 0.04, 0.04, Vector3(0.17, 0.18, 0.14), mat(Color(0.1, 0.1, 0.1), 0.4), 12)
+	knob.rotation.x = PI / 2
+	var ant := cyl(radio, 0.006, 0.006, 0.9, Vector3(0.18, 0.75, -0.05), mat(Color(0.75, 0.75, 0.78), 0.3, 0.8), 6)
+	ant.rotation.z = -0.35
+	# the Moon, big and low over the mountains
+	var moon := bright_moon(12.0)
+	moon.position = Vector3(-35, 42, -150)
+	st.add_child(moon)
+	return {
+		"marks": marks({"killa": [-0.5, 0, 0.0, 10], "inti": [0.35, 0, -0.25, -5], "rumi": [-1.25, 0, 0.35, 25], "wayra": [1.2, 0, 0.45, -40]}),
+		"cast": ["rumi", "killa", "inti", "wayra"],
+		"cams": {
+			"wide": {"from": Vector3(0.3, 1.0, 4.4), "to": Vector3(0, 0.6, 0)},
+			"moon": {"from": Vector3(0.6, 0.35, 2.6), "to": Vector3(0, 0.7, 0), "from2": Vector3(0.2, 0.5, 2.2), "to2": Vector3(-7, 9, -30), "time": 6.0},
+			"behind": {"from": Vector3(0.2, 0.9, -2.2), "to": Vector3(-8, 11, -30), "from2": Vector3(0.1, 1.2, -2.6)},
+		},
+		"act": "idle",
+		"fire_light": fl,
+		"moon": moon,
+	}
+
+
+# ===================================================================================== LAUNCH PAD 39A
+## Florida, a clear morning; a Saturn V on its launch platform beside the tower, the crew small among the pad's crates.
+static func _pad(world, env: Environment) -> Dictionary:
+	var st: Node3D = world.stage
+	Space.apply_day(env)
+	env.sky = low_sky()
+	env.glow_enabled = false
+	env.fog_density = 0.0009
+	env.fog_light_color = Color(0.75, 0.8, 0.86)
+	env.ambient_light_color = Color(0.62, 0.68, 0.78)
+	env.ambient_light_energy = 0.35
+	world.sun.light_energy = 1.0
+	world.sun.light_color = Color(1.0, 0.95, 0.86)
+	world.sun.rotation_degrees = Vector3(-38, -35, 0)
+	var gm := mat(Color(0.3, 0.36, 0.22), 1.0)
+	gm.metallic_specular = 0.05
+	var ground := box(st, Vector3(3000, 0.2, 3000), Vector3(0, -0.1, 0), gm)
+	ground.name = "Ground"
+	var concrete := mat(Color(0.55, 0.54, 0.51), 0.9)
+	box(st, Vector3(220, 0.3, 220), Vector3(0, 0.0, -90), concrete)
+	# the launch platform and the tower beside it
+	var ml := mat(Color(0.42, 0.43, 0.45), 0.8, 0.3)
+	box(st, Vector3(48 * K, 7.6 * K, 41 * K), Vector3(0, 3.8 * K, -90), ml)
+	var red := mat(Color(0.48, 0.13, 0.08), 0.8, 0.2)
+	var tower := Node3D.new()
+	tower.position = Vector3(16 * K, 7.6 * K, -90)
+	st.add_child(tower)
+	for cx in [-1, 1]:
+		for cz in [-1, 1]:
+			box(tower, Vector3(0.8 * K, 120 * K, 0.8 * K), Vector3(cx * 5 * K, 60 * K, cz * 5 * K), red)
+	for i in 30:
+		box(tower, Vector3(11 * K, 0.5 * K, 11 * K), Vector3(0, i * 4 * K, 0), red)
+		var d := box(tower, Vector3(14 * K, 0.4 * K, 0.4 * K), Vector3(0, i * 4 * K + 2 * K, 5 * K), red)
+		d.rotation.z = 0.28 if i % 2 == 0 else -0.28
+	for h in [62.0, 78.0, 95.0, 104.0]:
+		box(tower, Vector3(9 * K, 1.2 * K, 1.4 * K), Vector3(-9 * K, h * K, 0), red)
+	# the Saturn V
+	var rocket := _saturn()
+	rocket.position = Vector3(0, 7.6 * K, -90)
+	st.add_child(rocket)
+	var flames := Node3D.new()
+	flames.name = "Flames"
+	rocket.add_child(flames)
+	for ex in [-1, 0, 1]:
+		for ez in ([-1, 1] if ex != 0 else [0]):
+			var f := Space.make_flame(9.0)
+			f.position = Vector3(ex * 3.2 * K, -2 * K, ez * 3.2 * K)
+			flames.add_child(f)
+	var smoke := Space.make_pad_smoke()
+	smoke.scale = Vector3.ONE * 18.0
+	smoke.position = Vector3(0, 6 * K, -90)
+	st.add_child(smoke)
+	# the crew's corner: crates, a cart and a big roll of tape
+	var wood := mat(Color(0.55, 0.42, 0.26), 0.85)
+	box(st, Vector3(2.2, 1.5, 1.6), Vector3(-2.2, 0.75, -1.6), wood)
+	box(st, Vector3(1.6, 1.1, 1.3), Vector3(-0.7, 0.55, -2.4), wood)
+	box(st, Vector3(1.2, 0.9, 1.0), Vector3(2.4, 0.45, -1.8), wood, Vector3(0, 0.4, 0))
+	var tape := MeshInstance3D.new()
+	var tor := TorusMesh.new()
+	tor.inner_radius = 0.25
+	tor.outer_radius = 0.48
+	tape.mesh = tor
+	tape.material_override = mat(Color(0.7, 0.72, 0.75), 0.35, 0.5)
+	tape.position = Vector3(-1.5, 0.1, 0.5)
+	st.add_child(tape)
+	return {
+		"marks": marks({"inti": [0.3, 0, 0.2, 0], "killa": [-0.4, 0, 0.0, 15], "rumi": [-1.5, 0, 0.5, 20], "wayra": [1.2, 0, 0.4, -20]}),
+		"cast": ["rumi", "killa", "inti"],
+		"cams": {
+			"wide": {"from": Vector3(0.6, 0.8, 4.2), "to": Vector3(0, 0.8, -2)},
+			"pad_wide": {"from": Vector3(330, 30, 760), "to": Vector3(0, 160, -90), "from2": Vector3(280, 25, 680), "time": 8.0},
+			"rocket_up": {"from": Vector3(1.0, 0.25, 3.0), "to": Vector3(0, 0.7, 0), "from2": Vector3(0.6, 0.15, 3.6), "to2": Vector3(0, 300, -90), "time": 7.0},
+			"launch": {"from": Vector3(330, 20, 760), "to": Vector3(0, 180, -90), "track": "rocket", "offset": Vector3(0, 180, 0)},
+		},
+		"act": "idle",
+		"rocket": rocket,
+		"smoke": smoke,
+		"tape": tape,
+	}
+
+
+## A Saturn V as a stack of shapes: the first stage with its black roll pattern and fins, the second stage, the third,
+## the instrument ring, the adapter that hides the lunar module, the service and command modules, the escape tower.
+static func _saturn() -> Node3D:
+	var r := Node3D.new()
+	r.name = "Rocket"
+	var white := mat(Color(0.93, 0.93, 0.9), 0.55)
+	var black := mat(Color(0.08, 0.08, 0.09), 0.6)
+	var steel := mat(Color(0.6, 0.6, 0.62), 0.4, 0.6)
+	var y := 0.0
+	# engine bells
+	for ex in [-1, 0, 1]:
+		for ez in ([-1, 1] if ex != 0 else [0]):
+			cyl(r, 0.9 * K, 1.9 * K, 5.8 * K, Vector3(ex * 3.2 * K, 2.9 * K - 5.8 * K, ez * 3.2 * K), black, 24)
+	# first stage: white with a black quarter pattern, fins
+	var s1 := cyl(r, 5.05 * K, 5.05 * K, 42 * K, Vector3(0, 21 * K, 0), white, 64)
+	s1.name = "S1"
+	for q in 4:
+		var panel := box(r, Vector3(5.0 * K, 14 * K, 0.4 * K), Vector3(0, 0, 0), black)
+		var ang := q * PI / 2 + PI / 4
+		panel.position = Vector3(sin(ang) * 3.7 * K, (7 if q % 2 == 0 else 35) * K, cos(ang) * 3.7 * K)
+		panel.rotation.y = ang
+	cyl(r, 5.1 * K, 5.1 * K, 1.4 * K, Vector3(0, 41.4 * K, 0), black, 64)
+	for q in 4:
+		var fin := box(r, Vector3(0.6 * K, 8 * K, 4.5 * K), Vector3(0, 0, 0), white)
+		var a2 := q * PI / 2
+		fin.position = Vector3(sin(a2) * 6.6 * K, 3.5 * K, cos(a2) * 6.6 * K)
+		fin.rotation.y = a2
+	y = 42 * K
+	cyl(r, 5.05 * K, 5.05 * K, 5.5 * K, Vector3(0, y + 2.75 * K, 0), white, 64)
+	y += 5.5 * K
+	cyl(r, 5.05 * K, 5.05 * K, 24.8 * K, Vector3(0, y + 12.4 * K, 0), white, 64)
+	y += 24.8 * K
+	cyl(r, 3.3 * K, 5.05 * K, 5.0 * K, Vector3(0, y + 2.5 * K, 0), white, 64)
+	y += 5.0 * K
+	cyl(r, 3.3 * K, 3.3 * K, 17.8 * K, Vector3(0, y + 8.9 * K, 0), white, 48)
+	cyl(r, 3.32 * K, 3.32 * K, 4 * K, Vector3(0, y + 2 * K, 0), black, 48)
+	y += 17.8 * K
+	cyl(r, 3.3 * K, 3.3 * K, 1.0 * K, Vector3(0, y + 0.5 * K, 0), steel, 48)
+	y += 1.0 * K
+	cyl(r, 1.95 * K, 3.3 * K, 8.5 * K, Vector3(0, y + 4.25 * K, 0), white, 48)
+	y += 8.5 * K
+	cyl(r, 1.95 * K, 1.95 * K, 7.5 * K, Vector3(0, y + 3.75 * K, 0), white, 48)
+	y += 7.5 * K
+	cyl(r, 0.3 * K, 1.95 * K, 3.5 * K, Vector3(0, y + 1.75 * K, 0), white, 48)
+	y += 3.5 * K
+	cyl(r, 0.08 * K, 0.08 * K, 7 * K, Vector3(0, y + 3.5 * K, 0), steel, 8)
+	cyl(r, 0.25 * K, 0.4 * K, 3 * K, Vector3(0, y + 8 * K, 0), white, 16)
+	cyl(r, 0.0, 0.25 * K, 1.5 * K, Vector3(0, y + 10.2 * K, 0), white, 16)
+	return r
+
+
+# ===================================================================================== ODYSSEY AND AQUARIUS
+## Inside a capsule: the crew float in front of the instrument panel; a window shows the Earth (Odyssey) or the Moon
+## (Aquarius, dark and cold, its power turned down).
+static func _capsule(world, env: Environment, lm: bool) -> Dictionary:
+	var st: Node3D = world.stage
+	env.sky = Space.make_space_sky()
+	env.background_energy_multiplier = 1.0
+	env.ambient_light_color = Color(0.55, 0.6, 0.7) if not lm else Color(0.35, 0.42, 0.6)
+	env.ambient_light_energy = 0.35 if not lm else 0.22
+	world.sun.light_energy = 1.4
+	world.sun.light_color = Color(1.0, 0.97, 0.92)
+	world.sun.rotation_degrees = Vector3(-15, 55, 0)
+	var shell := mat(Color(0.46, 0.47, 0.45) if not lm else Color(0.3, 0.33, 0.38), 0.85)
+	var panel_m := mat(Color(0.33, 0.35, 0.36) if not lm else Color(0.24, 0.26, 0.29), 0.6, 0.2)
+	var dark := mat(Color(0.08, 0.08, 0.09), 0.5)
+	var room := Node3D.new()
+	st.add_child(room)
+	# back: the main panel in three angled parts, covered in switches, gauges and lamps
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 13 if not lm else 31
+	var lamps: Array = []
+	for i in 3:
+		var part := Node3D.new()
+		part.position = Vector3((i - 1) * 3.6, 1.6, -2.4 + (0.9 if i != 1 else 0.0))
+		part.rotation.y = (1 - i) * 0.45
+		part.rotation.x = -0.25
+		room.add_child(part)
+		box(part, Vector3(3.6, 2.6, 0.3), Vector3.ZERO, panel_m)
+		for gx in 9:
+			for gy in 6:
+				var p := Vector3(-1.5 + gx * 0.375, -1.05 + gy * 0.42, 0.17)
+				var kind := rng.randi() % 5
+				if kind <= 1:
+					var sw := cyl(part, 0.02, 0.025, 0.14, p + Vector3(0, 0, 0.06), mat(Color(0.85, 0.85, 0.82), 0.3, 0.7), 6)
+					sw.rotation.x = PI / 2 + rng.randf_range(-0.5, 0.5)
+					box(part, Vector3(0.12, 0.12, 0.02), p, dark)
+				elif kind == 2:
+					var g := cyl(part, 0.12, 0.12, 0.04, p, dark, 20)
+					g.rotation.x = PI / 2
+					var face := cyl(part, 0.1, 0.1, 0.02, p + Vector3(0, 0, 0.025), mat(Color(0.9, 0.9, 0.85), 0.5, 0.0, 0.15), 20)
+					face.rotation.x = PI / 2
+				elif kind == 3:
+					var c: Color = [Color(1, 0.25, 0.15), Color(0.3, 1, 0.4), Color(1, 0.75, 0.2), Color(0.5, 0.75, 1)][rng.randi() % 4]
+					var lamp := box(part, Vector3(0.14, 0.09, 0.03), p, mat(c, 0.4, 0.0, 1.6 if not lm else 0.5))
+					lamps.append(lamp)
+				else:
+					box(part, Vector3(0.3, 0.16, 0.03), p, mat(Color(0.1, 0.12, 0.1), 0.4, 0.0, 0.0))
+	# the master alarm: a red lamp the stage lights when the alarm sounds
+	var alarm_lamp := box(room, Vector3(0.5, 0.22, 0.05), Vector3(0, 3.05, -2.25), mat(Color(1, 0.15, 0.1), 0.4, 0.0, 0.2))
+	# floor of couches below, a hatch ring above, the curved hull around
+	var fabric := mat(Color(0.5, 0.52, 0.5), 0.95)
+	for i in 3:
+		box(room, Vector3(1.6, 0.4, 4.0), Vector3((i - 1) * 1.9, -1.0, 0.4), fabric)
+	var hull := MeshInstance3D.new()
+	var hm := CylinderMesh.new()
+	hm.top_radius = 2.5
+	hm.bottom_radius = 6.5
+	hm.height = 6.5
+	hm.radial_segments = 48
+	hm.cap_top = false
+	hm.cap_bottom = false
+	hull.mesh = hm
+	var hullm := shell.duplicate() as StandardMaterial3D
+	hullm.cull_mode = BaseMaterial3D.CULL_FRONT
+	hull.material_override = hullm
+	hull.position = Vector3(0, 1.8, 0)
+	room.add_child(hull)
+	var hatch := MeshInstance3D.new()
+	var ht := TorusMesh.new()
+	ht.inner_radius = 0.7
+	ht.outer_radius = 0.9
+	hatch.mesh = ht
+	hatch.material_override = mat(Color(0.5, 0.5, 0.52), 0.4, 0.6)
+	hatch.position = Vector3(0, 4.9, 0)
+	room.add_child(hatch)
+	# a window: a lit frame on the left wall; through it, the Earth (Odyssey) or the Moon (Aquarius)
+	var win := Node3D.new()
+	win.position = Vector3(-4.2, 2.0, 0.6)
+	win.rotation.y = PI / 2 - 0.3
+	room.add_child(win)
+	var frame := MeshInstance3D.new()
+	var ft := TorusMesh.new()
+	ft.inner_radius = 0.75
+	ft.outer_radius = 0.95
+	frame.mesh = ft
+	frame.rotation.x = PI / 2
+	frame.material_override = mat(Color(0.3, 0.3, 0.32), 0.5, 0.5)
+	win.add_child(frame)
+	var look_out := Vector3(-0.955, 0.0, -0.296)        # the window's outward direction (the wall's turn)
+	var outside: Node3D
+	if lm:
+		outside = bright_moon(22.0)
+	else:
+		outside = Space.make_earth(18.0, false)
+	outside.position = Vector3(-4.3, 2.0, 0.6) + look_out * 150.0 + Vector3(0, 6, 8)
+	st.add_child(outside)
+	# the Sun lights only what is outside: inside, the cabin's own lamps do
+	layer2(outside)
+	world.sun.light_cull_mask = 2
+	if not lm:
+		world.planet = outside
+	# the cabin lights
+	var flood := omni(room, Vector3(0, 3.6, 2.5), Color(0.95, 0.97, 1.0) if not lm else Color(0.6, 0.7, 1.0), 1.6 if not lm else 0.7, 12.0)
+	flood.shadow_enabled = true
+	omni(room, Vector3(0, 1.4, -1.5), Color(0.7, 0.85, 1.0), 0.6 if not lm else 0.25, 5.0)
+	# the hull hides the window's view of space: open it there
+	hullm.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED
+	hull.visible = false
+	var back := box(room, Vector3(16, 9, 0.2), Vector3(0, 2, -3.4), shell)
+	back.name = "Back"
+	box(room, Vector3(16, 0.2, 10), Vector3(0, -1.3, 0), shell)
+	box(room, Vector3(16, 0.2, 10), Vector3(0, 5.6, 0), shell)
+	box(room, Vector3(0.2, 9, 10), Vector3(5.6, 2, 0), shell)
+	# the left wall with the window's hole: four pieces around it
+	var wl := Node3D.new()
+	wl.position = Vector3(-4.3, 2.0, 0.6)
+	wl.rotation.y = -0.3
+	room.add_child(wl)
+	box(wl, Vector3(0.2, 9, 4), Vector3(0, 0, -2.9), shell)
+	box(wl, Vector3(0.2, 9, 4), Vector3(0, 0, 2.9), shell)
+	box(wl, Vector3(0.2, 3.6, 1.8), Vector3(0, 2.7, 0), shell)
+	box(wl, Vector3(0.2, 3.6, 1.8), Vector3(0, -2.7, 0), shell)
+	var locker := mat(Color(0.52, 0.53, 0.5) if not lm else Color(0.36, 0.38, 0.42), 0.6, 0.3)
+	for lx in 3:
+		for ly in 3:
+			box(room, Vector3(0.15, 0.9, 1.2), Vector3(5.45, 0.2 + ly * 1.1, -1.6 + lx * 1.4), locker)
+	var fl := 1.0 if not lm else 0.0
+	return {
+		"marks": marks({"rumi": [-1.15, 0.35, 0.3, 15], "killa": [-0.35, 0.75, 0.0, 5], "inti": [0.45, 0.45, -0.1, -5], "wayra": [1.2, 0.6, 0.3, -20]}),
+		"cast": ["rumi", "killa", "inti"],
+		"cams": {
+			"wide": {"from": Vector3(0.2, 1.5, 4.6), "to": Vector3(0, 1.1, 0)},
+			"window": {"from": Vector3(0.6, 1.5, 2.6), "to": Vector3(-1.0, 1.2, 0), "from2": Vector3(-1.6, 2.05, 1.2), "to2": Vector3(-4.3, 2.0, 0.6) + Vector3(-0.955, 0.0, -0.296) * 150.0 + Vector3(0, 6, 8), "time": 5.0},
+		},
+		"act": "float",
+		"lamps": lamps,
+		"alarm_lamp": alarm_lamp,
+		"flood": flood,
+		"flood_energy": flood.light_energy * fl + (0.7 if lm else 0.0),
+	}
+
+
+# ===================================================================================== MISSION CONTROL
+## Houston: three rows of consoles under their screens, the big wall screens in front with the path to the Moon and
+## back; Wayra on duty at the front row.
+static func _houston(world, env: Environment) -> Dictionary:
+	var st: Node3D = world.stage
+	env.background_mode = Environment.BG_COLOR
+	env.background_color = Color(0.02, 0.02, 0.03)
+	env.ambient_light_color = Color(0.5, 0.48, 0.45)
+	env.ambient_light_energy = 0.6
+	var room := Node3D.new()
+	st.add_child(room)
+	var carpet := mat(Color(0.2, 0.22, 0.26), 1.0)
+	var wall := mat(Color(0.3, 0.3, 0.28), 0.9)
+	var console := mat(Color(0.5, 0.53, 0.5), 0.7, 0.1)
+	var dark := mat(Color(0.08, 0.09, 0.1), 0.5)
+	box(room, Vector3(40, 0.2, 40), Vector3(0, -0.1, 0), carpet)
+	box(room, Vector3(40, 16, 0.3), Vector3(0, 8, -16), wall)
+	box(room, Vector3(40, 0.3, 40), Vector3(0, 14, 0), mat(Color(0.18, 0.18, 0.17), 1.0))
+	for sx in [-1, 1]:
+		box(room, Vector3(0.3, 16, 40), Vector3(sx * 18, 8, 0), wall)
+	var screen := shader_mat("""
+shader_type spatial;
+render_mode unshaded;
+uniform vec3 tint = vec3(0.55, 1.0, 0.7);
+uniform float seed = 0.0;
+float h(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233)) + seed) * 43758.5453); }
+void fragment() {
+	vec2 uv = UV;
+	float row = floor(uv.y * 14.0);
+	float col = floor(uv.x * 28.0);
+	float on = step(0.45, h(vec2(row, col))) * step(0.12, fract(uv.y * 14.0)) * step(fract(uv.y * 14.0), 0.7);
+	on *= step(h(vec2(row, 3.0)) * 0.9, uv.x);
+	float blink = step(0.5, fract(TIME * 0.7 + h(vec2(row, 9.0))));
+	on *= mix(1.0, blink, step(0.93, h(vec2(row, 5.0))));
+	ALBEDO = tint * (0.12 + on * 0.9);
+	EMISSION = tint * on * 0.8;
+}
+""")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 5
+	var wayra_desk := Vector3.ZERO
+	for row in 3:
+		var z := 1.5 + row * 4.0
+		var floor_y := row * 0.8
+		if row > 0:
+			box(room, Vector3(30, floor_y, 4.0), Vector3(0, floor_y / 2.0, z), carpet)
+		for c in 5:
+			var x := (c - 2) * 5.2
+			var desk := Node3D.new()
+			desk.position = Vector3(x, floor_y, z)
+			room.add_child(desk)
+			box(desk, Vector3(4.8, 2.5, 1.6), Vector3(0, 1.25, 0), console)
+			box(desk, Vector3(4.8, 0.12, 1.0), Vector3(0, 2.56, 1.0), console)
+			var hood := box(desk, Vector3(4.8, 1.7, 0.9), Vector3(0, 3.3, -0.25), console)
+			hood.rotation.x = 0.3
+			for s in 2:
+				var sm := screen.duplicate() as ShaderMaterial
+				sm.set_shader_parameter("seed", rng.randf() * 100.0)
+				sm.set_shader_parameter("tint", Vector3(0.55, 1.0, 0.7) if rng.randf() < 0.7 else Vector3(1.0, 0.95, 0.85))
+				var q := MeshInstance3D.new()
+				var qm := QuadMesh.new()
+				qm.size = Vector2(1.6, 1.1)
+				q.mesh = qm
+				q.material_override = sm
+				q.position = Vector3(-1.0 + s * 2.0, 3.35, 0.24)
+				q.rotation.x = -0.3
+				desk.add_child(q)
+			for b in 10:
+				box(desk, Vector3(0.14, 0.05, 0.14), Vector3(-2.0 + b * 0.44, 2.63, 1.2), mat([Color(1, 0.8, 0.3), Color(0.3, 0.9, 1), Color(1, 0.3, 0.2)][b % 3], 0.4, 0.0, 1.2))
+			if row == 0 and c == 2:
+				wayra_desk = Vector3(x, floor_y + 2.62, z + 1.0)
+			if row == 0 and c == 2:
+				omni(desk, Vector3(0, 3.8, 1.6), Color(1.0, 0.85, 0.65), 1.2, 5.0)
+	# the wall screens: the path to the Moon and back in the middle, data at the sides
+	var path := shader_mat("""
+shader_type spatial;
+render_mode unshaded;
+void fragment() {
+	vec2 p = (UV - vec2(0.5)) * vec2(2.0, 1.0);
+	vec3 c = vec3(0.02, 0.04, 0.09);
+	vec2 e = vec2(-0.72, 0.0);
+	vec2 m = vec2(0.78, 0.0);
+	c += vec3(0.3, 0.6, 1.0) * smoothstep(0.075, 0.06, length(p - e));
+	c += vec3(0.75) * smoothstep(0.04, 0.03, length(p - m));
+	// a free-return figure eight: out above, around the Moon, back below
+	float t = atan(p.y, p.x - 0.03);
+	float best = 1.0;
+	for (int i = 0; i < 120; i++) {
+		float a = float(i) / 120.0 * 6.2831;
+		vec2 q = vec2(0.03 + 0.78 * cos(a), 0.18 * sin(2.0 * a));
+		best = min(best, length(p - q));
+	}
+	c += vec3(1.0, 0.75, 0.3) * smoothstep(0.012, 0.004, best);
+	float a2 = fract(TIME * 0.05) * 6.2831;
+	vec2 craft = vec2(0.03 + 0.78 * cos(a2), 0.18 * sin(2.0 * a2));
+	c += vec3(1.0, 0.95, 0.7) * smoothstep(0.03, 0.015, length(p - craft));
+	ALBEDO = c;
+	EMISSION = c * 0.9;
+}
+""")
+	for i in 3:
+		var big := MeshInstance3D.new()
+		var bq := QuadMesh.new()
+		bq.size = Vector2(9.0, 4.8) if i == 1 else Vector2(6.0, 4.0)
+		big.mesh = bq
+		if i == 1:
+			big.material_override = path
+		else:
+			var sm2 := screen.duplicate() as ShaderMaterial
+			sm2.set_shader_parameter("seed", 40.0 + i)
+			sm2.set_shader_parameter("tint", Vector3(0.6, 0.8, 1.0))
+			big.material_override = sm2
+		big.position = Vector3((i - 1) * 10.5, 8.0, -15.8)
+		room.add_child(big)
+		box(room, Vector3(bq.size.x + 0.4, bq.size.y + 0.4, 0.1), Vector3((i - 1) * 10.5, 8.0, -15.9), dark)
+	for lx in [-10, 0, 10]:
+		for lz in [-6, 4, 12]:
+			omni(room, Vector3(lx, 12.5, lz), Color(1.0, 0.92, 0.8), 1.5, 14.0)
+	var mk := wayra_desk
+	return {
+		"marks": {"wayra": {"pos": mk + Vector3(0.4, 0, -0.1), "yaw": 0.0}, "killa": {"pos": mk + Vector3(-1.2, 0, 0), "yaw": 0.2},
+			"rumi": {"pos": mk + Vector3(1.6, 0, 0), "yaw": -0.2}, "inti": {"pos": mk + Vector3(-0.4, 0, 0), "yaw": 0.0}},
+		"cast": ["wayra"],
+		"cams": {
+			"wide": {"from": mk + Vector3(1.5, 2.5, 7.5), "to": mk + Vector3(0, 1.5, -6)},
+			"room": {"from": Vector3(9, 9, 14), "to": Vector3(0, 6, -14), "from2": Vector3(4, 6, 10), "to2": mk + Vector3(0, 0.6, 0), "time": 6.0},
+		},
+		"act": "idle",
+	}
+
+
+# ===================================================================================== THE PACIFIC
+## Splashdown near Samoa: an ocean that moves, a recovery ship far away, the command module coming down under three
+## parachutes, and a raft where the crew wait.
+static func _ocean(world, env: Environment) -> Dictionary:
+	var st: Node3D = world.stage
+	Space.apply_day(env)
+	env.sky = low_sky()
+	env.glow_enabled = false
+	env.fog_density = 0.0006
+	env.fog_light_color = Color(0.72, 0.8, 0.9)
+	env.ambient_light_color = Color(0.7, 0.78, 0.9)
+	env.ambient_light_energy = 0.65
+	world.sun.light_energy = 1.05
+	env.ambient_light_energy = 0.45
+	world.sun.light_color = Color(1.0, 0.96, 0.88)
+	world.sun.rotation_degrees = Vector3(-30, 40, 0)
+	var water := MeshInstance3D.new()
+	var pm := PlaneMesh.new()
+	pm.size = Vector2(2400, 2400)
+	pm.subdivide_width = 260
+	pm.subdivide_depth = 260
+	water.mesh = pm
+	water.material_override = shader_mat("""
+shader_type spatial;
+render_mode cull_disabled;
+varying vec3 wp;
+float wave(vec2 p, vec2 d, float f, float a, float s) { return a * sin(dot(p, d) * f + TIME * s); }
+void vertex() {
+	vec3 w = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	float hgt = wave(w.xz, normalize(vec2(1.0, 0.3)), 0.35, 0.16, 1.1) + wave(w.xz, normalize(vec2(-0.4, 1.0)), 0.6, 0.08, 1.7)
+		+ wave(w.xz, normalize(vec2(0.7, -0.8)), 1.3, 0.035, 2.4);
+	VERTEX.y += hgt;
+	wp = w;
+}
+void fragment() {
+	vec3 n = normalize(cross(dFdx(wp), dFdy(wp)));
+	NORMAL = (VIEW_MATRIX * vec4(n, 0.0)).xyz;
+	float fres = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 4.0);
+	ALBEDO = mix(vec3(0.02, 0.12, 0.2), vec3(0.15, 0.32, 0.42), fres);
+	ROUGHNESS = 0.08;
+	SPECULAR = 0.7;
+}
+""")
+	st.add_child(water)
+	# the recovery ship on the horizon
+	var grey := mat(Color(0.5, 0.52, 0.55), 0.8, 0.2)
+	var ship := Node3D.new()
+	ship.position = Vector3(-140, 0, -420)
+	ship.rotation.y = 0.3
+	st.add_child(ship)
+	box(ship, Vector3(180 / 2.0, 10, 30 / 2.0), Vector3(0, 4, 0), grey)
+	box(ship, Vector3(180 / 2.0, 1, 34 / 2.0), Vector3(0, 9.5, 0), mat(Color(0.32, 0.33, 0.35), 0.9))
+	box(ship, Vector3(14, 14, 5), Vector3(20, 17, 6), grey)
+	# the command module, coming down under its parachutes
+	var cm := Node3D.new()
+	cm.name = "Capsule"
+	cm.position = Vector3(-16, 0, -26)
+	st.add_child(cm)
+	var shell := mat(Color(0.78, 0.76, 0.7), 0.35, 0.6)
+	cyl(cm, 0.35 * K, 1.95 * K, 3.2 * K, Vector3(0, 1.6 * K - 0.8, 0), shell, 48)
+	cyl(cm, 1.98 * K, 1.9 * K, 0.4 * K, Vector3(0, -0.8, 0), mat(Color(0.3, 0.24, 0.18), 0.9), 48)
+	var collar := MeshInstance3D.new()
+	var ct := TorusMesh.new()
+	ct.inner_radius = 1.85 * K
+	ct.outer_radius = 2.25 * K
+	collar.mesh = ct
+	collar.material_override = mat(Color(0.95, 0.55, 0.1), 0.7)
+	collar.position.y = -0.3
+	cm.add_child(collar)
+	var chutes := Node3D.new()
+	chutes.name = "Chutes"
+	chutes.position.y = 3.2 * K
+	cm.add_child(chutes)
+	var canopy_m := shader_mat("""
+shader_type spatial;
+render_mode cull_disabled;
+varying vec3 lp;
+void vertex() { lp = VERTEX; }
+void fragment() {
+	float a = atan(lp.z, lp.x);
+	float band = step(0.5, fract(a / 6.2831 * 12.0));
+	ALBEDO = mix(vec3(0.95, 0.94, 0.9), vec3(0.85, 0.2, 0.15), band);
+	ROUGHNESS = 0.9;
+}
+""")
+	var line_m := mat(Color(0.9, 0.9, 0.85), 0.8)
+	for i in 3:
+		var c := Node3D.new()
+		var ang := i * TAU / 3.0
+		c.position = Vector3(sin(ang) * 9.0, 36.0, cos(ang) * 9.0)
+		chutes.add_child(c)
+		var dome := MeshInstance3D.new()
+		var sm := SphereMesh.new()
+		sm.radius = 9.0
+		sm.height = 9.0
+		sm.is_hemisphere = true
+		dome.mesh = sm
+		dome.material_override = canopy_m
+		c.add_child(dome)
+		for l in 8:
+			var la := l * TAU / 8.0
+			rope(c, Vector3(sin(la) * 8.8, 0, cos(la) * 8.8), -c.position, 0.04, line_m)
+	# the raft: a yellow ring where the cuyes stand
+	var raft := Node3D.new()
+	raft.position = Vector3(1.0, 0, 0)
+	st.add_child(raft)
+	var rim := MeshInstance3D.new()
+	var rt := TorusMesh.new()
+	rt.inner_radius = 1.45
+	rt.outer_radius = 1.9
+	rim.mesh = rt
+	rim.material_override = mat(Color(0.95, 0.62, 0.12), 0.7)
+	rim.position.y = 0.15
+	raft.add_child(rim)
+	cyl(raft, 1.6, 1.6, 0.1, Vector3(0, 0.03, 0), mat(Color(0.9, 0.55, 0.1), 0.8), 32)
+	var splash := Space.make_pad_smoke()
+	splash.direction = Vector3(0, 1, 0)
+	splash.spread = 60.0
+	splash.scale = Vector3.ONE * 3.0
+	splash.position = Vector3(-16, 0, -26)
+	st.add_child(splash)
+	return {
+		"marks": marks({"killa": [0.9, 0.1, 0.35, -10], "inti": [1.7, 0.1, -0.2, -20], "rumi": [0.15, 0.1, 0.2, 15], "wayra": [1.4, 0.1, 0.9, -30]}),
+		"cast": ["rumi", "killa", "inti"],
+		"cams": {
+			"wide": {"from": Vector3(3.2, 1.5, 6.5), "to": Vector3(-2.5, 1.6, -8)},
+			"descent": {"from": Vector3(20, 3, 45), "to": Vector3(-16, 30, -26), "track": "capsule", "offset": Vector3(0, 16, 0)},
+		},
+		"act": "idle",
+		"capsule": cm,
+		"chutes": chutes,
+		"splash": splash,
+		"raft": raft,
+	}

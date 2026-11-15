@@ -50,6 +50,8 @@ var voice: AudioStreamPlayer
 var _voices := {}
 var _said := 0
 var _title_t := 0.0
+var _title_len := 3.2
+var waiting := -1.0          ## Seconds left of a beat with no words (the stage plays: a launch, a splashdown).
 
 
 ## Plays scene `scene` of chapter `chapter` over the game; on_done(skipped) is called at the end. Returns the player.
@@ -182,15 +184,24 @@ func next() -> void:
 		_show_title(L)
 		return
 	title_box.visible = false
+	if not L.has("who"):
+		# a beat with no words: the stage plays for a while
+		card.visible = false
+		speaker = ""
+		waiting = float(L.get("wait", 2.0))
+		return
 	card.visible = true
-	frame.visible = show_portrait
 	var who := str(L.get("who", ""))
+	var narrator := who == "narrator"
+	frame.visible = show_portrait and not narrator
 	speaker = who
 	_said = 0
-	var col: Color = Cast.colour(who)
+	var col: Color = Kit.C_GOLD if narrator else Cast.colour(who)
+	name_lbl.visible = not narrator
 	name_lbl.text = (Cast.display_name(who) + "  ·  " + Cast.station(who)).to_upper()
 	name_lbl.add_theme_color_override("font_color", Kit.ink(col))
-	var tex: Texture2D = _live_portrait(who, str(L.get("mood", ""))) if live else null
+	text_lbl.add_theme_color_override("font_color", Color(1.0, 0.86, 0.62) if narrator else Kit.C_TEXT)
+	var tex: Texture2D = _live_portrait(who, str(L.get("mood", ""))) if live and not narrator else null
 	if tex == null:
 		tex = Cast.portrait(who)
 	portrait.texture = tex
@@ -215,7 +226,10 @@ func next() -> void:
 
 ## Click or Enter: finish writing the line, or go to the next one.
 func advance() -> void:
-	if title_box.visible:
+	if waiting >= 0.0:
+		waiting = -1.0
+		next()
+	elif title_box.visible:
 		next()
 	elif text_lbl.visible_ratio < 1.0:
 		text_lbl.visible_ratio = 1.0
@@ -235,7 +249,11 @@ func _process(delta: float) -> void:
 	if title_box.visible:
 		_title_t += delta
 		title_box.modulate.a = clampf(_title_t * 2.0, 0.0, 1.0)
-		if _title_t > 3.2:
+		if _title_t > _title_len:
+			next()
+	if waiting >= 0.0:
+		waiting -= delta
+		if waiting < 0.0:
 			next()
 	if text_lbl and text_lbl.visible_ratio >= 1.0 and fact_lbl.text != "" and not fact_box.visible:
 		fact_box.visible = true
@@ -269,7 +287,7 @@ func _end(skipped: bool) -> void:
 
 ## True while the line is still being written (the speaker's mouth moves).
 func writing() -> bool:
-	return card.visible and text_lbl.visible_ratio < 1.0
+	return card.visible and text_lbl.visible_ratio < 1.0 and speaker != "narrator"
 
 
 func _show_title(L: Dictionary) -> void:
@@ -283,6 +301,7 @@ func _show_title(L: Dictionary) -> void:
 	title_box.visible = true
 	title_box.modulate.a = 0.0
 	_title_t = 0.0
+	_title_len = float(L.get("wait", 3.2))
 	Kit.UiSound.play("whoosh", 0.0)
 
 

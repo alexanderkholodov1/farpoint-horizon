@@ -40,7 +40,7 @@ func _initialize() -> void:
 			if lines.is_empty():
 				fail("%s/%s has no lines" % [chapter, scene])
 			for L in lines:
-				if not L.has("who") and L.has("title"):
+				if not L.has("who") or L.who == "narrator":
 					pass
 				elif not Cast.has(str(L.get("who", ""))):
 					fail("%s/%s: %s is not in the cast" % [chapter, scene, L.get("who", "?")])

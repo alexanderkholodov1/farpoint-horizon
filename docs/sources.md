@@ -133,7 +133,11 @@ branches add entries at the same place (`.gitattributes`).
   Launched April 11, 1970; oxygen tank no. 2 exploded on April 13 (Houston time), 200,000 miles from Earth; the crew
   used the lunar module as a lifeboat; the command module's square CO2 canisters did not fit the lunar module's round
   openings, and Mission Control devised an adapter of plastic bags, cardboard and tape; splashdown April 17, 1970. The
-  facts the cuyes cite in chapter 1 (data/story/apollo13.json).
+  facts the cuyes cite in chapter 1 (data/story/apollo13.json). Also from the page: the planned landing in the Fra
+  Mauro area, Swigert's words "Houston, we've had a problem here.", the circle around the Moon without landing, the
+  cold (38 degrees Fahrenheit, condensation on the walls), noncritical systems off and power use cut to 1/5, the
+  five-minute burn near the Moon to speed up the return, launch at 1:13 p.m. CST, and splashdown in the Pacific near
+  Samoa with USS Iwo Jima as recovery ship.
 
 ## The look: Earth, Moon, the Andes and the launch site (issue 12; scripts in `assets/source/`)
 - **S-moon-kit** NASA Goddard Space Flight Center, Scientific Visualization Studio. *CGI Moon Kit* (2019).
