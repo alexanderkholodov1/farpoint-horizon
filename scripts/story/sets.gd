@@ -1509,8 +1509,7 @@ static func _lcross_space(world, env: Environment) -> Dictionary:
 	moon.mesh = sm
 	var mm := StandardMaterial3D.new()
 	mm.albedo_texture = Space.MOON_COLOR
-	mm.normal_enabled = true
-	mm.normal_texture = Space.MOON_NORMAL
+	mm.albedo_color = Color(0.8, 0.8, 0.8)
 	mm.roughness = 1.0
 	moon.material_override = mm
 	moon.position = Vector3(0, -1150, -1500)

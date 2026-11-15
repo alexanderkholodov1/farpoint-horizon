@@ -30,41 +30,47 @@
    },
    {
     "set": "houston",
-    "cast": ["wayra", "killa", "rumi", "inti"],
+    "cast": [
+     "wayra",
+     "killa",
+     "rumi",
+     "inti"
+    ],
     "who": "wayra",
     "mood": "alert",
     "act": "talk",
-    "shot": "wide",
+    "shot": "two",
     "text": "Here is the plan. The empty Centaur hits a dark crater at the south pole. Our craft follows four minutes behind and looks at what it throws up.",
     "fact": "The Centaur hit Cabeus at 11:31 UT; the shepherding craft flew through the plume and hit four minutes later.",
-    "source": "S-lcross-nasa"
+    "source": "S-lcross-nasa",
+    "other": "killa"
    },
    {
     "who": "killa",
     "mood": "curious",
     "act": "point",
-    "shot": "wide",
+    "shot": "close",
     "text": "The plan is to crash?"
    },
    {
     "who": "wayra",
     "mood": "flat",
     "act": "talk",
-    "shot": "wide",
+    "shot": "close",
     "text": "Yes."
    },
    {
     "who": "killa",
     "mood": "happy",
     "act": "shrug",
-    "shot": "wide",
+    "shot": "close",
     "text": "OK."
    },
    {
     "who": "rumi",
     "mood": "pleased",
     "act": "talk",
-    "shot": "wide",
+    "shot": "close",
     "text": "Two thousand kilograms of empty rocket at two and a half kilometers a second. That is a big splash.",
     "fact": "The 2000 kg Centaur upper stage hit at about 2.5 km/s.",
     "source": "S-lcross-nssdc"
@@ -73,7 +79,7 @@
     "who": "inti",
     "mood": "determined",
     "act": "talk",
-    "shot": "wide",
+    "shot": "close",
     "text": "And I keep our craft looking into the splash. From down here. For once nobody rides it."
    },
    {
@@ -84,14 +90,20 @@
    },
    {
     "set": "houston",
-    "cast": ["wayra", "killa", "rumi", "inti"],
+    "cast": [
+     "wayra",
+     "killa",
+     "rumi",
+     "inti"
+    ],
     "who": "wayra",
     "mood": "determined",
     "act": "talk",
-    "shot": "wide",
+    "shot": "two",
     "text": "Separation now. Aim the Centaur at the dark floor of Cabeus.",
     "fact": "The shepherding craft separated from the Centaur at 01:50 UT on October 9, 2009, and let it go ahead.",
-    "source": "S-lcross-nssdc"
+    "source": "S-lcross-nssdc",
+    "other": "inti"
    }
   ],
   "mission": [
@@ -105,33 +117,35 @@
   ],
   "outro": [
    {
-    "set": "houston",
-    "cast": ["wayra", "killa", "rumi", "inti"],
-    "shot": "wide",
-    "wait": 0.5
-   },
-   {
     "who": "killa",
     "mood": "happy",
     "act": "cheer",
     "all": "happy",
-    "shot": "wide",
+    "shot": "two",
     "text": "Water! In the light from the splash. I knew it!",
     "fact": "On November 13, 2009, NASA announced that the data showed the mission had found water near the Moon's south pole.",
-    "source": "S-lcross-nasa"
+    "source": "S-lcross-nasa",
+    "set": "houston",
+    "cast": [
+     "wayra",
+     "killa",
+     "rumi",
+     "inti"
+    ],
+    "other": "rumi"
    },
    {
     "who": "rumi",
     "mood": "flat",
     "act": "shrug",
-    "shot": "wide",
+    "shot": "close",
     "text": "We crashed twice. On purpose. And it worked."
    },
    {
     "who": "inti",
     "mood": "happy",
     "act": "cheer",
-    "shot": "wide",
+    "shot": "close",
     "text": "Best landing I never made."
    },
    {
