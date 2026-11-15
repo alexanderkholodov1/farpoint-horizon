@@ -17,6 +17,10 @@ func _ready() -> void:
 	g = load("res://scenes/main.tscn").instantiate()
 	add_child(g)
 	await wait(1.5)
+	if OS.get_cmdline_user_args().has("report"):
+		await _report()
+		get_tree().quit()
+		return
 	if OS.get_cmdline_user_args().has("operation"):
 		await _operation()
 		get_tree().quit()
@@ -330,3 +334,25 @@ func _operation() -> void:
 	g.screen.month_f = 0.0
 	await wait(1.0)
 	await shot("63_operation_orbit_slow")
+
+
+## The report as a celebration (issue #11): after a soft landing that met two extra objectives, and its photo shown
+## large; then after an orbital mission. Quick.
+func _report() -> void:
+	_moon_mission()
+	GameState.mission.extras_offered = ["shadow_photo", "pole_visit", "soft_touch"]
+	GameState.mission.extras = GameState.mission.extras_offered.duplicate()
+	for seed in 200:
+		GameState.begin_flight(GameState.mission.compute(), seed)
+		if GameState.last_sim.status != "lost" and GameState.last_sim.months >= 12:
+			break
+	GameState.flight["landing"] = {"landed": true, "grade": "soft", "x": 0.0, "z": 0.0, "touchdown_mps": 0.81, "target_m": 0.0,
+		"shadow_edge_m": 60.0, "pole_m": 424.0, "fuel_left": 0.4, "contact_kept": true}
+	GameState.settle_extras()
+	g.go("report")
+	await wait(2.5)
+	await shot("70_report_landed")
+	var ph: Array = preload("res://scripts/flight/photos.gd").of("moon_south_pole")
+	g.screen._show_photo(ph[2])
+	await wait(1.0)
+	await shot("71_report_photo")
