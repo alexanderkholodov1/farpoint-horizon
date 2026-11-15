@@ -20,6 +20,8 @@ func enter(_args: Dictionary) -> void:
 	var last_sim: Dictionary = GameState.last_sim
 	var flight: Dictionary = GameState.flight
 	var landing: Dictionary = flight.get("landing", {})
+	if not last_sim.launch_failed:
+		preload("res://scripts/progress.gd").done(mission.scenario)   # a mission flown opens the next one
 	if last_sim.launch_failed:
 		world.stage_earth()
 	elif bool(landing.get("landed", false)) and FlightData.has_landing(mission.scenario):

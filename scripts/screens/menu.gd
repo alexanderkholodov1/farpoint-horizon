@@ -1,11 +1,13 @@
 extends "res://scripts/screens/screen.gd"
-## The main menu: the logo, play, the difficulty, the appearance (dark or light), how to play and the ranking. The real
-## Earth turns behind it, framed by a viewfinder with live telemetry (UTC clock, Quito's coordinates).
+## The main menu: the logo and a list (play, the guided first mission, how to play, credits, settings, quit) drawn
+## straight on space, with no box. The real Earth turns behind it, framed by a viewfinder with live telemetry (UTC
+## clock, Quito's coordinates). Settings (language, difficulty, missions, appearance, sound) open in its place.
 
 const Horizon := preload("res://scripts/ui/horizon.gd")
 const Music := preload("res://scripts/ui/music.gd")
 const VERSION := "v0.2.0"
 const Coach := preload("res://scripts/tutorial/coach.gd")
+const Progress := preload("res://scripts/progress.gd")
 const QUITO := "0.18° S · 78.47° W"   ## Quito, the team's city (the Ecuador marker on the globe).
 
 var clock: Label
@@ -15,19 +17,24 @@ var arc: Control
 func enter(args: Dictionary) -> void:
 	world.stage_menu()
 	Music.ensure(main)   # the game's music, from here on (scripts/ui/music.gd)
-	# ---------- the panel on the left: frosted glass over space
-	var panel := Kit.panel_box(34)
-	Kit.place(panel, 0, 0, 0, 0, 56, 60, 616, 60)   # grows to its content
-	add_child(panel)
-	var box := Kit.vbox(12)
-	panel.add_child(box)
-	var head := Kit.hbox(8)
-	box.add_child(head)
-	var ch := caps("NASA SPACE APPS CHALLENGE 2026")
-	ch.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	head.add_child(ch)
-	head.add_child(caps(VERSION))
-	box.add_child(rule())
+	# ---------- no box: the logo and the list sit straight on space, over a soft shade that fades toward the Earth
+	var shade := TextureRect.new()
+	var g := Gradient.new()
+	g.set_color(0, Color(0.0, 0.01, 0.04, 0.82))
+	g.set_color(1, Color(0.0, 0.01, 0.04, 0.0))
+	var gt := GradientTexture2D.new()
+	gt.gradient = g
+	gt.width = 64
+	gt.height = 4
+	shade.texture = gt
+	shade.stretch_mode = TextureRect.STRETCH_SCALE
+	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	Kit.place(shade, 0, 0, 0.56, 1, 0, 0, 0, 0)
+	add_child(shade)
+	var box := Kit.vbox(8)
+	Kit.place(box, 0, 0.5, 0, 0.5, 84, 0, 644, 0)
+	box.grow_vertical = Control.GROW_DIRECTION_BOTH   # centred on the screen's height, whatever it holds
+	add_child(box)
 	var lg := logo(1.0)
 	box.add_child(lg)
 	arc = lg.get_child(0)
@@ -37,12 +44,10 @@ func enter(args: Dictionary) -> void:
 		arc.progress = 0.0
 		arc.create_tween().tween_property(arc, "progress", 1.0, 1.4).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 		_main_list(box)
-		# entrance: the panel slides in from the left as the arc draws itself
-		panel.modulate.a = 0.0
-		panel.position.x -= 24
-		var tw := panel.create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-		tw.tween_property(panel, "modulate:a", 1.0, 0.5)
-		tw.tween_property(panel, "position:x", panel.position.x + 24, 0.5)
+		# entrance: it slides in from the left as the arc draws itself
+		box.modulate.a = 0.0
+		var tw := box.create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tw.tween_property(box, "modulate:a", 1.0, 0.7)
 	# ---------- the viewfinder around the Earth, with live telemetry
 	var vf := Viewfinder.new()
 	Kit.place(vf, 0.5, 0.5, 0.5, 0.5, 20, -360, 700, 330)
@@ -61,72 +66,93 @@ func enter(args: Dictionary) -> void:
 	tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	tele.add_child(tag)
 	_tick()
-	var foot := Kit.lbl(tr("Space Mission Design Game challenge · Team SK Horizon · Quito, Ecuador"), 12, Color(Kit.C_ON_DARK, 0.55))
-	Kit.place(foot, 0, 1, 0, 1, 60, -38, 900, -14)
+	var foot := Kit.lbl("NASA Space Apps Challenge 2026  ·  " + tr("Team SK Horizon · Quito, Ecuador") + "  ·  " + VERSION, 12, Color(Kit.C_ON_DARK, 0.5))
+	Kit.place(foot, 0, 1, 0, 1, 84, -38, 900, -14)
 	add_child(foot)
 
 
 ## The menu itself: one line about the game and the list of what the player can do, the first one the main action.
+## Playing is alone for now: the crew of friends (same screen, online) and the ranking come back in v0.3.0.
 func _main_list(box: VBoxContainer) -> void:
-	box.add_child(Kit.lbl(tr("Design, launch and fly your own space mission."), Kit.T_LEAD, Kit.C_DIM, Kit.FONT_R, true))
-	box.add_child(Kit.spacer(6))
-	var play := Kit.accent_btn(Kit.btn(tr("▶  Play"), func(): go("team"), Kit.T_ACTION, 340), Kit.C_GOLD)
+	var lead := Kit.lbl(tr("Design, launch and fly your own space mission."), Kit.T_LEAD, Color(Kit.C_ON_DARK, 0.72), Kit.FONT_R, true)
+	lead.add_theme_color_override("font_color", Color(Kit.C_ON_DARK, 0.72))
+	box.add_child(lead)
+	box.add_child(Kit.spacer(18))
+	var play := Kit.accent_btn(Kit.btn(tr("▶  Play"), _play, Kit.T_ACTION, 300), Kit.C_GOLD)
 	play.custom_minimum_size.y = 60
+	play.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	box.add_child(play)
+	box.add_child(Kit.spacer(10))
 	var items := [
-		[tr("First mission · guided by the crew"), func(): Coach.start(main)],
+		[tr("First mission · guided"), func(): Coach.start(main)],
 		[tr("How to play"), func(): main.overlay("howto")],
-		[tr("Ranking"), func(): main.overlay("ranking")],
 		[tr("Credits"), func(): go("credits_film")],
 		[tr("Settings"), func(): go("menu", {"settings": true})]]
 	if not OS.has_feature("web"):
 		items.append([tr("Quit"), func(): get_tree().quit()])
 	for it in items:
-		var b := Kit.btn(it[0], it[1], Kit.T_LEAD, 340)
-		b.custom_minimum_size.y = Kit.BTN_H + 4
+		var b := Kit.menu_item(it[0], it[1])
+		b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		box.add_child(b)
 
 
-## The settings, in the menu's own panel: language, difficulty, appearance, sound. Each choice is kept and shown at once.
+func _play() -> void:
+	GameState.start_solo()
+	go("missions")
+
+
+## The settings, in the menu's own place: language, difficulty, appearance, sound. Each choice is kept and shown at once.
 func _settings(box: VBoxContainer) -> void:
 	var again := {"settings": true}
-	box.add_child(Kit.lbl(tr("Settings"), Kit.T_STAT, Kit.C_TEXT, Kit.FONT_T))
-	box.add_child(caps(tr("Language")))
+	var rows := Kit.vbox(Kit.GAP)
+	var pn := Kit.panel_box(Kit.PAD)
+	pn.add_child(rows)
+	box.add_child(Kit.spacer(8))
+	box.add_child(pn)
+	rows.add_child(Kit.lbl(tr("Settings"), Kit.T_STAT, Kit.C_TEXT, Kit.FONT_T))
+	rows.add_child(caps(tr("Language")))
 	var lh := segmented()
-	box.add_child(lh)
+	rows.add_child(lh)
 	for code in GameData.LANGUAGES:
 		lh.add_child(Kit.choice(GameData.LANGUAGES[code], GameData.language == code, func():
 			GameData.set_language(code)
 			go("menu", again), 130))
-	box.add_child(caps(tr("Difficulty")))
+	rows.add_child(caps(tr("Difficulty")))
 	var dh := segmented()
-	box.add_child(dh)
+	rows.add_child(dh)
 	for d in ["facil", "normal", "dificil"]:
 		dh.add_child(Kit.choice(GameData.DIFFICULTY[d].name, GameState.difficulty == d, func():
 			GameState.difficulty = d
 			go("menu", again), 130))
-	box.add_child(Kit.lbl(GameData.DIFFICULTY[GameState.difficulty].desc, Kit.T_SMALL, Kit.C_DIM))
-	box.add_child(caps(tr("Appearance")))
+	rows.add_child(Kit.lbl(GameData.DIFFICULTY[GameState.difficulty].desc, Kit.T_SMALL, Kit.C_DIM))
+	rows.add_child(caps(tr("Missions")))
+	var uh := segmented()
+	rows.add_child(uh)
+	for open in [false, true]:
+		uh.add_child(Kit.choice(tr("All open") if open else tr("In order"), Progress.all_open() == open, func():
+			Progress.set_all_open(open)
+			go("menu", again), 130))
+	rows.add_child(caps(tr("Appearance")))
 	var mh := segmented()
-	box.add_child(mh)
+	rows.add_child(mh)
 	for m in Kit.MODES:
 		mh.add_child(Kit.choice(tr("Dark") if m == "dark" else tr("Light"), Kit.mode == m, func():
 			if m != Kit.mode:
 				Kit.set_mode(m)
 				main.root_ui.theme = Kit.build_theme()
 				go("menu", again), 130))
-	box.add_child(caps(tr("Sound")))
+	rows.add_child(caps(tr("Sound")))
 	var sh := segmented()
-	box.add_child(sh)
+	rows.add_child(sh)
 	for on in [true, false]:
 		sh.add_child(Kit.choice(tr("On") if on else tr("Off"), Kit.UiSound.is_muted() != on, func():
 			Kit.UiSound.set_muted(not on)
 			go("menu", again), 130))
-	box.add_child(rule())
-	box.add_child(Kit.lbl(tr("The Earth behind is NASA data: Blue Marble by day, Black Marble city lights at night, and the real clouds of 31 August 2024 from the VIIRS instrument."), 12, Kit.C_DIM, Kit.FONT_R, true))
+	rows.add_child(Kit.rule())
+	rows.add_child(Kit.lbl(tr("The Earth behind is NASA data: Blue Marble by day, Black Marble city lights at night, and the real clouds of 31 August 2024 from the VIIRS instrument."), 12, Kit.C_DIM, Kit.FONT_R, true))
 	var back := Kit.btn(tr("◀ Menu"), func(): go("menu"), Kit.T_BODY, 340)
 	back.custom_minimum_size.y = Kit.BTN_H
-	box.add_child(back)
+	rows.add_child(back)
 
 
 func process(_delta: float) -> void:

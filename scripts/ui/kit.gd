@@ -534,3 +534,36 @@ static func cover(tex: Texture2D, h: float, region := Rect2()) -> TextureRect:
 	t.clip_contents = true
 	t.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return t
+
+
+## A line of a menu drawn straight on the scene: no box, the words alone; under the pointer a warm bar lights at its
+## left and the line brightens. For lists where the scene behind should stay in view (the main menu).
+static func menu_item(text: String, cb: Callable, size := T_ACTION) -> Button:
+	var b := btn(text, cb, size)
+	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	b.focus_mode = Control.FOCUS_NONE
+	var clear := Color(0, 0, 0, 0)
+	for st in ["normal", "hover", "pressed"]:
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = clear if st == "normal" else Color(C_GOLD.r, C_GOLD.g, C_GOLD.b, 0.1 if st == "hover" else 0.2)
+		sb.border_color = clear if st == "normal" else C_GOLD
+		sb.border_width_left = 3
+		sb.set_corner_radius_all(4)
+		sb.content_margin_left = 16
+		sb.content_margin_right = 16
+		sb.content_margin_top = 7
+		sb.content_margin_bottom = 7
+		b.add_theme_stylebox_override(st, sb)
+	b.add_theme_color_override("font_color", Color(C_ON_DARK, 0.82))
+	b.add_theme_color_override("font_hover_color", C_ON_DARK)
+	b.add_theme_color_override("font_pressed_color", C_ON_DARK)
+	b.add_theme_font_override("font", FONT_B)
+	return b
+
+
+## A font with its letters spaced by `px` (labels in capitals).
+static func spaced(font: Font, px: int) -> FontVariation:
+	var f := FontVariation.new()
+	f.base_font = font
+	f.spacing_glyph = px
+	return f

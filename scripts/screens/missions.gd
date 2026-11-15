@@ -14,6 +14,8 @@ const PICTURES := {
 	"moon_south_pole": ["res://assets/mission_photos/moon_south_pole/south_pole_wide_lroc_wac.jpg", [], "The Moon's south pole · LRO"],
 }
 const PHOTO_H := 150.0
+const Progress := preload("res://scripts/progress.gd")
+const GREY := preload("res://shaders/ui_grey.gdshader")
 
 
 func enter(_args: Dictionary) -> void:
@@ -35,7 +37,11 @@ func enter(_args: Dictionary) -> void:
 	sc.add_child(grid)
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var mult: float = GameData.DIFFICULTY[GameState.difficulty].budget
+	var ids: Array = Progress.ORDER.filter(func(x): return GameData.SCENARIOS.has(x))
 	for id in GameData.SCENARIOS:
+		if not ids.has(id):
+			ids.append(id)
+	for id in ids:
 		grid.add_child(_card(id, GameData.SCENARIOS[id], mult))
 	var back := Kit.btn(tr("◀ Menu"), func(): go("menu"))
 	Kit.place(back, 0, 1, 0, 1, 50, -62, 180, -20)
@@ -45,7 +51,7 @@ func enter(_args: Dictionary) -> void:
 func _card(id: String, S: Dictionary, mult: float) -> Control:
 	var pc := PanelContainer.new()
 	pc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var sb := Kit.flat(Color(Kit.C_BG, 0.94), Kit.C_EDGE, 14, 1, 0, 0)
+	var sb := Kit.flat(Kit.C_BG, Kit.C_EDGE, 14, 1, 0, 0)
 	pc.add_theme_stylebox_override("panel", sb)
 	pc.clip_children = CanvasItem.CLIP_CHILDREN_AND_DRAW   # the picture takes the card's rounded corners
 	pc.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
@@ -68,6 +74,21 @@ func _card(id: String, S: Dictionary, mult: float) -> Control:
 		cap.add_child(Kit.lbl("NASA · " + tr(P[2]), Kit.T_CAPS, Kit.C_ON_DARK, Kit.FONT_B))
 		pic.add_child(cap)
 		cap.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT, Control.PRESET_MODE_MINSIZE, 10)
+	# a mission that is not open yet: its picture in grey under a lock, and what opens it
+	var lock: String = Progress.locked_by(id, S)
+	if lock != "":
+		if pic:
+			var gm := ShaderMaterial.new()
+			gm.shader = GREY
+			pic.material = gm
+			var lp := PanelContainer.new()
+			lp.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			lp.add_theme_stylebox_override("panel", Kit.flat(Color(0.0, 0.02, 0.06, 0.7), Color(Kit.C_ON_DARK, 0.35), 14, 1, 14, 6))
+			lp.add_child(Kit.lbl(tr("LOCKED"), Kit.T_SMALL, Kit.C_ON_DARK, Kit.spaced(Kit.FONT_B, 3)))
+			pic.add_child(lp)
+			lp.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
+		pc.mouse_default_cursor_shape = Control.CURSOR_ARROW
+		pc.modulate = Color(0.62, 0.64, 0.7)   # dimmed, never see-through
 	var pad := MarginContainer.new()
 	pad.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	for side in ["left", "right"]:
@@ -89,6 +110,11 @@ func _card(id: String, S: Dictionary, mult: float) -> Control:
 	var chips := Kit.hbox(8)
 	chips.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	t.add_child(chips)
+	if lock != "":
+		chips.add_child(Kit.chip(tr("Coming soon") if lock == "soon" else tr("Finish “%s” first") % GameData.SCENARIOS[lock].name, Kit.C_DIM))
+		return pc
+	if Progress.is_done(id):
+		chips.add_child(Kit.chip("✓ " + tr("Done"), Kit.C_OK))
 	chips.add_child(Kit.chip(Kit.money(S.budget * mult), Kit.C_GOLD))
 	chips.add_child(Kit.chip(tr("%d yr or more") % S.min_years))
 	pc.gui_input.connect(func(e: InputEvent):
