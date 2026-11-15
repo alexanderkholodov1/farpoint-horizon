@@ -40,6 +40,7 @@ const UNIX_DAY0 := 1794700800       ## 15 November 2026 00:00 UTC, the first row
 const BRAKE_DV_MAX := 2500.0         ## m/s: a brake that has burned this much and still is not held has failed (a real one is about 900).
 const STEPS_TEXT := ["Plan", "Burn", "Coast", "Brake", "Moon orbit"]   ## The trip's steps, shown across the top.
 const STEP_OF := {"plan": 0, "burn": 1, "coast": 2, "missed": 2, "capture": 3, "lunar": 4}
+const EARTH_SPIN_MAX := 0.15        ## Turns a second of the drawn Earth above which it is held still (a blur, not a motion).
 const LUNAR_ORBIT_HIGH := 160000.0  ## The capture burn ends when the orbit's high point is below this height (m).
 const STARS := 7000                ## Our own stars, scattered by a formula (not a catalogue): 45 % crowd into a Milky Way band.
 
@@ -71,6 +72,8 @@ var auto_fly := false                  ## This try is flown by the flight comput
 var missed_ms := 0
 var steps_row: HBoxContainer
 var cam_idle := 0.0
+var earth_spin := 0.0                ## The angle the Earth is drawn at (radians).
+var earth_held := false
 var los := false                    ## The braking burn happens behind the Moon, out of contact with the Earth.
 var brake_dv := 900.0              ## The speed the brake has to take off (m/s), for its gauge.
 var now_lbl: Label
@@ -392,8 +395,26 @@ func _build_plan_panel() -> void:
 
 
 # ===================================================================================== EACH FRAME
+## The Earth turns once a sidereal day [S-nssdc-planets]. Drawn at its true angle while that can be followed by eye;
+## when time runs so fast that it would turn more than EARTH_SPIN_MAX times a second (day and night and the clouds
+## flashing by: issue #55), it is held at its last angle and the time note says so; it eases back to the true angle
+## when time slows down.
+func _spin_earth(delta: float) -> void:
+	var day_s: float = FlightData.fact("earth", "sidereal_rotation_h", 23.9345) * 3600.0
+	var true_angle: float = fmod(TAU * m.t / day_s, TAU)
+	var fast: bool = hud.warp / day_s > EARTH_SPIN_MAX
+	if not fast:
+		earth_spin = lerp_angle(earth_spin, true_angle, clampf(delta * 4.0, 0.0, 1.0)) if earth_held else true_angle
+		if earth_held and absf(angle_difference(earth_spin, true_angle)) < 0.01:
+			earth_held = false
+	else:
+		earth_held = true
+	hud.extra_note = tr("the Earth's turning held still (it would be a blur)") if fast else ""
+
+
 func process(delta: float) -> void:
 	phase_t += delta
+	_spin_earth(delta)
 	hud.ring.active = false
 	# each phase sets how fast time may run first, and only then takes its step (delta * hud.warp): a step taken at the
 	# speed of the wait just ended would jump past the moment the phase slowed down for
@@ -939,7 +960,7 @@ func _draw_map() -> void:
 	var mp: Vector3 = _v3(m.moon(m.t))
 	moon.position = mp
 	moon.rotation.y = atan2(mp.x, mp.z) + PI
-	earth.rotation.y = TAU * m.t / (FlightData.fact("earth", "sidereal_rotation_h", 23.9345) * 3600.0)
+	earth.rotation.y = earth_spin
 	moon_lbl.position = mp + Vector3(0, (m.r_m / u) * 1.6 + cam.distance_to(mp) * 0.03, 0)
 	moon_dot.position = mp
 	moon_dot.scale = Vector3.ONE * cam.distance_to(mp) * 0.007
@@ -1005,7 +1026,7 @@ func _draw_craft_view() -> void:
 	flame.position = back * 2.8
 	_place_body(cv_earth, [0.0, 0.0], m.r_e)
 	_place_body(cv_moon, m.moon(m.t), m.r_m)
-	cv_earth.rotation.y = TAU * m.t / (FlightData.fact("earth", "sidereal_rotation_h", 23.9345) * 3600.0)
+	cv_earth.rotation.y = earth_spin
 
 
 ## Puts a body (centre c, radius r, metres) where it is seen from the craft, at its true angular size; far bodies are

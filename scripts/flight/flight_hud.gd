@@ -53,6 +53,11 @@ var _warp_btns := {}        ## warp -> Button
 var _top: VBoxContainer
 var _cap_why := ""         ## Why time may not run faster now, said beside the warp.
 var auto_note := ""        ## Set by a screen that runs time by itself ("Auto"), shown before the speed.
+var extra_note := "":      ## Set by a screen to say what the speed changes in the picture, shown after it.
+	set(v):
+		if v != extra_note:
+			extra_note = v
+			_show_warp()
 
 
 var _top_right: HBoxContainer
@@ -268,6 +273,8 @@ func _show_warp() -> void:
 		t = auto_note + " · " + t
 	if _cap_why != "":
 		t += " · " + _cap_why
+	if extra_note != "":
+		t += " · " + extra_note
 	warp_note.text = t
 	warp_note.visible = warp > 1.0 or auto_note != ""   # at real time there is nothing to add
 
