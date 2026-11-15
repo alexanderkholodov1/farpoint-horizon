@@ -90,7 +90,7 @@ func process(delta: float) -> void:
 
 ## Any key or click ends the celebration early.
 func _unhandled_input(e: InputEvent) -> void:
-	if intro and is_instance_valid(intro) and intro_t > 0.6 and ((e is InputEventKey and e.pressed) or (e is InputEventMouseButton and e.pressed)):
+	if intro and is_instance_valid(intro) and intro_t > 0.6 and e is InputEventKey and e.pressed:
 		_end_intro()
 		get_viewport().set_input_as_handled()
 
@@ -99,12 +99,14 @@ func _unhandled_input(e: InputEvent) -> void:
 ## The moment the mission ends, before the details: the scene behind, a big title, the grade landing, the points
 ## rolling up, a burst of the brand's colours and a fanfare. A lost mission gets a calm version, never a failure screen.
 func _celebrate(s: Dictionary, last_sim: Dictionary) -> void:
-	var good: bool = s.grade in ["S", "A", "B"] and not last_sim.launch_failed and last_sim.status != "lost"
 	var lost: bool = last_sim.launch_failed or last_sim.status == "lost"
 	total_pts = s.total + bonus
 	intro = Control.new()
 	intro.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	intro.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	intro.mouse_filter = Control.MOUSE_FILTER_STOP   # the click that ends it must not reach the report under it
+	intro.gui_input.connect(func(e: InputEvent):
+		if e is InputEventMouseButton and e.pressed and intro_t > 0.6:
+			_end_intro())
 	add_child(intro)
 	var shade := ColorRect.new()
 	shade.color = Color(0.0, 0.01, 0.04, 0.45)
@@ -116,7 +118,7 @@ func _celebrate(s: Dictionary, last_sim: Dictionary) -> void:
 	v.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	intro.add_child(v)
-	var title_txt: String = tr("MISSION COMPLETE!") if good else (tr("MISSION OVER") if lost else tr("MISSION DONE!"))
+	var title_txt: String = tr("MISSION OVER") if lost else (tr("MISSION COMPLETE!") if s.grade in ["S", "A"] else tr("MISSION DONE!"))
 	var t := Kit.lbl(title_txt, Kit.T_SHOUT, Kit.C_ON_DARK, Kit.FONT_T)
 	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(t)
