@@ -46,6 +46,7 @@ var info_body: Label
 var main_btn: Button
 var back_btn: Button
 var picks: Array = []             ## What each tile on screen does, in order (the number keys choose them).
+var later: Array = []             ## Notices to show once the screen is drawn ([text, colour]): drawing clears the screen.
 var last_problems := {}           ## The problems shown last time, by title (to tell what a new choice broke).
 
 
@@ -179,6 +180,9 @@ func _show(i: int) -> void:
 	_fill_question(Q[0], r)
 	_fill_board(r)
 	_fill_resources(r)
+	for n in later:   # notices from this redraw's own changes, shown now that the screen is drawn
+		toast(n[0], n[1], 3.5)
+	later = []
 	if not room.can_edit(STEP.role):
 		left_box.modulate.a = 0.6
 		for c in left_box.find_children("*", "Control", true, false):
@@ -304,7 +308,7 @@ func _follow_the_craft() -> void:
 	if said != "":
 		GameState.room.design_edited(QUESTIONS[q][1])
 		world.rebuild_ship()
-		toast(said, Kit.C_ACCENT, 3.5)
+		_later(said, Kit.C_ACCENT)
 
 
 ## True when option `value` is enough for question `id` with the craft as it is.
@@ -335,9 +339,14 @@ func _tell_new_problems(r: Dictionary, here: String) -> void:
 			var c: Dictionary = now[t]
 			var at := _q_index(str(c.get("at", "")))
 			if not last_problems.has(t) and at >= 0 and at < q and c.at != here:
-				toast(tr("%s · fix it in %s (click it on the board)") % [t, tr(STAGES[QUESTIONS[at][2]])], Kit.C_BAD if c.level == "fatal" else Kit.C_WARN)
+				_later(tr("%s · fix it in %s (click it on the board)") % [t, tr(STAGES[QUESTIONS[at][2]])], Kit.C_BAD if c.level == "fatal" else Kit.C_WARN)
 				break
 	last_problems = now
+
+
+## A notice shown once the screen is drawn again (drawing clears whatever is on it).
+func _later(text: String, col: Color) -> void:
+	later.append([text, col])
 
 
 func _say(title: String, text: String) -> void:
@@ -531,7 +540,7 @@ func _fill_question(id: String, r: Dictionary) -> void:
 							toast(tr("%s doesn't fit on %s") % [I.name, B.name], Kit.C_BAD)
 							return
 						mission.bus = grown
-						toast(tr("Your craft grew to %s so the %s fits.") % [GameData.BUSES[grown].name, I.name], Kit.C_ACCENT)
+						_later(tr("Your craft grew to %s so the %s fits.") % [GameData.BUSES[grown].name, I.name], Kit.C_ACCENT)
 					mission.toggle_instrument(i)
 					on_change(), I.desc + "\n" + tr("%s · %s · %s per day · %s · %s pointing") % [Kit.kg(I.mass), Kit.watts(I.power), Kit.gb(I.data), Kit.money(I.cost), [tr("free"), tr("coarse"), tr("fine"), tr("precise")][I.pointing]],
 					mark, Kit.C_OK if rel >= 0.95 and fits else (Kit.C_WARN if not fits else Kit.C_DIM), not fits))
