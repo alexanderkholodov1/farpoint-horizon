@@ -75,6 +75,10 @@ branches add entries at the same place (`.gitattributes`).
 - **S15** SpaceX. *Falcon Heavy*. https://www.spacex.com/vehicles/falcon-heavy/; figures as given in Wikipedia, *Falcon
   Heavy* (infobox, checked 2026-11-14), https://en.wikipedia.org/wiki/Falcon_Heavy. Height 70 m, width 12.2 m, three
   cores of 3.7 m: the heavy launcher model.
+- **S-nasa-crew10** NASA. *NASA's SpaceX Crew-10 Launch Day Milestones*, Commercial Crew blog, 12 March 2025.
+  https://www.nasa.gov/blogs/commercialcrew/2025/03/12/nasas-spacex-crew-10-launch-day-milestones. Falcon 9 liftoff
+  7:48 p.m., Max Q 7:49 p.m., second stage engine cutoff (SECO-1) 7:57 p.m.: a climb to orbit of about nine minutes,
+  the bound of the flow audit's climb (`tests/flowaudit.gd`).
 
 - **S-rideshare-price** New Space Economy. *SpaceX rideshare pricing as of February 2026*, 2026.
   https://newspaceeconomy.ca/2026/02/27/spacex-rideshare-pricing-as-of-february-2026-what-it-costs-whats-included-and-how-buyers-budget-a-mission/.
@@ -220,6 +224,9 @@ All checked 2026-11-14.
 - **S-apollo11** Wikipedia. *Apollo 11* (mission timeline). https://en.wikipedia.org/wiki/Apollo_11. Launched
   16 July 1969 13:32 UTC, entered lunar orbit 19 July 17:21 UTC (about 76 hours), landed 20 July; the 1201 and 1202
   alarms began about five minutes into the descent burn. The trip time of the coast to the Moon.
+- **S-afj-a11-loi** NASA History Office. *Apollo 11 Flight Journal, Day 4: Lunar Orbit Insertion*.
+  https://www.nasa.gov/history/afj/ap11fj/12day4-loi1.html. The LOI-1 burn ran from 075:49:51 to 075:55:49 ground
+  elapsed time, about six minutes: the real length of the capture burn the flow audit compares with the game's.
 - **S-alsj-1202** Adler, P. *Apollo 11 Program Alarms*, Apollo Lunar Surface Journal (NASA), 1998.
   https://www.nasa.gov/wp-content/uploads/static/history/alsj/a11/a11.1201-pa.html. What the 1202 alarm meant (no free
   core sets for new jobs), why the computer kept steering after its restarts, and why Mission Control could call go.
