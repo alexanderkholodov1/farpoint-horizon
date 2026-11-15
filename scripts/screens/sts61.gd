@@ -1,7 +1,9 @@
 extends "res://scripts/screens/screen.gd"
 ## Mission 2, STS-61 (December 1993): "Glasses for a telescope" (issue #46). Hubble stands in Endeavour's payload bay
 ## over the Earth. (1) Five spacewalks: Wayra reads each step, the player takes the real part from the toolbox
-## (keys 1-6 or a click) and fits it with a press on the timing ring (Space) while the cuyes float at the spot;
+## (keys 1-6 or a click), then does the job with the hands (scripts/missions/sts61/work_panel.gd: turn bolts out,
+## drag pieces into slots, unroll the solar blanket, slide the camera along its rails, aim COSTAR's mirrors) while the
+## cuyes float at the spot and the part goes into place in 3D;
 ## each spacewalk has its own clock, its real length run fast (said on screen); a wrong part costs seconds, and when
 ## the clock runs out that spacewalk is tried again. (2) The first image: the player turns the correction (arrows,
 ## wheel or drag) until M100's stars snap to points; then NASA's real images of M100 before and after.
@@ -12,6 +14,7 @@ const Spacewalks := preload("res://scripts/missions/sts61/spacewalks.gd")
 const Sets := preload("res://scripts/story/sets.gd")
 const CuyActor := preload("res://scripts/story/cuy_actor.gd")
 const Instruments := preload("res://scripts/flight/instruments.gd")
+const WorkPanel := preload("res://scripts/missions/sts61/work_panel.gd")
 const Sound := preload("res://scripts/flight/sound.gd")
 const RING_PERIOD := 1.4
 const TOOLBOX := 6
@@ -65,6 +68,9 @@ var heart: AudioStreamPlayer
 var cam_pos := Vector3.ZERO
 var cam_look := Vector3.ZERO
 var held: Node3D               ## The part in hand, floating by the spot.
+var held_from := Vector3.ZERO
+var work: Control              ## The hands-on job of the part in hand.
+var work_box: PanelContainer
 var glow: MeshInstance3D       ## The ring of light where the part goes.
 var phase := "walks"           ## walks, between, lost, focus, done
 var phase_t := 0.0
@@ -186,6 +192,13 @@ func _build_ui() -> void:
 	ring = Instruments.TimingRing.new()
 	Kit.place(ring, 0.5, 0.5, 0.5, 0.5, -320, -230, 320, 250)
 	add_child(ring)
+	work_box = Kit.panel_box(8)
+	Kit.place(work_box, 0.5, 1, 0.5, 1, -388, -362, 388, -Kit.MARGIN)
+	work_box.visible = false
+	add_child(work_box)
+	work = WorkPanel.new()
+	work_box.add_child(work)
+	work.finished.connect(_on_work_done)
 	msg = Kit.lbl("", Kit.T_SHOUT, Kit.C_GOLD, Kit.FONT_T)
 	msg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	Kit.place(msg, 0, 0.5, 1, 0.5, 0, -300, 0, -230)
@@ -297,6 +310,7 @@ func _show_step() -> void:
 	var spot: Vector3 = S.spots.get(W.needed(), Vector3.ZERO)
 	var out := _outward(spot)
 	glow.global_position = spot + out * 0.3
+	out = _view(out)
 	glow.look_at(spot + out * 2.0, Vector3.UP if absf(out.y) < 0.9 else Vector3.RIGHT)
 	glow.rotate_object_local(Vector3.RIGHT, PI / 2)
 	var side := out.cross(Vector3.UP).normalized()
@@ -320,15 +334,25 @@ func _outward(spot: Vector3) -> Vector3:
 	return d.normalized() if d.length() > 0.1 else Vector3(0, 0, 1)
 
 
+## Where the camera and the crew look at a spot from: straight out, except on Hubble's sides, where the solar wings
+## stand, which are seen from the front at an angle so no wing comes between the camera and the work.
+func _view(out: Vector3) -> Vector3:
+	if absf(out.x) > 0.6:
+		return (out * 0.55 + Vector3(0, 0, 1)).normalized()
+	return out
+
+
 func _cam_goal() -> Array:
 	if phase == "focus" or phase == "done":
 		return [Vector3(26, 30, 60), Vector3(0, 22, -6)]
 	var spot: Vector3 = S.spots.get(W.needed(), Vector3(0, 20, -6))
-	var out := _outward(spot)
+	var out := _view(_outward(spot))
 	var side := out.cross(Vector3.UP).normalized()
 	if absf(out.y) > 0.9:
 		side = Vector3.RIGHT
-	return [spot + out * 15.0 + side * 6.0 + Vector3(0, 4.0, 0), spot + Vector3(0, -1.5, 0)]
+	# while working, the camera comes closer and looks a little above the panel
+	var near := 11.0 if work_box and work_box.visible else 15.0
+	return [spot + out * near + side * 4.0 + Vector3(0, 4.0, 0), spot + Vector3(0, -2.5, 0)]
 
 
 static func _hm(minutes: float) -> String:
@@ -345,9 +369,20 @@ func _pick(id: String) -> void:
 	match r:
 		"ok":
 			Kit.UiSound.play("select")
-			houston.text = tr("In hand. Press Space when the ring meets the circle to fit it.")
-			ring_t = 0.0
+			houston.text = tr("In hand. Now do the job: the panel shows how.")
 			_hold(id)
+			var st := W.current()
+			work.setup(str(st.get("do", "drag")), int(st.get("count", 1)), PART_COLOURS.get(id, Color(0.8, 0.8, 0.8)), tr(_part(id).name))
+			toolbox_panel.visible = false
+			work_box.visible = true
+			if id == "arrays":
+				# the old wings come off; the new ones grow as the blanket is unrolled
+				var wings: Node3D = S.wings
+				for c in wings.get_children():
+					c.queue_free()
+				Sets._wings(wings, Color(0.12, 0.2, 0.5))
+				wings.scale = Vector3(1, 0.05, 1)
+				held.visible = false
 		"wrong", "cloth":
 			Kit.UiSound.play("error")
 			houston.text = tr(W.D.cloth if r == "cloth" else W.D.wrong)
@@ -380,7 +415,8 @@ func _hold(id: String) -> void:
 	world.stage.add_child(held)
 	var spot: Vector3 = S.spots.get(id, Vector3.ZERO)
 	var out := _outward(spot)
-	held.global_position = spot + out * 1.5
+	held_from = spot + _view(out) * 2.4 + Vector3(0, 0.6, 0)
+	held.global_position = held_from
 	var col: Color = PART_COLOURS.get(id, Color(0.8, 0.8, 0.8))
 	if id == "arrays":
 		Sets.box(held, Vector3(0.2, 3.0, 1.2), Vector3.ZERO, Sets.mat(col, 0.4, 0.4))
@@ -394,6 +430,30 @@ const PART_COLOURS := {"rsu": Color(0.85, 0.75, 0.4), "ecu": Color(0.6, 0.7, 0.8
 	"arrays": Color(0.15, 0.22, 0.5), "wfpc2": Color(0.9, 0.9, 0.95), "magnetometers": Color(0.7, 0.7, 0.75),
 	"costar": Color(0.85, 0.85, 0.8), "coprocessor": Color(0.3, 0.6, 0.35), "sade": Color(0.75, 0.7, 0.55),
 	"ghrs": Color(0.8, 0.6, 0.35), "covers": Color(0.95, 0.95, 0.95)}
+
+
+## The job is done: the part is in. A clean job counts as perfect.
+func _on_work_done(mistakes: int) -> void:
+	var grade := "perfect" if mistakes == 0 else ("good" if mistakes <= 2 else "late")
+	(ring as Instruments.TimingRing).grade(tr(grade.to_upper()), Kit.C_OK if grade == "perfect" else (Kit.C_ACCENT if grade == "good" else Kit.C_WARN))
+	get_tree().create_timer(0.5).timeout.connect(_apply_work.bind(grade))
+
+
+func _apply_work(grade: String) -> void:
+	if not is_inside_tree() or W.picked == "":
+		return
+	work_box.visible = false
+	toolbox_panel.visible = true
+	var id := W.picked
+	var r := W.press(grade)
+	_fit(id)
+	match r:
+		"next":
+			_show_step()
+		"walk":
+			_walk_done(false)
+		"all":
+			_walk_done(true)
 
 
 func _press() -> void:
@@ -434,11 +494,7 @@ func _fit(id: String) -> void:
 		held = null
 	if id == "arrays":
 		var wings: Node3D = S.wings
-		for c in wings.get_children():
-			c.queue_free()
-		Sets._wings(wings, Color(0.12, 0.2, 0.5))
-		wings.scale = Vector3(1, 0.05, 1)
-		wings.create_tween().tween_property(wings, "scale", Vector3.ONE, 1.2).set_trans(Tween.TRANS_QUAD)
+		wings.create_tween().tween_property(wings, "scale", Vector3.ONE, 0.4).set_trans(Tween.TRANS_QUAD)
 	for k in ["inti", "rumi"]:
 		actors[k].hop()
 
@@ -460,29 +516,60 @@ func _walk_done(all: bool) -> void:
 	(ring as Instruments.TimingRing).active = false
 
 
+var lose_layer: Control
+
+
+## Out of time: the screen goes dark and red, the crew slump, and the spacewalk is tried again.
 func _lose() -> void:
 	phase = "lost"
 	phase_t = 0.0
 	Kit.UiSound.play("error", 0.0)
 	if held and is_instance_valid(held):
 		held.queue_free()
-	msg.text = tr(W.D.lost)
-	msg_sub.text = tr(W.D.lost_sub)
-	msg.add_theme_color_override("font_color", Kit.C_BAD)
-	msg.visible = true
-	msg_sub.visible = true
 	houston.text = tr("Press Enter to try this spacewalk again.")
 	for k in actors:
 		actors[k].set_mood("tired")
+		actors[k].act = "hide"
+	lose_layer = Control.new()
+	lose_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(lose_layer)
+	var shade := ColorRect.new()
+	shade.color = Color(0.08, 0.0, 0.0, 0.0)
+	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	lose_layer.add_child(shade)
+	shade.create_tween().tween_property(shade, "color:a", 0.78, 1.0)
+	var v := Kit.vbox(Kit.GAP)
+	v.alignment = BoxContainer.ALIGNMENT_CENTER
+	v.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	v.modulate.a = 0.0
+	lose_layer.add_child(v)
+	var big := Kit.lbl(tr(W.D.lost), Kit.T_SHOUT, Kit.C_BAD, Kit.FONT_T)
+	big.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(big)
+	var sub := Kit.lbl(tr(W.D.lost_sub), Kit.T_ACTION, Kit.C_ON_DARK, Kit.FONT_B, true)
+	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	sub.custom_minimum_size.x = 900
+	v.add_child(sub)
+	var row := Kit.hbox(Kit.GAP)
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	v.add_child(row)
+	var again := Kit.btn(tr("Try again  ·  Enter"), _retry, Kit.T_BODY)
+	Kit.accent_btn(again, Kit.C_GOLD)
+	row.add_child(again)
+	v.create_tween().tween_property(v, "modulate:a", 1.0, 0.7).set_delay(0.6)
+	again.grab_focus()
 
 
 func _retry() -> void:
+	if lose_layer and is_instance_valid(lose_layer):
+		lose_layer.queue_free()
 	W.retry()
 	msg.visible = false
 	msg_sub.visible = false
 	msg.add_theme_color_override("font_color", Kit.C_GOLD)
 	for k in actors:
 		actors[k].set_mood("determined")
+		actors[k].act = "float"
 	_start_walk()
 
 
@@ -665,8 +752,21 @@ func process(delta: float) -> void:
 	world.cam.position = cam_pos + Vector3(sin(_t * 0.3), sin(_t * 0.23), 0) * 0.25 + jit
 	world.cam.look_at(cam_look, Vector3.UP)
 	glow.scale = Vector3.ONE * (1.0 + 0.12 * sin(_t * 5.0))
+	# the solar wings stand on Hubble's sides: when the work is there, they fade so they never hide the crew
+	var side_work := false
+	if phase == "walks" and W.needed() != "" and W.needed() != "arrays":
+		side_work = absf(_outward(S.spots.get(W.needed(), Vector3.ZERO)).x) > 0.6
+	var wings: Node3D = S.wings
+	if wings.has_meta("mats"):
+		for m in wings.get_meta("mats"):
+			(m as StandardMaterial3D).albedo_color.a = move_toward((m as StandardMaterial3D).albedo_color.a, 0.18 if side_work else 1.0, delta * 2.0)
 	if held and is_instance_valid(held):
-		held.rotate_y(delta * 0.8)
+		held.rotate_y(delta * 0.3)
+		if work_box.visible and W.picked == "arrays":
+			(S.wings as Node3D).scale.y = maxf(0.05, work.progress)
+		if work_box.visible:
+			var spot: Vector3 = S.spots.get(W.picked, held_from)
+			held.global_position = held_from.lerp(spot, smoothstep(0.0, 1.0, work.progress) * 0.85)
 	match phase:
 		"walks":
 			W.update(delta)
@@ -689,18 +789,10 @@ func process(delta: float) -> void:
 				heart.play()
 				_heart_t = lerpf(1.0, 0.45, short)
 			var tr_ring := ring as Instruments.TimingRing
-			if W.picked != "":
-				ring_t += delta
-				if ring_t > RING_PERIOD:
-					ring_t = 0.0
-				tr_ring.active = true
-				tr_ring.label = tr("Fit it")
-				tr_ring.remaining = 1.0 - ring_t / (RING_PERIOD * 0.8)
-				tr_ring.window = 0.08
-			else:
-				tr_ring.active = false
+			tr_ring.active = false
 			if W.lost:
-				tr_ring.active = false
+				work_box.visible = false
+				toolbox_panel.visible = true
 				_lose()
 		"between":
 			if phase_t > 2.4:
@@ -744,7 +836,7 @@ func _unhandled_input(e: InputEvent) -> void:
 	elif phase == "walks" and k >= KEY_1 and k <= KEY_9 and k - KEY_1 < keys.size():
 		_pick(keys[k - KEY_1])
 	elif phase == "walks" and k == KEY_SPACE and W.picked != "":
-		_press()
+		work.key_space()
 	elif k == KEY_ESCAPE:
 		go(back)
 	else:

@@ -28,11 +28,33 @@ func pick(id: String) -> void:
 	var i: int = s.keys.find(id)
 	key(KEY_1 + i)
 
-func fit() -> void:
-	var s = g.screen
-	while is_instance_valid(s) and absf(1.0 - s.ring_t / (s.RING_PERIOD * 0.8)) > 0.05:
-		await get_tree().process_frame
-	key(KEY_SPACE)
+## Does the job in the panel: halfway (for a picture), then to the end.
+func fit(name := "") -> void:
+	var w = g.screen.work
+	await wait(0.6)
+	match w.mode:
+		"drag":
+			w.key_space()
+		"screw":
+			w._turn(TAU * 4.5)
+		"unroll":
+			w._pull(0.45, 200.0)
+		"slide":
+			w.depth = 0.5
+			w.offset = 0.9
+		"aim":
+			w.angles[0] = w.targets[0] - 0.12
+	await wait(0.5)
+	if name != "":
+		await shot("job_" + name)
+	match w.mode:
+		"drag":
+			while not w.done:
+				w.key_space()
+				await wait(0.05)
+		_:
+			w._finish()
+	await wait(0.8)
 
 func _ready() -> void:
 	g = load("res://scenes/main.tscn").instantiate()
@@ -48,7 +70,7 @@ func _ready() -> void:
 	pick(g.screen.W.needed())
 	await wait(0.5)
 	await shot("in_hand")
-	await fit()
+	await fit("screw")
 	await wait(0.4)
 	await shot("fitted")
 	# let spacewalk one run out
@@ -62,9 +84,8 @@ func _ready() -> void:
 		if g.screen.phase == "walks" and g.screen.W.picked == "":
 			pick(g.screen.W.needed())
 			await wait(0.6)
-			if g.screen.W.needed() in ["arrays", "wfpc2", "costar", "magnetometers"]:
-				await shot("walk_" + g.screen.W.needed())
-			await fit()
+			var nm: String = g.screen.W.picked
+			await fit(nm if nm in ["fuses", "arrays", "wfpc2", "costar", "magnetometers", "ghrs"] else "")
 			await wait(0.3)
 		elif g.screen.phase == "between":
 			if w < 2:
@@ -89,6 +110,8 @@ func _ready() -> void:
 	for i in 8:
 		await wait(1.6 if i == 0 else 1.3)
 		await shot("intro_%d" % i)
+		if not g.screen.get_script().resource_path.ends_with("story.gd"):
+			break
 		d = g.screen.dialogue
 		if d == null or not is_instance_valid(d):
 			break

@@ -735,8 +735,9 @@ static func _hubble(world, env: Environment) -> Dictionary:
 	box(bay, Vector3(16, 1.0, 62), Vector3(0, -1.0, 0), lining)
 	for sx in [-1, 1]:
 		box(bay, Vector3(1.0, 6, 62), Vector3(sx * 8.5, 1.5, 0), white)
-		var door := box(bay, Vector3(0.4, 15, 62), Vector3(sx * 15.5, 6.0, 0), white)
-		door.rotation.z = sx * -1.05
+		# the doors open all the way, lying out flat beside the bay, as in the photos of shuttle servicing missions
+		var door := box(bay, Vector3(0.4, 15, 62), Vector3(sx * 16.0, 0.6, 0), white)
+		door.rotation.z = sx * -1.5
 	box(bay, Vector3(4, 22, 14), Vector3(0, 9, 40), white)
 	# the berthing platform and Hubble standing on it
 	var hub := Node3D.new()
@@ -807,6 +808,10 @@ static func _hubble(world, env: Environment) -> Dictionary:
 static func _wings(parent: Node3D, cell: Color) -> void:
 	var cm := mat(cell, 0.35, 0.5)
 	var gold := mat(Color(0.85, 0.65, 0.25), 0.4, 0.8)
+	# see-through when the camera works behind them (scripts/screens/sts61.gd fades them)
+	for m in [cm, gold]:
+		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	parent.set_meta("mats", [cm, gold])
 	for sx in [-1, 1]:
 		rope(parent, Vector3(sx * 7.0, 24.0, 0), Vector3(sx * 9.5, 24.0, 0), 0.25, gold)
 		box(parent, Vector3(0.12, 40.0, 8.0), Vector3(sx * 9.8, 24.0, 0), cm)
