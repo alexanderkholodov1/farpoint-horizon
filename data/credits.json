@@ -359,9 +359,13 @@
     {
      "id": "S-soho-recovery",
      "text": "NASA/ESA. SOHO Mission Interruption and Recovery. https://soho.nascom.nasa.gov/about/Recovery/. SOHO's faint carrier found again on 3 August 1998, six weeks after the loss."
+    },
+    {
+     "id": "S-afj-loi",
+     "text": "O'Brien, F. Lunar Orbit Insertion, Apollo Flight Journal (NASA History Office, hosted at apollojournals.org, linked from https://www.nasa.gov/history/afj/). https://apollojournals.org/afj/loiessay.html. The crew had to \"perform and monitor the burn on the far side of the Moon, without assistance from the ground\": the trip's loss of signal when the braking burn happens behind the Moon."
     }
    ]
   }
  ],
- "count": 69
+ "count": 70
 }
