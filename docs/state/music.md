@@ -6,3 +6,8 @@
 - `scripts/ui/music.gd` plays it for the whole game from the menu on: under the menus and the design, louder in the
   credits film, nearly silent in the launch, the trip and the landing. Master bus (the menu's Sound off silences it);
   it pauses while the window is not in front.
+
+The music now follows the moment: a second layer, `audio/music_horizon_drive.ogg` (a pulse, a thump on each beat, a
+run of the chord's notes; same length, tempo and chords, composed by the same script), comes in under the piece
+during the climb, while an engine burns or is about to, at the braking at the Moon and in the landing, and leaves
+in the coast and the menus (`scripts/ui/music.gd`, `_tense`).

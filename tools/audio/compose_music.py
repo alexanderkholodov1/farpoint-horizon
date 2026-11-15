@@ -18,6 +18,8 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 OUT_DIR = os.path.join(ROOT, "audio")
 WAV = os.path.join(ROOT, "build", "music_horizon.wav")
 OGG = os.path.join(OUT_DIR, "music_horizon.ogg")
+DRIVE_WAV = os.path.join(ROOT, "build", "music_horizon_drive.wav")
+DRIVE_OGG = os.path.join(OUT_DIR, "music_horizon_drive.ogg")   # the second layer, for the tense moments
 
 SR = 44100
 BPM = 84.0
@@ -132,6 +134,41 @@ def bells():
     return left * 0.07, right * 0.07
 
 
+def drive():
+    """The second layer, the same length, tempo and chords as the piece so the two always line up: a pulse of
+    eighth notes on each chord's root, a soft thump on every beat and a quiet run of the chord's notes above.
+    The game brings it in under the first layer when the flight asks for the player (scripts/ui/music.gd)."""
+    left = np.zeros(N)
+    right = np.zeros(N)
+    span = BARS_PER_CHORD * BAR
+
+    def put(st, tone, pan=0.5):
+        idx = (np.arange(len(tone)) + int(st * SR)) % N
+        left[idx] += tone * (1 - pan)
+        right[idx] += tone * pan
+
+    for ci, ch in enumerate(CHORDS):
+        for b in range(BARS_PER_CHORD):
+            bar0 = ci * span + b * BAR
+            for e in range(8):                                   # the pulse
+                tt = np.arange(int(0.32 * SR)) / SR
+                f = hz(ch[0] + 12)
+                tone = (np.sin(2 * np.pi * f * tt) + 0.3 * np.sin(4 * np.pi * f * tt)) * np.exp(-tt * 9.0) * np.minimum(1.0, tt / 0.005)
+                put(bar0 + e * BEAT / 2, tone * (1.0 if e % 2 == 0 else 0.55))
+            for q in range(4):                                   # the thump
+                tt = np.arange(int(0.2 * SR)) / SR
+                fr = 44.0 + 52.0 * np.exp(-tt * 30.0)
+                tone = np.sin(2 * np.pi * np.cumsum(fr) / SR) * np.exp(-tt * 15.0) * np.minimum(1.0, tt / 0.003)
+                put(bar0 + q * BEAT, tone * (1.1 if q == 0 else 0.8))
+            notes = ch[1:]
+            for k in range(16):                                  # the run
+                tt = np.arange(int(0.22 * SR)) / SR
+                f = hz(notes[(k * 2 + b) % len(notes)] + 12)
+                tone = np.sin(2 * np.pi * f * tt) * np.exp(-tt * 13.0) * np.minimum(1.0, tt / 0.004) * 0.22
+                put(bar0 + k * BEAT / 4, tone, 0.25 if k % 2 == 0 else 0.75)
+    return left, right
+
+
 def hall(x, seconds=4.5, seed=1):
     """A long hall: decaying stereo noise as impulse, convolved around the loop (FFT), so the loop has no seam."""
     r = np.random.default_rng(seed)
@@ -168,6 +205,19 @@ def main():
         w.writeframes(pcm.tobytes())
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", WAV, "-c:a", "libvorbis", "-q:a", "4", OGG], check=True)
     print("wrote", OGG, "%.1f s" % LOOP_S, os.path.getsize(OGG) // 1024, "KB")
+    # the second layer: dry and a little room, so it stays tight under the engines
+    dl, dr = drive()
+    dl = dl + hall(dl, seconds=1.2, seed=3) * 0.25
+    dr = dr + hall(dr, seconds=1.2, seed=4) * 0.25
+    st = np.stack([dl, dr], axis=1)
+    st /= np.max(np.abs(st)) / 0.7
+    with wave.open(DRIVE_WAV, "wb") as w:
+        w.setnchannels(2)
+        w.setsampwidth(2)
+        w.setframerate(SR)
+        w.writeframes((st * 32767).astype(np.int16).tobytes())
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", DRIVE_WAV, "-c:a", "libvorbis", "-q:a", "4", DRIVE_OGG], check=True)
+    print("wrote", DRIVE_OGG, os.path.getsize(DRIVE_OGG) // 1024, "KB")
 
 
 if __name__ == "__main__":
