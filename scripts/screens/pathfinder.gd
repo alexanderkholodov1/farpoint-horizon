@@ -45,6 +45,8 @@ var photo_shown := false
 var brief: Control
 var steps_box: VBoxContainer
 var step_rows: Array = []
+var shout_panel: PanelContainer   ## The card behind the big moment ("Impact: 19 m/s"), above the action.
+var hint_panel: PanelContainer    ## The dark card behind the line of what to do, so it reads on bright ground.
 var now_lbl: Label             ## The big call to act ("SPACE: ROCKETS NOW!").
 var vside := 0.0               ## The ball's sideways speed (steering and rock hits).
 # descent
@@ -148,45 +150,50 @@ func _build_ui() -> void:
 	Kit.place(ladder, 0, 0.5, 0, 0.5, Kit.MARGIN, -220, Kit.MARGIN + 170, 260)
 	add_child(ladder)
 	# the three steps of the descent, ticked as they are done
+	var steps_panel := Kit.panel_box(10)
+	steps_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	Kit.place(steps_panel, 0, 0.5, 0, 0.5, Kit.MARGIN, 272, Kit.MARGIN + 10, 282)
+	add_child(steps_panel)
 	steps_box = Kit.vbox(4)
-	Kit.place(steps_box, 0, 0.5, 0, 0.5, Kit.MARGIN, 272, Kit.MARGIN + 420, 380)
-	add_child(steps_box)
+	steps_panel.add_child(steps_box)
 	for t in [tr("1  Keep it steady (A/D)"), tr("2  Rockets at 98 m (SPACE)"), tr("3  Cut at 21.5 m (C)")]:
 		var l := Kit.lbl(t, Kit.T_ACTION - 4, Kit.C_DIM, Kit.FONT_B)
-		l.add_theme_constant_override("outline_size", 8)
-		l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
 		steps_box.add_child(l)
 		step_rows.append(l)
 	now_lbl = Kit.lbl("", Kit.T_SHOUT, Kit.C_GOLD, Kit.FONT_T)
 	now_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	Kit.place(now_lbl, 0, 0.5, 1, 0.5, 0, 60, 0, 140)
-	now_lbl.add_theme_constant_override("outline_size", 12)
+	now_lbl.add_theme_constant_override("outline_size", 6)
 	now_lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
 	add_child(now_lbl)
 	# what to do now, at the bottom
 	hint = Kit.lbl("", Kit.T_ACTION, Kit.C_ON_DARK, Kit.FONT_B, true)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	Kit.place(hint, 0.5, 1, 0.5, 1, -520, -120, 520, -Kit.MARGIN)
-	hint.add_theme_constant_override("outline_size", 8)
-	hint.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.75))
-	add_child(hint)
+	hint.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	hint_panel = Kit.panel_box(12)
+	hint_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	Kit.place(hint_panel, 0.5, 1, 0.5, 1, -330, -130, 330, -Kit.MARGIN)
+	hint_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	hint_panel.add_child(hint)
+	add_child(hint_panel)
+	shout_panel = Kit.panel_box(12)
+	shout_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	Kit.place(shout_panel, 0.5, 0, 0.5, 0, -10, Kit.MARGIN + 176, 10, Kit.MARGIN + 186)
+	shout_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	add_child(shout_panel)
+	var shout_box := Kit.vbox(2)
+	shout_panel.add_child(shout_box)
 	big = Kit.lbl("", Kit.T_SHOUT, Kit.C_GOLD, Kit.FONT_T)
 	big.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	Kit.place(big, 0, 0.5, 1, 0.5, 0, -260, 0, -190)
-	big.add_theme_constant_override("outline_size", 12)
-	big.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
-	add_child(big)
-	big_sub = Kit.lbl("", Kit.T_ACTION, Kit.C_ON_DARK, Kit.FONT_B)
+	shout_box.add_child(big)
+	big_sub = Kit.lbl("", Kit.T_ACTION, Kit.C_TEXT, Kit.FONT_B)
 	big_sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	Kit.place(big_sub, 0, 0.5, 1, 0.5, 0, -186, 0, -150)
-	big_sub.add_theme_constant_override("outline_size", 8)
-	big_sub.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
-	add_child(big_sub)
+	shout_box.add_child(big_sub)
 	# Inti's count, in a speech bubble
 	bubble = Kit.lbl("", Kit.T_CLOCK, Kit.C_TEXT, Kit.FONT_T)
 	bubble.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	Kit.place(bubble, 0.5, 0.5, 0.5, 0.5, -300, 40, 300, 110)
-	bubble.add_theme_constant_override("outline_size", 10)
+	Kit.place(bubble, 0.5, 0.5, 0.5, 0.5, -300, -105, 300, -45)
+	bubble.add_theme_constant_override("outline_size", 5)
 	bubble.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.75))
 	add_child(bubble)
 	flash = ColorRect.new()
@@ -675,7 +682,10 @@ func process(delta: float) -> void:
 				phase = "done"
 				_show_photo()
 	ladder.visible = phase == "descent" or phase == "ramp" or phase == "brief"
-	steps_box.visible = phase == "descent" or phase == "brief"
+	steps_box.get_parent().visible = phase == "descent" or phase == "brief"
+	hint_panel.visible = hint.text != ""
+	shout_panel.visible = big.text != ""
+	big_sub.visible = big_sub.text != ""
 	if phase != "descent":
 		now_lbl.text = ""
 	(ladder as Ladder).mode = phase
