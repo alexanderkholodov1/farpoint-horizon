@@ -273,6 +273,7 @@ func _touchdown() -> void:
 	shake = 0.6
 	if r.grade == "rough":
 		lander.rotate_object_local(Vector3(1, 0, 0.4).normalized(), deg_to_rad(9.0))
+	preload("res://scripts/flight/surface.gd").note_landing(mission, r)
 	GameState.settle_extras()
 	var met := 0
 	for id in GameState.flight.get("extras", {}):
