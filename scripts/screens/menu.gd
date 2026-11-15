@@ -5,7 +5,7 @@ extends "res://scripts/screens/screen.gd"
 
 const Horizon := preload("res://scripts/ui/horizon.gd")
 const Music := preload("res://scripts/ui/music.gd")
-const VERSION := "v0.2.0"
+const VERSION := "v0.2.2"
 const Coach := preload("res://scripts/tutorial/coach.gd")
 const Progress := preload("res://scripts/progress.gd")
 const QUITO := "0.18° S · 78.47° W"   ## Quito, the team's city (the Ecuador marker on the globe).
@@ -32,11 +32,12 @@ func enter(args: Dictionary) -> void:
 	Kit.place(shade, 0, 0, 0.56, 1, 0, 0, 0, 0)
 	add_child(shade)
 	var box := Kit.vbox(8)
-	Kit.place(box, 0, 0.5, 0, 0.5, 84, 0, 644, 0)
+	Kit.place(box, 0, 0.5, 0, 0.5, 40 if Kit.compact else 84, 0, 600 if Kit.compact else 644, 0)
 	box.grow_vertical = Control.GROW_DIRECTION_BOTH   # centred on the screen's height, whatever it holds
 	add_child(box)
-	var lg := logo(1.0)
+	var lg := logo(0.72 if Kit.compact else 1.0)
 	box.add_child(lg)
+	lg.visible = not (Kit.compact and args.get("settings", false))   # on a phone the settings need the room
 	arc = lg.get_child(0)
 	if args.get("settings", false):
 		_settings(box)
@@ -69,6 +70,7 @@ func enter(args: Dictionary) -> void:
 	var foot := Kit.lbl("NASA Space Apps Challenge 2026  ·  " + tr("Team SK Horizon · Quito, Ecuador") + "  ·  " + VERSION, 12, Color(Kit.C_ON_DARK, 0.5))
 	Kit.place(foot, 0, 1, 0, 1, 84, -38, 900, -14)
 	add_child(foot)
+	foot.visible = not Kit.compact   # on a phone the list needs the bottom; the team is in the Credits
 
 
 ## The menu itself: one line about the game and the list of what the player can do, the first one the main action.
@@ -77,13 +79,13 @@ func _main_list(box: VBoxContainer) -> void:
 	var lead := Kit.lbl(tr("Design, launch and fly your own space mission."), Kit.T_LEAD, Color(Kit.C_ON_DARK, 0.72), Kit.FONT_R, true)
 	lead.add_theme_color_override("font_color", Color(Kit.C_ON_DARK, 0.72))
 	box.add_child(lead)
-	box.add_child(Kit.spacer(18))
+	box.add_child(Kit.spacer(6 if Kit.compact else 18))
 	var play := Kit.accent_btn(Kit.btn(tr("▶  Play"), _play, Kit.T_ACTION, 300), Kit.C_GOLD)
-	play.custom_minimum_size.y = 60
+	play.custom_minimum_size.y = 48 if Kit.compact else 60
 	play.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	box.add_child(play)
 	play.grab_focus.call_deferred()   # the keyboard starts on Play: arrows move along the list, Enter chooses
-	box.add_child(Kit.spacer(10))
+	box.add_child(Kit.spacer(2 if Kit.compact else 10))
 	var items := [
 		[tr("Guided first mission"), func(): Coach.start(main)],
 		[tr("How to play"), func(): main.overlay("howto")],

@@ -129,7 +129,11 @@ func _answer(failure: Dictionary, done: Callable) -> void:
 func _show(game: Control) -> void:
 	_close()
 	panel = Kit.panel_box(Kit.PAD)
-	Kit.place(panel, 0, 0, 0, 0, Kit.MARGIN, 446, Kit.MARGIN + 424, 446)   # under the time panel, clear of the messages and the controls
+	if Kit.compact:   # on a phone in the middle, over the scene: there is no free corner
+		Kit.place(panel, 0.5, 0.5, 0.5, 0.5, -212, 0, 212, 0)
+		panel.grow_vertical = Control.GROW_DIRECTION_BOTH
+	else:
+		Kit.place(panel, 0, 0, 0, 0, Kit.MARGIN, 446, Kit.MARGIN + 424, 446)   # under the time panel, clear of the messages and the controls
 	panel.add_child(game)
 	root.add_child(panel)
 	panel.modulate.a = 0.0

@@ -60,6 +60,7 @@ func _setup_ui() -> void:
 
 # ===================================================================================== SCREENS OF EVERY SIZE (issue #76)
 var turn_card: Control
+const MIN_SCALE := 0.8
 
 ## The interface grows on small screens so its text stays readable (a phone in landscape is about 390 CSS pixels tall:
 ## the 1600 x 900 layout shrunk to it makes 13 px text about 6 px), and a phone held upright is asked to turn: the
@@ -71,16 +72,25 @@ func _fit_screen() -> void:
 		var h = JavaScriptBridge.eval("window.innerHeight", true)
 		if h != null and float(h) > 0.0:
 			css_h = float(h)
-	var factor := 1.0
-	if css_h < 600.0:
-		factor = 1.25     # phones in landscape
-	elif css_h < 800.0:
-		factor = 1.12     # small tablets and laptops
+	if OS.get_environment("FIT_CSS_H") != "":   # a test sets the CSS height of the screen it stands for
+		css_h = float(OS.get_environment("FIT_CSS_H"))
+	# text is never drawn below 80 % of its design size in CSS pixels: 1600 x 900 shrunk to a 390 px tall phone would
+	# be 43 %, so short screens get a bigger interface (the screens lay themselves out for the space left, Kit.compact)
+	var factor := maxf(1.0, MIN_SCALE * 900.0 / maxf(css_h, 200.0))
 	var upright: bool = px.x < px.y * 1.05
 	if upright:
 		factor = 3.0   # only the turn card is seen: big enough to read on a phone held upright
 	if absf(get_window().content_scale_factor - factor) > 0.01:
 		get_window().content_scale_factor = factor
+	# the room the layout has once scaled: short (a phone in landscape) means compact
+	var room: Vector2 = px / maxf(factor * minf(px.x / 1600.0, px.y / 900.0), 0.001)
+	var short: bool = not upright and room.y < 640.0
+	if short != Kit.compact:
+		Kit.set_compact(short)
+		if root_ui:
+			root_ui.theme = Kit.build_theme()
+		if screen_id in ["menu", "missions"]:
+			go.call_deferred(screen_id)   # drawn again for the room it has now
 	if upright and turn_card == null:
 		turn_card = _make_turn_card()
 	if turn_card:

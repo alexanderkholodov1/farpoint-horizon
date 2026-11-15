@@ -51,7 +51,10 @@ func enter(_args: Dictionary) -> void:
 	var r: Dictionary = GameState.last_report
 	var S: Dictionary = GameData.SCENARIOS[mission.scenario]
 	var p := Kit.panel_box(Kit.PAD)
-	Kit.place(p, 0.5, 0, 0.5, 1, -660, Kit.MARGIN, 660, -Kit.MARGIN)
+	if Kit.compact:
+		Kit.place(p, 0, 0, 1, 1, Kit.MARGIN, Kit.MARGIN, -Kit.MARGIN, -Kit.MARGIN)
+	else:
+		Kit.place(p, 0.5, 0, 0.5, 1, -660, Kit.MARGIN, 660, -Kit.MARGIN)
 	add_child(p)
 	panel = p
 	p.modulate.a = 0.0
@@ -297,7 +300,7 @@ func _header(outer: VBoxContainer, s: Dictionary, r: Dictionary, S: Dictionary, 
 # ===================================================================================== SCORE
 func _score_column(cols: HBoxContainer, s: Dictionary, r: Dictionary, S: Dictionary, last_sim: Dictionary) -> void:
 	var c1 := Kit.vbox(8)
-	c1.custom_minimum_size.x = 340
+	c1.custom_minimum_size.x = 250 if Kit.compact else 340
 	cols.add_child(c1)
 	c1.add_child(Kit.caps(tr("Score")))
 	_score_row(c1, tr("Goals met"), s.objectives, 400, "")
@@ -345,7 +348,7 @@ func _score_row(parent: VBoxContainer, nm: String, val: int, mx: int, sub: Strin
 func _photo_column(cols: HBoxContainer, flight: Dictionary, last_sim: Dictionary) -> void:
 	var sc := ScrollContainer.new()
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	sc.custom_minimum_size.x = 420
+	sc.custom_minimum_size.x = 300 if Kit.compact else 420
 	cols.add_child(sc)
 	var c := Kit.vbox(Kit.GAP)
 	c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -372,7 +375,7 @@ func _photo_column(cols: HBoxContainer, flight: Dictionary, last_sim: Dictionary
 ## A photo's tile: the picture (click to see it large) or, when it did not come home, what would bring it.
 func _photo_tile(ph: Dictionary, earned: bool) -> Control:
 	var tile := PanelContainer.new()
-	tile.custom_minimum_size = Vector2(200, 132)
+	tile.custom_minimum_size = Vector2(140, 92) if Kit.compact else Vector2(200, 132)
 	tile.add_theme_stylebox_override("panel", Kit.flat(Kit.C_CARD, Kit.C_LINE, 8, 1, 0, 0))
 	if earned:
 		var tr_ := TextureRect.new()

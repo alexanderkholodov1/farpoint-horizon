@@ -4,7 +4,7 @@
  "people": [
   {
    "name": "Alexander Kholodov",
-   "role": "team lead; the flight's real physics, the Moon landing, ground control, the online crew room and the NASA data.",
+   "role": "team lead; the flight's real physics, the Moon landing, ground control, the crew room and the NASA data.",
    "links": [
     {
      "label": "GitHub",
@@ -26,11 +26,12 @@
  "ai": [
   "Claude Code (Anthropic), models Claude Opus 5.5 and Claude Sonnet: code, documents and research notes.",
   "Cursor, model Composer 2.5: a feasibility test of the web build (kept outside this repository).",
-  "Meshy and TRELLIS (Microsoft, run on Hugging Face): 3D drafts the team used as references for the four cuy crew models; Rumi's body is a TRELLIS mesh, the heads and the other three cuyes were modelled in Blender by script (assets/source/crew_*.py). The story portraits are renders of those models."
+  "Meshy and TRELLIS (Microsoft, run on Hugging Face): 3D drafts the team used as references for the four cuy crew models; Rumi's body is a TRELLIS mesh, the heads and the other three cuyes were modelled in Blender by script (assets/source/crew_*.py). The story portraits are renders of those models.",
+  "Claude (Anthropic): the game's music (audio/music_horizon.ogg, audio/music_horizon_drive.ogg) was generated with AI. Its files say so in their metadata and the in-game credits say so too."
  ],
  "ai_note": [
   "Artificial intelligence (AI) tools helped build this project, as the challenge rules ask us to disclose. The game idea, the design decisions and the balance are the team's.",
-  "No AI-generated images are used, so no watermark is needed: models come from our scripts and from the cited libraries, imagery from NASA. Every source (information, formula, data) is cited where it is used and in docs/sources.md."
+  "No AI-generated images or videos are used, so no watermark is needed: models come from our scripts and from the cited libraries, imagery from NASA. Every source (information, formula, data) is cited where it is used and in docs/sources.md."
  ],
  "built_with": [
   "Engine: Godot Engine (https://godotengine.org) (MIT).",
@@ -133,15 +134,15 @@
    "entries": [
     {
      "id": "S13",
-     "text": "Rocket Lab. Electron. https://rocketlabcorp.com/launch/electron/; figures as given in Wikipedia, Rocket Lab Electron (infobox, checked 2026-11-14), https://en.wikipedia.org/wiki/Rocket_Lab_Electron. Height 18 m, diameter 1.2 m, nine first-stage engines: the light launcher model."
+     "text": "Rocket Lab. Electron. https://rocketlabcorp.com/launch/electron/. Figures as given in Wikipedia, Rocket Lab Electron (infobox, checked 2026-11-14), https://en.wikipedia.org/wiki/Rocket_Lab_Electron. Height 18 m, diameter 1.2 m, nine first-stage engines: the light launcher model."
     },
     {
      "id": "S14",
-     "text": "SpaceX. Falcon 9. https://www.spacex.com/vehicles/falcon-9/; figures as given in Wikipedia, Falcon 9 (infobox and performance table, checked 2026-11-14), https://en.wikipedia.org/wiki/Falcon_9. Height about 70 m, diameter 3.7 m, fairing 5.2 m across and 13 m long, nine first-stage engines: the medium launcher model."
+     "text": "SpaceX. Falcon 9. https://www.spacex.com/vehicles/falcon-9/. Figures as given in Wikipedia, Falcon 9 (infobox and performance table, checked 2026-11-14), https://en.wikipedia.org/wiki/Falcon_9. Height about 70 m, diameter 3.7 m, fairing 5.2 m across and 13 m long, nine first-stage engines: the medium launcher model."
     },
     {
      "id": "S15",
-     "text": "SpaceX. Falcon Heavy. https://www.spacex.com/vehicles/falcon-heavy/; figures as given in Wikipedia, Falcon Heavy (infobox, checked 2026-11-14), https://en.wikipedia.org/wiki/Falcon_Heavy. Height 70 m, width 12.2 m, three cores of 3.7 m: the heavy launcher model."
+     "text": "SpaceX. Falcon Heavy. https://www.spacex.com/vehicles/falcon-heavy/. Figures as given in Wikipedia, Falcon Heavy (infobox, checked 2026-11-14), https://en.wikipedia.org/wiki/Falcon_Heavy. Height 70 m, width 12.2 m, three cores of 3.7 m: the heavy launcher model."
     },
     {
      "id": "S-rideshare-price",
@@ -317,7 +318,7 @@
     },
     {
      "id": "S-nasa-science",
-     "text": "NASA Science (science.nasa.gov) resource and image pages, for the Moon: Shackleton crater rim, credit \"NASA/GSFC/Arizona State University\" (https://science.nasa.gov/resource/shackleton-craters-illuminated-rim-shadowed-interior/); Shackleton floor seen by ShadowCam, a NASA instrument on the Korean KPLO orbiter, credit as printed \"NASA, ShadowCam, Korea Aerospace Research Institute, Arizona State University\" (https://science.nasa.gov/image-article/apod-2023-may-5-shackleton-from-shadowcam/; the Korean partner is named in the credit; no separate terms found). In assets/mission_photos/moon_south_pole/."
+     "text": "NASA Science (science.nasa.gov) resource and image pages, for the Moon: Shackleton crater rim, credit \"NASA/GSFC/Arizona State University\" (https://science.nasa.gov/resource/shackleton-craters-illuminated-rim-shadowed-interior/); Shackleton floor seen by ShadowCam, a NASA instrument on the Korean KPLO orbiter, credit as printed \"NASA, ShadowCam, Korea Aerospace Research Institute, Arizona State University\" (https://science.nasa.gov/image-article/apod-2023-may-5-shackleton-from-shadowcam/); the Korean partner is named in the credit; no separate terms found. In assets/mission_photos/moon_south_pole/."
     },
     {
      "id": "S-lroc-wac",
@@ -412,9 +413,13 @@
     {
      "id": "S-eo-orbits",
      "text": "Riebeek, H. Catalog of Earth Satellite Orbits, NASA Earth Observatory, 2009. https://earthobservatory.nasa.gov/features/OrbitsCatalog. Low, Sun-synchronous and geostationary orbits in plain words: the glossary of the game (issue #69) and the plain names of its orbits."
+    },
+    {
+     "id": "S-noaa-scales",
+     "text": "NOAA Space Weather Prediction Center. NOAA Space Weather Scales, and the pages Coronal Mass Ejections and Solar Radiation Storm. https://www.swpc.noaa.gov/noaa-scales-explanation, https://www.swpc.noaa.gov/phenomena/coronal-mass-ejections, https://www.swpc.noaa.gov/phenomena/solar-radiation-storm. The space weather alerts of the operation (issue #90): G4 about 100 and G5 about 4 storms per 11-year cycle, S3 about 10 and S4 about 3; their effects on spacecraft (surface charging, orientation problems, drag on low orbits, memory upsets, noise in images, worn solar panels); the fastest coronal mass ejections reach the Earth in 15 to 18 hours and slower ones take several days; protons cross from the Sun in tens of minutes, and a radiation storm lasts hours to days."
     }
    ]
   }
  ],
- "count": 82
+ "count": 83
 }
