@@ -1,6 +1,6 @@
 """Cuts the 30-second video from the game's own recording (issue #38).
 
-1. Record:  tools/godot.sh --path . --write-movie build/video/raw.avi --fixed-fps 30 res://tests/trailer.tscn > build/video/record.log
+1. Record:  tools/godot.sh --path . --write-movie build/video/raw.ogv --fixed-fps 30 res://tests/trailer.tscn > build/video/record.log
    (the window size of the project, 1600x900; the cut is scaled to 1920x1080). Do not close the window: it ends itself.
 2. Cut:     python tools/video/make_trailer.py
 Writes build/video/farpoint_horizon_30s.mp4 (H.264 + AAC, under 30 s), from the "[cut] <moment> <seconds>" marks the
@@ -17,7 +17,7 @@ import sys
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 VID = os.path.join(ROOT, "build", "video")
-RAW = os.path.join(VID, "raw.avi")
+RAW = os.path.join(VID, "raw.ogv")    # Theora: an AVI (MJPEG) of the whole run takes gigabytes
 LOG = os.path.join(VID, "record.log")
 OUT = os.path.join(VID, "farpoint_horizon_30s.mp4")
 XF = 0.4            # crossfade, seconds
@@ -25,7 +25,7 @@ LIMIT = 30.0
 
 # moment, offset after its mark, length kept
 EDIT = [
-    ("open", 2.6, 5.4),
+    ("open", 6.4, 4.6),     # the film's title arriving (cue at 7.0 s)
     ("design", 0.2, 3.6),
     ("builder", 0.1, 3.2),
     ("liftoff", 0.4, 4.8),
@@ -33,7 +33,7 @@ EDIT = [
     ("burn", 0.0, 2.8),
     ("landing", 0.0, 3.6),
     ("report", 0.0, 2.6),
-    ("end", 0.3, 4.2),
+    ("end", 0.6, 4.6),      # the same title over the Earthrise
 ]
 
 

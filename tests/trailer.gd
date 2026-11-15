@@ -3,7 +3,7 @@ extends Node
 ## the real screens (design, the rocket builder, liftoff from the Andes, the climb, the trip, the landing, the report,
 ## an Earthrise to close) with English caption cards, and prints "[cut] <moment> <seconds>" when each moment starts,
 ## in the recording's own time. tools/video/make_trailer.py records it and cuts the 30 seconds from those marks.
-## Run (records): tools/godot.sh --path . --write-movie build/video/raw.avi --fixed-fps 30 --resolution 1920x1080 res://tests/trailer.tscn
+## Run (records): tools/godot.sh --path . --write-movie build/video/raw.ogv --fixed-fps 30 --resolution 1920x1080 res://tests/trailer.tscn
 ## Not a check: it has no "## check:" line, so tools/check.sh leaves it alone.
 
 const Kit := preload("res://scripts/ui/kit.gd")
@@ -46,16 +46,12 @@ func caption(line: String, note := "", life := 4.0) -> void:
 	a.sun_at = 0.95
 	a.progress = 0.0
 	v.add_child(a)
-	var l := Kit.lbl(line, 46, Color(0.97, 0.98, 1.0), Kit.FONT_T)
+	var l := Kit.legible(Kit.lbl(line, 46, Color(0.97, 0.98, 1.0), Kit.FONT_T))
 	l.add_theme_color_override("font_color", Color(0.97, 0.98, 1.0))
-	l.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.6))
-	l.add_theme_constant_override("shadow_outline_size", 4)
 	v.add_child(l)
 	if note != "":
-		var n := Kit.lbl(note, 22, Color(1.0, 0.82, 0.5), Kit.FONT_B)
+		var n := Kit.legible(Kit.lbl(note, 22, Color(1.0, 0.82, 0.5), Kit.FONT_B))
 		n.add_theme_color_override("font_color", Color(1.0, 0.82, 0.5))
-		n.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.6))
-		n.add_theme_constant_override("shadow_outline_size", 3)
 		v.add_child(n)
 	v.modulate.a = 0.0
 	var tw := v.create_tween()
@@ -82,7 +78,7 @@ func _ready() -> void:
 	# 1. the opening: a sunrise over the real Earth, the title
 	g.go("credits_film")
 	cut("open")
-	await wait(9.5)
+	await wait(12.5)        # the film's own title comes in at 7 s (credits_film.gd, _title)
 
 	# 2. the craft, assembled part by part
 	RD.current = null
@@ -132,6 +128,8 @@ func _ready() -> void:
 		await wait(0.2)
 	cut("space")
 	caption("Real physics, real time", "Speed time up when you want, never in secret", 3.0)
+	await wait(3.6)
+	g.screen._skip()        # the game's own Skip: the rest of the climb is computed, not recorded
 	while g.screen_id == "launch":
 		await wait(0.2)
 
@@ -199,24 +197,7 @@ func _ready() -> void:
 		c.queue_free()
 	await wait(0.5)
 	cut("end")
-	var v := Kit.vbox(6)
-	Kit.place(v, 0, 0.5, 1, 0.5, 0, -160, 0, 40)
-	cap_layer.add_child(v)
-	var h := Kit.hbox(18)
-	h.alignment = BoxContainer.ALIGNMENT_CENTER
-	v.add_child(h)
-	h.add_child(Kit.lbl("Farpoint", 92, Color(0.97, 0.98, 1.0), Kit.FONT_T))
-	var sp := FontVariation.new()
-	sp.base_font = Kit.FONT_B
-	sp.spacing_glyph = 10
-	h.add_child(Kit.lbl("HORIZON", 92, Color(0.55, 0.78, 1.0), sp))
-	for line in ["Design it. Launch it. Land it.", "SK Horizon · Quito, Ecuador · NASA Space Apps Challenge 2026"]:
-		var l := Kit.lbl(line, 30 if line.begins_with("Design") else 22, Color(0.97, 0.98, 1.0, 0.9), Kit.FONT_B)
-		l.add_theme_color_override("font_color", Color(0.97, 0.98, 1.0, 0.9))
-		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		v.add_child(l)
-	v.modulate.a = 0.0
-	v.create_tween().tween_property(v, "modulate:a", 1.0, 0.8)
-	await wait(5.0)
+	g.screen._title()       # the game's own logo, as the film shows it
+	await wait(7.0)
 	cut("done")
 	get_tree().quit()
