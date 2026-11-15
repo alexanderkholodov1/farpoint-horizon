@@ -17,11 +17,11 @@ func _ready() -> void:
 	for k in [KEY_DOWN, KEY_DOWN, KEY_ENTER]:
 		await _key(k)
 		await _wait(0.3)
-	print("menu Down, Down, Enter: how to play open=", _has("Esc or Enter closes this."))
+	print("menu Down, Down, Enter: how to play open=", _has("Enter goes on · Backspace goes back · Esc pauses a mission · Esc or Enter closes this"))
 	await _shot("howto")
 	await _key(KEY_ESCAPE)
 	await _wait(0.4)
-	print("how to play + Esc: open=", _has("Esc or Enter closes this."))
+	print("how to play + Esc: open=", _has("Enter goes on · Backspace goes back · Esc pauses a mission · Esc or Enter closes this"))
 	# the credits film: Enter skips to the end card, S opens every source, Page Down scrolls, Esc closes, Enter = menu
 	g.go("credits_film")
 	await _wait(1.5)
