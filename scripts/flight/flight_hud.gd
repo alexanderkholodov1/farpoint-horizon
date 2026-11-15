@@ -16,6 +16,8 @@ signal warp_picked(value: float)            ## The pilot chose how fast time run
 
 ## How fast time can run: real time, then faster. The screen multiplies its real seconds by `warp`.
 const WARPS := [1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0]
+## How each gauge is drawn (Instruments.Gauge.look), by its name: what climbs is a rocket, what drains is a tank.
+const GAUGE_LOOK := {"orbit": "climb", "burn": "climb", "fuel": "tank", "stress": "needle"}
 
 const Kit := preload("res://scripts/ui/kit.gd")
 const Instruments := preload("res://scripts/flight/instruments.gd")
@@ -24,7 +26,7 @@ const Sound := preload("res://scripts/flight/sound.gd")
 var title: Label
 var clock: Label
 var readouts: GridContainer
-var gauges: VBoxContainer
+var gauges: HBoxContainer
 var dial: Instruments.Dial
 var instrument_box: PanelContainer
 var lever: Instruments.Lever
@@ -75,16 +77,22 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 	_top = v
 	title = Kit.caps(heading)
 	v.add_child(title)
-	clock = Kit.lbl("", Kit.T_CLOCK, Kit.C_TEXT, Kit.font_num())
-	v.add_child(clock)
-	v.add_child(Kit.rule())
+	# the mission clock, as a lit display set into the console
+	var plate := PanelContainer.new()
+	plate.add_theme_stylebox_override("panel", Kit.flat(Color(0.0, 0.01, 0.03, 0.55), Color(Kit.C_GOLD, 0.35), 8, 1, 14, 4))
+	clock = Kit.lbl("", Kit.T_CLOCK, Kit.C_GOLD, Kit.font_num())
+	clock.add_theme_color_override("font_color", Color(1.0, 0.78, 0.42))
+	plate.add_child(clock)
+	v.add_child(plate)
 	readouts = GridContainer.new()
 	readouts.columns = 2
 	v.add_child(readouts)
-	gauges = Kit.vbox(8)
+	gauges = Kit.hbox(8)
 	v.add_child(gauges)
+	_console(p)
 	# the instrument, bottom left
 	instrument_box = Kit.panel_box(18)
+	_console(instrument_box)
 	Kit.place(instrument_box, 0, 1, 0, 1, 24, -262, 340, -24)
 	add_child(instrument_box)
 	if with_dial:
@@ -95,6 +103,7 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 		instrument_box.visible = false
 	# controls, bottom right
 	var cp := Kit.panel_box(20)
+	_console(cp)
 	Kit.place(cp, 1, 1, 1, 1, -476, -330, -24, -24)
 	add_child(cp)
 	var ch := Kit.hbox(18)
@@ -168,6 +177,17 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 	Kit.place(hint_panel, 0.5, 1, 0.5, 1, -440, -128, 300, -Kit.MARGIN)
 	add_child(hint_panel)
 	hint_panel.visible = false
+
+
+## Makes a panel read as a piece of the craft's console: a rivet in each corner and a warm bar at its top edge.
+func _console(p: PanelContainer) -> void:
+	p.draw.connect(func():
+		var sz := p.size
+		for q in [Vector2(11, 11), Vector2(sz.x - 11, 11), Vector2(11, sz.y - 11), Vector2(sz.x - 11, sz.y - 11)]:
+			p.draw_circle(q, 3.2, Color(Kit.C_TEXT, 0.32))
+			p.draw_circle(q, 1.3, Color(0, 0, 0, 0.55))
+		p.draw_line(Vector2(26, 1.5), Vector2(84, 1.5), Kit.C_GOLD, 3.0)
+		p.draw_line(Vector2(90, 1.5), Vector2(98, 1.5), Color(Kit.C_GOLD, 0.6), 3.0))
 
 
 ## A Restart button beside Skip: the pilot can always fly this part again, whatever happened (never a dead end).
@@ -288,6 +308,7 @@ func value(name_: String, text: String, col := Color.WHITE) -> void:
 ## Adds a gauge; set it with gauge(name, 0..1, text).
 func add_gauge(name_: String, label: String, warn_at := 2.0, bad_at := 2.0, col := Color(0.4, 0.75, 1.0)) -> void:
 	var g := Instruments.Gauge.new()
+	g.look = GAUGE_LOOK.get(name_, "needle")
 	g.title = label
 	g.warn_at = warn_at
 	g.bad_at = bad_at

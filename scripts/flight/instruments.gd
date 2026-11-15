@@ -53,10 +53,14 @@ class Dial extends Control:
 		var dir := Vector2.from_angle(pa)
 		var side := dir.orthogonal()
 		draw_line(c, c + dir * (r - 4.0), Color(Kit.C_TEXT.r, Kit.C_TEXT.g, Kit.C_TEXT.b, 0.25), 1.0, true)
-		var tip := c + dir * (r * 0.66)
+		var tip := c + dir * (r * 0.7)
+		var mid := c + dir * (r * 0.52)
 		var base := c + dir * (r * 0.16)
-		draw_colored_polygon(PackedVector2Array([tip, base + side * 7.0, base - side * 7.0]), C_NEEDLE)
-		draw_circle(c, 5.0, C_NEEDLE)
+		draw_colored_polygon(PackedVector2Array([tip, mid + side * 6.0, base + side * 6.0, base - side * 6.0, mid - side * 6.0]), C_NEEDLE)
+		draw_colored_polygon(PackedVector2Array([base + side * 6.0, base + side * 13.0 - dir * 5.0, base + side * 6.0 + dir * 12.0]), C_NEEDLE)
+		draw_colored_polygon(PackedVector2Array([base - side * 6.0, base - side * 13.0 - dir * 5.0, base - side * 6.0 + dir * 12.0]), C_NEEDLE)
+		var fl := 8.0 + 4.0 * sin(_pulse * 28.0)
+		draw_colored_polygon(PackedVector2Array([base + side * 4.0, base - side * 4.0, base - dir * fl]), Color(1.0, 0.66, 0.26))
 		# labels
 		var f: Font = Kit.FONT_B
 		draw_string(f, c + Vector2(22, -r + 4), TranslationServer.translate("UP"), HORIZONTAL_ALIGNMENT_LEFT, -1, Kit.T_SMALL, Kit.C_DIM)
@@ -123,7 +127,10 @@ class Lever extends Control:
 		draw_string(Kit.font_num(), Vector2(0, size.y - 12), "%d %%" % roundi(value * 100.0), HORIZONTAL_ALIGNMENT_CENTER, size.x, Kit.T_VALUE, Kit.C_TEXT)
 
 
-## A labeled horizontal gauge, 0 to 1, colored by `warn_at` and `bad_at` (or reversed when `high_is_good`).
+## A cockpit gauge, 0 to 1, drawn as the thing it measures (`look`), coloured by `warn_at` and `bad_at`:
+##   "climb": a small rocket climbing from the ground to the ring of the orbit (speed toward orbit, speed added);
+##   "tank": a fuel tank that drains;
+##   "needle": a round dial with its fine, caution and danger arcs and a needle (stress).
 class Gauge extends Control:
 	var title := ""
 	var value := 0.0
@@ -131,12 +138,18 @@ class Gauge extends Control:
 	var warn_at := 2.0
 	var bad_at := 2.0
 	var color := Color(0.4, 0.75, 1.0)
+	var look := "needle"
+	var _shown := 0.0      ## The value the gauge draws, easing toward `value` (a needle has weight).
+	var _t := 0.0
 
 	func _init() -> void:
-		custom_minimum_size = Vector2(220, 46)
+		custom_minimum_size = Vector2(124, 150)
+		size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-	func _process(_d: float) -> void:
+	func _process(delta: float) -> void:
+		_t += delta
+		_shown = lerpf(_shown, clampf(value, 0.0, 1.2), clampf(delta * 6.0, 0.0, 1.0))
 		queue_redraw()
 
 	func _draw() -> void:
@@ -145,13 +158,64 @@ class Gauge extends Control:
 			col = Kit.C_BAD
 		elif value >= warn_at:
 			col = Kit.C_WARN
-		draw_string(Kit.FONT_R, Vector2(0, 16), title, HORIZONTAL_ALIGNMENT_LEFT, size.x * 0.62, Kit.T_BODY, Kit.C_DIM)
-		draw_string(Kit.font_num(), Vector2(0, 16), text, HORIZONTAL_ALIGNMENT_RIGHT, size.x, Kit.T_BODY, Kit.C_TEXT)
-		var bar := Rect2(Vector2(0, 20), Vector2(size.x, 10))
-		draw_style_box(Kit.flat(Kit.C_LINE, Color(0, 0, 0, 0), 5, 0, 0, 0), bar)
-		var v := clampf(value, 0.0, 1.0)
-		if v > 0.0:
-			draw_style_box(Kit.flat(col, Color(0, 0, 0, 0), 5, 0, 0, 0), Rect2(bar.position, Vector2(maxf(bar.size.x * v, 10.0), bar.size.y)))
+		var v := clampf(_shown, 0.0, 1.0)
+		var w := size.x
+		var cx := w * 0.5
+		var ink: Color = Kit.C_TEXT
+		var line := Color(ink.r, ink.g, ink.b, 0.28)
+		match look:
+			"climb":
+				var y0 := 96.0
+				var y1 := 16.0
+				# the ground, the way up, the orbit to reach
+				draw_arc(Vector2(cx, y0 + 46.0), 52.0, -PI * 0.78, -PI * 0.22, 24, Color(Kit.C_ACCENT, 0.9), 3.0, true)
+				for k in 9:
+					var yy := lerpf(y0 - 8.0, y1 + 6.0, k / 8.0)
+					draw_line(Vector2(cx, yy), Vector2(cx, yy - 3.0), line, 2.0)
+				draw_arc(Vector2(cx, y1 + 60.0), 62.0, -PI * 0.66, -PI * 0.34, 24, Color(Kit.C_GOLD, 0.95), 2.0, true)
+				# the rocket, with its flame while it climbs
+				var ry := lerpf(y0 - 10.0, y1 + 8.0, v)
+				var flick := 4.0 + 3.0 * sin(_t * 30.0)
+				if v < 0.995:
+					draw_colored_polygon(PackedVector2Array([Vector2(cx - 4, ry + 8), Vector2(cx + 4, ry + 8), Vector2(cx, ry + 12 + flick)]), Kit.C_GOLD)
+				draw_colored_polygon(PackedVector2Array([Vector2(cx, ry - 11), Vector2(cx + 5, ry - 2), Vector2(cx + 5, ry + 8), Vector2(cx - 5, ry + 8), Vector2(cx - 5, ry - 2)]), col)
+				draw_colored_polygon(PackedVector2Array([Vector2(cx - 5, ry + 2), Vector2(cx - 10, ry + 9), Vector2(cx - 5, ry + 8)]), col)
+				draw_colored_polygon(PackedVector2Array([Vector2(cx + 5, ry + 2), Vector2(cx + 10, ry + 9), Vector2(cx + 5, ry + 8)]), col)
+			"tank":
+				var r := Rect2(Vector2(cx - 22.0, 12.0), Vector2(44.0, 88.0))
+				draw_style_box(Kit.flat(Color(0, 0, 0, 0.3), line, 20, 2, 0, 0), r)
+				var inner := r.grow(-5.0)
+				var hgt := inner.size.y * v
+				if hgt > 1.0:
+					var wave := 1.5 * sin(_t * 3.0)
+					draw_style_box(Kit.flat(Color(col, 0.9), Color(0, 0, 0, 0), 14, 0, 0, 0), Rect2(Vector2(inner.position.x, inner.end.y - hgt + wave), Vector2(inner.size.x, hgt - wave)))
+				for k in [0.25, 0.5, 0.75]:
+					var ty: float = inner.end.y - inner.size.y * k
+					draw_line(Vector2(r.end.x + 3.0, ty), Vector2(r.end.x + 9.0, ty), line, 1.5)
+				draw_line(Vector2(cx - 5.0, 8.0), Vector2(cx + 5.0, 8.0), line, 3.0)   # the filler cap
+			_:
+				var c := Vector2(cx, 74.0)
+				var rad := 50.0
+				var a0 := PI * 0.85
+				var a1 := PI * 2.15
+				var span := a1 - a0
+				var w_at := clampf(warn_at, 0.0, 1.0)
+				var b_at := clampf(bad_at, 0.0, 1.0)
+				draw_arc(c, rad, a0, a0 + span * w_at, 24, Color(Kit.C_OK, 0.85), 7.0, true)
+				if b_at > w_at:
+					draw_arc(c, rad, a0 + span * w_at, a0 + span * b_at, 12, Color(Kit.C_WARN, 0.9), 7.0, true)
+				if b_at < 1.0:
+					draw_arc(c, rad, a0 + span * b_at, a1, 12, Color(Kit.C_BAD, 0.9), 7.0, true)
+				for k in 9:
+					var a := a0 + span * k / 8.0
+					draw_line(c + Vector2.from_angle(a) * (rad - 12.0), c + Vector2.from_angle(a) * (rad - 6.0), line, 1.5, true)
+				var na := a0 + span * v + (0.012 * sin(_t * 23.0) if value >= warn_at else 0.0)   # it trembles when stressed
+				draw_line(c, c + Vector2.from_angle(na) * (rad - 14.0), col, 3.0, true)
+				draw_circle(c, 6.0, col)
+				draw_circle(c, 2.5, Color(0, 0, 0, 0.6))
+		# the number and the name, as engraved under an instrument
+		draw_string(Kit.font_num(), Vector2(0, 122), text, HORIZONTAL_ALIGNMENT_CENTER, w, Kit.T_BODY, Kit.ink(col) if value >= warn_at else ink)
+		draw_multiline_string(Kit.FONT_B, Vector2(0, 137), title.to_upper(), HORIZONTAL_ALIGNMENT_CENTER, w, Kit.T_CAPS - 1, 2, Kit.C_DIM)
 
 
 ## A big round push button (STAGE). `lit` makes it glow; pressed emits `pressed`.
@@ -164,7 +228,7 @@ class BigButton extends Control:
 	var _down := 0.0
 
 	func _init() -> void:
-		custom_minimum_size = Vector2(124, 124)
+		custom_minimum_size = Vector2(136, 136)
 		mouse_filter = Control.MOUSE_FILTER_STOP
 		mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 
@@ -189,13 +253,19 @@ class BigButton extends Control:
 		if lit:
 			draw_circle(c, r + 5.0 + glow * 4.0, Color(color.r, color.g, color.b, 0.25 + glow * 0.3))
 		draw_circle(c, r, Color(0.08, 0.06, 0.05))
+		# the guard ring, striped amber and black as on real hardware
+		for k in 16:
+			if k % 2 == 0:
+				draw_arc(c, r - 4.0, TAU * k / 16.0, TAU * (k + 1) / 16.0, 6, Color(1.0, 0.72, 0.2, 0.95 if lit else 0.5), 7.0, true)
 		var face := color.darkened(0.55 - glow * 0.35) if lit else Color(0.22, 0.2, 0.2)
-		draw_circle(c + Vector2(0, _down * 3.0), r - 6.0, face)
-		draw_arc(c + Vector2(0, _down * 3.0), r - 6.0, 0, TAU, 40, Color(1, 1, 1, 0.25), 2.0, true)
+		var fr := r - 12.0
+		draw_circle(c + Vector2(0, _down * 3.0), fr, face)
+		draw_arc(c + Vector2(0, _down * 3.0), fr, 0, TAU, 40, Color(1, 1, 1, 0.25), 2.0, true)
+		draw_arc(c + Vector2(0, _down * 3.0), fr - 5.0, -PI * 0.9, -PI * 0.55, 12, Color(1, 1, 1, 0.35 if lit else 0.15), 3.0, true)   # a highlight on the dome
 		# the word shrinks to fit inside the face (CORRECT, CORREGIR)
 		var word := TranslationServer.translate(label)
 		var fs := 18
-		while fs > 10 and Kit.FONT_T.get_string_size(word, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > (r - 10.0) * 2.0:
+		while fs > 9 and Kit.FONT_T.get_string_size(word, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > (r - 18.0) * 2.0:
 			fs -= 1
 		draw_string(Kit.FONT_T, c + Vector2(-r, fs * 0.38 + _down * 3.0), word, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, fs, Color.WHITE if lit else Color(1, 1, 1, 0.55))
 
