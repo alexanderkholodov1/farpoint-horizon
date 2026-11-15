@@ -135,6 +135,7 @@ func launch(seed_value := -1) -> void:
 		return
 	launching = true
 	GameState.begin_flight(r, seed_value)
+	preload("res://scripts/minigames/desk.gd").install(self)   # ground control during the flight (#9)
 	await go_faded("launch", 0.5, 0.6)
 	launching = false
 
