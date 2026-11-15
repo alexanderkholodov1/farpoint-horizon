@@ -12,7 +12,7 @@ var clock: Label
 var arc: Control
 
 
-func enter(_args: Dictionary) -> void:
+func enter(args: Dictionary) -> void:
 	world.stage_menu()
 	Music.ensure(main)   # the game's music, from here on (scripts/ui/music.gd)
 	# ---------- the panel on the left: frosted glass over space
@@ -31,67 +31,18 @@ func enter(_args: Dictionary) -> void:
 	var lg := logo(1.0)
 	box.add_child(lg)
 	arc = lg.get_child(0)
-	arc.progress = 0.0
-	arc.create_tween().tween_property(arc, "progress", 1.0, 1.4).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	box.add_child(Kit.lbl(tr("Design, launch and operate your own space mission. Every decision has consequences, in mass, power, data, budget and time."), 17, Kit.C_DIM, Kit.FONT_R, true))
-	box.add_child(Kit.spacer(6))
-	var play := Kit.accent_btn(Kit.btn(tr("▶  Play"), func(): go("team"), 21, 340), Kit.C_GOLD)
-	play.custom_minimum_size.y = 56
-	box.add_child(play)
-	# the first mission, guided by the crew (scripts/tutorial/coach.gd)
-	var first := Kit.btn(tr("First mission · guided by the crew"), func(): Coach.start(main), Kit.T_BODY, 340)
-	first.custom_minimum_size.y = Kit.BTN_H
-	box.add_child(first)
-	box.add_child(Kit.spacer(4))
-	# ---------- settings: difficulty and appearance, each a row of joined choices
-	box.add_child(rule())
-	box.add_child(caps(tr("Difficulty")))
-	var dh := segmented()
-	box.add_child(dh)
-	for d in ["facil", "normal", "dificil"]:
-		var b := Kit.btn(GameData.DIFFICULTY[d].name, func(): GameState.difficulty = d; go("menu"), 15, 120)
-		if GameState.difficulty == d:
-			Kit.accent_btn(b, Kit.C_ACCENT)
-		dh.add_child(b)
-	box.add_child(Kit.lbl(GameData.DIFFICULTY[GameState.difficulty].desc, 13, Kit.C_DIM))
-	box.add_child(Kit.spacer(4))
-	# appearance and sound side by side
-	var prefs := Kit.hbox(24)
-	box.add_child(prefs)
-	var av := Kit.vbox(8)
-	prefs.add_child(av)
-	av.add_child(caps(tr("Appearance")))
-	var mh := segmented()
-	av.add_child(mh)
-	for m in Kit.MODES:
-		var b := Kit.btn(tr("Dark") if m == "dark" else tr("Light"), func(): _set_mode(m), 15, 110)
-		if Kit.mode == m:
-			Kit.accent_btn(b, Kit.C_ACCENT)
-		mh.add_child(b)
-	var sv := Kit.vbox(8)
-	prefs.add_child(sv)
-	sv.add_child(caps(tr("Sound")))
-	var sh := segmented()
-	sv.add_child(sh)
-	for on in [true, false]:
-		var b := Kit.btn(tr("On") if on else tr("Off"), func(): Kit.UiSound.set_muted(not on); go("menu"), 15, 110)
-		if Kit.UiSound.is_muted() != on:
-			Kit.accent_btn(b, Kit.C_ACCENT)
-		sh.add_child(b)
-	box.add_child(rule())
-	var hh := Kit.hbox(8)
-	box.add_child(hh)
-	hh.add_child(Kit.btn(tr("How to play"), func(): main.overlay("howto"), 15, 150))
-	hh.add_child(Kit.btn("Ranking", func(): main.overlay("ranking"), 15, 150))
-	hh.add_child(Kit.btn(tr("Credits"), func(): go("credits_film"), 15, 150))
-	box.add_child(Kit.spacer(2))
-	box.add_child(Kit.lbl(tr("The Earth behind is NASA data: Blue Marble by day, Black Marble city lights at night, and the real clouds of 31 August 2024 from the VIIRS instrument."), 12, Kit.C_DIM, Kit.FONT_R, true))
-	# entrance: the panel slides in from the left as the arc draws itself
-	panel.modulate.a = 0.0
-	panel.position.x -= 24
-	var tw := panel.create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	tw.tween_property(panel, "modulate:a", 1.0, 0.5)
-	tw.tween_property(panel, "position:x", panel.position.x + 24, 0.5)
+	if args.get("settings", false):
+		_settings(box)
+	else:
+		arc.progress = 0.0
+		arc.create_tween().tween_property(arc, "progress", 1.0, 1.4).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		_main_list(box)
+		# entrance: the panel slides in from the left as the arc draws itself
+		panel.modulate.a = 0.0
+		panel.position.x -= 24
+		var tw := panel.create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tw.tween_property(panel, "modulate:a", 1.0, 0.5)
+		tw.tween_property(panel, "position:x", panel.position.x + 24, 0.5)
 	# ---------- the viewfinder around the Earth, with live telemetry
 	var vf := Viewfinder.new()
 	Kit.place(vf, 0.5, 0.5, 0.5, 0.5, 20, -360, 700, 330)
@@ -110,19 +61,72 @@ func enter(_args: Dictionary) -> void:
 	tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	tele.add_child(tag)
 	_tick()
-	# ---------- along the edges: the team line and the languages
 	var foot := Kit.lbl(tr("Space Mission Design Game challenge · Team SK Horizon · Quito, Ecuador"), 12, Color(Kit.C_ON_DARK, 0.55))
 	Kit.place(foot, 0, 1, 0, 1, 60, -38, 900, -14)
 	add_child(foot)
-	var langs := Kit.hbox(6)
-	Kit.place(langs, 1, 0, 1, 0, -270, 24, -30, 64)
-	langs.alignment = BoxContainer.ALIGNMENT_END
-	add_child(langs)
+
+
+## The menu itself: one line about the game and the list of what the player can do, the first one the main action.
+func _main_list(box: VBoxContainer) -> void:
+	box.add_child(Kit.lbl(tr("Design, launch and fly your own space mission."), Kit.T_LEAD, Kit.C_DIM, Kit.FONT_R, true))
+	box.add_child(Kit.spacer(6))
+	var play := Kit.accent_btn(Kit.btn(tr("▶  Play"), func(): go("team"), Kit.T_ACTION, 340), Kit.C_GOLD)
+	play.custom_minimum_size.y = 60
+	box.add_child(play)
+	var items := [
+		[tr("First mission · guided by the crew"), func(): Coach.start(main)],
+		[tr("How to play"), func(): main.overlay("howto")],
+		[tr("Ranking"), func(): main.overlay("ranking")],
+		[tr("Credits"), func(): go("credits_film")],
+		[tr("Settings"), func(): go("menu", {"settings": true})]]
+	if not OS.has_feature("web"):
+		items.append([tr("Quit"), func(): get_tree().quit()])
+	for it in items:
+		var b := Kit.btn(it[0], it[1], Kit.T_LEAD, 340)
+		b.custom_minimum_size.y = Kit.BTN_H + 4
+		box.add_child(b)
+
+
+## The settings, in the menu's own panel: language, difficulty, appearance, sound. Each choice is kept and shown at once.
+func _settings(box: VBoxContainer) -> void:
+	var again := {"settings": true}
+	box.add_child(Kit.lbl(tr("Settings"), Kit.T_STAT, Kit.C_TEXT, Kit.FONT_T))
+	box.add_child(caps(tr("Language")))
+	var lh := segmented()
+	box.add_child(lh)
 	for code in GameData.LANGUAGES:
-		var lb := Kit.btn(GameData.LANGUAGES[code], func(): _set_language(code), 14, 110)
-		if GameData.language == code:
-			Kit.accent_btn(lb, Kit.C_ACCENT)
-		langs.add_child(lb)
+		lh.add_child(Kit.choice(GameData.LANGUAGES[code], GameData.language == code, func():
+			GameData.set_language(code)
+			go("menu", again), 130))
+	box.add_child(caps(tr("Difficulty")))
+	var dh := segmented()
+	box.add_child(dh)
+	for d in ["facil", "normal", "dificil"]:
+		dh.add_child(Kit.choice(GameData.DIFFICULTY[d].name, GameState.difficulty == d, func():
+			GameState.difficulty = d
+			go("menu", again), 130))
+	box.add_child(Kit.lbl(GameData.DIFFICULTY[GameState.difficulty].desc, Kit.T_SMALL, Kit.C_DIM))
+	box.add_child(caps(tr("Appearance")))
+	var mh := segmented()
+	box.add_child(mh)
+	for m in Kit.MODES:
+		mh.add_child(Kit.choice(tr("Dark") if m == "dark" else tr("Light"), Kit.mode == m, func():
+			if m != Kit.mode:
+				Kit.set_mode(m)
+				main.root_ui.theme = Kit.build_theme()
+				go("menu", again), 130))
+	box.add_child(caps(tr("Sound")))
+	var sh := segmented()
+	box.add_child(sh)
+	for on in [true, false]:
+		sh.add_child(Kit.choice(tr("On") if on else tr("Off"), Kit.UiSound.is_muted() != on, func():
+			Kit.UiSound.set_muted(not on)
+			go("menu", again), 130))
+	box.add_child(rule())
+	box.add_child(Kit.lbl(tr("The Earth behind is NASA data: Blue Marble by day, Black Marble city lights at night, and the real clouds of 31 August 2024 from the VIIRS instrument."), 12, Kit.C_DIM, Kit.FONT_R, true))
+	var back := Kit.btn(tr("◀ Menu"), func(): go("menu"), Kit.T_BODY, 340)
+	back.custom_minimum_size.y = Kit.BTN_H
+	box.add_child(back)
 
 
 func process(_delta: float) -> void:
@@ -133,21 +137,6 @@ func _tick() -> void:
 	if clock and is_instance_valid(clock):
 		var t := Time.get_datetime_dict_from_system(true)
 		clock.text = "UTC %02d:%02d:%02d" % [t.hour, t.minute, t.second]
-
-
-## Switches the language (the choice is remembered) and draws the menu again in it.
-func _set_language(code: String) -> void:
-	GameData.set_language(code)
-	go("menu")
-
-
-## Switches the appearance (remembered), rebuilds the theme and draws the menu again in it.
-func _set_mode(m: String) -> void:
-	if m == Kit.mode:
-		return
-	Kit.set_mode(m)
-	main.root_ui.theme = Kit.build_theme()
-	go("menu")
 
 
 # ===================================================================================== PIECES

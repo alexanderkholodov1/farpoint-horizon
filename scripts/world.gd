@@ -147,6 +147,7 @@ func clear_stage() -> void:
 	orbit_ship = null
 	ship_label = null
 	ship_lost = false
+	cam.h_offset = 0.0
 	world_env.environment.sky = Space.make_space_sky()
 	world_env.environment.ambient_light_energy = 0.35
 	world_env.environment.fog_enabled = false
@@ -171,7 +172,10 @@ func stage_menu() -> void:
 	cam_pitch = -0.12
 	cam_dist_goal = 3.6
 	cam_dist = 3.6
-	cam_target = Vector3(-1.25, 0.05, 0)
+	# the camera circles the Earth's own centre, so dragging turns the planet in place; the lens is shifted so the
+	# Earth sits right of the menu (an off-centre target made the planet swing across the screen when dragged)
+	cam_target = Vector3(0, 0.05, 0)
+	cam.h_offset = -1.25
 
 
 ## Puts the craft of mission m on a circular orbit (ring, craft, tr("YOUR CRAFT") label); _animate_world moves it.

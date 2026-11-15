@@ -90,6 +90,9 @@ func show_step(idx: int) -> void:
 	left.add_child(lv)
 	var R: Dictionary = GameData.ROLES[STEP.role]
 	lv.add_child(Kit.lbl(STEP.title, 26, Kit.C_TEXT, Kit.FONT_T))
+	# what to do here, in one line, before anything else
+	if TODO.has(STEP.id):
+		lv.add_child(Kit.lbl(tr(TODO[STEP.id]), Kit.T_LEAD, Kit.C_GOLD, Kit.FONT_B, true))
 	var room = GameState.room
 	var turn: String = (tr("%s (bot) · %s") if room.is_bot(STEP.role) else tr("%s decides · %s")) % [room.holder_name(STEP.role), R.name]
 	lv.add_child(Kit.lbl(turn, 14, R.color, Kit.FONT_B))
@@ -354,9 +357,23 @@ func _fill_review(r: Dictionary) -> void:
 
 
 # ===================================================================================== DASHBOARD
+## What each step asks of the player, in one line (shown under the step's title).
+const TODO := {
+	"orbita": "Pick where your craft will fly.",
+	"plataforma": "Pick the body of your craft: bigger carries more and costs more.",
+	"instrumentos": "Pick the instruments that meet the science goals. Start with the ★ Key ones.",
+	"energia": "Pick panels and a battery until Power and Battery are blue on the board.",
+	"comunicaciones": "Pick an antenna that can send all your data home.",
+	"control": "Pick how your craft points and how it moves.",
+	"lanzador": "Pick the rocket that can lift it, and how long to operate.",
+	"revision": "Fix what is red, then launch.",
+}
+
+
 func _fill_dashboard(r: Dictionary) -> void:
 	var S: Dictionary = GameData.SCENARIOS[mission.scenario]
 	dash_box.add_child(Kit.lbl(tr("Mission board"), 20, Kit.C_TEXT, Kit.FONT_T))
+	dash_box.add_child(Kit.lbl(tr("What your craft uses, against what it has. Blue is fine; red must be fixed."), Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true))
 	_bar(tr("Budget"), tr("%s of %s") % [Kit.money(r.cost_total), Kit.money(r.budget)], r.cost_total / r.budget, 0.9, 1.0,
 		tr("Reserve %s") % Kit.pct(r.reserve) if r.reserve >= 0.0 else tr("Over budget!"), tr("Covers building, launch (%s) and operations for %d years (%s).") % [Kit.money(r.cost.launch), mission.years, Kit.money(r.cost.ops)])
 	var lim_txt := tr("platform %s · rocket %s") % [Kit.kg(r.mass_bus_max), Kit.kg(r.launch_cap) if r.launch_cap > 0.0 else tr("can't reach")]
@@ -425,7 +442,13 @@ func _bar(nm: String, value: String, frac: float, warn: float, bad: float, sub: 
 	pb.value = clamp(frac, 0.0, 1.0)
 	pb.add_theme_stylebox_override("fill", Kit.flat(col, Color(0, 0, 0, 0), 4, 0, 0, 0))
 	v.add_child(pb)
+	# a red bar says in words what is wrong: too much of it, or nothing to give it
+	if not higher_better and frac > bad:
+		n.add_theme_color_override("font_color", Kit.ink(Kit.C_BAD))
+		n.text = "✗ " + nm
+		if sub == "":
+			sub = tr("Nothing provides this yet: add the part that does") if frac >= 1.99 else tr("Too much: %s over what you have") % Kit.pct(frac - 1.0)
 	if sub != "":
-		v.add_child(Kit.lbl(sub, 12, col))
+		v.add_child(Kit.lbl(sub, 12, col, Kit.FONT_R, true))
 	v.mouse_entered.connect(func(): set_info(nm, info))
 	dash_box.add_child(v)

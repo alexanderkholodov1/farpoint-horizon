@@ -36,6 +36,8 @@ const BURN_WARP := 50.0             ## Time while an engine burns: a six-minute 
 const SUN_LON_DEG := 233.0          ## The Sun's ecliptic longitude on 15 November 2026 (about; our simplification).
 const UNIX_DAY0 := 1794700800       ## 15 November 2026 00:00 UTC, the first row of the Moon's ephemeris.
 const BRAKE_DV_MAX := 2500.0         ## m/s: a brake that has burned this much and still is not held has failed (a real one is about 900).
+const STEPS_TEXT := ["Plan", "Burn", "Coast", "Brake", "Moon orbit"]   ## The trip's steps, shown across the top.
+const STEP_OF := {"plan": 0, "burn": 1, "coast": 2, "missed": 2, "capture": 3, "lunar": 4}
 const LUNAR_ORBIT_HIGH := 160000.0  ## The capture burn ends when the orbit's high point is below this height (m).
 const STARS := 2400
 
@@ -65,6 +67,8 @@ var braking := false
 var leaving := false
 var auto_fly := false                  ## This try is flown by the flight computer (after Skip on a missed Moon).
 var missed_ms := 0
+var steps_row: HBoxContainer
+var steps_shown := ""
 var plan_ok := false                   ## The pilot said the plan is good (or let it be for a while): time runs to the burn.
 var plan_shown_ms := 0
 var cur_stop := ""                   ## The moment time is running to now ("count", "correct", "arrive").
@@ -270,6 +274,7 @@ func _build_hud() -> void:
 	hud.restart_pressed.connect(func(): _restart(false))
 	hud.warp_picked.connect(_on_warp_picked)
 	hud.set_autopilot(GameState.pilot_bot or auto_fly)
+	_build_steps()
 	_build_plan_panel()
 	hud.hint(tr("You are in orbit around the Earth. Mission control is working out when to leave so that you meet the Moon where it will be in three or four days."))
 
@@ -277,6 +282,26 @@ func _build_hud() -> void:
 func _on_autopilot(on: bool) -> void:
 	if on:
 		hud.hint(tr("Autopilot on: the flight computer flies every step."))
+
+
+## The trip's steps across the top, the one being flown lit: the player always knows where they are and what comes.
+func _build_steps() -> void:
+	steps_row = Kit.hbox(6)
+	steps_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	steps_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	Kit.place(steps_row, 0.5, 0, 0.5, 0, -330, 26, 330, 56)
+	hud.add_child(steps_row)
+	_show_steps()
+
+
+func _show_steps() -> void:
+	steps_shown = phase
+	for c in steps_row.get_children():
+		c.queue_free()
+	var at: int = STEP_OF.get(phase, 0)
+	for i in STEPS_TEXT.size():
+		var col: Color = Kit.C_GOLD if i == at else (Kit.C_OK if i < at else Color(Kit.C_ON_DARK, 0.55))
+		steps_row.add_child(Kit.chip(("✓ " if i < at else "%d  " % (i + 1)) + tr(STEPS_TEXT[i]), col))
 
 
 ## The plan's own controls: move the burn earlier or later, make it bigger or smaller, or take mission control's plan.
@@ -949,6 +974,8 @@ func _set_line(mi: MeshInstance3D, pts: PackedVector3Array, strip := true) -> vo
 
 # ===================================================================================== READOUTS AND CAMERA
 func _readouts() -> void:
+	if steps_shown != phase:
+		_show_steps()
 	hud.clock.text = FlightHud.met_text(m.t - t_launch)
 	var dtd := Time.get_datetime_dict_from_unix_time(UNIX_DAY0 + int(m.t))
 	hud.value("utc", "%d-%02d-%02d %02d:%02d" % [dtd.year, dtd.month, dtd.day, dtd.hour, dtd.minute])
