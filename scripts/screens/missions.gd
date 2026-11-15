@@ -25,9 +25,10 @@ func enter(_args: Dictionary) -> void:
 	Kit.place(head, 0, 0, 1, 0, 50, 30, -50, 130)
 	add_child(head)
 	var over := Kit.caps(GameData.CML_NAMES[1] + "  ·  " + tr("Every mission starts with a science question"))
-	over.add_theme_color_override("font_color", Color(Kit.C_ON_DARK, 0.7))   # straight on the dark scene in both appearances
+	over.add_theme_color_override("font_color", Color(Kit.C_ON_DARK, 0.8))   # straight on the dark scene in both appearances
+	Kit.legible(over, 1.4)
 	head.add_child(over)
-	head.add_child(Kit.lbl(tr("Choose your mission"), 36, Kit.C_ON_DARK, Kit.FONT_T))
+	head.add_child(Kit.legible(Kit.lbl(tr("Choose your mission"), 36, Kit.C_ON_DARK, Kit.FONT_T)))
 	var grid := GridContainer.new()
 	grid.columns = 3
 	grid.add_theme_constant_override("h_separation", 18)

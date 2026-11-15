@@ -107,22 +107,17 @@ func _script() -> void:
 		[16.5, func(): _card_at(tr("Designed, launched and flown from"), Kit.T_LEAD, Kit.C_ON_DARK, 0.27, 0.36, 6.0, "fade", 720)],
 		[17.3, func(): _card_at("Quito, Ecuador", Kit.T_CINEMA * 0.8, Kit.C_ON_DARK, 0.27, 0.45, 5.6, "track", 720)],
 		[18.4, func(): _card_at("0.18° S · 78.47° W", Kit.T_BODY, Color(1, 0.8, 0.3), 0.27, 0.54, 4.6, "type", 720)],
-		[24.5, func(): _card_at(tr("Made by"), Kit.T_BODY, Color(Kit.C_ON_DARK, 0.7), 0.27, 0.33, 9.0, "track", 720)],
+		[24.5, func(): _card(tr("Made by"), Kit.T_LEAD, Color(Kit.C_ON_DARK, 0.8), 0.33, 12.6, "track")],
 	]
-	for i in people.size():
+	# the team at once, side by side and the same size, so nobody comes first; each with what they made, on the kit's
+	# frosted panel so the words read over the bright clouds behind them
+	var team_n := people.size()
+	for i in team_n:
 		var P: Dictionary = people[i]
-		var at := 25.2 + i * 4.4
-		cues.append([at, func(): _card_at(P.name, Kit.T_CINEMA * 0.62, Kit.C_ON_DARK, 0.27, 0.43, 4.0, "type", 760)])
-		cues.append([at + 0.9, func(): _card_at(String(P.role).substr(0, 1).to_upper() + String(P.role).substr(1), Kit.T_LEAD, Color(Kit.C_ON_DARK, 0.8), 0.27, 0.53, 3.1, "fade", 640)])
-	cues.append([34.5, func(): _card(tr("And the crew"), Kit.T_BODY, Color(Kit.C_ON_DARK, 0.7), 0.14, 8.0, "track")])
-	var roles: Array = GameData.ROLE_ORDER
-	var quips := {"engineer": tr("counts every gram"), "scientist": tr("points everything at volcanoes"), "pilot": tr("loves the big red button"), "ground": tr("has not slept since launch")}
-	for i in roles.size():
-		var role: String = roles[i]
-		var R: Dictionary = GameData.ROLES[role]
-		var x := 0.2 + 0.2 * i
-		cues.append([35.2 + i * 0.7, func(): _card_at(Bots.NAMES.get(role, "?"), Kit.T_SHOUT * 0.75, R.color, x, 0.24, 7.2 - i * 0.7, "track", 320)])
-		cues.append([35.6 + i * 0.7, func(): _card_at(String(quips.get(role, "")), Kit.T_BODY, Color(Kit.C_ON_DARK, 0.85), x, 0.31, 6.8 - i * 0.7, "fade", 320)])
+		var x := (i + 0.5) / float(team_n) * 0.84 + 0.08
+		var role := String(P.role).substr(0, 1).to_upper() + String(P.role).substr(1)
+		cues.append([25.2, func(): _card_at(P.name, Kit.T_CINEMA * 0.5, Kit.C_ON_DARK, x, 0.43, 12.0, "type", 640)])
+		cues.append([26.4, func(): _plate_at(role, x, 0.6, 10.6, 600)])
 	var made := [["Godot", tr("the engine")], ["Blender", tr("every model of ours")], ["Inter", tr("every letter")], [tr("NASA open data"), tr("the Earth, the Moon, the Andes")]]
 	for i in made.size():
 		var M: Array = made[i]
@@ -196,12 +191,12 @@ func _title() -> void:
 	h.alignment = BoxContainer.ALIGNMENT_CENTER
 	Kit.place(h, 0, 0.5, 1, 0.5, 0, -70, 0, 50)
 	layer.add_child(h)
-	var f := Kit.lbl("Farpoint", Kit.T_CINEMA, Kit.C_ON_DARK, Kit.FONT_T)
+	var f := Kit.legible(Kit.lbl("Farpoint", Kit.T_CINEMA, Kit.C_ON_DARK, Kit.FONT_T))
 	h.add_child(f)
 	var sp := FontVariation.new()
 	sp.base_font = Kit.FONT_B
 	sp.spacing_glyph = 40
-	var hz := Kit.lbl("HORIZON", Kit.T_CINEMA, Color(0.55, 0.78, 1.0), sp)
+	var hz := Kit.legible(Kit.lbl("HORIZON", Kit.T_CINEMA, Color(0.55, 0.78, 1.0), sp))
 	h.add_child(hz)
 	h.modulate.a = 0.0
 	var tw := h.create_tween()
@@ -214,6 +209,26 @@ func _title() -> void:
 	_arc(0.62, 0.36, 7.5)
 
 
+## A paragraph on the kit's frosted panel centred at (x, y), fading in and out over `life` seconds: words that must be
+## read over a bright planet.
+func _plate_at(text: String, x: float, y: float, life: float, width: float) -> void:
+	var p := Kit.panel_box(18)
+	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var l := Kit.lbl(text, Kit.T_LEAD, Kit.C_TEXT, Kit.FONT_R, true)
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.custom_minimum_size.x = width - 36.0
+	p.add_child(l)
+	Kit.place(p, x, y, x, y, -width / 2.0, -36, width / 2.0, 36)
+	p.grow_vertical = Control.GROW_DIRECTION_BOTH
+	p.modulate.a = 0.0
+	layer.add_child(p)
+	var tw := p.create_tween()
+	tw.tween_property(p, "modulate:a", 1.0, 0.8)
+	tw.tween_interval(maxf(0.0, life - 1.6))
+	tw.tween_property(p, "modulate:a", 0.0, 0.8)
+	tw.tween_callback(p.queue_free)
+
+
 ## A line of text across the screen at height y (0..1), styled "track" (letters close in), "type" (typed out) or "fade".
 func _card(text: String, size: float, col: Color, y: float, life: float, style: String, width := 1400.0) -> Label:
 	return _card_at(text, size, col, 0.5, y, life, style, width)
@@ -223,10 +238,7 @@ func _card_at(text: String, size: float, col: Color, x: float, y: float, life: f
 	var l := Kit.lbl(text, int(size), col, Kit.FONT_T if size >= Kit.T_STAT else Kit.FONT_B, true)
 	l.add_theme_color_override("font_color", col)   # straight on the scene: keep the colour as given
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	l.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.55))
-	l.add_theme_constant_override("shadow_offset_x", 0)
-	l.add_theme_constant_override("shadow_offset_y", 2)
-	l.add_theme_constant_override("shadow_outline_size", 3)
+	Kit.legible(l)
 	var w := minf(width, 1400.0)
 	Kit.place(l, x, y, x, y, -w / 2.0, -size * 0.8, w / 2.0, size * 0.8)
 	layer.add_child(l)
@@ -275,7 +287,7 @@ func _roll() -> void:
 	roll.custom_minimum_size.x = 840
 	Kit.place(roll, 0.5, 1, 0.5, 1, -420, 40, 420, 40)
 	layer.add_child(roll)
-	var head := Kit.lbl(tr("The sources behind every number"), Kit.T_STAT, Kit.C_ON_DARK, Kit.FONT_T, true)
+	var head := Kit.legible(Kit.lbl(tr("The sources behind every number"), Kit.T_STAT, Kit.C_ON_DARK, Kit.FONT_T, true))
 	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	roll.add_child(head)
 	roll.add_child(Kit.spacer(Kit.GAP * 2))
@@ -288,7 +300,7 @@ func _roll() -> void:
 		for e in sec.entries:
 			# "NASA Earth Observatory (...), image pages ..." -> its first phrase
 			var who: String = String(e.text).get_slice(". ", 0).get_slice(" https", 0)
-			var l := Kit.lbl("%s   %s" % [e.id, who.left(90)], Kit.T_SMALL, Color(Kit.C_ON_DARK, 0.85), Kit.FONT_R, true)
+			var l := Kit.legible(Kit.lbl("%s   %s" % [e.id, who.left(90)], Kit.T_BODY, Color(Kit.C_ON_DARK, 0.9), Kit.FONT_R, true))
 			l.add_theme_color_override("font_color", Color(Kit.C_ON_DARK, 0.85))
 			l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			roll.add_child(l)
@@ -315,12 +327,13 @@ func _to_end() -> void:
 	a.sun_at = 0.5
 	a.thickness = 2.5
 	v.add_child(a)
-	var th := Kit.lbl(tr("Thank you for flying with us."), Kit.T_SHOUT, Kit.C_ON_DARK, Kit.FONT_T)
+	var th := Kit.legible(Kit.lbl(tr("Thank you for flying with us."), Kit.T_SHOUT, Kit.C_ON_DARK, Kit.FONT_T))
 	th.add_theme_color_override("font_color", Kit.C_ON_DARK)
 	th.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(th)
-	var sub := Kit.lbl(tr("Farpoint HORIZON uses NASA's open data. NASA does not endorse it."), Kit.T_SMALL, Color(Kit.C_ON_DARK, 0.7))
-	sub.add_theme_color_override("font_color", Color(Kit.C_ON_DARK, 0.7))
+	var sub := Kit.lbl(tr("Farpoint HORIZON uses NASA's open data. NASA does not endorse it."), Kit.T_BODY, Color(Kit.C_ON_DARK, 0.7))
+	sub.add_theme_color_override("font_color", Color(Kit.C_ON_DARK, 0.8))
+	Kit.legible(sub)
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(sub)
 	v.add_child(Kit.spacer(Kit.GAP))

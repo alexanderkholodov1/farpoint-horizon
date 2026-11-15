@@ -160,20 +160,20 @@ func _celebrate(s: Dictionary, last_sim: Dictionary) -> void:
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	intro.add_child(v)
 	var title_txt: String = tr("MISSION OVER") if lost else (tr("MISSION COMPLETE!") if s.grade in ["S", "A"] else tr("MISSION DONE!"))
-	var t := Kit.lbl(title_txt, Kit.T_SHOUT + 8, Color(1.0, 0.78, 0.42), Kit.FONT_T)
+	var t := Kit.legible(Kit.lbl(title_txt, Kit.T_SHOUT + 8, Color(1.0, 0.78, 0.42), Kit.FONT_T))
 	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(t)
-	var sub := Kit.lbl(GameData.SCENARIOS[mission.scenario].name + "  ·  " + str(s.label), Kit.T_LEAD, Kit.C_ON_DARK, Kit.FONT_R)
+	var sub := Kit.legible(Kit.lbl(GameData.SCENARIOS[mission.scenario].name + "  ·  " + str(s.label), Kit.T_VALUE, Kit.C_ON_DARK, Kit.FONT_B), 1.3)
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(sub)
 	var gcol: Color = {"S": Color(1.0, 0.85, 0.3), "A": Kit.C_OK, "B": Kit.C_ACCENT, "C": Kit.C_WARN, "D": Kit.C_BAD}[s.grade]
-	var g := Kit.lbl(s.grade, 150, Kit.ink(gcol), Kit.FONT_T)
+	var g := Kit.legible(Kit.lbl(s.grade, 150, Kit.ink(gcol), Kit.FONT_T), 0.7)
 	g.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(g)
-	pts_lbl = Kit.lbl(tr("%d points") % 0, Kit.T_CLOCK, Color(0.62, 0.82, 1.0), Kit.font_num())
+	pts_lbl = Kit.legible(Kit.lbl(tr("%d points") % 0, Kit.T_CLOCK, Color(0.62, 0.82, 1.0), Kit.font_num()))
 	pts_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(pts_lbl)
-	var skip := Kit.lbl(tr("Click or press any key for your report"), Kit.T_SMALL, Kit.C_ON_DARK, Kit.FONT_R)
+	var skip := Kit.legible(Kit.lbl(tr("Click or press any key for your report"), Kit.T_BODY, Kit.C_ON_DARK, Kit.FONT_R), 1.3)
 	skip.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	skip.modulate.a = 0.0
 	v.add_child(skip)
