@@ -18,8 +18,8 @@ func _ready() -> void:
 	g.go("flight")
 	var t := 0.0
 	while t < 170.0 and g.screen_id == "flight":
-		await _wait(3.0)
-		t += 3.0
+		await _wait(2.0)
+		t += 2.0
 		var f = g.screen
 		n += 1
 		await _shot("%02d" % n)
