@@ -23,7 +23,7 @@ OUT = os.path.abspath(sys.argv[sys.argv.index("--") + 1]) if "--" in sys.argv el
 BODY = os.path.join(HERE, "rumi_trellis_body.glb")
 
 NECK_Z = 0.118      # above this the generated head is cut off (the collar ring stays)
-HEAD_C = Vector((0.0, -0.01, 0.27))
+HEAD_C = Vector((0.0, -0.01, 0.256))
 HEAD_R = Vector((0.19, 0.16, 0.175))
 
 CREAM = (1.0, 0.93, 0.85)
@@ -93,6 +93,15 @@ def body():
     bmesh.ops.delete(bm, geom=[v for v in bm.verts if v.co.z > NECK_Z and v.co.y < 0.15], context="VERTS")
     bm.to_mesh(b.data)
     bm.free()
+    # the head sits on the collar: its centre over the middle of the neck opening, not where the generated head was
+    ring = [v.co for v in b.data.vertices if NECK_Z - 0.035 < v.co.z <= NECK_Z and v.co.y < 0.15]
+    xs = [c.x for c in ring]
+    ys = [c.y for c in ring]
+    HEAD_C.x = (min(xs) + max(xs)) / 2
+    # forward, its face flush with the front of the chest (as the reference seen from the side): the neck opening is
+    # deeper than the head, and the backpack sits behind it
+    HEAD_C.y = min(ys) + HEAD_R.y * 0.92 + 0.005
+    print("collar centre", round(HEAD_C.x, 3), round(HEAD_C.y, 3), "opening", round(max(xs) - min(xs), 3), "x", round(max(ys) - min(ys), 3))
     return b
 
 
