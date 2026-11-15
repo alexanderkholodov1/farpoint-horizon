@@ -4,6 +4,7 @@ extends "res://scripts/screens/screen.gd"
 
 const Horizon := preload("res://scripts/ui/horizon.gd")
 const VERSION := "v0.2.0"
+const Coach := preload("res://scripts/tutorial/coach.gd")
 const QUITO := "0.18° S · 78.47° W"   ## Quito, the team's city (the Ecuador marker on the globe).
 
 var clock: Label
@@ -35,6 +36,10 @@ func enter(_args: Dictionary) -> void:
 	var play := Kit.accent_btn(Kit.btn(tr("▶  Play"), func(): go("team"), 21, 340), Kit.C_GOLD)
 	play.custom_minimum_size.y = 56
 	box.add_child(play)
+	# the first mission, guided by the crew (scripts/tutorial/coach.gd)
+	var first := Kit.btn(tr("First mission · guided by the crew"), func(): Coach.start(main), Kit.T_BODY, 340)
+	first.custom_minimum_size.y = Kit.BTN_H
+	box.add_child(first)
 	box.add_child(Kit.spacer(4))
 	# ---------- settings: difficulty and appearance, each a row of joined choices
 	box.add_child(rule())
