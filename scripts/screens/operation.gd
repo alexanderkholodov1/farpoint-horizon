@@ -271,7 +271,7 @@ func _ask(st: Dictionary) -> void:
 	var O: Dictionary = GameData.ORBITS[mission.orbit]
 	var low: bool = float(O.drag_life) < 900.0
 	var beyond: bool = mission.orbit == "lunar" or mission.orbit == "l2"
-	v.add_child(Kit.lbl(tr("Month %d · %s") % [st.month, st.name], Kit.T_LEAD, Kit.C_WARN, Kit.FONT_B, true))
+	v.add_child(Kit.lbl(tr("Forecast for month %d · %s") % [st.month, st.name], Kit.T_LEAD, Kit.C_WARN, Kit.FONT_B, true))
 	var what: String
 	var craft: String
 	if st.kind == "G":
