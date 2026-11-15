@@ -256,3 +256,11 @@ All checked 2026-11-14; the research behind them is `kb/research/in-flight-failu
 - **S-eo-orbits** Riebeek, H. *Catalog of Earth Satellite Orbits*, NASA Earth Observatory, 2009.
   https://earthobservatory.nasa.gov/features/OrbitsCatalog. Low, Sun-synchronous and geostationary orbits in plain
   words: the glossary of the game (issue #69) and the plain names of its orbits.
+- **S-noaa-scales** NOAA Space Weather Prediction Center. *NOAA Space Weather Scales*, and the pages *Coronal Mass
+  Ejections* and *Solar Radiation Storm*. https://www.swpc.noaa.gov/noaa-scales-explanation,
+  https://www.swpc.noaa.gov/phenomena/coronal-mass-ejections, https://www.swpc.noaa.gov/phenomena/solar-radiation-storm.
+  The space weather alerts of the operation (issue #90): G4 about 100 and G5 about 4 storms per 11-year cycle, S3
+  about 10 and S4 about 3; their effects on spacecraft (surface charging, orientation problems, drag on low orbits,
+  memory upsets, noise in images, worn solar panels); the fastest coronal mass ejections reach the Earth in 15 to 18
+  hours and slower ones take several days; protons cross from the Sun in tens of minutes, and a radiation storm lasts
+  hours to days.
