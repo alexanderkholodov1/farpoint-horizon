@@ -2,7 +2,7 @@ extends Node
 ## The operation in orbit as a player sees it (issue #64; development only, needs a window): every orbit (LEO, SSO,
 ## GEO, the Moon) at each speed of time, so the ring can be judged around its body. Saves to shots/orbit_*.png.
 ## Run: tools/godot.sh --path . --resolution 1600x900 res://tests/orbitshot.tscn
-const CASES := [["volcanes", "leo"], ["volcanes", "sso"], ["clima", "geo"], ["luna", "lunar"]]
+const CASES := [["telescopio", "l2"], ["volcanes", "sso"]]
 var g
 
 
