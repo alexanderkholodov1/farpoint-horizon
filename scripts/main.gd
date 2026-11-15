@@ -77,6 +77,9 @@ func _fit_screen() -> void:
 	# text is never drawn below 80 % of its design size in CSS pixels: 1600 x 900 shrunk to a 390 px tall phone would
 	# be 43 %, so short screens get a bigger interface (the screens lay themselves out for the space left, Kit.compact)
 	var factor := maxf(1.0, MIN_SCALE * 900.0 / maxf(css_h, 200.0))
+	# but the room stays at least 1000 units wide, or a narrow phone (667 px across) cannot hold the three columns of
+	# the design side by side: there the text gives a little instead (issue #93)
+	factor = maxf(1.0, minf(factor, 0.9 * (px.x / maxf(px.y, 1.0))))
 	var upright: bool = px.x < px.y * 1.05
 	if upright:
 		factor = 3.0   # only the turn card is seen: big enough to read on a phone held upright

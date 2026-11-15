@@ -241,6 +241,35 @@ static func build_theme() -> Theme:
 
 # ===================================================================================== WIDGETS
 ## Sets anchors (al, at, ar, ab: 0..1 of the parent) and offsets in pixels; returns the control.
+## On a short screen (a phone in landscape, under its browser bar) a panel anchored to the bottom may reach up into
+## one above it. This scales it down, from its bottom corner, just enough that its top stays below top_limit (in the
+## screen's units), never below min_s. Returns the scale used. Measured every frame by the screens that need it, so it
+## follows the panel's own content and the screen's size.
+static func fit_under(lower: Control, top_limit: float, right_corner: bool, min_s := 0.55) -> float:
+	var bottom: float = lower.get_viewport_rect().size.y - MARGIN
+	var s := clampf((bottom - top_limit) / maxf(lower.size.y, 1.0), min_s, 1.0)
+	lower.pivot_offset = Vector2(lower.size.x if right_corner else 0.0, lower.size.y)
+	lower.scale = Vector2(s, s)
+	return s
+
+
+## The middle column of a phone's three-column screen (design, builder): the hint and the action bar span exactly the
+## gap between the left panel and the right one, the bar on the bottom edge and the hint just above it, so neither
+## covers a panel whatever the panels' content or the screen's size.
+static func fit_middle(left: Control, right: Control, hint: Control, bar: Control) -> void:
+	var view: Vector2 = bar.get_viewport_rect().size
+	var l: float = left.get_global_rect().end.x + 8.0
+	var r: float = right.get_global_rect().position.x - 8.0 if right.visible else view.x - MARGIN
+	for c in [hint, bar]:
+		c.offset_left = l
+		c.offset_right = r - view.x
+	bar.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	bar.offset_top = -MARGIN
+	bar.offset_bottom = -MARGIN
+	hint.offset_top = -MARGIN - bar.size.y - 6.0
+	hint.offset_bottom = hint.offset_top
+
+
 static func place(c: Control, al: float, at: float, ar: float, ab: float, ol: float, ot: float, orr: float, ob: float) -> Control:
 	c.anchor_left = al
 	c.anchor_top = at
