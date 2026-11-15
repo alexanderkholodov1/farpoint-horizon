@@ -98,3 +98,17 @@ AUTOPILOT,PILOTO AUTO
 Braking: watch your path close into a loop around the Moon,Frenando: mira cómo tu trayectoria se cierra en un lazo alrededor de la Luna
 your plan first,primero tu plan
 Speed lost,Velocidad perdida
+SPACE,ESPACIO
+IGNITE,ENCENDER
+PERFECT,PERFECTO
+GOOD,BIEN
+EARLY,PRONTO
+LATE,TARDE
+AUTO,AUTO
+Ignition,Encendido
+Cut,Corte
+%d × %d km over its surface.,%d × %d km sobre su superficie.
+Press SPACE when the ring closes on the circle: that cuts the engine,Pulsa ESPACIO cuando el anillo se cierre sobre el círculo: eso apaga el motor
+Press SPACE when the ring closes on the circle,Pulsa ESPACIO cuando el anillo se cierre sobre el círculo
+"Press SPACE when the ring closes: the rounder the orbit, the better","Pulsa ESPACIO cuando el anillo se cierre: cuanto más redonda la órbita, mejor"
+Press SPACE when the ring closes on the circle to brake,Pulsa ESPACIO cuando el anillo se cierre sobre el círculo para frenar

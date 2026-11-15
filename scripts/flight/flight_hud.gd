@@ -56,6 +56,7 @@ var auto_note := ""        ## Set by a screen that runs time by itself ("Auto"),
 
 
 var _top_right: HBoxContainer
+var ring: Instruments.TimingRing   ## The timing ring in the middle (ring_show, ring_grade).
 var _hint_tw: Tween
 
 
@@ -160,7 +161,7 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 	big.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	big.add_theme_constant_override("outline_size", 12)
 	big.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.55))
-	Kit.place(big, 0.5, 0.2, 0.5, 0.2, -600, -50, 600, 32)
+	Kit.place(big, 0, 0.2, 1, 0.2, 500, -50, -400, 32)
 	big.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(big)
 	sub = Kit.lbl("", Kit.T_ACTION, Kit.C_ON_DARK, Kit.FONT_B, true)
@@ -170,6 +171,10 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 	Kit.place(sub, 0, 0.2, 1, 0.2, 520, 38, -420, 110)   # the column between the readouts and the buttons, at any width
 	sub.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(sub)
+	ring = Instruments.TimingRing.new()
+	Kit.place(ring, 0.5, 0.5, 0.5, 0.5, -320, -250, 320, 330)
+	ring.visible = false
+	add_child(ring)
 	var hb: Array = Kit.hint_box()
 	hint_panel = hb[0]
 	hint_lbl = hb[1]
@@ -322,6 +327,20 @@ func gauge(name_: String, v: float, text := "") -> void:
 	g.text = text
 
 
+## Shows the timing ring this frame: `remaining` from 1 (far) to 0 (press now), `window` how near 0 is on time.
+func ring_show(label: String, remaining: float, window := 0.05) -> void:
+	ring.active = true
+	ring.label = label
+	ring.remaining = remaining
+	ring.window = window
+
+
+## Flashes how a timed press went ("PERFECT", "LATE"...).
+func ring_grade(text: String, col: Color) -> void:
+	ring.grade(text, col)
+	Sound.player(self, "chime" if col == Kit.C_OK else "beep").play()
+
+
 ## Renames a gauge (the same instrument reads the speed added in a burn and the speed lost in a brake).
 func name_gauge(name_: String, label: String) -> void:
 	_gauges[name_].title = label
@@ -337,6 +356,10 @@ func message(big_text: String, small_text := "", col := Color.WHITE, time := 2.5
 		_msg_tw.kill()
 	big.text = big_text
 	sub.text = small_text
+	var fs := Kit.T_SHOUT
+	while fs > 30 and Kit.FONT_T.get_string_size(big_text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > maxf(size.x - 920.0, 300.0):
+		fs -= 2
+	big.add_theme_font_size_override("font_size", fs)
 	big.add_theme_color_override("font_color", col)
 	big.modulate.a = 1.0
 	sub.modulate.a = 1.0

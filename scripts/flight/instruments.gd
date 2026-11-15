@@ -332,3 +332,59 @@ class Switch extends Button:
 		var kx := lerpf(track.position.x + 10.0, track.end.x - 10.0, _k)
 		draw_circle(Vector2(kx, size.y * 0.5), 8.0, Color(0.9, 0.93, 0.98).lerp(lit, _k))
 		draw_circle(Vector2(kx, size.y * 0.5), 3.0, Color(0, 0, 0, 0.25))
+
+
+## A timing ring, for the moments that ask for one press at the right instant (light the engine, cut it, brake): a
+## ring closes onto a fixed circle and the pilot presses when they meet. `remaining` runs from 1 (far) to 0 (now) and
+## below (late); `window` is how near 0 still counts as on time. grade() flashes how the press went.
+class TimingRing extends Control:
+	var active := false
+	var remaining := 1.0
+	var window := 0.05
+	var label := ""
+	var _grade := ""
+	var _grade_col := Color.WHITE
+	var _grade_t := 9.0
+	var _t := 0.0
+
+	func _init() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	func grade(text: String, col: Color) -> void:
+		_grade = text
+		_grade_col = col
+		_grade_t = 0.0
+
+	func _process(delta: float) -> void:
+		_t += delta
+		_grade_t += delta
+		visible = active or _grade_t < 1.6
+		queue_redraw()
+
+	func _draw() -> void:
+		var c := size * 0.5
+		var r0 := 62.0
+		if active:
+			var on: bool = absf(remaining) <= window
+			var late: bool = remaining < -window
+			var target: Color = Kit.C_OK if on else Kit.C_GOLD
+			draw_arc(c, r0, 0.0, TAU, 64, Color(target, 0.95), 5.0 if on else 3.0, true)
+			for k in 4:   # four marks, as a sight
+				var a := TAU * k / 4.0
+				draw_line(c + Vector2.from_angle(a) * (r0 - 9.0), c + Vector2.from_angle(a) * (r0 + 9.0), Color(target, 0.9), 2.0, true)
+			var r := r0 * (1.0 + 2.4 * clampf(remaining, -0.25, 1.4))
+			var col: Color = Kit.C_BAD if late else (Kit.C_OK if on else Kit.C_ACCENT)
+			draw_arc(c, r, 0.0, TAU, 72, Color(col, 0.35), 9.0, true)
+			draw_arc(c, r, 0.0, TAU, 72, col, 3.0, true)
+			# the key and the word
+			var word := TranslationServer.translate("SPACE") + "  ·  " + label
+			var w := Kit.FONT_B.get_string_size(word, HORIZONTAL_ALIGNMENT_LEFT, -1, Kit.T_BODY).x + 28.0
+			var box := Rect2(c + Vector2(-w * 0.5, r0 + 26.0), Vector2(w, 30.0))
+			draw_style_box(Kit.flat(Color(0.0, 0.01, 0.04, 0.8), Color(target, 0.9 if on else 0.5 + 0.3 * sin(_t * 8.0)), 8, 2, 0, 0), box)
+			draw_string(Kit.FONT_B, box.position + Vector2(0, 21), word, HORIZONTAL_ALIGNMENT_CENTER, w, Kit.T_BODY, target)
+		if _grade_t < 1.6:
+			var k := clampf(_grade_t / 0.18, 0.0, 1.0)
+			var fade := 1.0 - smoothstep(1.0, 1.6, _grade_t)
+			var fs := int(lerpf(64.0, 44.0, k))
+			draw_string_outline(Kit.FONT_T, c + Vector2(-300, -r0 - 34.0), _grade, HORIZONTAL_ALIGNMENT_CENTER, 600, fs, 10, Color(0, 0, 0, 0.6 * fade))
+			draw_string(Kit.FONT_T, c + Vector2(-300, -r0 - 34.0), _grade, HORIZONTAL_ALIGNMENT_CENTER, 600, fs, Color(_grade_col, fade))

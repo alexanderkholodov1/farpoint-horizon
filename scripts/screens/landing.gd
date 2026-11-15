@@ -72,7 +72,7 @@ func enter(_args: Dictionary) -> void:
 	model.spend_fuel(float(tli.get("lander_fuel_used", 0.0)))
 	lander = Scene3D.lander(mission, 3.2, Descent.LEG)
 	world.stage.add_child(lander)
-	flame = Space.make_flame(0.45)
+	flame = Space.make_vacuum_flame(0.45)
 	lander.get_node("Nozzle").add_child(flame)
 	dust = Scene3D.dust_ring(Vector3.ZERO, 3.0)
 	world.stage.add_child(dust)
