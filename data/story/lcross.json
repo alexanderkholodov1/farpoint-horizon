@@ -55,7 +55,7 @@
    {
     "who": "wayra",
     "mood": "flat",
-    "act": "talk",
+    "act": "idle",
     "shot": "close",
     "text": "Yes."
    },
@@ -69,7 +69,7 @@
    {
     "who": "rumi",
     "mood": "pleased",
-    "act": "talk",
+    "act": "work",
     "shot": "close",
     "text": "Two thousand kilograms of empty rocket at two and a half kilometers a second. That is a big splash.",
     "fact": "The 2000 kg Centaur upper stage hit at about 2.5 km/s.",
@@ -78,7 +78,7 @@
    {
     "who": "inti",
     "mood": "determined",
-    "act": "talk",
+    "act": "point",
     "shot": "close",
     "text": "And I keep our craft looking into the splash. From down here. For once nobody rides it."
    },
@@ -86,7 +86,8 @@
     "set": "lcross_space",
     "shot": "separate",
     "cut": true,
-    "wait": 4.0
+    "wait": 5.0,
+    "fx": "separate"
    },
    {
     "set": "houston",
@@ -112,10 +113,20 @@
     "title": "Your turn",
     "shot": "separate",
     "wait": 2.5,
-    "play": "lcross"
+    "play": "lcross",
+    "fx": "separate"
    }
   ],
   "outro": [
+   {
+    "set": "lcross_space",
+    "shot": "far",
+    "fx": "moonflash",
+    "who": "narrator",
+    "text": "11:31 UT. A flash at the bottom of Cabeus, then a cloud rising into the sunlight. Four minutes later, a second flash.",
+    "fact": "The Centaur hit Cabeus at 11:31 UT; the shepherding craft flew through the plume and hit four minutes later.",
+    "source": "S-lcross-nasa"
+   },
    {
     "who": "killa",
     "mood": "happy",
@@ -132,7 +143,12 @@
      "rumi",
      "inti"
     ],
-    "other": "rumi"
+    "other": "rumi",
+    "acts": {
+     "inti": "cheer",
+     "rumi": "wave",
+     "wayra": "cheer"
+    }
    },
    {
     "who": "rumi",

@@ -198,6 +198,22 @@ static func layer2(n: Node) -> void:
 		layer2(c)
 
 
+## A soft round glow texture (white at the centre, clear at the edge), for flashes and engine glows.
+static func soft_glow() -> GradientTexture2D:
+	var g := Gradient.new()
+	g.set_color(0, Color(1, 1, 1, 1))
+	g.set_color(1, Color(1, 1, 1, 0))
+	g.add_point(0.35, Color(1, 1, 1, 0.55))
+	var t := GradientTexture2D.new()
+	t.gradient = g
+	t.fill = GradientTexture2D.FILL_RADIAL
+	t.fill_from = Vector2(0.5, 0.5)
+	t.fill_to = Vector2(1.0, 0.5)
+	t.width = 128
+	t.height = 128
+	return t
+
+
 static func marks(list: Dictionary) -> Dictionary:
 	var out := {}
 	for k in list:
@@ -1485,6 +1501,23 @@ static func _lcross_stack(parent: Node3D, at: Vector3, apart: float) -> Node3D:
 	for i in 4:
 		cyl(shep, 0.35, 0.35, 0.9, Vector3(-1.2 + i * 0.8, 1.5, 0.6), dark, 12)
 	box(shep, Vector3(6.0, 0.15, 3.0), Vector3(0, 1.2, -2.6), mat(Color(0.1, 0.13, 0.25), 0.25, 0.6))
+	# the shepherding craft's engine glow, for its delay burn after separation
+	var burn := MeshInstance3D.new()
+	var bq := QuadMesh.new()
+	bq.size = Vector2(5.0, 5.0)
+	burn.mesh = bq
+	var bm := StandardMaterial3D.new()
+	bm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	bm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	bm.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	bm.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	bm.albedo_texture = soft_glow()
+	bm.albedo_color = Color(0.6, 0.8, 1.0, 0.0)
+	burn.material_override = bm
+	burn.position = Vector3(0, 2.2, 0)
+	burn.name = "Burn"
+	shep.add_child(burn)
+	shep.name = "Shepherd"
 	root.rotation = Vector3(-1.2, 0.5, 0.0)
 	return root
 
@@ -1516,7 +1549,25 @@ static func _lcross_space(world, env: Environment) -> Dictionary:
 	moon.rotation = Vector3(-0.9, 0, 0)
 	st.add_child(moon)
 	var stack := _lcross_stack(st, Vector3.ZERO, 0.0)
-	var apart := _lcross_stack(st, Vector3(400, 0, 0), 26.0)
+	var apart := _lcross_stack(st, Vector3(400, 0, 0), 0.0)
+	# the flash of the Centaur's impact, far below at the south pole (the story's "moonflash")
+	# on the shadowed side, where Cabeus lies in the dark: the flash stands out
+	var at := moon.position + Vector3(-0.5, 0.72, 0.48).normalized() * 902.0
+	var flash := MeshInstance3D.new()
+	var fq := QuadMesh.new()
+	fq.size = Vector2(90, 90)
+	flash.mesh = fq
+	var fm := StandardMaterial3D.new()
+	fm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	fm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	fm.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	fm.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	fm.albedo_texture = soft_glow()
+	fm.no_depth_test = true
+	fm.albedo_color = Color(1.0, 0.92, 0.75, 0.0)
+	flash.material_override = fm
+	flash.position = at
+	st.add_child(flash)
 	return {
 		"marks": marks({"inti": [0, 0, 600, 0], "killa": [2, 0, 600, 0], "rumi": [4, 0, 600, 0], "wayra": [6, 0, 600, 0]}),
 		"cast": [],
@@ -1524,7 +1575,11 @@ static func _lcross_space(world, env: Environment) -> Dictionary:
 			"approach": {"from": Vector3(60, 30, 80), "to": Vector3(0, -200, -1500), "from2": Vector3(35, 12, 55), "to2": Vector3(0, -300, -1500), "time": 7.0},
 			"stack": {"from": Vector3(40, 22, 45), "to": Vector3(0, 5, 0), "from2": Vector3(28, 8, 52), "to2": Vector3(0, 0, 0), "time": 8.0},
 			"separate": {"from": Vector3(470, 25, 70), "to": Vector3(400, 0, 0), "from2": Vector3(455, 8, 60), "to2": Vector3(400, -10, -20), "time": 6.0},
+			"far": {"from": at + Vector3(160, 260, 520), "to": at, "from2": at + Vector3(110, 170, 340), "to2": at, "time": 6.0},
 		},
+		"sep_shep": apart.get_node("Shepherd"),
+		"sep_burn": apart.get_node("Shepherd/Burn"),
+		"moon_flash": flash,
 		"act": "idle",
 		"stack": stack,
 		"apart": apart,
