@@ -20,6 +20,8 @@ var intro_t := 0.0
 var counted := 0.0
 var total_pts := 0
 var pts_lbl: Label
+var photo_layer: Control       ## a photo shown large (Esc closes it before anything else)
+var first_btn: Button          ## the report's main action, focused once the celebration is over
 ## Where each problem of the design is fixed (scripts/mission.gd checks' "at"), as the design's stage names.
 const FIX_AT := {"instruments": "Craft", "bus": "Craft", "panels": "Power", "battery": "Power", "comms": "Systems",
 	"adcs": "Systems", "propulsion": "Systems", "launcher": "Rocket", "orbit": "Mission"}
@@ -88,11 +90,34 @@ func process(delta: float) -> void:
 			_end_intro()
 
 
-## Any key or click ends the celebration early.
+## Any key or click ends the celebration early. Then (issue #58): Enter redesigns, R flies again, N picks a new mission,
+## Esc or Backspace go to the menu; Esc first closes a photo shown large.
 func _unhandled_input(e: InputEvent) -> void:
-	if intro and is_instance_valid(intro) and intro_t > 0.6 and e is InputEventKey and e.pressed:
-		_end_intro()
+	if not (e is InputEventKey) or not e.pressed or e.echo:
+		return
+	if intro and is_instance_valid(intro):
+		if intro_t > 0.6:
+			_end_intro()
 		get_viewport().set_input_as_handled()
+		return
+	var k: int = e.physical_keycode
+	if photo_layer and is_instance_valid(photo_layer):
+		if k in [KEY_ESCAPE, KEY_BACKSPACE, KEY_ENTER, KEY_KP_ENTER]:
+			photo_layer.queue_free()
+			get_viewport().set_input_as_handled()
+		return
+	match k:
+		KEY_ENTER, KEY_KP_ENTER:
+			_back_to_design()
+		KEY_R:
+			_fly_again()
+		KEY_N:
+			go("missions")
+		KEY_ESCAPE, KEY_BACKSPACE:
+			go("menu")
+		_:
+			return
+	get_viewport().set_input_as_handled()
 
 
 # ===================================================================================== THE CELEBRATION
@@ -234,6 +259,8 @@ func _end_intro() -> void:
 	tw.tween_property(it, "modulate:a", 0.0, 0.35)
 	tw.tween_property(panel, "modulate:a", 1.0, 0.45)
 	tw.chain().tween_callback(it.queue_free)
+	if first_btn and is_instance_valid(first_btn):
+		first_btn.grab_focus()   # Tab and the arrows move between the ways on
 
 
 # ===================================================================================== HEADER
@@ -379,6 +406,7 @@ func _photo_tile(ph: Dictionary, earned: bool) -> Control:
 func _show_photo(ph: Dictionary) -> void:
 	Kit.UiSound.play("select")
 	var box := Kit.overlay(self, tr("A photo your mission sent home"), 980.0, 760.0)
+	photo_layer = box.get_parent().get_parent()   # the overlay's shade, which holds the panel
 	var tex := TextureRect.new()
 	tex.texture = load(ph.path)
 	tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -435,17 +463,18 @@ func _story_column(cols: HBoxContainer, last_sim: Dictionary) -> void:
 func _actions(outer: VBoxContainer, s: Dictionary) -> void:
 	var bh := Kit.hbox(10)
 	outer.add_child(bh)
-	var redo := Kit.accent_btn(Kit.btn(tr("Redesign mission"), func(): _back_to_design(), Kit.T_BODY), Kit.C_ACCENT)
+	var redo := Kit.accent_btn(Kit.btn(tr("Redesign mission") + "  ·  Enter", func(): _back_to_design(), Kit.T_BODY), Kit.C_ACCENT)
+	first_btn = redo
 	redo.custom_minimum_size.y = Kit.BTN_H
 	bh.add_child(redo)
-	for b in [Kit.btn(tr("↻ Fly again (new luck)"), func(): _fly_again(), Kit.T_BODY), Kit.btn(tr("New mission"), func(): go("missions"), Kit.T_BODY)]:
+	for b in [Kit.btn(tr("↻ Fly again (new luck)") + "  ·  R", func(): _fly_again(), Kit.T_BODY), Kit.btn(tr("New mission") + "  ·  N", func(): go("missions"), Kit.T_BODY)]:
 		b.custom_minimum_size.y = Kit.BTN_H
 		bh.add_child(b)
 	var sp := Control.new()
 	sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bh.add_child(sp)
 	# the ranking comes back with the crew of friends (v0.3.0, issue #52); the menu has none either
-	var menu := Kit.btn(tr("Menu"), func(): go("menu"), Kit.T_BODY)
+	var menu := Kit.btn(tr("Menu") + "  ·  Esc", func(): go("menu"), Kit.T_BODY)
 	menu.custom_minimum_size.y = Kit.BTN_H
 	bh.add_child(menu)
 
