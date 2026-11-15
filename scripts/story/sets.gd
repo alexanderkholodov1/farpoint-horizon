@@ -46,6 +46,8 @@ static func build(id: String, world) -> Dictionary:
 			S = _mars_approach(world, env)
 		"crew_ship":
 			S = _crew_ship(world, env)
+		"lcross_space":
+			S = _lcross_space(world, env)
 		_:
 			S = _andes(world, env)
 	S["id"] = id
@@ -194,6 +196,22 @@ static func layer2(n: Node) -> void:
 		(n as VisualInstance3D).layers = 3
 	for c in n.get_children():
 		layer2(c)
+
+
+## A soft round glow texture (white at the centre, clear at the edge), for flashes and engine glows.
+static func soft_glow() -> GradientTexture2D:
+	var g := Gradient.new()
+	g.set_color(0, Color(1, 1, 1, 1))
+	g.set_color(1, Color(1, 1, 1, 0))
+	g.add_point(0.35, Color(1, 1, 1, 0.55))
+	var t := GradientTexture2D.new()
+	t.gradient = g
+	t.fill = GradientTexture2D.FILL_RADIAL
+	t.fill_from = Vector2(0.5, 0.5)
+	t.fill_to = Vector2(1.0, 0.5)
+	t.width = 128
+	t.height = 128
+	return t
 
 
 static func marks(list: Dictionary) -> Dictionary:
@@ -1450,4 +1468,119 @@ void fragment() {
 		"chutes": chutes,
 		"splash": splash,
 		"raft": raft,
+	}
+
+
+# ===================================================================================== LCROSS ON THE WAY TO THE MOON
+## LCROSS, October 2009: the shepherding craft riding on the empty Centaur upper stage, the Moon's south pole ahead
+## (its real map, textures/moon_color.jpg, S-moon-kit), the Sun low. Shapes only, no markings. The Centaur is about
+## 3 m wide and 12.7 m long (a set, not a model to measure); the shepherding craft is a ring with its instruments.
+## A second pair farther off, apart, for the separation shot (each shot shows one or the other). Nobody is on board:
+## the crew fly it from mission control.
+static func _lcross_stack(parent: Node3D, at: Vector3, apart: float) -> Node3D:
+	var root := Node3D.new()
+	root.position = at
+	parent.add_child(root)
+	var foil := mat(Color(0.86, 0.84, 0.8), 0.35, 0.6)
+	var dark := mat(Color(0.2, 0.2, 0.22), 0.6, 0.4)
+	var centaur := Node3D.new()
+	root.add_child(centaur)
+	cyl(centaur, 5.0, 5.0, 34.0, Vector3(0, 0, 0), foil, 32)
+	cyl(centaur, 5.0, 3.2, 4.0, Vector3(0, -19.0, 0), dark, 32)
+	cyl(centaur, 1.4, 2.6, 4.5, Vector3(0, -23.0, 0), mat(Color(0.35, 0.33, 0.32), 0.5, 0.7), 24)
+	cyl(centaur, 4.2, 5.0, 2.0, Vector3(0, 18.0, 0), dark, 32)
+	var shep := Node3D.new()
+	shep.position = Vector3(0, 21.5 + apart, 0)
+	root.add_child(shep)
+	cyl(shep, 3.0, 3.0, 2.2, Vector3.ZERO, mat(Color(0.7, 0.7, 0.72), 0.4, 0.7), 24)
+	for i in 6:
+		var ang := i * TAU / 6.0
+		var b := box(shep, Vector3(2.0, 2.0, 1.4), Vector3(sin(ang) * 3.4, 0, cos(ang) * 3.4), mat(Color(0.82, 0.68, 0.3), 0.4, 0.8) if i % 2 == 0 else foil)
+		b.rotation.y = ang
+	# the instruments' little cameras on top, looking ahead
+	for i in 4:
+		cyl(shep, 0.35, 0.35, 0.9, Vector3(-1.2 + i * 0.8, 1.5, 0.6), dark, 12)
+	box(shep, Vector3(6.0, 0.15, 3.0), Vector3(0, 1.2, -2.6), mat(Color(0.1, 0.13, 0.25), 0.25, 0.6))
+	# the shepherding craft's engine glow, for its delay burn after separation
+	var burn := MeshInstance3D.new()
+	var bq := QuadMesh.new()
+	bq.size = Vector2(5.0, 5.0)
+	burn.mesh = bq
+	var bm := StandardMaterial3D.new()
+	bm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	bm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	bm.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	bm.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	bm.albedo_texture = soft_glow()
+	bm.albedo_color = Color(0.6, 0.8, 1.0, 0.0)
+	burn.material_override = bm
+	burn.position = Vector3(0, 2.2, 0)
+	burn.name = "Burn"
+	shep.add_child(burn)
+	shep.name = "Shepherd"
+	root.rotation = Vector3(-1.2, 0.5, 0.0)
+	return root
+
+
+static func _lcross_space(world, env: Environment) -> Dictionary:
+	var st: Node3D = world.stage
+	env.sky = Space.make_space_sky()
+	env.background_energy_multiplier = 1.0
+	env.glow_enabled = true
+	env.ambient_light_color = Color(0.55, 0.58, 0.7)
+	env.ambient_light_energy = 0.3
+	world.sun.light_energy = 1.6
+	world.sun.light_color = Color(1.0, 0.97, 0.93)
+	world.sun.rotation_degrees = Vector3(-8, 75, 0)
+	world.cam.far = 9000.0
+	var moon := MeshInstance3D.new()
+	var sm := SphereMesh.new()
+	sm.radius = 900.0
+	sm.height = 1800.0
+	sm.radial_segments = 128
+	sm.rings = 64
+	moon.mesh = sm
+	var mm := StandardMaterial3D.new()
+	mm.albedo_texture = Space.MOON_COLOR
+	mm.albedo_color = Color(0.8, 0.8, 0.8)
+	mm.roughness = 1.0
+	moon.material_override = mm
+	moon.position = Vector3(0, -1150, -1500)
+	moon.rotation = Vector3(-0.9, 0, 0)
+	st.add_child(moon)
+	var stack := _lcross_stack(st, Vector3.ZERO, 0.0)
+	var apart := _lcross_stack(st, Vector3(400, 0, 0), 0.0)
+	# the flash of the Centaur's impact, far below at the south pole (the story's "moonflash")
+	# on the shadowed side, where Cabeus lies in the dark: the flash stands out
+	var at := moon.position + Vector3(-0.5, 0.72, 0.48).normalized() * 902.0
+	var flash := MeshInstance3D.new()
+	var fq := QuadMesh.new()
+	fq.size = Vector2(90, 90)
+	flash.mesh = fq
+	var fm := StandardMaterial3D.new()
+	fm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	fm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	fm.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	fm.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	fm.albedo_texture = soft_glow()
+	fm.no_depth_test = true
+	fm.albedo_color = Color(1.0, 0.92, 0.75, 0.0)
+	flash.material_override = fm
+	flash.position = at
+	st.add_child(flash)
+	return {
+		"marks": marks({"inti": [0, 0, 600, 0], "killa": [2, 0, 600, 0], "rumi": [4, 0, 600, 0], "wayra": [6, 0, 600, 0]}),
+		"cast": [],
+		"cams": {
+			"approach": {"from": Vector3(60, 30, 80), "to": Vector3(0, -200, -1500), "from2": Vector3(35, 12, 55), "to2": Vector3(0, -300, -1500), "time": 7.0},
+			"stack": {"from": Vector3(40, 22, 45), "to": Vector3(0, 5, 0), "from2": Vector3(28, 8, 52), "to2": Vector3(0, 0, 0), "time": 8.0},
+			"separate": {"from": Vector3(470, 25, 70), "to": Vector3(400, 0, 0), "from2": Vector3(455, 8, 60), "to2": Vector3(400, -10, -20), "time": 6.0},
+			"far": {"from": at + Vector3(160, 260, 520), "to": at, "from2": at + Vector3(110, 170, 340), "to2": at, "time": 6.0},
+		},
+		"sep_shep": apart.get_node("Shepherd"),
+		"sep_burn": apart.get_node("Shepherd/Burn"),
+		"moon_flash": flash,
+		"act": "idle",
+		"stack": stack,
+		"apart": apart,
 	}

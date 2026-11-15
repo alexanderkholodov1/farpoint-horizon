@@ -178,6 +178,21 @@ branches add entries at the same place (`.gitattributes`).
 - **S-mpf-pia00633** NASA/JPL. *Rover Tracks*, PIA00633 (public domain). https://images.nasa.gov/details/PIA00633.
   Sojourner's tracks on sol 3, from its own camera. Shown at the end of mission 3.
 
+- **S-lcross-nasa** NASA Science. *LCROSS*. https://science.nasa.gov/mission/lcross/. Launched June 18, 2009,
+  21:32 UT, with the Lunar Reconnaissance Orbiter on an Atlas V 401; the Centaur hit Cabeus at 11:31 UT; LCROSS flew
+  through the plume and struck four minutes later, at 11:36 UT, at 9,000 km/h; its instruments: cameras (visible,
+  near and mid infrared), spectrometers and a photometer; on Nov 13, 2009 NASA announced the data showed water near the
+  Moon's south pole. Mission 4.
+- **S-lcross-nssdc** NASA Space Science Data Coordinated Archive. *LCROSS Shepherding Spacecraft*, 2009-031B.
+  https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2009-031B. The 2000 kg Centaur upper stage; the
+  shepherding craft separated at 01:50 UT on Oct 9, 2009 and followed a few minutes behind; the Centaur hit at
+  11:31:19.5 UT at about 2.5 km/s; the shepherding craft gathered data for about four minutes and hit at 11:35:36.1
+  UT. Mission 4's aim and its four minutes.
+- **S-cabeus-gazetteer** IAU / USGS Astrogeology Science Center (NASA-supported). *Gazetteer of Planetary
+  Nomenclature*, Moon, Cabeus. https://planetarynames.wr.usgs.gov/SearchResults?Target=16_Moon&Feature%20Name=Cabeus.
+  Centre 85.33 S, 42.13 W (planetographic, +East), diameter 100.58 km. Where mission 4 draws Cabeus on NASA's LROC
+  mosaic (S-lroc-wac).
+
 ## The look: Earth, Moon, the Andes and the launch site (issue 12; scripts in `assets/source/`)
 - **S-moon-kit** NASA Goddard Space Flight Center, Scientific Visualization Studio. *CGI Moon Kit* (2019).
   https://svs.gsfc.nasa.gov/4720. LRO LROC WAC colour map (`lroc_color_poles_4k.tif`, colour enhanced from LROC and Kaguya) and

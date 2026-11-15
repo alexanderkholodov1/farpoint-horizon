@@ -50,6 +50,8 @@ var splashed := false        ## The capsule is on the water (kept when the film 
 var _t := 0.0
 var _saved := {}
 var heat := false              ## Mars entry: the cabin's window glows and shakes (Mars's chapter).
+var sep_t := -1.0              ## Seconds since the shepherding craft let the Centaur go (LCROSS's chapter).
+var mflash_t := -1.0           ## Seconds since the Centaur's flash on the Moon (LCROSS's chapter).
 var fireball_t := -1.0         ## Seconds since the craft outside started its plunge into Mars's air.
 
 
@@ -77,7 +79,7 @@ func enter(args: Dictionary) -> void:
 
 ## What the sets change in the shared world, put back when the film ends.
 ## The story so far, in order: the prologue, then each chapter (its intro, the mission, its outro), as scene refs.
-static func story(chapters := ["prologue", "apollo13", "sts61", "pathfinder"]) -> Array:
+static func story(chapters := ["prologue", "apollo13", "sts61", "pathfinder", "lcross"]) -> Array:
 	var out := []
 	for c in chapters:
 		var data = JSON.parse_string(FileAccess.get_file_as_string("res://data/story/%s.json" % c))
@@ -252,6 +254,8 @@ func _go_to_set(id: String) -> void:
 	alarm = false
 	heat = false
 	fireball_t = -1.0
+	sep_t = -1.0
+	mflash_t = -1.0
 	rumble = 0.0
 	dim = 0.0
 	dim_goal = 0.0
@@ -322,6 +326,13 @@ func _fx(fx: String) -> void:
 		"fireball":
 			heat = true
 			fireball_t = 0.0
+			Kit.UiSound.play("whoosh", 0.0)
+		"separate":
+			sep_t = 0.0
+			Kit.UiSound.play("snap", 0.0)
+		"moonflash":
+			mflash_t = 0.0
+			flash.color = Color(1.0, 0.97, 0.9, 0.35)
 			Kit.UiSound.play("whoosh", 0.0)
 
 
@@ -406,6 +417,25 @@ func process(delta: float) -> void:
 ## The set's own life: the fire, the alarm, the power going down, the launch, the splashdown.
 func _animate_set(delta: float) -> void:
 	var pulse := 0.5 + 0.5 * sin(_t * 6.0)
+	# LCROSS: the shepherding craft lets go of the Centaur, then fires its engine to fall behind (its delay burn)
+	if S.has("sep_shep"):
+		var sh: Node3D = S.sep_shep
+		var k := 0.0
+		if sep_t >= 0.0:
+			sep_t += delta
+			k = smoothstep(0.0, 4.5, sep_t)
+		sh.position.y = 21.5 + 26.0 * k
+		var bm := (S.sep_burn as MeshInstance3D).material_override as StandardMaterial3D
+		bm.albedo_color.a = (0.75 + 0.25 * sin(_t * 40.0)) if sep_t > 0.6 and sep_t < 3.6 else 0.0
+	# LCROSS: the Centaur's flash at the bottom of Cabeus, seen from far above
+	if S.has("moon_flash"):
+		var fl: MeshInstance3D = S.moon_flash
+		var a := 0.0
+		if mflash_t >= 0.0:
+			mflash_t += delta
+			a = clampf(mflash_t / 0.15, 0.0, 1.0) * clampf(1.0 - (mflash_t - 0.15) / 3.0, 0.0, 1.0)
+			fl.scale = Vector3.ONE * (0.4 + mflash_t * 0.5)
+		(fl.material_override as StandardMaterial3D).albedo_color.a = a
 	# on the way to Mars: the craft turns slowly in the sunlight; at entry it glows and plunges
 	if S.has("cruise_spin"):
 		(S.cruise_spin as Node3D).rotate_y(delta * 0.25)
