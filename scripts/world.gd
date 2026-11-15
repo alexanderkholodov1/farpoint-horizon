@@ -90,8 +90,28 @@ func _update_camera(delta: float) -> void:
 	cam.look_at(cam_target, Vector3.UP)
 
 
+var touches := {}          ## Fingers on the screen (index -> position), for the two-finger pinch (issue #76).
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if not cam_free:
+		return
+	# two fingers pinch to zoom; one finger drags the camera through the mouse emulation, as the mouse does
+	if event is InputEventScreenTouch:
+		if event.pressed:
+			touches[event.index] = event.position
+		else:
+			touches.erase(event.index)
+		return
+	if event is InputEventScreenDrag and touches.size() == 2 and touches.has(event.index):
+		var keys: Array = touches.keys()
+		var other: Vector2 = touches[keys[0] if keys[1] == event.index else keys[1]]
+		var before: float = (touches[event.index] as Vector2).distance_to(other)
+		var after: float = event.position.distance_to(other)
+		touches[event.index] = event.position
+		if before > 10.0:
+			cam_dist_goal = clampf(cam_dist_goal * before / maxf(after, 1.0), 0.6, 300.0)
+		dragging = false
 		return
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT or event.button_index == MOUSE_BUTTON_RIGHT:

@@ -27,6 +27,8 @@ func _ready() -> void:
 		if f.hud.action.lit:
 			_key(KEY_SPACE)
 
+	await _wait(4.0)
+	await _shot("landing")
 	print("tripshot: ended on ", g.screen_id)
 	get_tree().quit()
 
