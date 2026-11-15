@@ -4,7 +4,7 @@ extends Control
 ##   const PartIcon := preload("res://scripts/ui/part_icon.gd")
 ##   var i := PartIcon.new(); i.kind = "tank"; i.k = 0.75
 ## kinds: engine, upper, tank, booster, fairing, orbit, bus, camera, panel, battery, antenna, wheel, thruster, rocket,
-## shield, spare, none.
+## shield, spare, star, none.
 
 const Kit := preload("res://scripts/ui/kit.gd")
 
@@ -120,6 +120,12 @@ func _draw() -> void:
 		"spare":    # a backup: two of the same
 			_box(x - 20, 22, x + 4, 54, c)
 			_box(x - 4, 14, x + 20, 46, w)
+		"star":     # a goal to go for
+			var pts: Array = []
+			for i in 10:
+				var a := -PI / 2.0 + i * PI / 5.0
+				pts.append(Vector2(x, 36) + Vector2.from_angle(a) * (24.0 if i % 2 == 0 else 10.0))
+			_shape(pts, w)
 		_:          # nothing here
 			draw_arc(Vector2(x, 36), 20.0, 0.0, TAU, 40, Color(c, 0.6), 2.0, true)
 			draw_line(Vector2(x - 14, 50), Vector2(x + 14, 22), Color(c, 0.6), 2.0)

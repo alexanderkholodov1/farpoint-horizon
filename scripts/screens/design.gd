@@ -2,7 +2,7 @@ extends "res://scripts/screens/screen.gd"
 ## Design (CML 2-4), guided as the rocket builder is: the craft is designed one question at a time. Each question
 ## shows only the options that make sense here, as tiles with a drawing, a name and two facts; the rest is told when
 ## a tile is pointed at. The best fit carries a star, so a player who is lost can follow the stars.
-##   Orbit: where it flies · Craft: its body, its instruments · Power: panels, battery · Systems: antenna, pointing,
+##   Mission: its extra goals, where it flies · Craft: its body, its instruments · Power: panels, battery · Systems: antenna, pointing,
 ##   engine · Rocket: the launcher (or build your own) · Launch: the review, years, extras, LAUNCH!
 ## Top: the six stages, the current one lit; a stage already reached can be clicked. Centre: the craft in 3D.
 ## Right: the mission board as seven short answers (budget, mass, power, battery, data, fuel, science).
@@ -13,10 +13,12 @@ const RocketDesign := preload("res://scripts/craft/rocket_design.gd")
 const Bots := preload("res://scripts/crew/bots.gd")
 const PartIcon := preload("res://scripts/ui/part_icon.gd")
 const Progress := preload("res://scripts/progress.gd")
+const Objectives := preload("res://scripts/flight/objectives.gd")
 
-const STAGES := ["Orbit", "Craft", "Power", "Systems", "Rocket", "Launch"]
+const STAGES := ["Mission", "Craft", "Power", "Systems", "Rocket", "Launch"]
 ## The questions in order: [id, the GameData.STEPS id it belongs to, stage, the question, what it is about].
 const QUESTIONS := [
+	["goals", "orbita", 0, "Which extra goals will you go for?", "Each one you meet adds points and brings a photo home. Missing one never takes anything away."],
 	["orbit", "orbita", 0, "Where will it fly?", "The orbit decides what your craft sees, how long it talks to Earth and how hard it is to get there."],
 	["bus", "plataforma", 1, "How big is your craft?", "The body holds everything. Bigger carries more instruments, and costs and weighs more."],
 	["instruments", "instrumentos", 1, "What will it carry?", "The instruments do the science. Pick the ones that meet the goals, then continue."],
@@ -75,7 +77,7 @@ func show_step(idx: int) -> void:
 # ===================================================================================== THE SCREEN
 ## Draws the screen at question i.
 func _show(i: int) -> void:
-	q = clampi(i, 0, QUESTIONS.size() - 1)
+	q = clampi(i, _first_q(), QUESTIONS.size() - 1)
 	_reached = maxi(_reached, q)
 	var Q: Array = QUESTIONS[q]
 	for k in GameData.STEPS.size():
@@ -149,7 +151,7 @@ func _show(i: int) -> void:
 	bar.add_child(menu)
 	var back := Kit.btn(tr("◀ Back"), func(): _show(q - 1), Kit.T_BODY, 130)
 	back.custom_minimum_size.y = Kit.BTN_H + 8
-	back.disabled = q == 0
+	back.disabled = q <= _first_q()
 	bar.add_child(back)
 	if Q[0] == "review":
 		main_btn = Kit.accent_btn(Kit.btn(tr("LAUNCH!"), func(): main.launch(), Kit.T_ACTION, 260), Kit.C_GOLD)
@@ -169,6 +171,11 @@ func _show(i: int) -> void:
 				c.disabled = true
 			elif c is PanelContainer:
 				c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+
+## The first question: the extra goals when this mission offers any, else the orbit.
+func _first_q() -> int:
+	return 0 if not mission.extras_offered.is_empty() else 1
 
 
 func _first_of(stage: int) -> int:
@@ -264,6 +271,20 @@ func _fill_question(id: String, r: Dictionary) -> void:
 	var S: Dictionary = GameData.SCENARIOS[mission.scenario]
 	var O: Dictionary = GameData.ORBITS[mission.orbit]
 	match id:
+		"goals":
+			var all: Dictionary = Objectives.all()
+			left_box.add_child(Kit.lbl(tr("%d of %d chosen") % [mission.extras.size(), mission.extras_offered.size()], Kit.T_BODY, Kit.C_TEXT, Kit.FONT_B))
+			for e in mission.extras_offered:
+				var E: Dictionary = all.get(e, {})
+				if E.is_empty():
+					continue
+				var has: bool = mission.extras.has(e)
+				left_box.add_child(_tile("star", E.name, [tr("+%d points") % int(E.points)], has, func():
+					if has:
+						mission.extras.erase(e)
+					else:
+						mission.extras.append(e)
+					on_change(false), E.desc, tr("Going for it") if has else "", Kit.C_OK))
 		"orbit":
 			var top := 0.0
 			for o in GameData.ORBITS:
@@ -457,7 +478,8 @@ func _fill_review(r: Dictionary) -> void:
 
 
 # ===================================================================================== THE MISSION BOARD
-## Seven short answers: what the craft uses against what it has. Pointing at one tells the numbers behind it.
+## Seven short answers: what the craft uses against what it has (the numbers after _row's text are the index in
+## QUESTIONS of the question that decides each: until it is reached the row is grey). Pointing at one tells the numbers behind it.
 func _fill_board(r: Dictionary) -> void:
 	var S: Dictionary = GameData.SCENARIOS[mission.scenario]
 	board.add_child(Kit.caps(tr("Mission board")))
@@ -466,12 +488,12 @@ func _fill_board(r: Dictionary) -> void:
 	_row(tr("Mass"), tr("weighs %s · limit %s") % [Kit.kg(r.mass_total), Kit.kg(r.mass_limit)], r.mass_total / max(0.001, r.mass_limit), 0.9,
 		tr("Limit") + " · " + tr("platform %s · rocket %s") % [Kit.kg(r.mass_bus_max), Kit.kg(r.launch_cap) if r.launch_cap > 0.0 else tr("can't reach")] + ". " + tr("Instruments %s · power %s · fuel %s · platform %s.") % [Kit.kg(r.mass.instruments), Kit.kg(r.mass.power), Kit.kg(r.mass.propellant), Kit.kg(r.mass.bus)])
 	_row(tr("Power"), tr("uses %s · makes %s") % [Kit.watts(r.power_load), Kit.watts(r.power_gen)], r.power_load / max(0.001, r.power_gen), 0.87,
-		tr("Draw against the panels' average generation (counting shadow).") + " " + tr("Margin %s") % Kit.pct(r.power_margin), false, 3)
-	_row(tr("Battery"), tr("needs %d Wh · holds %d Wh") % [int(r.battery_need), int(r.battery_wh)], r.battery_need / max(0.001, r.battery_wh), 0.85, tr("Energy needed to cross the shadow."), false, 4)
-	_row(tr("Data"), tr("makes %s · sends %s a day") % [Kit.gb(r.data_gen), Kit.gb(r.data_down)], r.data_gen / max(0.0001, r.data_down), 0.9, tr("Data made against what the antenna can send down."), false, 5)
-	_row(tr("Fuel"), tr("needs %d m/s · has %d m/s") % [int(r.dv_need), int(r.dv_have)], r.dv_need / max(0.001, r.dv_have) if r.dv_have > 0.0 else (0.0 if r.dv_need <= 0.0 else 2.0), 0.9, tr("Change of speed needed to get there and hold the orbit."), false, 7)
+		tr("Draw against the panels' average generation (counting shadow).") + " " + tr("Margin %s") % Kit.pct(r.power_margin), false, 4)
+	_row(tr("Battery"), tr("needs %d Wh · holds %d Wh") % [int(r.battery_need), int(r.battery_wh)], r.battery_need / max(0.001, r.battery_wh), 0.85, tr("Energy needed to cross the shadow."), false, 5)
+	_row(tr("Data"), tr("makes %s · sends %s a day") % [Kit.gb(r.data_gen), Kit.gb(r.data_down)], r.data_gen / max(0.0001, r.data_down), 0.9, tr("Data made against what the antenna can send down."), false, 6)
+	_row(tr("Fuel"), tr("needs %d m/s · has %d m/s") % [int(r.dv_need), int(r.dv_have)], r.dv_need / max(0.001, r.dv_have) if r.dv_have > 0.0 else (0.0 if r.dv_need <= 0.0 else 2.0), 0.9, tr("Change of speed needed to get there and hold the orbit."), false, 8)
 	var sf: float = r.expected_science / S.science_target
-	_row(tr("Science"), tr("%d points · goal %d") % [int(r.expected_science), int(S.science_target)], sf, 0.0, tr("An estimate with no surprises."), true, 2)
+	_row(tr("Science"), tr("%d points · goal %d") % [int(r.expected_science), int(S.science_target)], sf, 0.0, tr("An estimate with no surprises."), true, 3)
 	var nf := 0
 	var nw := 0
 	for c in r.checks:

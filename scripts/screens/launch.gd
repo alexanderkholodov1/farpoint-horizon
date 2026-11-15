@@ -49,6 +49,8 @@ var base_fov := 75.0           ## The camera's field of view on entering, restor
 var smoke: CPUParticles3D       ## Steam and smoke thrown sideways at ignition (the look of #12).
 
 
+var shown_pitch := 0.0             ## The pitch the rocket is drawn at, easing toward the model's.
+
 func enter(_args: Dictionary) -> void:
 	world.cam_free = false
 	world.clear_stage()
@@ -241,7 +243,9 @@ func _place_rocket() -> void:
 	var vx: float = _squash(model.x, 1000.0, 0.08) * VIS
 	var vy: float = 0.2 + _squash(model.h, 1500.0, 0.1) * VIS
 	rocket.position = Vector3(vx, vy, 0)
-	rocket.rotation = Vector3(0, 0, -deg_to_rad(model.pitch))
+	# the rocket turns smoothly toward its true attitude (the dial shows the true one)
+	shown_pitch = model.pitch if absf(model.pitch - shown_pitch) > 30.0 else lerpf(shown_pitch, model.pitch, clampf(get_process_delta_time() * 3.5, 0.0, 1.0))
+	rocket.rotation = Vector3(0, 0, -deg_to_rad(shown_pitch))
 	if model.h > 15000.0:
 		pad.visible = false
 		horizon.visible = true

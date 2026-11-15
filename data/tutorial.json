@@ -6,8 +6,9 @@
    "ctx": "design:0",
    "who": "pilot",
    "title": "Welcome aboard",
-   "text": "Your first mission: land at the Moon's south pole, where the Sun never climbs high and ice may hide in the dark of the craters. We design it one station at a time. First, the orbit, where your craft will fly. Lunar orbit, 100 km up, is the one: click it.",
+   "text": "Your first mission: land at the Moon's south pole, where the Sun never climbs high and ice may hide in the dark of the craters. First, the extra goals: keep the ones you want to go for and press Continue. Then the orbit, where your craft will fly: lunar orbit, 100 km up, is the one. Click it.",
    "targets": [
+    "Continue ▶",
     "Lunar orbit (100 km)"
    ],
    "sources": [

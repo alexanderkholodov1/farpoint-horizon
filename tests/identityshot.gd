@@ -44,7 +44,7 @@ func _ready() -> void:
 	GameState.mission.from_dict({"bus": "small", "instruments": ["ir_adv", "gas_adv", "cam_ms"], "panels": "dep_m", "battery": "b1k", "comms": "xband", "adcs": "rw", "propulsion": "cold", "launcher": "ride", "orbit": "sso", "years": 3})
 	g.world.rebuild_ship()
 	g.go("design", {"step": 0})
-	for qi in 10:
+	for qi in 11:
 		g.screen._show(qi)
 		await wait(0.9)
 		await shot("5_design_%d" % qi)

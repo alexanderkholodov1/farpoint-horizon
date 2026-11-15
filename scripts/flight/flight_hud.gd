@@ -184,19 +184,16 @@ func _sound_text() -> String:
 ## Adds the time control under the clock: real time and faster, chosen with the buttons or the keys , and . ;
 ## `cap` is the fastest allowed at first. A note says in words how fast time runs, so the clock never misleads.
 func add_time_warp(cap := 1.0) -> void:
-	var head := Kit.caps(TranslationServer.translate("Time"))
-	_top.add_child(head)
-	_top.move_child(head, 2)
 	warp_box = Kit.segmented()
 	for w in WARPS:
 		var b := Kit.choice(_warp_label(w), false, func(): set_warp(w, true), 66)
 		_warp_btns[w] = b
 		warp_box.add_child(b)
 	_top.add_child(warp_box)
-	_top.move_child(warp_box, 3)
+	_top.move_child(warp_box, 2)
 	warp_note = Kit.lbl("", Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R)
 	_top.add_child(warp_note)
-	_top.move_child(warp_note, 4)
+	_top.move_child(warp_note, 3)
 	cap_warp(cap)
 
 
