@@ -122,8 +122,8 @@ libraries, imagery from NASA. Every source (information, formula, data) is cited
 
 Team SK Horizon, Quito, Ecuador.
 
-- **Alexander Kholodov**: team lead; the mission, the flight to the Moon, the crew room and how the team works. [GitHub](https://github.com/alexanderkholodov1)
-- **Sebastián Amaguaya**: the rocket builder, the 3D models, the look and the sound of the game. [GitHub](https://github.com/XebaxCode)
+- **Alexander Kholodov**: team lead; the flight's real physics, the Moon landing, ground control, the online crew room and the NASA data. [GitHub](https://github.com/alexanderkholodov1)
+- **Sebastián Amaguaya**: the rocket builder, the 3D models, the visual identity, the guided design, the music and every sound. [GitHub](https://github.com/XebaxCode)
 
 ## License
 

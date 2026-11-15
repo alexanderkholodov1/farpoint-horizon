@@ -55,10 +55,10 @@ func enter(args: Dictionary) -> void:
 	var tele := Kit.vbox(2)
 	Kit.place(tele, 1, 1, 1, 1, -380, -112, -100, -36)
 	add_child(tele)
-	var t1 := Kit.lbl(tr("EARTH") + " · QUITO " + QUITO, 12, Color(Kit.C_ON_DARK, 0.7), spaced(Kit.FONT_B, 1))
+	var t1 := Kit.legible(Kit.lbl(tr("EARTH") + " · QUITO " + QUITO, 12, Color(Kit.C_ON_DARK, 0.8), spaced(Kit.FONT_B, 1)), 1.4)
 	t1.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	tele.add_child(t1)
-	clock = Kit.lbl("", 24, Kit.C_ON_DARK, Kit.font_num())
+	clock = Kit.legible(Kit.lbl("", 24, Kit.C_ON_DARK, Kit.font_num()))
 	clock.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	tele.add_child(clock)
 	var tag := Kit.lbl("● Ecuador", 13, Color(1, 0.8, 0.3), Kit.FONT_B)

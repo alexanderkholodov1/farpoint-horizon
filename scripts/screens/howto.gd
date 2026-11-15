@@ -1,33 +1,33 @@
 extends "res://scripts/screens/screen.gd"
-## Overlay: how to play, in plain words. Opened with main.overlay("howto").
+## Overlay: how to play, in plain words. Opened with main.overlay("howto") (the menu) or from the pause card.
+## Esc, Enter or Backspace close it (issue #58).
+
+const PARTS := [
+	["1. Choose a mission.", "Each one starts with a real science question: when will a volcano erupt, is El Niño coming? Missions open one after another."],
+	["2. Design your craft, one question at a time.", "Where it flies, how big it is, what it carries, its power, antenna and engine, and the rocket. The option with a star is the best fit; the board on the right says what is fine, and Your resources (bottom right) shows what you have and what you have used."],
+	["3. Fix what is red, then LAUNCH!", "Red blocks the launch; amber flies but costs science. Every problem has a button that takes you to the step that fixes it."],
+	["4. Fly it.", "Lean the rocket with the arrows to keep the needle on the green marker, Space drops an empty stage. Faster time is a visible control; the flight computer helps when you let go."],
+	["5. Keep it talking to Earth.", "Ground control finds your craft's radio signal and answers the alarms. Then the months of work go by and the report shows the real NASA photos your mission sent home."],
+	["Keys.", "Enter goes on, Backspace goes back, the numbers choose, Esc pauses a mission. Drag to turn the camera, scroll to zoom."],
+]
 
 
 func enter(_args: Dictionary) -> void:
-	var v := Kit.overlay(self, tr("How to play"), 960, 680, queue_free)
+	var v := Kit.overlay(self, tr("How to play"), 960, 560, queue_free)
 	var rt := RichTextLabel.new()
 	rt.bbcode_enabled = true
 	rt.fit_content = false
 	rt.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	rt.text = tr("""[b]1. Choose a goal[/b] (CML 1). Every mission starts with a science question. When will a volcano erupt? Is El Niño coming?
-
-[b]2. Design the mission step by step[/b] (CML 2 to 4), like NASA's Mission Design Lab: orbit, platform, instruments, power, communications, control, propulsion and launcher. Every decision changes the others, and the board on the right shows it live.
-
-[b]3. Review and launch.[/b] Red blocks the launch (it doesn't fit, or the money isn't there). Yellow can launch… but will have consequences in operations.
-
-[b]4. Operate the mission.[/b] Watch the months go by with solar storms, space debris, failures… and discoveries. A good design rides out the surprises.
-
-[b]5. Learn from the report[/b] and redesign. There is no single right answer.
-
-[b]Key resources[/b]
-• [b]Mass.[/b] Everything weighs. The platform and the rocket both have a limit.
-• [b]Power.[/b] Panels make nothing in Earth's shadow, and the battery must cover that time.
-• [b]Data.[/b] An instrument that makes more data than the antenna can send wastes science.
-• [b]Delta-v.[/b] The “change of speed” propulsion gives you. Going to the Moon or GEO takes a lot.
-• [b]Budget and time.[/b] More years in operation means more science and more cost.
-
-[b]Team mode.[/b] Up to 4 players with roles (Direction, Science, Engineering and Operations). Each role has its goal, and everyone must approve the design before launch.
-
-[b]Controls.[/b] Drag with the mouse to turn the camera, scroll to zoom.
-
-Based on NASA resources, “Design and Develop Science Missions”, “CubeSat 101”, and JPL's Concept Maturity Levels (CML).""")
+	var text := ""
+	for p in PARTS:
+		text += "[b]" + tr(p[0]) + "[/b] " + tr(p[1]) + "\n\n"
+	text += tr("Every number comes from NASA or a real mission; the Credits list every source.")
+	rt.text = text
 	v.add_child(rt)
+	v.add_child(Kit.lbl(tr("Esc or Enter closes this."), Kit.T_SMALL, Kit.C_DIM))
+
+
+func _unhandled_input(e: InputEvent) -> void:
+	if e is InputEventKey and e.pressed and not e.echo and e.physical_keycode in [KEY_ESCAPE, KEY_ENTER, KEY_KP_ENTER, KEY_BACKSPACE]:
+		get_viewport().set_input_as_handled()
+		queue_free()
