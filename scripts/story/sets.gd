@@ -1061,7 +1061,7 @@ void fragment() {
 	ball(rover, 0.015, Vector3(0.18, 0.56, -0.22), bar_m)
 	rover.position = Vector3(0, RAMP_LEN * sin(deg_to_rad(20.0)) + 0.01, 1.25)
 	return {
-		"marks": marks({"inti": [-1.1, 0.0, 1.0, 40], "killa": [1.2, 0.0, 0.9, -40], "rumi": [-0.9, 0.0, -0.9, 30], "wayra": [1.1, 0.0, -0.8, -30]}),
+		"marks": marks({"inti": [-1.1, 0.0, 1.0, 40], "killa": [1.2, 0.0, 0.9, -40], "rumi": [-1.55, 0.0, 1.45, 55], "wayra": [1.1, 0.0, -0.8, -30]}),
 		"actor_scale": 0.3,
 		"cast": ["rumi", "killa", "inti"],
 		"cams": {

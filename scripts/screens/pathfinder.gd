@@ -661,7 +661,8 @@ func _cam_goal() -> Array:
 			var base2: Node3D = S.base
 			var rover: Node3D = S.rover
 			var r := rover.global_position
-			return [base2.global_position + Vector3(1.8, 1.0, 3.6), r + Vector3(0, 0.1, 0.2)]
+			# a little to the left, so Rumi, the engineer, watches his rover roll off beside it
+			return [base2.global_position + Vector3(0.9, 1.3, 4.9), r + Vector3(-0.7, 0.4, -0.2)]
 
 
 func process(delta: float) -> void:
