@@ -55,11 +55,13 @@ func _steps_of(st: String) -> String:
 func _show_home() -> void:
 	var v := _frame(700, 520, tr("Your crew"), tr("A mission is a team effort. You have four stations: engineer, scientist, pilot and ground control. Friends take the stations they like, and bots take the rest, so you never fly alone."))
 	var opts := [
-		[tr("Solo"), tr("You take one station. Three bots take the others and work with you."), "solo", Kit.C_ACCENT],
-		[tr("Same screen"), tr("Two to four people on one computer, passing the screen. Free stations get a bot."), "same", Kit.C_OK],
-		[tr("Online"), tr("Create a room, share its code, and up to four friends join from their own browsers."), "online", Kit.C_WARN]]
+		[tr("Solo"), tr("You take one station. Three bots take the others and work with you."), "solo", Kit.C_GOLD],
+		[tr("Same screen"), tr("Two to four people on one computer, passing the screen. Free stations get a bot."), "same", null],
+		[tr("Online"), tr("Create a room, share its code, and up to four friends join from their own browsers."), "online", null]]
 	for o in opts:
-		var b := Kit.accent_btn(Kit.btn(o[0], func(): go("team", {"view": o[2]}), 22, 640), o[3])
+		var b := Kit.btn(o[0], func(): go("team", {"view": o[2]}), 22, 640)
+		if o[3] != null:   # one main action: playing alone, the quickest way in
+			Kit.accent_btn(b, o[3])
 		v.add_child(b)
 		v.add_child(Kit.lbl(o[1], 14, Kit.C_DIM, Kit.FONT_R, true))
 	v.add_child(Kit.spacer(6))
@@ -107,7 +109,7 @@ func _show_same(n: int) -> void:
 	for k in [2, 3, 4]:
 		var b := Kit.btn(tr("%d players") % k, func(): go("team", {"players": k}), 15, 120)
 		if k == n:
-			Kit.accent_btn(b, Kit.C_OK)
+			Kit.accent_btn(b, Kit.C_ACCENT)
 		count.add_child(b)
 	var edits: Array = []
 	for i in n:
@@ -185,7 +187,7 @@ func _show_online() -> void:
 	_code_edit.max_length = 6
 	_code_edit.custom_minimum_size = Vector2(200, 0)
 	jr.add_child(_code_edit)
-	jr.add_child(Kit.accent_btn(Kit.btn(tr("Join"), func(): _begin(false), 18, 140), Kit.C_OK))
+	jr.add_child(Kit.accent_btn(Kit.btn(tr("Join"), func(): _begin(false), 18, 140), Kit.C_ACCENT))
 	v.add_child(Kit.spacer(8))
 	v.add_child(Kit.btn(tr("◀ Back"), func(): go("team")))
 

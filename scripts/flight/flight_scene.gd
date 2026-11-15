@@ -153,6 +153,10 @@ static func lander(m, size := 3.2, leg := 1.6) -> Node3D:
 	var craft := Ship.build(m)
 	var r: float = craft.get_meta("radius", 1.0)
 	craft.scale = Vector3.ONE * (size * 0.4 / maxf(r, 0.01))
-	craft.position = Vector3(0, -leg * 0.25 + size * 0.16 + size * 0.3, 0)
+	# the craft sits on the lander's deck on an adapter cone, as a payload on its stage (it floated above it before)
+	var deck_top := -leg * 0.25 + size * 0.16
+	Ship.cyl(root, size * 0.09, size * 0.24, size * 0.2, Vector3(0, deck_top + size * 0.1, 0), metal)
+	Ship.cyl(root, size * 0.25, size * 0.25, size * 0.02, Vector3(0, deck_top + size * 0.01, 0), dark)
+	craft.position = Vector3(0, deck_top + size * 0.2, 0)
 	root.add_child(craft)
 	return root

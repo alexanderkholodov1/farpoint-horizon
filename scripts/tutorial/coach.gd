@@ -17,8 +17,12 @@ var ctx := ""
 var dismissed := {}            ## ctx -> true, tips the player closed
 var card: PanelContainer
 var rings: Array = []          ## Highlight panels, one per lit target.
+var lit_targets: Array = []    ## The texts of what is lit, to find it again when its list is rebuilt.
+var lit_col := Color.WHITE
+var relight_t := 0.0
 var lit: Array = []            ## The controls they follow.
 var t := 0.0
+var last_q := -1               ## The design question the targets were last lit for.
 
 
 ## Opens the guided first mission: the player holds every station, the Moon's south pole is chosen, design begins.
@@ -35,6 +39,7 @@ static func start(m) -> void:
 
 func _ready() -> void:
 	layer = 5
+	process_priority = 100   # after the screen has moved its lists this frame, so the frames never lag behind a scroll
 	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(TIPS_PATH))
 	for tip in data.get("tips", []):
 		tips[tip.ctx] = tip
@@ -54,6 +59,12 @@ func _process(delta: float) -> void:
 	if now != ctx:
 		ctx = now
 		_show()
+	# a step of the design may hold more than one question: light the tip's targets again on each new one
+	var sub: int = int(main.screen.get("q")) if main.screen and id == "design" and main.screen.get("q") != null else -1
+	if sub != last_q:
+		last_q = sub
+		if tips.has(ctx) and not dismissed.has(ctx) and card and is_instance_valid(card):
+			_relight()
 	_follow()
 
 
@@ -75,7 +86,7 @@ func _show() -> void:
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
 	card.tree_exited.connect(root.queue_free)
-	var in_design := ctx.begins_with("design")
+	var in_design := ctx.begins_with("design") or ctx == "builder"
 	if in_design:
 		# over the 3D view, between the design screen's option list (left) and its board (right), below the craft's name and mass
 		Kit.place(card, 0.5, 0, 0.5, 0, -285, 124, 375, 124)
@@ -127,8 +138,17 @@ func _show() -> void:
 
 
 # ===================================================================================== THE LIGHTS
+func _relight() -> void:
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if tips.has(ctx):
+		_light(tips[ctx].get("targets", []), Kit.C_GOLD)
+
+
 func _light(targets: Array, col: Color) -> void:
 	_clear_rings()
+	lit_targets = targets
+	lit_col = col
 	for txt in targets:
 		var c := _find(tr(txt))
 		if c == null:
@@ -148,14 +168,24 @@ func _light(targets: Array, col: Color) -> void:
 
 
 func _follow() -> void:
+	# the screen rebuilt its list (a choice, "Show all"): find the lit options again, so a frame never stays behind
+	# on a freed or moved control
+	relight_t -= get_process_delta_time()
+	for c in lit:
+		if not is_instance_valid(c) and relight_t <= 0.0:
+			relight_t = 0.3
+			_light(lit_targets, lit_col)
+			break
 	for i in rings.size():
 		var ring: Panel = rings[i]
 		var c: Control = lit[i]
 		if not is_instance_valid(c) or not c.is_visible_in_tree():
 			ring.visible = false
 			continue
-		ring.visible = true
 		var r := c.get_global_rect().grow(5)
+		var sc := _scroll_of(c)
+		# a frame is shown only while its option is whole inside its list: it never floats over the panel's edge
+		ring.visible = sc == null or sc.get_global_rect().grow(6).encloses(r)
 		ring.position = r.position
 		ring.size = r.size
 		ring.modulate.a = 0.75 + 0.25 * sin(t * 5.0)

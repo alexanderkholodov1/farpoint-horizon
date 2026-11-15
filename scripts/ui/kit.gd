@@ -14,6 +14,9 @@ const FONT_T := preload("res://fonts/InterDisplay-Bold.otf")
 ## Two appearances the player chooses on the menu, remembered between sessions (user://settings.cfg, [ui] mode):
 ## - "dark" (the default): deep navy frosted glass over the scene, light text, bright status colours.
 ## - "light": the lead's "clean room" (direction A, issue #12): light frosted glass, dark text, dark status colours.
+## The palette is the brand's horizon arc and nothing else: horizon blue (C_ACCENT), sunrise amber (C_GOLD), and
+## navy-tinted neutrals. Status stays inside it: fine is ice blue, attention is pale sunrise, and one red only for what
+## blocks the mission. No green, pink or violet anywhere in the UI.
 ## Both keep the same language: frosted panels over the 3D scene, hairlines, large tabular numerals, the deep blue and
 ## the gold of thermal blankets, contrast at least WCAG AA. The brand's horizon arc is scripts/ui/horizon.gd.
 ## Screens read these as Kit.C_*; set_mode() changes them and main.gd rebuilds the theme and the screen.
@@ -29,10 +32,10 @@ static var C_BTN_HOVER := Color(1, 1, 1, 0.13)
 static var C_BTN_PRESS := Color(0.2, 0.42, 0.8, 0.45)
 static var C_EDGE := Color(0.6, 0.75, 1.0, 0.22)      ## A panel's hairline edge.
 static var C_ACCENT := Color(0.47, 0.72, 1.0)         ## Blue: selection, headings, links, the default bar fill.
-static var C_GOLD := Color(0.93, 0.68, 0.27)          ## Thermal-blanket gold: the one main action of a screen.
-static var C_OK := Color(0.4, 0.86, 0.56)
-static var C_WARN := Color(1.0, 0.76, 0.32)
-static var C_BAD := Color(1.0, 0.47, 0.44)
+static var C_GOLD := Color(1.0, 0.66, 0.26)           ## Sunrise amber, the arc's warm point: the one main action of a screen.
+static var C_OK := Color(0.62, 0.9, 1.0)             ## Fine: the ice blue of the horizon's limb (no green: the palette is the arc's).
+static var C_WARN := Color(1.0, 0.82, 0.5)            ## Attention: pale sunrise.
+static var C_BAD := Color(1.0, 0.45, 0.4)             ## Blocks the mission: the only red, used for nothing else.
 static var C_DIM := Color(0.66, 0.72, 0.82)
 static var C_TEXT := Color(0.94, 0.96, 1.0)
 static var C_LINE := Color(0.6, 0.75, 1.0, 0.16)      ## Hairlines: borders, dividers, empty bars.
@@ -98,8 +101,8 @@ static func _apply(m: String) -> void:
 		C_BTN_PRESS = Color(0.85, 0.9, 0.98, 1.0)
 		C_EDGE = Color(1, 1, 1, 0.95)
 		C_ACCENT = Color(0.08, 0.3, 0.68)
-		C_GOLD = Color(0.86, 0.6, 0.16)
-		C_OK = Color(0.08, 0.5, 0.26)
+		C_GOLD = Color(0.9, 0.56, 0.14)
+		C_OK = Color(0.04, 0.42, 0.6)
 		C_WARN = Color(0.68, 0.42, 0.0)
 		C_BAD = Color(0.76, 0.14, 0.14)
 		C_DIM = Color(0.32, 0.38, 0.48)
@@ -116,16 +119,17 @@ static func _apply(m: String) -> void:
 		C_BTN_PRESS = Color(0.2, 0.42, 0.8, 0.45)
 		C_EDGE = Color(0.6, 0.75, 1.0, 0.22)
 		C_ACCENT = Color(0.47, 0.72, 1.0)
-		C_GOLD = Color(0.93, 0.68, 0.27)
-		C_OK = Color(0.4, 0.86, 0.56)
-		C_WARN = Color(1.0, 0.76, 0.32)
-		C_BAD = Color(1.0, 0.47, 0.44)
+		C_GOLD = Color(1.0, 0.66, 0.26)
+		C_OK = Color(0.62, 0.9, 1.0)
+		C_WARN = Color(1.0, 0.82, 0.5)
+		C_BAD = Color(1.0, 0.45, 0.4)
 		C_DIM = Color(0.66, 0.72, 0.82)
 		C_TEXT = Color(0.94, 0.96, 1.0)
 		C_LINE = Color(0.6, 0.75, 1.0, 0.16)
 		C_SHADE = Color(0.0, 0.01, 0.03, 0.55)
 	var f := frost()
-	f.set_shader_parameter("tint", 0.84 if m == "light" else 0.8)
+	# the panel colour covers most of the blur, so a panel over a bright sky, white smoke or dark space reads the same
+	f.set_shader_parameter("tint", 0.88 if m == "light" else 0.9)
 	f.set_shader_parameter("lift", 0.55 if m == "light" else 0.0)
 	f.set_shader_parameter("lift_to", Color(1, 1, 1) if m == "light" else Color(0, 0, 0))
 
@@ -355,12 +359,12 @@ static func card(title: String, body: String, selected: bool, on_click: Callable
 
 
 ## A short message at the top center that fades out; it lives in `parent` (a screen), so it goes with it.
-static func toast(parent: Control, text: String, col := C_ACCENT, time := 2.5) -> void:
+static func toast(parent: Control, text: String, col := C_ACCENT, time := 2.5, top := 122.0) -> void:
 	UiSound.play("error" if col == C_BAD else "notify")
 	var p := PanelContainer.new()
 	p.add_theme_stylebox_override("panel", flat(Color(C_BG.r, C_BG.g, C_BG.b, 0.97), col, 10, 2, 18, 12))
 	p.add_child(lbl(text, 16, col, FONT_B))
-	place(p, 0.5, 0, 0.5, 0, -300, 122, 300, 176)
+	place(p, 0.5, 0, 0.5, 0, -300, top, 300, top + 54.0)
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(p)
 	var tw := p.create_tween()
@@ -503,3 +507,62 @@ static func hint_box() -> Array:
 	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	p.add_child(l)
 	return [p, l]
+
+
+## A small pill for one fact ("220 M$", "3 yr"): a few of these replace a sentence.
+static func chip(text: String, col := C_ACCENT) -> PanelContainer:
+	var p := PanelContainer.new()
+	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	p.add_theme_stylebox_override("panel", flat(Color(col.r, col.g, col.b, 0.12), Color(col.r, col.g, col.b, 0.45), 12, 1, 11, 4))
+	p.add_child(lbl(text, T_SMALL, col, FONT_B))
+	return p
+
+
+## A picture that fills its box whatever its shape (cropped, never stretched), `h` pixels tall. `region` (in the
+## texture's pixels) shows only that part of it, for a view cut from a global map.
+static func cover(tex: Texture2D, h: float, region := Rect2()) -> TextureRect:
+	var t := TextureRect.new()
+	if region.size.x > 0.0:
+		var a := AtlasTexture.new()
+		a.atlas = tex
+		a.region = region
+		tex = a
+	t.texture = tex
+	t.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	t.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	t.custom_minimum_size = Vector2(0, h)
+	t.clip_contents = true
+	t.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return t
+
+
+## A line of a menu drawn straight on the scene: no box, the words alone; under the pointer a warm bar lights at its
+## left and the line brightens. For lists where the scene behind should stay in view (the main menu).
+static func menu_item(text: String, cb: Callable, size := T_ACTION) -> Button:
+	var b := btn(text, cb, size)
+	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	var clear := Color(0, 0, 0, 0)
+	for st in ["normal", "hover", "pressed", "focus"]:   # the keyboard's focus looks as the pointer's hover
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = clear if st == "normal" else Color(C_GOLD.r, C_GOLD.g, C_GOLD.b, 0.2 if st == "pressed" else 0.1)
+		sb.border_color = clear if st == "normal" else C_GOLD
+		sb.border_width_left = 3
+		sb.set_corner_radius_all(4)
+		sb.content_margin_left = 16
+		sb.content_margin_right = 16
+		sb.content_margin_top = 7
+		sb.content_margin_bottom = 7
+		b.add_theme_stylebox_override(st, sb)
+	b.add_theme_color_override("font_color", Color(C_ON_DARK, 0.82))
+	b.add_theme_color_override("font_hover_color", C_ON_DARK)
+	b.add_theme_color_override("font_pressed_color", C_ON_DARK)
+	b.add_theme_font_override("font", FONT_B)
+	return b
+
+
+## A font with its letters spaced by `px` (labels in capitals).
+static func spaced(font: Font, px: int) -> FontVariation:
+	var f := FontVariation.new()
+	f.base_font = font
+	f.spacing_glyph = px
+	return f

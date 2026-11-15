@@ -54,9 +54,9 @@ void fragment() {
 	vec3 air = mix(haze, dusk, twilight * 0.5);
 	c = mix(c, air, clamp(rim * 0.6 + 0.03, 0.0, 0.75) * day);
 	ALBEDO = c * 1.1;
-	ROUGHNESS = mix(0.92, 0.2, ocean);
+	ROUGHNESS = mix(0.92, 0.42, ocean);   // a wide, soft glint: a mirror-sharp one blew out to white seen from low orbit
 	// no glare smeared along the limb: the glint fades well before grazing angles
-	SPECULAR = mix(0.08, 0.5, ocean) * (1.0 - smoothstep(0.35, 0.8, 1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0)));
+	SPECULAR = mix(0.08, 0.3, ocean) * (1.0 - smoothstep(0.35, 0.8, 1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0)));
 	float night = smoothstep(0.08, -0.18, ndl);
 	float lights = texture(night_tex, UV).r * (1.0 - shadow * 0.7);
 	EMISSION = vec3(1.0, 0.68, 0.32) * lights * night * 2.2 + air * rim * day * 0.18;

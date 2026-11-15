@@ -242,6 +242,28 @@ static func make_flame(scale: float) -> CPUParticles3D:
 	return p
 
 
+## An engine's flame where there is no air: a short, bright jet that stays with the craft and leaves no smoke
+## (smoke is exhaust slowed and cooled by air; in vacuum the gas just spreads and vanishes).
+static func make_vacuum_flame(scale: float) -> CPUParticles3D:
+	var p := make_flame(scale)
+	p.local_coords = true
+	p.amount = 90
+	p.lifetime = 0.32
+	p.spread = 7.0
+	p.initial_velocity_min = 11.0 * scale
+	p.initial_velocity_max = 15.0 * scale
+	var sc := Curve.new()
+	sc.add_point(Vector2(0, 0.7))
+	sc.add_point(Vector2(1, 1.7))
+	p.scale_amount_curve = sc
+	var g := Gradient.new()
+	g.set_color(0, Color(1.0, 0.97, 0.85, 0.95))
+	g.set_color(1, Color(1.0, 0.45, 0.1, 0.0))
+	g.add_point(0.3, Color(1.0, 0.72, 0.3, 0.7))
+	p.color_ramp = g
+	return p
+
+
 ## The ground cloud at ignition: steam from the sound suppression water and exhaust pushed out along the pad,
 ## billowing wide and slowly, as in launch footage. Unshaded and casting no shadow: a cloud has no hard silhouette.
 static func make_pad_smoke() -> CPUParticles3D:

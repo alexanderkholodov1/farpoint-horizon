@@ -72,7 +72,7 @@ func enter(_args: Dictionary) -> void:
 	model.spend_fuel(float(tli.get("lander_fuel_used", 0.0)))
 	lander = Scene3D.lander(mission, 3.2, Descent.LEG)
 	world.stage.add_child(lander)
-	flame = Space.make_flame(0.45)
+	flame = Space.make_vacuum_flame(0.45)
 	lander.get_node("Nozzle").add_child(flame)
 	dust = Scene3D.dust_ring(Vector3.ZERO, 3.0)
 	world.stage.add_child(dust)
@@ -109,11 +109,13 @@ func _build_hud() -> void:
 	hud.add_readout("vs", tr("Falling at"))
 	hud.add_readout("hs", tr("Drifting at"))
 	hud.add_readout("target", tr("To the target"))
-	hud.add_gauge("fuel", tr("Fuel"), 2.0, 2.0, Color(1.0, 0.72, 0.3))
+	hud.add_gauge("fuel", tr("Fuel"), 2.0, 2.0, Kit.C_GOLD)
 	hud.throttle_changed.connect(_on_lever)
 	hud.action_pressed.connect(_hover)
 	hud.autopilot_toggled.connect(func(on): hud.hint(tr("Autopilot on. It sets you down on the target; touch any control to fly it yourself.") if on else tr("You have the controls.")))
 	hud.skip_pressed.connect(_skip)
+	hud.add_restart()
+	hud.restart_pressed.connect(func(): main.go("landing"))   # fly this part again, whatever happened
 	hud.set_autopilot(GameState.pilot_bot)
 	if GameState.pilot_bot:
 		hud.hint(tr("The bot pilot is landing. Touch the throttle or the arrows to take the controls."))

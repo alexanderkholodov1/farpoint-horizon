@@ -11,13 +11,18 @@ static func all() -> Dictionary:
 	return GD._entries("objectives")
 
 
-## Ids of the objectives of a scenario.
+## Ids of the objectives of a scenario; a mission with none of its own and no landing gets the ones every launch to
+## orbit can go for (scenario "any_orbit").
 static func pool(scenario_id: String) -> Array:
 	var out: Array = []
 	var a := all()
 	for id in a:
 		if a[id].get("scenario", "") == scenario_id:
 			out.append(id)
+	if out.is_empty() and not preload("res://scripts/flight/flight_data.gd").has_landing(scenario_id):
+		for id in a:
+			if a[id].get("scenario", "") == "any_orbit":
+				out.append(id)
 	return out
 
 
@@ -54,4 +59,14 @@ static func met(id: String, flight: Dictionary) -> bool:
 		"ascent_error_deg":
 			# flown by a person for most of the climb, not by the flight computer
 			return flight.has("ascent") and bool(flight.ascent.get("orbit", false)) and float(flight.ascent.get("own_share", 0.0)) >= 0.6 				and float(flight.ascent.get("mean_error_deg", 99.0)) <= float(c.max)
+		"ascent_fuel_left":
+			return flight.has("ascent") and bool(flight.ascent.get("orbit", false)) and float(flight.ascent.get("fuel_left", 0.0)) >= float(c.min)
+		"science_frac", "budget_reserve":
+			var gs: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("GameState")
+			if gs == null or gs.last_sim.is_empty() or gs.last_sim.get("launch_failed", false):
+				return false
+			if c.kind == "science_frac":
+				var target: float = GD.SCENARIOS[gs.mission.scenario].science_target
+				return float(gs.last_sim.get("science", 0.0)) >= float(c.min) * target
+			return float(gs.last_report.get("reserve", -1.0)) >= float(c.min)
 	return false

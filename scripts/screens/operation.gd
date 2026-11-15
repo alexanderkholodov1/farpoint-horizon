@@ -14,7 +14,8 @@ const FlightData := preload("res://scripts/flight/flight_data.gd")
 const Surface := preload("res://scripts/flight/surface.gd")
 
 const MONTH_S := 30.44 * 86400.0    ## A calendar month in seconds (the mission log counts calendar months).
-const MONTH_REAL_S := 0.7           ## Real seconds one month takes at the slowest speed.
+const MONTH_REAL_S := 1.2           ## Real seconds one month takes at the slowest speed (slow enough to read the log).
+const LUNAR_DAY_S := 29.53 * 86400.0   ## The Sun circles the pole's horizon once a lunar day.
 const SPEEDS := [1.0, 3.0, 10.0]
 const BLUR_LAPS := 0.5              ## Laps a second above which an orbit is drawn as a ring instead of a moving craft.
 
@@ -41,6 +42,7 @@ var land: Dictionary
 var surface                         ## scripts/flight/surface.gd, when the craft landed
 var lander: Node3D
 var lost_shown := false
+var sun_held := false               ## The Sun's circling would strobe at this speed: it is held still, and the screen says so.
 
 
 func enter(_args: Dictionary) -> void:
@@ -76,6 +78,9 @@ func _build_ui() -> void:
 	top.add_child(tv)
 	var th := Kit.hbox(10)
 	tv.add_child(th)
+	# what the player is looking at, in one line
+	tv.add_child(Kit.lbl(tr("A time-lapse of your mission at work: the months go by, the log tells what happens and the science adds up."), Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true))
+	tv.move_child(tv.get_child(tv.get_child_count() - 1), 1)
 	var where: String = tr("On the Moon · Shackleton's rim") if landed else GameData.ORBITS[mission.orbit].name
 	var tt := Kit.caps(tr("Operations") + " · " + where)
 	tt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -139,6 +144,20 @@ func _build_ui() -> void:
 
 
 ## Speed i of SPEEDS: the time note says how fast that is, and an orbit turns at its true pace (or becomes a ring).
+## The keyboard: 1, 2 and 3 set how fast the months go by, Enter jumps to the report.
+func _unhandled_input(e: InputEvent) -> void:
+	if not (e is InputEventKey) or not e.pressed or e.echo:
+		return
+	var k: int = e.physical_keycode
+	if k >= KEY_1 and k <= KEY_3:
+		_set_speed(k - KEY_1)
+	elif k == KEY_ENTER or k == KEY_KP_ENTER:
+		month_f = 9999.0
+	else:
+		return
+	get_viewport().set_input_as_handled()
+
+
 func _set_speed(i: int) -> void:
 	speed = SPEEDS[i] * base
 	for k in speed_btns.size():
@@ -152,7 +171,12 @@ func _set_speed(i: int) -> void:
 	var warp := MONTH_S * speed / MONTH_REAL_S
 	time_note.text = tr("A month every %.1f s: time runs %s times faster than real.") % [per_month, _big(warp)]
 	if landed:
-		orbit_note.text = tr("At the pole the Sun circles the horizon once a lunar day (29.5 days), so its light sweeps round the ground; the crater's floor never sees it.")
+		var sun_laps := warp / LUNAR_DAY_S
+		sun_held = sun_laps > BLUR_LAPS
+		if sun_held:
+			orbit_note.text = tr("The Sun circles the pole's horizon once a lunar day: %s turns a second at this speed, a flicker, so it is held still.") % _big(sun_laps)
+		else:
+			orbit_note.text = tr("At the pole the Sun circles the horizon once a lunar day (29.5 days), so its light sweeps round the ground; the crater's floor never sees it.")
 		return
 	var period_s := float(GameData.ORBITS[mission.orbit].get("period_min", 90.0)) * 60.0
 	var laps := warp / period_s
@@ -166,7 +190,7 @@ func _set_speed(i: int) -> void:
 
 func process(delta: float) -> void:
 	if surface and is_instance_valid(lander):
-		surface.place_sun(month_f * MONTH_S if month_f < 9000.0 else 0.0)
+		surface.place_sun(month_f * MONTH_S if month_f < 9000.0 and not sun_held else 0.0)
 		surface.camera(delta)
 	var sim: Dictionary = GameState.last_sim
 	if sim.is_empty() or leaving:
@@ -224,7 +248,7 @@ func _log_event(e: Dictionary) -> void:
 	pc.modulate.a = 0.0
 	pc.create_tween().tween_property(pc, "modulate:a", 1.0, 0.4)
 	if e.kind != "info" and month_f < 9000.0:
-		toast(e.title, col, 1.8)
+		Kit.toast(self, e.title, col, 1.8, 196.0)   # below the top bar, never over the science
 	# scroll to the newest entry once the log has its new size (next frame); freed with the screen if it leaves first
 	if not get_tree().process_frame.is_connected(_scroll_log_to_end):
 		get_tree().process_frame.connect(_scroll_log_to_end, CONNECT_ONE_SHOT)
