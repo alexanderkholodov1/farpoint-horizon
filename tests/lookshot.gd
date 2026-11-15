@@ -42,6 +42,31 @@ func _ready() -> void:
 		await shot("tutorial_launch")
 		g.go("menu")
 		await wait(0.5)
+	if "film" in only:
+		g.go("credits_film")
+		for at in [3.5, 9.0, 18.5, 26.5, 37.5, 45.0, 56.0, 68.5, 80.0]:
+			while g.screen.t < at:
+				await wait(0.1)
+			await shot("film_%02d" % int(at))
+		g.screen._to_end()
+		await wait(2.5)
+		await shot("film_end")
+		g.go("menu")
+		await wait(0.5)
+	if "credits" in only:
+		g.screen.main.overlay("credits") if false else g.overlay("credits")
+		await wait(0.8)
+		await shot("credits")
+		var sc: ScrollContainer = g.screen.find_children("*", "ScrollContainer", true, false)[0]
+		sc.scroll_vertical = 700
+		await wait(0.4)
+		await shot("credits_mid")
+		for b in g.screen.find_children("*", "Button", true, false):
+			if (b as Button).text.begins_with("▸  NASA data"):
+				(b as Button).pressed.emit()
+		sc.scroll_vertical = 1500
+		await wait(0.4)
+		await shot("credits_sources")
 	GameState.start_solo()
 	GameState.start_mission("volcanes")
 	g.go("design", {"step": 0})
@@ -74,6 +99,21 @@ func _ready() -> void:
 		await shot("craft_cube")
 		GameState.mission.from_dict({"bus": "small", "instruments": ["ir_adv", "gas_adv", "cam_ms"], "panels": "dep_m", "battery": "b1k", "comms": "xband", "adcs": "rw", "propulsion": "cold", "launcher": "medium", "orbit": "sso", "years": 3})
 		g.world.rebuild_ship()
+	if "assemble" in only:
+		# the craft as it is assembled: a part snapping on, then the part a problem comes from glowing (#6)
+		g.go("design", {"step": 4})
+		await wait(1.2)
+		await shot("assemble_before")
+		GameState.mission.comms = "ka"
+		g.world.rebuild_ship()
+		await wait(0.12)
+		await shot("assemble_snap")
+		await wait(0.8)
+		await shot("assemble_after")
+		GameState.mission.comms = "uhf"
+		g.world.rebuild_ship()
+		await wait(1.0)
+		await shot("assemble_alert")
 	if only == "" or "earth" in only:
 		GameState.last_sim = GameState.mission.simulate(3)
 		GameState.last_report = GameState.mission.compute()
