@@ -137,7 +137,7 @@ func _transfer_cases() -> void:
 	_check(period > 87.0 * 60.0 and period < 89.0 * 60.0, "a low Earth orbit takes about 88 minutes")
 	m.place_circular(rp, 0.0, t0)
 	var dv := 3150.0
-	var plan: Dictionary = m.plan_departure(rp, 0.0, t0, dv, 3.0, dv / Transfer.BURN_ACCEL * 0.5 + 240.0)
+	var plan: Dictionary = m.plan_departure(rp, 0.0, t0, dv, 3.0, m.burn_time(dv) * 0.5 + 240.0)
 	_check(not plan.is_empty(), "the planners find a departure that meets the Moon")
 	if plan.is_empty():
 		return
@@ -145,14 +145,15 @@ func _transfer_cases() -> void:
 	print("plan: burn at ", snappedf(rad_to_deg(plan.angle), 0.01), " deg, pass ", roundi(m.pass_height(plan.pass) / 1000.0), " km, trip ", snappedf(trip_h, 0.1), " h")
 	_check(absf(m.pass_height(plan.pass) - Transfer.PERISELENE) < 5000.0, "the plan passes about 110 km over the Moon")
 	_check(trip_h > 60.0 and trip_h < 100.0, "the trip takes three to four days, like Apollo's")
-	m.advance(float(plan.time) - dv / Transfer.BURN_ACCEL * 0.5 - m.t)
+	m.advance(float(plan.time) - m.burn_time(dv) * 0.5 - m.t)
 	var t_b: float = m.t
 	while m.dv_used < dv:
-		m.advance(minf(0.5, (dv - m.dv_used) / Transfer.BURN_ACCEL), 1.0)
+		m.advance(minf(0.5, (dv - m.dv_used) / m.accel()), 1.0)
 	var burn_s: float = m.t - t_b
 	var v: float = sqrt(m.vx * m.vx + m.vy * m.vy)
 	print("burn: ", roundi(burn_s), " s to ", roundi(v), " m/s")
-	_check(burn_s > 300.0 and burn_s < 450.0 and v > 10600.0 and v < 10950.0, "the burn takes about six minutes and leaves at about 10.8 km/s")
+	_check(burn_s > 330.0 and burn_s < 365.0 and v > 10600.0 and v < 10950.0, "the burn takes about Apollo 11's 5 min 47 s [S-afj11-tli] and leaves at about 10.8 km/s")
+	m.use_engine("craft")
 	m.advance(6.0 * 3600.0)
 	var c: Dictionary = m.plan_correction()
 	_check(not c.is_empty() and absf(float(c.dv)) < 100.0, "a mid-course correction under 100 m/s brings the pass to 110 km")
@@ -160,11 +161,14 @@ func _transfer_cases() -> void:
 		return
 	m.kick(c.dv)
 	var p: Dictionary = m.predict(m.state(), m.t)
-	var cap_s: float = m.capture_dv(p) / Transfer.BURN_ACCEL
+	var cap_s: float = m.burn_time(m.capture_dv(p))
 	m.advance(float(p.t_closest) - cap_s * 0.5 - m.t)
 	var used0: float = m.dv_used
+	var t_c: float = m.t
 	while m.moon_orbit().high > 160000.0:
 		m.advance(0.5, 1.0, -1.0, true)
 	var o: Dictionary = m.moon_orbit()
-	print("correction ", snappedf(float(c.dv), 0.1), " m/s; capture ", roundi(m.dv_used - used0), " m/s into ", roundi(o.low / 1000.0), " x ", roundi(o.high / 1000.0), " km")
+	print("correction ", snappedf(float(c.dv), 0.1), " m/s; capture ", roundi(m.dv_used - used0), " m/s in ", roundi(m.t - t_c), " s into ", roundi(o.low / 1000.0), " x ", roundi(o.high / 1000.0), " km")
+	# Apollo 11's braking burn: 889 m/s in 6 min 2 s with the service module's engine [S-afj11-loi]
+	_check(m.t - t_c > 300.0 and m.t - t_c < 450.0, "the braking burn takes about six minutes, as Apollo 11's did")
 	_check(o.low > 50000.0 and o.high < 200000.0, "the capture burn leaves a low orbit around the Moon")

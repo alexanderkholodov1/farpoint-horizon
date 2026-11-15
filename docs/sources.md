@@ -275,6 +275,20 @@ All checked 2026-11-14.
 - **S-apollo-gear** Rogers, W. F. (NASA Johnson Space Center). *Apollo Lunar Module Landing Gear*, 1972. NASA Technical
   Reports Server 19730010151, https://ntrs.nasa.gov/citations/19730010151. A landing is decided mainly by the touchdown
   speed and the slope of the ground under the legs; the game's touchdown bands use those two (their values are ours).
+- **S-afj11-tli** Woods, W. D., et al. *Apollo 11, Day 1 part 2: Earth Orbit and Translunar Injection*, Apollo Flight
+  Journal (NASA History Office; apollojournals.org, linked from https://www.nasa.gov/history/afj/).
+  https://apollojournals.org/afj/ap11fj/02earth-orbit-tli.html. Checked 2026-11-15. "Duration of the burn expected to
+  be 5 minutes, 47 seconds"; inertial velocity at cutoff 35,575 ft/s (10,843 m/s); "an orbital weight of the combined
+  vehicles of 297,914 pounds" in the parking orbit. The departure stage of the trip (`data/engines.json`).
+- **S-afj11-loi** Woods, W. D., et al. *Apollo 11, Day 4 part 2: Entering Lunar Orbit*, Apollo Flight Journal.
+  https://apollojournals.org/afj/ap11fj/12day4-loi1.html. Checked 2026-11-15. LOI-1: "duration 6 minutes, 2 seconds",
+  delta-v 2,917 ft/s (889 m/s), weight before the burn 96,012 lb (43,550 kg), resulting orbit about 113 x 313 km. The
+  craft's engine of the trip (`data/engines.json`) and `tests/flight.gd`.
+- **S-j2** Wikipedia. *Rocketdyne J-2* (infobox). https://en.wikipedia.org/wiki/Rocketdyne_J-2. Checked 2026-11-15.
+  Vacuum thrust 1,033.1 kN (232,250 lbf), vacuum specific impulse 421 s. The departure stage's Isp.
+- **S-apollo-csm** Wikipedia. *Apollo command and service module* (Service Propulsion System).
+  https://en.wikipedia.org/wiki/Apollo_command_and_service_module. Checked 2026-11-15. SPS thrust 91.19 kN
+  (20,500 lbf), specific impulse 314.5 s. The craft's engine of the trip.
 
 ## Ground control: the Deep Space Network and the in-flight alarms (issue 9)
 All checked 2026-11-14; the research behind them is `kb/research/in-flight-failures.md`.

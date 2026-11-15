@@ -6,13 +6,16 @@ extends RefCounted
 ##   - The Moon is where JPL Horizons puts it on the day of the flight [S-horizons]: one row per day from 15 November
 ##     2026, joined smoothly with the velocities of each row (cubic Hermite).
 ##   - Our simplifications: everything in the plane of the ecliptic (the Moon's 5 degree tilt left out), the Sun's pull
-##     left out, the engine a steady push of BURN_ACCEL along or against the motion.
+##     left out, the engine always pointed exactly along or against the motion.
+##   - The engines burn by the rocket equation [S10]: push = thrust / mass, and the mass falls as propellant burns, so
+##     a burn starts gentle and ends hard. Two engines (data/engines.json): the departure stage for the burn to the Moon,
+##     the craft's own engine for the correction and the braking (Apollo 11's, [S-afj11-tli] [S-afj11-loi]).
 ## Positions and speeds are floats (64-bit): Vector2 is 32-bit, which loses metres at the Moon's distance.
 ##   const Transfer := preload("res://scripts/flight/transfer.gd")
 
 const FlightData := preload("res://scripts/flight/flight_data.gd")
 const DAY := 86400.0
-const BURN_ACCEL := 8.5     ## m/s2 at full throttle: a game value, about what a loaded upper stage gives.
+const ENGINES := "res://data/engines.json"
 const PERISELENE := 110000.0    ## Height over the Moon the planners aim for, metres (Apollo's lunar orbits were about this).
 const SOI := 6.61e7         ## The Moon's sphere of influence, metres: inside it the Moon's pull wins.
 
@@ -27,6 +30,9 @@ var y := 0.0
 var vx := 0.0
 var vy := 0.0
 var dv_used := 0.0          ## Speed the engine has added so far, m/s.
+var engines: Dictionary = {}    ## data/engines.json entries, each with its own "mass_kg" that falls as it burns.
+var engine := "departure"   ## The engine that fires now: "departure" until the burn to the Moon ends, then "craft".
+var g0 := 9.80665
 
 
 func setup() -> void:
@@ -35,6 +41,37 @@ func setup() -> void:
 	r_e = FlightData.radius_m("earth")
 	r_m = FlightData.radius_m("moon")
 	rows = FlightData.moon_rows()
+	var f := FileAccess.open(ENGINES, FileAccess.READ)
+	var d = JSON.parse_string(f.get_as_text()) if f != null else null
+	if d is Dictionary:
+		g0 = float(d.get("g0", g0))
+		engines = d.get("entries", {}).duplicate(true)
+	else:
+		push_error("Transfer: cannot read " + ENGINES)
+	use_engine("departure")
+
+
+## Picks the engine that fires next (a key of data/engines.json). The departure stage is dropped after its burn.
+func use_engine(id: String) -> void:
+	engine = id
+
+
+func _eng() -> Dictionary:
+	return engines.get(engine, {"thrust_n": 1.0e6, "isp_s": 420.0, "mass_kg": 1.2e5})
+
+
+## The push at this throttle now, m/s2: thrust / mass [S10].
+func accel(throttle := 1.0) -> float:
+	var e := _eng()
+	return float(e.thrust_n) * throttle / float(e.mass_kg)
+
+
+## Seconds a full-throttle burn of dv m/s takes from now: the propellant the rocket equation asks for [S10]
+## (m0 (1 - e^(-dv/ve)), ve = Isp g0) over the mass flow (thrust / ve).
+func burn_time(dv: float) -> float:
+	var e := _eng()
+	var ve: float = float(e.isp_s) * g0
+	return float(e.mass_kg) * (1.0 - exp(-absf(dv) / ve)) / (float(e.thrust_n) / ve)
 
 
 ## Puts the craft on a circular orbit of radius r (metres) at angle a (radians, counterclockwise as the Moon goes).
@@ -120,7 +157,7 @@ func _h(s: Array, time: float) -> float:
 	return clampf(0.02 * minf(r, d) / v, 0.5, 900.0)
 
 
-## Moves the craft `dt` seconds. thrust: 0..1 of BURN_ACCEL; dir: 1 along the motion (relative to the Earth, or to the
+## Moves the craft `dt` seconds. thrust: 0..1 of the engine's full thrust; dir: 1 along the motion (relative to the Earth, or to the
 ## Moon when moon_frame), -1 against it.
 func advance(dt: float, thrust := 0.0, dir := 1.0, moon_frame := false) -> void:
 	var left := dt
@@ -139,9 +176,14 @@ func advance(dt: float, thrust := 0.0, dir := 1.0, moon_frame := false) -> void:
 				rvx -= mv[0]
 				rvy -= mv[1]
 			var vl := maxf(sqrt(rvx * rvx + rvy * rvy), 1e-6)
-			ux = dir * BURN_ACCEL * thrust * rvx / vl
-			uy = dir * BURN_ACCEL * thrust * rvy / vl
-			dv_used += BURN_ACCEL * thrust * h
+			# the push at the step's middle mass (steps of at most 2 s, so the error is tiny), then the mass burned
+			var e := _eng()
+			var mdot: float = float(e.thrust_n) * thrust / (float(e.isp_s) * g0)
+			var a: float = float(e.thrust_n) * thrust / (float(e.mass_kg) - mdot * h * 0.5)
+			e.mass_kg = float(e.mass_kg) - mdot * h
+			ux = dir * a * rvx / vl
+			uy = dir * a * rvy / vl
+			dv_used += a * h
 		s = _rk4(s, t, h, ux, uy)
 		x = s[0]
 		y = s[1]
@@ -151,12 +193,16 @@ func advance(dt: float, thrust := 0.0, dir := 1.0, moon_frame := false) -> void:
 		left -= h
 
 
-## Adds an instant change of speed along the motion (relative to the Earth): dv m/s, negative slows down.
+## Adds a change of speed along the motion (relative to the Earth) at once: dv m/s, negative slows down. Our
+## simplification for the small mid-course correction (about 50 m/s, some 25 s of the craft's engine in a coast of
+## days); the engine's mass still falls by the rocket equation [S10].
 func kick(dv: float) -> void:
 	var v := sqrt(vx * vx + vy * vy)
 	vx += dv * vx / v
 	vy += dv * vy / v
 	dv_used += absf(dv)
+	var e := _eng()
+	e.mass_kg = float(e.mass_kg) * exp(-absf(dv) / (float(e.isp_s) * g0))
 
 
 # ===================================================================================== WHERE IT GOES
