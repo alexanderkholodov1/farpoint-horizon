@@ -6,3 +6,6 @@
 - Draft: the NASA pictures and the data slide are real; the game's screenshots are dashed frames to fill, and the
   live link, the final mission list, the source count, the teammate's AI tools and a classroom step are `TODO`.
   `python tools/pitch.py --final` passes only when none is left.
+- In the game's look (deep space, the horizon arc, glass cards, the title over the Earth from the credits film), and
+  also as editable PowerPoint (`python tools/pitch_pptx.py`). The built PDFs and PPTXs are committed in
+  `docs/pitch/build/`; rebuild and commit them after any text change.

@@ -41,16 +41,30 @@ Anything still to do is written `TODO` in the text: it shows highlighted on the 
 ```
 python tools/pitch.py              # both languages -> docs/pitch/build/deck-{en,es}.{html,pdf}, notes-{en,es}.md
 python tools/pitch.py --final      # also fails while any TODO or screenshot frame is left
+python tools/pitch_pptx.py         # the same slides as editable PowerPoint -> docs/pitch/build/deck-{en,es}.pptx
+python tools/pitch_art.py          # only to redraw the backgrounds in docs/pitch/art
 ```
-Needs Python 3 and Chrome or Edge (set `CHROME` to its path if it is not found). A slide whose text or pictures do
-not fit gets a red "TOO MUCH TEXT" mark in the HTML and the PDF: cut words, never shrink the type. Open the PDF and
+`pitch.py` needs Python 3 and Chrome or Edge (set `CHROME` to its path if it is not found); `pitch_pptx.py` needs
+`pip install python-pptx pillow`; `pitch_art.py` needs numpy, Pillow and, for the cover, ffmpeg and the game's own
+recording (`build/video/raw.ogv`). A slide whose text or pictures do not fit gets a red "TOO MUCH TEXT" mark in the
+HTML and the PDF, and `pitch_pptx.py` fails on it: cut words, never shrink the type. Open the PDF and the PPTX and
 look at every page before calling it done.
+
+The built decks are committed in `build/`, so the team can open them from GitHub. Rebuild all three after editing
+`en.md` or `es.md`, and commit the result. Hand edits in the PPTX are fine for the final touches (the screenshots, a
+last word), but they are lost on the next build: put text changes in the `.md` too.
+
+## The look
+The game's own (`scripts/ui/kit.gd`, `scripts/ui/horizon.gd`): deep space, the horizon arc from sunrise amber to deep
+blue, horizon-blue glass cards, the title as the game shows it. The cover is the credits film's opening, the Earth at
+sunrise from NASA Blue Marble and Black Marble [S-gibs-earth]; the other backgrounds are drawn by `tools/pitch_art.py`
+(procedural, no AI images). The HTML and PDF use Inter (the game's type); the PPTX uses Segoe UI, on every Windows PC.
 
 ## When the game is complete
 1. Take the screenshots each `shot:` frame asks for (`tools/shots.sh`, or play and capture at 1600x900 or larger),
-   put them in `docs/pitch/img/` and point the `image:` lines at them.
+   put them in `docs/pitch/img/` and point the `image:` lines at them, then rebuild.
 2. Settle every `TODO`: the live link, the missions that ship, the source count, the teammate's AI tools, the
    classroom step.
 3. Check every number on the slides against the game and `docs/sources.md` as it is then.
-4. `python tools/pitch.py --final`, look at both PDFs, upload: the English PDF to the global platform, both to the
+4. `python tools/pitch.py --final` and `python tools/pitch_pptx.py`, look at both PDFs and PPTXs, upload: the English PDF to the global platform, both to the
    venue's form.
