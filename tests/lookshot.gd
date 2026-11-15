@@ -28,6 +28,20 @@ func _ready() -> void:
 	await wait(1.2)
 	if only == "" or "menu" in only:
 		await shot("menu")
+	if "tutorial" in only:
+		preload("res://scripts/tutorial/coach.gd").start(g)
+		for i in 8:
+			g.screen.show_step(i)
+			await wait(1.2)
+			await shot("tutorial_%d" % i)
+		GameState.mission.from_dict({"bus": "medium", "instruments": ["cam_ms", "gamma", "alt"], "panels": "wing_l", "battery": "b1k", "comms": "ka", "adcs": "st", "propulsion": "chem", "launcher": "medium", "orbit": "lunar", "years": 1})
+		GameState.begin_flight(GameState.mission.compute())
+		GameState.last_sim.launch_failed = false
+		g.go("launch")
+		await wait(5.0)
+		await shot("tutorial_launch")
+		g.go("menu")
+		await wait(0.5)
 	GameState.start_solo()
 	GameState.start_mission("volcanes")
 	g.go("design", {"step": 0})
