@@ -54,3 +54,29 @@ jobs:
           name: web-build
           path: build/web
           retention-days: 7
+
+  # Every pull request gets its own temporary page on Firebase Hosting (a preview channel that expires after 7 days);
+  # the link is posted on the pull request. Production is deployed only when the version pull request is merged
+  # (release.yml).
+  preview:
+    name: Preview page on Firebase
+    needs: godot
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: web-build
+          path: build/web
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_FARPOINT_HORIZON }}
+          projectId: farpoint-horizon
+          expires: 7d

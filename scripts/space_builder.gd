@@ -7,8 +7,23 @@ const ATMO_SHADER := preload("res://shaders/atmosphere.gdshader")
 const MOON_SHADER := preload("res://shaders/moon.gdshader")
 const SKY_SHADER := preload("res://shaders/sky.gdshader")
 const GLOW := preload("res://shaders/engine_glow.gdshader")
-const EARTH_TEX := preload("res://textures/earth_albedo.jpg")
+const PARTICLE_SHADER := preload("res://shaders/particle.gdshader")
+## NASA textures, made by assets/source/planet_textures.py [S-gibs] [S-moon-kit].
+const EARTH_DAY := preload("res://textures/earth_day.jpg")
+const EARTH_NIGHT := preload("res://textures/earth_night.jpg")
+const EARTH_RELIEF := preload("res://textures/earth_relief.jpg")
+const EARTH_CLOUDS := preload("res://textures/earth_clouds.jpg")
+const EARTH_REGION_DAY := preload("res://textures/earth_region_day.jpg")
+const EARTH_REGION_RELIEF := preload("res://textures/earth_region_relief.jpg")
+const EARTH_REGION_CLOUDS := preload("res://textures/earth_region_clouds.jpg")
+## Where those cover the globe, in its UV (u0, v0, u1, v1): 92-68 W, 12 N-12 S (planet_textures.py REGION_LONLAT).
+const REGION_RECT := Vector4((180.0 - 92.0) / 360.0, (90.0 - 12.0) / 180.0, (180.0 - 68.0) / 360.0, (90.0 + 12.0) / 180.0)
+const MOON_COLOR := preload("res://textures/moon_color.jpg")
+const MOON_NORMAL := preload("res://textures/moon_normal.jpg")
+## Materials in this group get the Sun's direction ("sun_dir") from World every frame, for the night side.
+const SUN_LIT := "sun_lit"
 const Ship := preload("res://scripts/ship_builder.gd")
+const RocketDesign := preload("res://scripts/craft/rocket_design.gd")
 const FONT := preload("res://fonts/Inter-SemiBold.otf")
 
 
@@ -24,10 +39,11 @@ static func make_space_sky() -> Sky:
 static func make_day_sky() -> Sky:
 	var sky := Sky.new()
 	var p := ProceduralSkyMaterial.new()
-	p.sky_top_color = Color(0.18, 0.4, 0.78)
-	p.sky_horizon_color = Color(0.62, 0.74, 0.88)
-	p.ground_bottom_color = Color(0.2, 0.22, 0.2)
-	p.ground_horizon_color = Color(0.55, 0.62, 0.7)
+	p.sky_top_color = Color(0.12, 0.3, 0.66)
+	p.sky_horizon_color = Color(0.68, 0.76, 0.86)
+	p.sky_curve = 0.12
+	p.ground_bottom_color = Color(0.3, 0.3, 0.26)
+	p.ground_horizon_color = Color(0.68, 0.76, 0.86)
 	sky.sky_material = p
 	return sky
 
@@ -70,8 +86,15 @@ static func make_earth(radius := 1.0, with_marker := true) -> Node3D:
 	s.rings = 64
 	var em := ShaderMaterial.new()
 	em.shader = EARTH_SHADER
-	em.set_shader_parameter("albedo_tex", EARTH_TEX)
-	Ship.add_mesh(surface, s, Vector3.ZERO, em)
+	em.set_shader_parameter("day_tex", EARTH_DAY)
+	em.set_shader_parameter("night_tex", EARTH_NIGHT)
+	em.set_shader_parameter("relief_tex", EARTH_RELIEF)
+	em.set_shader_parameter("cloud_tex", EARTH_CLOUDS)
+	em.set_shader_parameter("region_day", EARTH_REGION_DAY)
+	em.set_shader_parameter("region_relief", EARTH_REGION_RELIEF)
+	em.set_shader_parameter("region_clouds", EARTH_REGION_CLOUDS)
+	em.set_shader_parameter("region_rect", REGION_RECT)
+	Ship.add_mesh(surface, s, Vector3.ZERO, em).add_to_group(SUN_LIT)
 	# nubes
 	var cs := SphereMesh.new()
 	cs.radius = radius * 1.012
@@ -80,16 +103,23 @@ static func make_earth(radius := 1.0, with_marker := true) -> Node3D:
 	cs.rings = 48
 	var cm := ShaderMaterial.new()
 	cm.shader = CLOUD_SHADER
-	Ship.add_mesh(surface, cs, Vector3.ZERO, cm).name = "Clouds"
-	# atmósfera
+	cm.set_shader_parameter("cloud_tex", EARTH_CLOUDS)
+	cm.set_shader_parameter("region_clouds", EARTH_REGION_CLOUDS)
+	cm.set_shader_parameter("region_rect", REGION_RECT)
+	var cl := Ship.add_mesh(surface, cs, Vector3.ZERO, cm)
+	cl.name = "Clouds"
+	cl.add_to_group(SUN_LIT)
+	# the air: about 100 km thick (1.6 % of the radius), drawn at 3.5 % so it reads at game size
+	const ATMO_K := 1.035
 	var as_ := SphereMesh.new()
-	as_.radius = radius * 1.045
-	as_.height = radius * 2.09
-	as_.radial_segments = 96
-	as_.rings = 48
+	as_.radius = radius * ATMO_K
+	as_.height = radius * 2.0 * ATMO_K
+	as_.radial_segments = 128
+	as_.rings = 64
 	var am := ShaderMaterial.new()
 	am.shader = ATMO_SHADER
-	Ship.add_mesh(root, as_, Vector3.ZERO, am)
+	am.set_shader_parameter("inner", 1.0 / ATMO_K)
+	Ship.add_mesh(root, as_, Vector3.ZERO, am).add_to_group(SUN_LIT)
 	# marcador de Ecuador (Quito: -0.2°, -78.5°)
 	if with_marker:
 		var mk := Node3D.new()
@@ -121,6 +151,8 @@ static func make_moon(radius := 1.0) -> Node3D:
 	s.rings = 64
 	var mm := ShaderMaterial.new()
 	mm.shader = MOON_SHADER
+	mm.set_shader_parameter("color_tex", MOON_COLOR)
+	mm.set_shader_parameter("normal_tex", MOON_NORMAL)
 	Ship.add_mesh(root, s, Vector3.ZERO, mm).name = "Surface"
 	return root
 
@@ -141,26 +173,26 @@ static func make_orbit_ring(radius: float, incl_deg: float, color: Color) -> Nod
 	return pivot
 
 
-static func particle_mat(unshaded := true) -> StandardMaterial3D:
-	var m := StandardMaterial3D.new()
-	m.vertex_color_use_as_albedo = true
-	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	if unshaded:
-		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	m.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
-	var gt := GradientTexture2D.new()
-	gt.fill = GradientTexture2D.FILL_RADIAL
-	gt.fill_from = Vector2(0.5, 0.5)
-	gt.fill_to = Vector2(1.0, 0.5)
-	gt.width = 64
-	gt.height = 64
-	var gg := Gradient.new()
-	gg.set_color(0, Color(1, 1, 1, 1))
-	gg.set_color(1, Color(1, 1, 1, 0))
-	gg.add_point(0.5, Color(1, 1, 1, 0.55))
-	gt.gradient = gg
-	m.albedo_texture = gt
-	return m
+## The material of every particle effect: a soft round puff tinted by each particle's colour (shaders/particle.gdshader,
+## which also hides the black discs GL Compatibility draws for particles not yet emitted). Made once and shared.
+static var _particle_mat: ShaderMaterial
+static func particle_mat(_unshaded := true) -> ShaderMaterial:
+	if _particle_mat == null:
+		var gt := GradientTexture2D.new()
+		gt.fill = GradientTexture2D.FILL_RADIAL
+		gt.fill_from = Vector2(0.5, 0.5)
+		gt.fill_to = Vector2(1.0, 0.5)
+		gt.width = 64
+		gt.height = 64
+		var gg := Gradient.new()
+		gg.set_color(0, Color(1, 1, 1, 1))
+		gg.set_color(1, Color(1, 1, 1, 0))
+		gg.add_point(0.5, Color(1, 1, 1, 0.55))
+		gt.gradient = gg
+		_particle_mat = ShaderMaterial.new()
+		_particle_mat.shader = PARTICLE_SHADER
+		_particle_mat.set_shader_parameter("puff", gt)
+	return _particle_mat
 
 
 static func make_label(text: String, color: Color, depth_test := false) -> Label3D:
@@ -210,33 +242,174 @@ static func make_flame(scale: float) -> CPUParticles3D:
 	return p
 
 
+## An engine's flame where there is no air: a short, bright jet that stays with the craft and leaves no smoke
+## (smoke is exhaust slowed and cooled by air; in vacuum the gas just spreads and vanishes).
+static func make_vacuum_flame(scale: float) -> CPUParticles3D:
+	var p := make_flame(scale)
+	p.local_coords = true
+	p.amount = 90
+	p.lifetime = 0.32
+	p.spread = 7.0
+	p.initial_velocity_min = 11.0 * scale
+	p.initial_velocity_max = 15.0 * scale
+	var sc := Curve.new()
+	sc.add_point(Vector2(0, 0.7))
+	sc.add_point(Vector2(1, 1.7))
+	p.scale_amount_curve = sc
+	var g := Gradient.new()
+	g.set_color(0, Color(1.0, 0.97, 0.85, 0.95))
+	g.set_color(1, Color(1.0, 0.45, 0.1, 0.0))
+	g.add_point(0.3, Color(1.0, 0.72, 0.3, 0.7))
+	p.color_ramp = g
+	return p
+
+
+## The ground cloud at ignition: steam from the sound suppression water and exhaust pushed out along the pad,
+## billowing wide and slowly, as in launch footage. Unshaded and casting no shadow: a cloud has no hard silhouette.
+static func make_pad_smoke() -> CPUParticles3D:
+	var p := CPUParticles3D.new()
+	p.name = "PadSmoke"
+	p.amount = 160
+	p.lifetime = 4.5
+	p.local_coords = false
+	var q := QuadMesh.new()
+	q.size = Vector2(1.6, 1.6)
+	q.material = particle_mat()
+	p.mesh = q
+	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
+	p.emission_sphere_radius = 0.4
+	# most of it leaves along the flame trench (+X), the rest rolls out over the pad
+	p.direction = Vector3(1, 0.25, 0)
+	p.spread = 110.0
+	p.flatness = 0.7
+	p.gravity = Vector3(0, 0.25, 0)
+	p.initial_velocity_min = 2.5
+	p.initial_velocity_max = 5.5
+	p.damping_min = 1.0
+	p.damping_max = 2.0
+	p.scale_amount_min = 0.8
+	p.scale_amount_max = 1.4
+	var sc := Curve.new()
+	sc.add_point(Vector2(0, 0.5))
+	sc.add_point(Vector2(0.5, 1.5))
+	sc.add_point(Vector2(1, 2.4))
+	p.scale_amount_curve = sc
+	var g := Gradient.new()
+	g.set_color(0, Color(1.0, 0.9, 0.75, 0.0))
+	g.add_point(0.1, Color(0.95, 0.94, 0.92, 0.8))
+	g.add_point(0.6, Color(0.88, 0.88, 0.87, 0.5))
+	g.set_color(g.get_point_count() - 1, Color(0.85, 0.85, 0.85, 0.0))
+	p.color_ramp = g
+	p.emitting = false
+	return p
+
+
+## A launcher breaking up in flight: a fireball that burns out to black smoke, the smoke cloud that lingers and
+## grows, and burning pieces arcing down. Three one-shot emitters; the caller starts them.
+static func make_explosion() -> Node3D:
+	var root := Node3D.new()
+	root.name = "Explosion"
+	# fireball: dense, fast, damped, white-hot to orange to soot
+	var fire := _burst("Fire", 110, 1.8, 1.0, Vector2(2.0, 2.0), 3.0, 9.0, 5.0)
+	var fg := Gradient.new()
+	fg.set_color(0, Color(1.0, 0.97, 0.85, 0.95))
+	fg.add_point(0.12, Color(1.0, 0.75, 0.3, 0.85))
+	fg.add_point(0.35, Color(0.85, 0.32, 0.08, 0.75))
+	fg.add_point(0.6, Color(0.22, 0.17, 0.14, 0.7))
+	fg.set_color(fg.get_point_count() - 1, Color(0.1, 0.1, 0.1, 0.0))
+	fire.color_ramp = fg
+	root.add_child(fire)
+	# smoke: slower, larger, rising, lingering
+	var smoke := _burst("Smoke", 70, 5.0, 1.0, Vector2(3.2, 3.2), 1.5, 4.0, 1.2)
+	smoke.gravity = Vector3(0, 0.6, 0)
+	var sg := Gradient.new()
+	sg.set_color(0, Color(0.5, 0.46, 0.42, 0.0))
+	sg.add_point(0.2, Color(0.46, 0.43, 0.4, 0.55))
+	sg.add_point(0.6, Color(0.58, 0.57, 0.56, 0.45))
+	sg.set_color(sg.get_point_count() - 1, Color(0.6, 0.6, 0.6, 0.0))
+	smoke.color_ramp = sg
+	root.add_child(smoke)
+	# debris: small burning pieces falling in arcs
+	var debris := _burst("Debris", 46, 3.2, 1.0, Vector2(0.25, 0.25), 6.0, 13.0, 0.3)
+	debris.gravity = Vector3(0, -9.0, 0)
+	debris.scale_amount_curve = null
+	var dg := Gradient.new()
+	dg.set_color(0, Color(1.0, 0.85, 0.5, 1.0))
+	dg.add_point(0.3, Color(1.0, 0.5, 0.15, 1.0))
+	dg.set_color(dg.get_point_count() - 1, Color(0.25, 0.2, 0.18, 0.0))
+	debris.color_ramp = dg
+	root.add_child(debris)
+	return root
+
+
+static func _burst(nm: String, amount: int, life: float, explosive: float, size: Vector2, v0: float, v1: float, damp: float) -> CPUParticles3D:
+	var p := CPUParticles3D.new()
+	p.name = nm
+	p.amount = amount
+	p.lifetime = life
+	p.one_shot = true
+	p.explosiveness = explosive
+	p.lifetime_randomness = 0.55  # so the puffs age apart and the cloud has depth instead of one flat colour
+	p.local_coords = false
+	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var q := QuadMesh.new()
+	q.size = size
+	q.material = particle_mat(true)
+	p.mesh = q
+	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
+	p.emission_sphere_radius = 0.5
+	p.direction = Vector3.UP
+	p.spread = 180.0
+	p.gravity = Vector3.ZERO
+	p.initial_velocity_min = v0
+	p.initial_velocity_max = v1
+	p.damping_min = damp
+	p.damping_max = damp * 1.5
+	p.scale_amount_min = 0.7
+	p.scale_amount_max = 1.4
+	var sc := Curve.new()
+	sc.add_point(Vector2(0, 0.6))
+	sc.add_point(Vector2(0.3, 1.5))
+	sc.add_point(Vector2(1, 2.6))
+	p.scale_amount_curve = sc
+	p.emitting = false
+	return p
+
+
+## Modeled launchers (assets/source/launchers.py): which model each launcher flies on, and each model's real height
+## in metres and the centre-to-centre offset of its side boosters, as printed by that script.
+const LAUNCHER_MODEL := {"ride": "medium", "light": "light", "medium": "medium", "heavy": "heavy"}
+const LAUNCHER_MODEL_INFO := {
+	"light": {"height": 17.9, "boosters": 0.0},
+	"medium": {"height": 70.9, "boosters": 0.0},
+	"heavy": {"height": 70.9, "boosters": 4.25},
+}
+
+
+## The launcher on the pad: its model, scaled to the size the launch screen frames (4.8 x the launcher's `height`),
+## with a `Flames` child for every engine cluster and the `height` meta. Origin at the base of the first stage.
 static func make_rocket(launcher_id: String) -> Node3D:
+	if launcher_id == RocketDesign.CUSTOM and RocketDesign.current != null:
+		return make_custom_rocket(RocketDesign.current)
 	var root := Node3D.new()
 	root.name = "Rocket"
 	var L: Dictionary = GameData.LAUNCHERS[launcher_id]
 	var h: float = L.height
-	if launcher_id == "ride":
+	if launcher_id == "ride":  # rideshare flies on a medium launcher, as before
 		h = 1.3
-	var r := 0.16 * h
-	var white := Ship.mat(Color(0.93, 0.93, 0.93), 0.1, 0.45)
-	var black := Ship.mat(Color(0.08, 0.08, 0.09), 0.3, 0.5)
-	var grey := Ship.mat(Color(0.35, 0.35, 0.37), 0.9, 0.4)
-	var s1 := 2.6 * h
-	var s2 := 0.9 * h
-	Ship.cyl(root, r, r, s1, Vector3(0, s1 / 2.0, 0), white)
-	Ship.cyl(root, r, r, 0.25 * h, Vector3(0, s1 + 0.125 * h, 0), black)
-	Ship.cyl(root, r, r, s2, Vector3(0, s1 + 0.25 * h + s2 / 2.0, 0), white)
-	var fz := s1 + 0.25 * h + s2
-	Ship.cyl(root, r * 1.15, r * 1.15, 0.5 * h, Vector3(0, fz + 0.25 * h, 0), white)
-	Ship.cyl(root, 0.0, r * 1.15, 0.55 * h, Vector3(0, fz + 0.5 * h + 0.275 * h, 0), white)
-	# aletas de rejilla y motores
-	for i in 4:
-		var a := i * PI / 2.0
-		Ship.box(root, Vector3(0.02, 0.18 * h, 0.14 * h), Vector3(cos(a) * r * 1.05, s1 - 0.2 * h, sin(a) * r * 1.05), black, Vector3(0, -rad_to_deg(a), 0))
-	Ship.cyl(root, r * 0.6, r * 0.95, 0.18 * h, Vector3(0, -0.09 * h, 0), grey)
+	var key: String = LAUNCHER_MODEL[launcher_id]
+	var info: Dictionary = LAUNCHER_MODEL_INFO[key]
+	var total := 4.8 * h
+	var k: float = total / float(info.height)
+	var model: Node3D = load("res://assets/models/launcher_%s.glb" % key).instantiate()
+	model.name = "Model"
+	model.scale = Vector3.ONE * k
+	root.add_child(model)
 	var flames := Node3D.new()
 	flames.name = "Flames"
 	root.add_child(flames)
+	var r := 0.16 * h
 	var f := make_flame(h)
 	f.position = Vector3(0, -0.2 * h, 0)
 	flames.add_child(f)
@@ -244,39 +417,162 @@ static func make_rocket(launcher_id: String) -> Node3D:
 	gm.shader = GLOW
 	var plume := Ship.cyl(flames, r * 0.7, r * 0.35, 1.2 * h, Vector3(0, -0.8 * h, 0), gm)
 	plume.name = "Plume"
-	if launcher_id == "heavy":
+	if float(info.boosters) > 0.0:
 		for sx in [-1, 1]:
-			var bx: float = sx * r * 2.1
-			Ship.cyl(root, r, r, s1, Vector3(bx, s1 / 2.0, 0), white)
-			Ship.cyl(root, 0.0, r, 0.4 * h, Vector3(bx, s1 + 0.2 * h, 0), white)
-			Ship.cyl(root, r * 0.6, r * 0.95, 0.18 * h, Vector3(bx, -0.09 * h, 0), grey)
 			var fb := make_flame(h)
-			fb.position = Vector3(bx, -0.2 * h, 0)
+			fb.position = Vector3(sx * float(info.boosters) * k, -0.2 * h, 0)
 			flames.add_child(fb)
-	root.set_meta("height", fz + 1.05 * h)
+	root.set_meta("height", total)
 	return root
+
+
+## The rocket the player assembled (RocketDesign), at the launch screen's scale (0.088 units per metre, the scale of
+## the catalog launchers), with Flames under its first stage, flames under each booster, and the meta "height" and
+## "stage1_y" (where the second stage's engine fires after separation).
+static func make_custom_rocket(design) -> Node3D:
+	var root := Node3D.new()
+	root.name = "Rocket"
+	var k := 0.088
+	var asm: Node3D = design.build_model()
+	asm.scale = Vector3.ONE * k
+	root.add_child(asm)
+	var core_r: float = RocketDesign.part(design.stack[0]).family / 2.0
+	var h := 1.3 * core_r / 1.85
+	var flames := Node3D.new()
+	flames.name = "Flames"
+	root.add_child(flames)
+	var f := make_flame(h)
+	f.position = Vector3(0, -0.25, 0)
+	flames.add_child(f)
+	var gm := ShaderMaterial.new()
+	gm.shader = GLOW
+	var plume := Ship.cyl(flames, core_r * k * 0.9, core_r * k * 0.45, 1.2 * h, Vector3(0, -0.25 - 0.6 * h, 0), gm)
+	plume.name = "Plume"
+	var boosters := asm.get_node_or_null("Boosters") as Node3D
+	if boosters:
+		for b in boosters.get_children():
+			var fb := make_flame(h)
+			fb.position = Vector3(b.position.x * k, b.position.y * k - 0.1, 0)
+			fb.name = "BoosterFlame%d" % flames.get_child_count()
+			fb.set_meta("booster", true)
+			flames.add_child(fb)
+	# where the second stage starts: the top of the first stage
+	var st: Array = design.stages()
+	var y1 := 0.0
+	for id in st[0]:
+		y1 += RocketDesign._part_height(id)
+	root.set_meta("stage1_y", y1 * k)
+	root.set_meta("height", design.height_m() * k)
+	return root
+
+
+## The launch site among the Andes: the modeled pad, tower and pad buildings (assets/models/launch_site.glb, in metres)
+## on the real relief around Cotopaxi (textures/terrain_cotopaxi.png, NASA SRTM [S-terrain-tiles]), both at the
+## launch screen's scale. The rocket stands on the mount at PAD_TOP.
+const SITE := preload("res://assets/models/launch_site.glb")
+const TERRAIN_HM := preload("res://textures/terrain_cotopaxi.png")
+const TERRAIN_SHADER := preload("res://shaders/terrain.gdshader")
+const SITE_K := 0.088                 ## Game units per metre, as the builder and the rockets.
+const PAD_TOP := 2.4 * SITE_K         ## Top of the launch mount (launch_site.py MOUNT_H).
+const TERRAIN_CELL_M := 191.0         ## Metres between heightmap samples (terrain_cotopaxi.py).
+const TERRAIN_PAD := Vector2i(116, 176)   ## The pad's sample (column, row).
+const TERRAIN_YAW := 50.0             ## Turns the map so Cotopaxi rises beside the rocket in the launch camera.
+static var _terrain_mesh: ArrayMesh
+static var _terrain_base := 0.0
 
 
 static func make_pad() -> Node3D:
 	var root := Node3D.new()
 	root.name = "Pad"
-	var ground := PlaneMesh.new()
-	ground.size = Vector2(600, 600)
-	Ship.add_mesh(root, ground, Vector3.ZERO, Ship.mat(Color(0.28, 0.33, 0.24), 0.0, 0.95))
-	Ship.box(root, Vector3(3.0, 0.2, 3.0), Vector3(0, 0.1, 0), Ship.mat(Color(0.5, 0.5, 0.5), 0.1, 0.8))
-	# torre de servicio
-	var steel := Ship.mat(Color(0.55, 0.15, 0.1), 0.6, 0.5)
-	Ship.box(root, Vector3(0.35, 5.5, 0.35), Vector3(-0.9, 2.75, 0), steel)
-	for i in 5:
-		Ship.box(root, Vector3(0.6, 0.06, 0.08), Vector3(-0.6, 1.0 + i, 0), steel)
-	# volcanes andinos de fondo (con nieve)
-	var rock := Ship.mat(Color(0.35, 0.33, 0.32), 0.0, 0.95)
-	var snow := Ship.mat(Color(0.95, 0.96, 1.0), 0.0, 0.7)
-	var volcanoes := [[Vector3(-60, 0, -140), 40.0, 30.0], [Vector3(50, 0, -170), 55.0, 26.0], [Vector3(120, 0, -120), 30.0, 22.0], [Vector3(-140, 0, -100), 35.0, 18.0]]
-	for v in volcanoes:
-		var pos: Vector3 = v[0]
-		var rr: float = v[1]
-		var hh: float = v[2]
-		Ship.cyl(root, rr * 0.06, rr, hh, pos + Vector3(0, hh / 2.0, 0), rock)
-		Ship.cyl(root, rr * 0.06, rr * 0.3, hh * 0.25, pos + Vector3(0, hh * 0.875 + 0.05, 0), snow)
+	var site: Node3D = SITE.instantiate()
+	site.scale = Vector3.ONE * SITE_K
+	root.add_child(site)
+	var t := MeshInstance3D.new()
+	t.name = "Terrain"
+	t.mesh = _terrain()
+	var tm := ShaderMaterial.new()
+	tm.shader = TERRAIN_SHADER
+	tm.set_shader_parameter("k", SITE_K)
+	tm.set_shader_parameter("base_alt", _terrain_base)
+	t.material_override = tm
+	t.rotation_degrees.y = TERRAIN_YAW
+	root.add_child(t)
 	return root
+
+
+## Daylight at 3,300 m: a deep blue sky, a pale hazy horizon, and haze that grows with distance (aerial perspective).
+static func apply_day(env: Environment) -> void:
+	env.sky = make_day_sky()
+	env.fog_enabled = true
+	env.fog_mode = Environment.FOG_MODE_EXPONENTIAL
+	env.fog_light_color = Color(0.68, 0.76, 0.86)
+	env.fog_density = 0.00042
+	env.fog_sky_affect = 0.0
+	env.fog_sun_scatter = 0.25
+	env.tonemap_exposure = 0.9
+
+
+## Altitude in metres of one heightmap sample (coded as R * 256 + G).
+static func _terrain_alt(img: Image, x: int, y: int) -> float:
+	var c := img.get_pixel(clampi(x, 0, img.get_width() - 1), clampi(y, 0, img.get_height() - 1))
+	return roundf(c.r * 255.0) * 256.0 + roundf(c.g * 255.0)
+
+
+## The terrain mesh, built once from the heightmap: the pad's sample at the origin, a disc around the pad levelled to
+## the pad's height, normals from the neighbours.
+static func _terrain() -> ArrayMesh:
+	if _terrain_mesh:
+		return _terrain_mesh
+	var img: Image = TERRAIN_HM.get_image()
+	if img.is_compressed():
+		img.decompress()
+	var n := img.get_width()
+	var base := _terrain_alt(img, TERRAIN_PAD.x, TERRAIN_PAD.y)
+	_terrain_base = base
+	var hs := PackedFloat32Array()
+	hs.resize(n * n)
+	for y in n:
+		for x in n:
+			var a := _terrain_alt(img, x, y)
+			var r := Vector2(x - TERRAIN_PAD.x, y - TERRAIN_PAD.y).length() * TERRAIN_CELL_M
+			a = lerpf(base - 0.6, a, smoothstep(700.0, 1600.0, r))
+			hs[y * n + x] = (a - base) * SITE_K
+	var cell := TERRAIN_CELL_M * SITE_K
+	var verts := PackedVector3Array()
+	var norms := PackedVector3Array()
+	var uvs := PackedVector2Array()
+	verts.resize(n * n)
+	norms.resize(n * n)
+	uvs.resize(n * n)
+	for y in n:
+		for x in n:
+			var i := y * n + x
+			verts[i] = Vector3((x - TERRAIN_PAD.x) * cell, hs[i], (y - TERRAIN_PAD.y) * cell)
+			var hl := hs[y * n + maxi(x - 1, 0)]
+			var hr := hs[y * n + mini(x + 1, n - 1)]
+			var hu := hs[maxi(y - 1, 0) * n + x]
+			var hd := hs[mini(y + 1, n - 1) * n + x]
+			norms[i] = Vector3(hl - hr, 2.0 * cell, hu - hd).normalized()
+			uvs[i] = Vector2(float(x) / (n - 1), float(y) / (n - 1))
+	var idx := PackedInt32Array()
+	idx.resize((n - 1) * (n - 1) * 6)
+	var j := 0
+	for y in n - 1:
+		for x in n - 1:
+			var a0 := y * n + x
+			idx[j] = a0
+			idx[j + 1] = a0 + 1
+			idx[j + 2] = a0 + n
+			idx[j + 3] = a0 + 1
+			idx[j + 4] = a0 + n + 1
+			idx[j + 5] = a0 + n
+			j += 6
+	var arr := []
+	arr.resize(Mesh.ARRAY_MAX)
+	arr[Mesh.ARRAY_VERTEX] = verts
+	arr[Mesh.ARRAY_NORMAL] = norms
+	arr[Mesh.ARRAY_TEX_UV] = uvs
+	arr[Mesh.ARRAY_INDEX] = idx
+	_terrain_mesh = ArrayMesh.new()
+	_terrain_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+	return _terrain_mesh

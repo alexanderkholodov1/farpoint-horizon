@@ -1,29 +1,11 @@
 shader_type spatial;
-#include "res://shaders/noise.gdshaderinc"
-varying vec3 lpos;
-void vertex() { lpos = VERTEX; }
-float craters(vec3 p) {
-	vec3 i = floor(p);
-	vec3 f = fract(p);
-	float d = 1.0;
-	for (int x = -1; x <= 1; x++)
-	for (int y = -1; y <= 1; y++)
-	for (int z = -1; z <= 1; z++) {
-		vec3 o = vec3(float(x), float(y), float(z));
-		vec3 h = vec3(hash13(i + o), hash13(i + o + 17.1), hash13(i + o + 41.7));
-		d = min(d, length(o + h - f));
-	}
-	return d;
-}
+// The Moon from NASA data (assets/source/planet_textures.py): LRO colour and the relief of the LOLA elevation.
+uniform sampler2D color_tex : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D normal_tex : hint_normal, filter_linear_mipmap, repeat_enable;
 void fragment() {
-	vec3 p = normalize(lpos);
-	float maria = smoothstep(0.45, 0.6, fbm(p * 1.6 + 3.0));
-	float n = fbm(p * 9.0);
-	float c1 = craters(p * 7.0);
-	float c2 = craters(p * 19.0);
-	float rim = smoothstep(0.25, 0.32, c1) - smoothstep(0.32, 0.42, c1);
-	float bowl = 1.0 - smoothstep(0.0, 0.3, c1);
-	float g = 0.62 - maria * 0.25 + (n - 0.5) * 0.18 + rim * 0.12 - bowl * 0.08 - (1.0 - smoothstep(0.0, 0.2, c2)) * 0.06;
-	ALBEDO = vec3(g) * vec3(1.0, 0.98, 0.95);
-	ROUGHNESS = 0.95;
+	ALBEDO = texture(color_tex, UV).rgb * 0.72;
+	NORMAL_MAP = texture(normal_tex, UV).rgb;
+	NORMAL_MAP_DEPTH = 0.75;
+	ROUGHNESS = 0.97;
+	SPECULAR = 0.05;
 }

@@ -1,4 +1,4 @@
-# SK Horizon, Mission Architect
+# Farpoint HORIZON
 
 Entry of team **SK Horizon** (Quito, Ecuador) to the NASA Space Apps Challenge 2026, challenge
 [Space Mission Design Game](https://www.spaceappschallenge.org/2026/challenges/space-mission-design-game/).
@@ -12,7 +12,7 @@ that there is no perfect design.
 
 **Current state.** Version v0.1.0 is the first playable sketch: it runs from menu to final report. The next version,
 v0.2.0, rebuilds it as described in [`docs/design/vision.md`](docs/design/vision.md). Where the project stands today
-is in [`docs/STATE.md`](docs/STATE.md). The interface text of v0.1.0 is in Spanish.
+is in `tools/state.sh` (notes in [`docs/state/`](docs/state/)). The interface text of v0.1.0 is in Spanish.
 
 ## How to play
 
@@ -86,8 +86,8 @@ PDFs are in `docs/challenge/`.
 
 ## Sources
 
-Every formula and value is cited at its definition and in [`kb/data/reference.json`](kb/data/reference.json). The main
-sources already collected there include:
+Every formula and value is cited where it is used and listed once in [`docs/sources.md`](docs/sources.md), the
+project's bibliography. The main sources so far:
 
 - NASA Space Science Data Coordinated Archive, [Earth fact sheet](https://nssdc.gsfc.nasa.gov/planetary/factsheet/earthfact.html) (radius, GM, solar constant).
 - NASA Orbital Debris Program Office [FAQ](https://orbitaldebris.jsc.nasa.gov/faq/) (orbital lifetime against altitude) and the NASA 25-year disposal guideline.
@@ -97,26 +97,33 @@ sources already collected there include:
 
 ## Use of AI
 
-Super Intelligence (AI) tools helped build this project, as the challenge rules ask us to disclose. The game idea, the
+Artificial intelligence (AI) tools helped build this project, as the challenge rules ask us to disclose. The game idea, the
 design decisions and the balance are the team's.
 
 - **Claude Code** (Anthropic), models Claude Opus 5.5 and Claude Sonnet: code, documents and research notes.
 - **Cursor**, model Composer 2.5: a feasibility test of the web build (kept outside this repository).
 - **TODO (teammate):** add here the other AI agents and models you used.
 
-No watermarks are used. Instead, every source (information, formula, data) is cited where it is used and in
-`kb/data/reference.json`.
+No AI-generated images are used, so no watermark is needed: models come from our scripts and from the cited
+libraries, imagery from NASA. Every source (information, formula, data) is cited where it is used and in
+`docs/sources.md`.
 
 ## Credits
 
 - Engine: [Godot Engine](https://godotengine.org) (MIT).
 - Font: Inter by Rasmus Andersson, [SIL Open Font License 1.1](https://rsms.me/inter/) (see `fonts/FONTS_LICENSE.txt`).
-- Earth texture (`textures/earth_albedo.jpg`): the previous README says the team generated it from a public land and ocean mask (the `global-land-mask` package, NOAA GLOBE data). No file in the repository states this, so it is **TODO: confirm the source and license with the teammate**.
-- Spacecraft and space scenes are built in code from Godot primitives and shaders (`scripts/`, `shaders/`); this was not independently checked for third-party assets.
+- Earth and Moon textures: NASA Blue Marble, Black Marble, VIIRS and the SVS CGI Moon Kit, made by `assets/source/planet_textures.py` (sources S-gibs-earth and S-moon-kit in `docs/sources.md`).
+- 3D modeling: [Blender](https://www.blender.org) (GPL), driven by our scripts in `assets/source/`. The craft, the launchers, the tanks, fairings and interstages, the craft components and the launch site are our own models.
+- Outside 3D models: Merlin Engine by hoahluke, Merlin 1D Vacuum by MartianDays, Rocket Nozzle Part by Zachary (corncob_127), all Sketchfab, CC BY 4.0; the Space Shuttle Solid Rocket Booster of NASA 3D Resources (public domain). Sources S-merlin-model, S-mvac-model, S-nozzle-model and S-srb-model in `docs/sources.md`.
+- NASA data in the game: Earth and Moon imagery, the Andes relief under the launch site, the Moon's south pole ground, the photos each mission returns, positions and constants; every item in `docs/sources.md`.
+- Sounds: synthesized in code by the game (`scripts/ui/ui_sound.gd`, `scripts/flight/sound.gd`); no recorded or outside sounds.
 
 ## Team
 
 Team SK Horizon, Quito, Ecuador.
+
+- **Alexander Kholodov**: team lead; the mission, the flight to the Moon, the crew room and how the team works. [GitHub](https://github.com/alexanderkholodov1)
+- **Sebastián Amaguaya**: the rocket builder, the 3D models, the look and the sound of the game. [GitHub](https://github.com/XebaxCode)
 
 ## License
 

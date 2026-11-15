@@ -16,3 +16,8 @@
 *.pdf binary
 *.zip binary
 *.tpz binary
+
+# The bibliography only grows: when two branches add entries at the same place, keep both sides instead of a conflict.
+docs/sources.md merge=union
+# Translations only grow too (one i18n/<piece>.csv per piece, #26): when two branches add lines at the same place, keep both.
+i18n/*.csv merge=union
