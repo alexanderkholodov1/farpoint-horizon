@@ -43,10 +43,11 @@ func _ready() -> void:
 	g.go("design", {"step": 0})
 	GameState.mission.from_dict({"bus": "small", "instruments": ["ir_adv", "gas_adv", "cam_ms"], "panels": "dep_m", "battery": "b1k", "comms": "xband", "adcs": "rw", "propulsion": "cold", "launcher": "ride", "orbit": "sso", "years": 3})
 	g.world.rebuild_ship()
-	for st in [0, 2, 6, 7]:
-		g.go("design", {"step": st})
-		await wait(1.3)
-		await shot("5_design_%d" % st)
+	g.go("design", {"step": 0})
+	for qi in 10:
+		g.screen._show(qi)
+		await wait(0.9)
+		await shot("5_design_%d" % qi)
 	preload("res://scripts/craft/rocket_design.gd").current = null
 	g.go("builder", {"back_step": 6})
 	await wait(1.2)

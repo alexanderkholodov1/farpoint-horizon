@@ -12,6 +12,7 @@ extends "res://scripts/screens/screen.gd"
 
 const Space := preload("res://scripts/space_builder.gd")
 const RocketDesign := preload("res://scripts/craft/rocket_design.gd")
+const PartIcon := preload("res://scripts/ui/part_icon.gd")
 
 const SCALE := 0.088          ## Metres to world units, as the launch screen draws its rockets.
 const NONE := "none"          ## A step answered with "no" (no upper stage, no boosters).
@@ -487,56 +488,3 @@ func process(delta: float) -> void:
 		snap_node.set_meta("rest_y", snap_node.get_meta("rest_y", snap_node.position.y))
 		var rest: float = snap_node.get_meta("rest_y")
 		snap_node.position.y = rest + (1.0 - e) * 25.0 + bounce * 10.0
-
-
-## A part's drawing for its tile: a few lines that say what it is at a glance.
-class PartIcon:
-	extends Control
-	var kind := "engine"
-	var small := false:
-		set(v):
-			small = v
-			custom_minimum_size = Vector2(32, 36) if v else Vector2(64, 72)
-
-	func _init() -> void:
-		custom_minimum_size = Vector2(64, 72)
-		mouse_filter = Control.MOUSE_FILTER_IGNORE
-
-	func _shape(pts: Array, col: Color) -> void:
-		var p := PackedVector2Array(pts)
-		draw_colored_polygon(p, Color(col, 0.16))
-		p.append(pts[0])
-		draw_polyline(p, col, 2.0, true)
-
-	func _draw() -> void:
-		var K := preload("res://scripts/ui/kit.gd")
-		var c: Color = K.ink(K.C_ACCENT)
-		var w: Color = K.ink(K.C_GOLD)
-		if small:
-			draw_set_transform(Vector2.ZERO, 0.0, Vector2(0.5, 0.5))
-		var x := 32.0
-		match kind:
-			"engine":   # a thrust section, three bells and their flames
-				_shape([Vector2(x - 22, 10), Vector2(x + 22, 10), Vector2(x + 22, 26), Vector2(x - 22, 26)], c)
-				for dx in [-15.0, 0.0, 15.0]:
-					_shape([Vector2(x + dx - 3, 26), Vector2(x + dx + 3, 26), Vector2(x + dx + 7, 44), Vector2(x + dx - 7, 44)], c)
-					_shape([Vector2(x + dx - 5, 47), Vector2(x + dx + 5, 47), Vector2(x + dx, 64)], w)
-			"upper":    # a small stage: a tank and one wide bell
-				_shape([Vector2(x - 14, 8), Vector2(x + 14, 8), Vector2(x + 14, 32), Vector2(x - 14, 32)], c)
-				_shape([Vector2(x - 4, 32), Vector2(x + 4, 32), Vector2(x + 15, 58), Vector2(x - 15, 58)], c)
-				draw_line(Vector2(x - 26, 64), Vector2(x + 26, 64), Color(c, 0.5), 1.0)
-			"tank":     # a tall body with its two domes marked
-				_shape([Vector2(x - 14, 6), Vector2(x + 14, 6), Vector2(x + 14, 66), Vector2(x - 14, 66)], c)
-				draw_arc(Vector2(x, 20), 14.0, PI, TAU, 16, Color(c, 0.7), 1.5, true)
-				draw_arc(Vector2(x, 44), 14.0, 0.0, PI, 16, Color(c, 0.7), 1.5, true)
-			"booster":  # the core and a slim rocket on each side
-				_shape([Vector2(x - 8, 14), Vector2(x + 8, 14), Vector2(x + 8, 62), Vector2(x - 8, 62)], Color(c, 0.5))
-				for s in [-1.0, 1.0]:
-					_shape([Vector2(x + s * 20, 16), Vector2(x + s * 26, 28), Vector2(x + s * 26, 60), Vector2(x + s * 14, 60), Vector2(x + s * 14, 28)], c)
-					_shape([Vector2(x + s * 16, 62), Vector2(x + s * 24, 62), Vector2(x + s * 20, 71)], w)
-			"fairing":  # the nose shell
-				_shape([Vector2(x, 4), Vector2(x + 10, 16), Vector2(x + 16, 34), Vector2(x + 16, 66), Vector2(x - 16, 66), Vector2(x - 16, 34), Vector2(x - 10, 16)], c)
-				draw_line(Vector2(x, 4), Vector2(x, 66), Color(c, 0.6), 1.5)
-			_:          # nothing here
-				draw_arc(Vector2(x, 36), 20.0, 0.0, TAU, 40, Color(c, 0.6), 2.0, true)
-				draw_line(Vector2(x - 14, 50), Vector2(x + 14, 22), Color(c, 0.6), 2.0)

@@ -1,0 +1,61 @@
+keys,es
+Craft,Nave
+Systems,Sistemas
+Rocket,Cohete
+Launch,Lanzamiento
+Where will it fly?,¿Dónde volará?
+"The orbit decides what your craft sees, how long it talks to Earth and how hard it is to get there.","La órbita decide qué ve tu nave, cuánto habla con la Tierra y qué tan difícil es llegar."
+How big is your craft?,¿Qué tan grande es tu nave?
+"The body holds everything. Bigger carries more instruments, and costs and weighs more.","El cuerpo lo sostiene todo. Más grande lleva más instrumentos, y cuesta y pesa más."
+What will it carry?,¿Qué llevará?
+"The instruments do the science. Pick the ones that meet the goals, then continue.",Los instrumentos hacen la ciencia. Elige los que cumplen los objetivos y continúa.
+Pick the solar panels,Elige los paneles solares
+They make the power for everything on board.,Dan la energía para todo lo que va a bordo.
+Pick the battery,Elige la batería
+"It keeps the craft alive in the shadow, where the panels make nothing.","Mantiene viva la nave en la sombra, donde los paneles no dan nada."
+Pick the antenna,Elige la antena
+Every picture has to come home. A faster antenna sends more data each day.,Cada foto tiene que llegar a casa. Una antena más rápida envía más datos cada día.
+How will it point?,¿Cómo apuntará?
+Sharp pictures need a steady aim.,Las fotos nítidas necesitan un pulso firme.
+Pick its engine,Elige su motor
+It moves the craft to its orbit and holds it there.,Lleva la nave a su órbita y la mantiene ahí.
+Pick the rocket,Elige el cohete
+"The farther the destination, the less a rocket can carry.","Cuanto más lejos el destino, menos puede cargar un cohete."
+Ready to launch?,¿Lista para lanzar?
+Fix what is red. Amber costs science but still flies.,"Arregla lo que esté en rojo. El ámbar cuesta ciencia, pero igual vuela."
+"Point at an option to know more. Drag to turn the craft, scroll to zoom.","Señala una opción para saber más. Arrastra para girar la nave, rueda para acercar."
+Best fit,La que mejor encaja
+science ×%.1f,ciencia ×%.1f
+%d m/s to get there,%d m/s para llegar
+%d instrument(s),%d instrumento(s)
+%d of %d places used,%d de %d lugares usados
+Key,Clave
+Needs a bigger body,Necesita un cuerpo más grande
+Show the useful ones only,Mostrar solo los útiles
+Show all %d instruments,Mostrar los %d instrumentos
+Your craft needs %s of panels.,Tu nave necesita %s de paneles.
+In the shadow it needs %.0f Wh.,En la sombra necesita %.0f Wh.
+"Only 60 % of a battery is used, so it lasts many cycles.","Solo se usa el 60 % de una batería, para que dure muchos ciclos."
+Your instruments make %s per day.,Tus instrumentos generan %s al día.
+sends %s a day,envía %s al día
++%s cost,+%s de costo
+It needs %d m/s for this orbit and %d years.,Necesita %d m/s para esta órbita y %d años.
++%s mass,+%s de masa
+Your craft weighs %s and goes to %s.,Tu nave pesa %s y va a %s.
+Build your own rocket,Construye tu propio cohete
+part by part,pieza a pieza
+"Put a rocket together from real parts, from the engines up, and see if it can lift your craft.","Arma un cohete con piezas reales, desde los motores hacia arriba, y mira si puede levantar tu nave."
+lifts %s,levanta %s
+All systems go,Todo listo
+%d other things are fine,%d cosas más están bien
+Years of work · at least %d,Años de trabajo · al menos %d
+Extras,Opcionales
+Backup parts,Piezas de respaldo
++20 % cost,+20 % de costo
++10 % mass,+10 % de masa
++5 % cost,+5 % de costo
++4 % mass,+4 % de masa
+"More years means more science, and more cost (%s per year) and fuel.","Más años es más ciencia, y más costo (%s al año) y combustible."
+%d to fix,%d por arreglar
+Ready to fly,Lista para volar
+%d warning(s),%d advertencia(s)

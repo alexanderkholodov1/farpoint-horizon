@@ -1,6 +1,6 @@
 keys,es
 Welcome aboard,Bienvenido a bordo
-"Your first mission: land at the Moon's south pole, where the Sun never climbs high and ice may hide in the dark of the craters. We design it one station at a time. First, the orbit, where your craft will fly. Lunar orbit, 100 km up, is already set. Press Next.","Tu primera misión: aterrizar en el polo sur de la Luna, donde el Sol nunca sube alto y puede haber hielo escondido en la oscuridad de los cráteres. La diseñamos estación por estación. Primero, la órbita, donde volará tu nave. La órbita lunar, a 100 km, ya está elegida. Pulsa Siguiente."
+"Your first mission: land at the Moon's south pole, where the Sun never climbs high and ice may hide in the dark of the craters. We design it one station at a time. First, the orbit, where your craft will fly. Lunar orbit, 100 km up, is the one: click it.","Tu primera misión: aterrizar en el polo sur de la Luna, donde el Sol nunca sube alto y puede haber hielo escondido en la oscuridad de los cráteres. La diseñamos pregunta por pregunta. Primero, la órbita, donde volará tu nave. La órbita lunar, a 100 km, es la indicada: haz clic en ella."
 The body of the craft,El cuerpo de la nave
 "The platform is the craft's body: structure, computer, room for instruments. A small one is cheap but fills up fast. Take the medium platform: room for three instruments, and strong enough to carry fuel to the Moon.","La plataforma es el cuerpo de la nave: estructura, computadora y espacio para instrumentos. Una pequeña es barata pero se llena rápido. Elige la plataforma mediana: cabe en ella tres instrumentos y aguanta el combustible para llegar a la Luna."
 What we came to see,Lo que vinimos a ver
@@ -12,9 +12,9 @@ Bringing the data home,Traer los datos a casa
 Pointing and pushing,Apuntar y empujar
 "Sharp photos need precise pointing: reaction wheels and a star tracker. To brake into lunar orbit and land you need delta-v, a change of speed. Chemical propulsion gives 1,500 m/s.","Las fotos nítidas necesitan apuntar con precisión: ruedas de reacción y un buscador de estrellas. Para frenar en órbita lunar y aterrizar necesitas delta-v, un cambio de velocidad. La propulsión química da 1.500 m/s."
 The ride up,El viaje de subida
-"The farther the destination, the less a rocket can carry. The medium launcher lifts your craft toward the Moon. Feeling brave? Build your own rocket, part by part.","Cuanto más lejos el destino, menos puede cargar un cohete. El lanzador mediano lleva tu nave hacia la Luna. ¿Te sientes valiente? Construye tu propio cohete, pieza a pieza."
+"The farther the destination, the less a rocket can carry. The medium launcher lifts your craft toward the Moon: click it. Feeling brave? Build your own rocket instead, from the engines up.","Cuanto más lejos el destino, menos puede cargar un cohete. El lanzador mediano lleva tu nave hacia la Luna: haz clic en él. ¿Te sientes valiente? Construye tu propio cohete, desde los motores hacia arriba."
 The review,La revisión
-"Real NASA teams check a design like this before it flies. Green is fine, yellow costs science, red stops the launch. All green? Then it is yours to fly. Press LAUNCH!","Los equipos reales de la NASA revisan así un diseño antes de que vuele. Verde está bien, amarillo cuesta ciencia, rojo detiene el lanzamiento. ¿Todo verde? Entonces es tuyo para volar. ¡Pulsa LANZAR!"
+"Real NASA teams check a design like this before it flies. Blue is fine, amber costs science, red stops the launch. Nothing red? Then it is yours to fly. Press LAUNCH!","Los equipos reales de la NASA revisan así un diseño antes de que vuele. Azul está bien, ámbar cuesta ciencia, rojo detiene el lanzamiento. ¿Nada en rojo? Entonces es tuyo para volar. ¡Pulsa LANZAR!"
 You fly it,Tú lo vuelas
 "Keep the needle on the green marker with the arrow keys. When a stage runs dry, press Space to drop it: the rocket gets lighter and goes faster. Time runs for real; speed it up with the time controls.","Mantén la aguja sobre la marca verde con las flechas. Cuando una etapa se vacíe, pulsa Espacio para soltarla: el cohete se aligera y va más rápido. El tiempo corre de verdad; acelera con los controles de tiempo."
 Toward the Moon,Rumbo a la Luna
@@ -28,3 +28,5 @@ What you found,Lo que encontraste
 Got it,Entendido
 End the guided mission,Terminar la misión guiada
 First mission · guided by the crew,Primera misión · guiada por la tripulación
+Your own rocket,Tu propio cohete
+"We build it from the ground up, one choice at a time: engines, tank, an upper stage, the fairing. In a hurry? Take the ready Falcon 9-type. When the three answers on the right are ticked, fly it.","Lo construimos desde el suelo, una elección a la vez: motores, tanque, una etapa superior, la cofia. ¿Con prisa? Toma el Tipo Falcon 9 ya listo. Cuando las tres respuestas de la derecha estén marcadas, vuélalo."

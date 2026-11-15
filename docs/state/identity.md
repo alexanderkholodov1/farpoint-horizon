@@ -20,3 +20,11 @@ time, only the parts that fit, a drawing and two facts per part, the rest when p
 the launch HUD's groups are all frosted panels of one tint (0.9) and show only the time speeds allowed now; each design
 step says what to do in one line; a red board bar says in words what is wrong. The trip to the Moon has no dead ends
 (`tests/flightsafe.tscn`).
+
+The craft's design is guided the same way (`scripts/screens/design.gd`): six stages across the top (Orbit, Craft,
+Power, Systems, Rocket, Launch), ten questions one at a time, tiles with a drawing (`scripts/ui/part_icon.gd`, shared
+with the rocket builder), two facts and a mark (the best fit carries a star); the mission board is seven short
+answers. The eight steps of `data/steps.json` stay underneath (who decides, the bots). The menu is a list straight on
+space; playing is alone for now (the crew of friends and the ranking return in v0.3.0; `scripts/screens/team.gd` and
+the ranking overlay are still in the code). Missions open in order (`scripts/progress.gd`), "all open" in Settings.
+The guided first mission lights the new tiles and has a tip for the rocket builder.
