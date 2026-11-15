@@ -35,8 +35,12 @@ const CUT_GUARD_MS := 1500          ## A cut is refused this soon after lighting
 const BURN_WARP := 50.0             ## Time while an engine burns: a six-minute burn in about seven seconds.
 const SUN_LON_DEG := 233.0          ## The Sun's ecliptic longitude on 15 November 2026 (about; our simplification).
 const UNIX_DAY0 := 1794700800       ## 15 November 2026 00:00 UTC, the first row of the Moon's ephemeris.
+const OVERBURN := 1.01              ## The flight computer cuts the burn for a pilot who has not cut by the planned speed: 1 % more already passes the Moon thousands of km too far.
+const BRAKE_DV_MAX := 2500.0         ## m/s: a brake that has burned this much and still is not held has failed (a real one is about 900).
+const STEPS_TEXT := ["Plan", "Burn", "Coast", "Brake", "Moon orbit"]   ## The trip's steps, shown across the top.
+const STEP_OF := {"plan": 0, "burn": 1, "coast": 2, "missed": 2, "capture": 3, "lunar": 4}
 const LUNAR_ORBIT_HIGH := 160000.0  ## The capture burn ends when the orbit's high point is below this height (m).
-const STARS := 2400
+const STARS := 7000                ## Our own stars, scattered by a formula (not a catalogue): 45 % crowd into a Milky Way band.
 
 var m                                ## scripts/flight/transfer.gd
 var hud
@@ -51,7 +55,7 @@ var shown := {}
 var burn_start := 0.0
 var burn_t0 := 0.0
 var burn_ms := 0
-var phase := "plan"                  ## plan, burn, coast, capture, lunar
+var phase := "plan"                  ## plan, burn, coast, capture, lunar, missed
 var phase_t := 0.0
 var throttle := 1.0
 var pred := {}
@@ -62,6 +66,15 @@ var offered_ms := 0
 var capture_at := 0.0
 var braking := false
 var leaving := false
+var auto_fly := false                  ## This try is flown by the flight computer (after Skip on a missed Moon).
+var missed_ms := 0
+var steps_row: HBoxContainer
+var cam_idle := 0.0
+var grades: Array = []              ## How each timed press went ("Ignition · PERFECT"), told at the end.
+var brake_dv := 900.0              ## The speed the brake has to take off (m/s), for its gauge.
+var now_lbl: Label
+var minimap: MiniMap
+var steps_shown := ""
 var plan_ok := false                   ## The pilot said the plan is good (or let it be for a while): time runs to the burn.
 var plan_shown_ms := 0
 var cur_stop := ""                   ## The moment time is running to now ("count", "correct", "arrive").
@@ -110,7 +123,8 @@ var stars: MultiMeshInstance3D
 var plan_panel: PanelContainer
 
 
-func enter(_args: Dictionary) -> void:
+func enter(args: Dictionary) -> void:
+	auto_fly = bool(args.get("auto", false))
 	m = Transfer.new()
 	m.setup()
 	u = m.r_e / EARTH_U
@@ -205,7 +219,7 @@ func _build_craft_view() -> void:
 	var r: float = ship.get_meta("radius", 1.0)
 	ship.scale = Vector3.ONE * (4.0 / maxf(r, 0.01))     # about 4 m across
 	cv.add_child(ship)
-	flame = Space.make_flame(1.6)
+	flame = Space.make_vacuum_flame(1.6)
 	cv.add_child(flame)
 	cv_earth = Space.make_earth(1.0, false)
 	cv.add_child(cv_earth)
@@ -233,8 +247,12 @@ func _starfield() -> MultiMeshInstance3D:
 	rng.seed = 7
 	for i in STARS:
 		var d := Vector3(rng.randfn(), rng.randfn(), rng.randfn()).normalized()
-		var bright := pow(rng.randf(), 3.0)
-		var s := lerpf(18.0, 70.0, bright)
+		var in_band := i < int(STARS * 0.45)
+		if in_band:   # pressed toward a great circle tilted across the sky
+			var pole := Vector3(0.35, 0.86, 0.36).normalized()
+			d = (d - pole * d.dot(pole) * 0.86).normalized()
+		var bright := pow(rng.randf(), 5.0 if in_band else 3.0)
+		var s := lerpf(14.0, 70.0, bright)
 		mm.set_instance_transform(i, Transform3D(Basis().scaled(Vector3.ONE * s), d * 40000.0))
 		var tint := Color(0.8, 0.88, 1.0).lerp(Color(1.0, 0.93, 0.82), rng.randf())
 		mm.set_instance_color(i, Color(tint.r, tint.g, tint.b, lerpf(0.25, 1.0, bright)))
@@ -254,7 +272,7 @@ func _build_hud() -> void:
 	hud.add_readout("trip", tr("Trip"))
 	hud.add_readout("pass", tr("Pass over the Moon"))
 	hud.add_readout("speed", tr("Speed"))
-	hud.add_gauge("burn", tr("Speed added"), 1.02, 1.08, Color(0.45, 1.0, 0.7))
+	hud.add_gauge("burn", tr("Speed added"), 1.02, 1.08, Kit.C_OK)
 	hud.show_gauge("burn", false)
 	hud.lever.value = 1.0
 	hud.action.lit = false
@@ -262,8 +280,13 @@ func _build_hud() -> void:
 	hud.action_pressed.connect(_on_action)
 	hud.autopilot_toggled.connect(_on_autopilot)
 	hud.skip_pressed.connect(_skip)
+	hud.add_restart()
+	hud.restart_pressed.connect(func(): _restart(false))
 	hud.warp_picked.connect(_on_warp_picked)
-	hud.set_autopilot(GameState.pilot_bot)
+	hud.set_autopilot(GameState.pilot_bot or auto_fly)
+	_build_steps()
+	_build_now()
+	_build_minimap()
 	_build_plan_panel()
 	hud.hint(tr("You are in orbit around the Earth. Mission control is working out when to leave so that you meet the Moon where it will be in three or four days."))
 
@@ -271,6 +294,76 @@ func _build_hud() -> void:
 func _on_autopilot(on: bool) -> void:
 	if on:
 		hud.hint(tr("Autopilot on: the flight computer flies every step."))
+
+
+## The trip's steps across the top, the one being flown lit: the player always knows where they are and what comes.
+func _build_steps() -> void:
+	steps_row = Kit.hbox(6)
+	steps_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	steps_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	Kit.place(steps_row, 0.5, 0, 0.5, 0, -330, 26, 330, 56)
+	hud.add_child(steps_row)
+	_show_steps()
+
+
+func _show_steps() -> void:
+	steps_shown = phase
+	for c in steps_row.get_children():
+		c.queue_free()
+	var at: int = STEP_OF.get(phase, 0)
+	for i in STEPS_TEXT.size():
+		var col: Color = Kit.C_GOLD if i == at else (Kit.C_OK if i < at else Color(Kit.C_ON_DARK, 0.55))
+		steps_row.add_child(Kit.chip(("✓ " if i < at else "%d  " % (i + 1)) + tr(STEPS_TEXT[i]), col))
+
+
+## What to do right now, in one line under the steps: the player is never left guessing.
+func _build_now() -> void:
+	var p := Kit.panel_box(8)
+	p.add_theme_stylebox_override("panel", Kit.flat(Kit.C_BG, Kit.C_GOLD, 10, 1, 14, 6))
+	Kit.place(p, 0.5, 0, 0.5, 0, 0, 64, 0, 64)
+	p.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hud.add_child(p)
+	now_lbl = Kit.lbl("", Kit.T_LEAD, Kit.C_GOLD, Kit.FONT_B)
+	p.add_child(now_lbl)
+
+
+func _now_text() -> String:
+	match phase:
+		"plan":
+			if plan.is_empty():
+				return tr("Wait: mission control is planning your departure")
+			if not plan_ok:
+				return tr("Press SPACE (or Ready) to take this plan")
+			return tr("Press SPACE when the ring closes on the circle") if hud.action.lit else tr("Wait: time runs by itself to the burn")
+		"burn":
+			return tr("Press SPACE when the ring closes on the circle: that cuts the engine")
+		"coast":
+			if correction_state == "offered":
+				return tr("Press SPACE to correct your path")
+			return tr("Nothing to do: you coast toward the Moon and time runs by itself")
+		"capture":
+			return tr("Press SPACE when the ring closes: the rounder the orbit, the better") if braking else tr("Press SPACE when the ring closes on the circle to brake")
+		"lunar":
+			return tr("You circle the Moon. Look at your orbit, then press SPACE to go down and land")
+		"missed":
+			return tr("Press SPACE to try the departure again")
+	return ""
+
+
+## A small map, always in view: the Earth, the Moon on its orbit, your craft and the path it will follow.
+func _build_minimap() -> void:
+	var p := Kit.panel_box(12)
+	Kit.place(p, 0, 1, 0, 1, Kit.MARGIN, -300, Kit.MARGIN + 272, -Kit.MARGIN)
+	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hud.add_child(p)
+	var v := Kit.vbox(4)
+	p.add_child(v)
+	v.add_child(Kit.caps(tr("Map · M for the big one")))
+	minimap = MiniMap.new()
+	minimap.screen = self
+	minimap.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	v.add_child(minimap)
 
 
 ## The plan's own controls: move the burn earlier or later, make it bigger or smaller, or take mission control's plan.
@@ -300,6 +393,7 @@ func _build_plan_panel() -> void:
 # ===================================================================================== EACH FRAME
 func process(delta: float) -> void:
 	phase_t += delta
+	hud.ring.active = false
 	# each phase sets how fast time may run first, and only then takes its step (delta * hud.warp): a step taken at the
 	# speed of the wait just ended would jump past the moment the phase slowed down for
 	match phase:
@@ -313,7 +407,12 @@ func process(delta: float) -> void:
 			_capture_phase(delta)
 		"lunar":
 			_lunar_phase(delta)
+		"missed":
+			_missed_phase(delta)
 	plan_panel.visible = phase == "plan" and not plan.is_empty() and not plan_ok
+	# seen from beside the craft, fast time is the Earth flashing from day to night every few seconds: the map shows it
+	if view_auto and view == "craft" and hud.warp > 300.0:
+		view = "map"
 	_draw_map()
 	_draw_craft_view()
 	_camera(delta)
@@ -365,7 +464,12 @@ func _replan() -> void:
 
 
 func _plan_phase(delta: float) -> void:
-	hud.cap_warp(100000.0)
+	# time may only run fast once the plan is taken: sped up while mission control planned, or while the player
+	# looked at the plan, the craft flew past the moment to leave and burned in the wrong place (it missed the Moon)
+	if plan_ok and not plan.is_empty():
+		hud.cap_warp(100000.0)
+	else:
+		hud.cap_warp(1.0, tr("your plan first"))
 	var dt: float = delta * hud.warp
 	if not job.is_empty():
 		if m.plan_work(job, 8.0):
@@ -390,6 +494,9 @@ func _plan_phase(delta: float) -> void:
 			_go_ahead()
 		return
 	var count_at := burn_start - COUNTDOWN
+	if m.t > burn_start + GRACE + 2.0 and not hud.action.lit:
+		_replan()   # the moment to leave has gone by: mission control plans the next one, it never burns late
+		return
 	if m.t < count_at:
 		m.advance(_time_to(count_at, get_process_delta_time(), "count"))
 		hud.action.lit = false
@@ -408,6 +515,7 @@ func _plan_phase(delta: float) -> void:
 		last_count = n
 		sfx.beep.play()
 		hud.message(tr("BURN IN %d") % n if n > 0 else tr("BURN NOW"), tr("Press SPACE to light the engine."), Kit.C_ACCENT, 0.0)
+	hud.ring_show(tr("IGNITE"), left / COUNTDOWN, 0.5 / COUNTDOWN)
 	if (_computer() and left <= 0.0) or left <= -GRACE:
 		if not _computer():
 			hud.hint(tr("The flight computer lit the engine for you."))
@@ -464,7 +572,7 @@ func _on_action() -> void:
 				_go_ahead()
 				return
 			if hud.action.lit:
-				_start_burn()
+				_start_burn(true)
 			else:
 				hud.message(tr("NOT YET"), tr("The countdown comes first: the burn is in %s.") % _span(burn_start - m.t), Kit.C_WARN, 2.0)
 		"burn":
@@ -479,13 +587,36 @@ func _on_action() -> void:
 				_correct(false)
 		"capture":
 			if not braking and hud.action.lit:
-				_brake()
+				_brake(true)
 			elif braking:
 				_end_capture(false)
+		"lunar":
+			_to_landing()
+		"missed":
+			_restart(false)
 
 
 # ===================================================================================== 2. THE BURN
-func _start_burn() -> void:
+## How a timed press went, from how far off it was (seconds, + early, - late) against the windows `good` and `ok`.
+func _grade(what: String, off: float, good: float, ok: float, by_pilot: bool) -> void:
+	var word := "AUTO"
+	var col: Color = Kit.C_ACCENT
+	if by_pilot:
+		if absf(off) <= good:
+			word = "PERFECT"
+			col = Kit.C_OK
+		elif absf(off) <= ok:
+			word = "GOOD"
+			col = Kit.C_GOLD
+		else:
+			word = "EARLY" if off > 0.0 else "LATE"
+			col = Kit.C_WARN
+	grades.append(tr(what) + " " + tr(word))
+	hud.ring_grade(tr(word), col)
+
+
+func _start_burn(by_pilot := false) -> void:
+	_grade("Ignition", burn_start - m.t, 0.5, 1.5, by_pilot)
 	phase = "burn"
 	phase_t = 0.0
 	burn_t0 = m.t
@@ -528,19 +659,29 @@ func _burn_phase(delta: float) -> void:
 		throttle = hud.throttle_keys(throttle, get_process_delta_time(), 0.9)
 	var step := dt
 	if throttle > 0.0 and (_computer() or m.dv_used < dv_plan):
-		step = minf(dt, maxf((dv_plan * (1.0 if _computer() else 1.08) - m.dv_used) / (Transfer.BURN_ACCEL * throttle), 0.0))
+		step = minf(dt, maxf((dv_plan * (1.0 if _computer() else OVERBURN) - m.dv_used) / (Transfer.BURN_ACCEL * throttle), 0.0))
 	m.advance(step, throttle, 1.0)
 	_refresh_pred(0.25)
 	hud.gauge("burn", m.dv_used / dv_plan / 1.1, "%d / %d m/s" % [roundi(m.dv_used), roundi(dv_plan)])
+	var to_go: float = dv_plan - m.dv_used
+	hud.ring_show(tr("CUT"), to_go / (dv_plan * 0.33), 0.01 / 0.33)
+	if not _computer() and to_go < 450.0 and hud.warp > 10.0:
+		hud.set_warp(10.0)   # the last of the burn in slow motion: the cut is the pilot's
+		hud.auto_note = ""
 	if _computer() and m.dv_used >= dv_plan - 0.05:
 		_cut(true)
-	elif m.dv_used >= dv_plan * 1.08:
-		hud.hint(tr("The flight computer cut the engine: past the planned speed."))
+	elif m.dv_used >= dv_plan * OVERBURN:
+		hud.hint(tr("The flight computer cut the engine for you, a little past the planned speed. The correction on the way fixes the rest."))
 		_cut(true)
 
 
 func _cut(by_computer: bool) -> void:
 	var error: float = (float(m.dv_used) - dv_plan) / dv_plan
+	if by_computer and not _computer():
+		grades.append(tr("Cut") + " " + tr("LATE"))
+		hud.ring_grade(tr("LATE"), Kit.C_WARN)
+	else:
+		_grade("Cut", -error * 100.0, 0.3, 1.0, not by_computer)   # in percent of the planned speed
 	GameState.flight["tli"] = {"dv": roundi(m.dv_used), "target": roundi(dv_plan), "error": snappedf(error, 0.0001),
 		"by": "computer" if by_computer else "pilot", "shift_deg": shift_deg, "burn_s": roundi(m.t - burn_t0), "t_cut": m.t}
 	GameState.flight_moment("tli", GameState.flight.tli)
@@ -576,7 +717,7 @@ func _coast_phase(_delta: float) -> void:
 		_refresh_pred(0.4)
 		if m.t >= at - 0.5:
 			hud.set_warp(1.0)
-			correction = m.plan_correction()
+			correction = m.plan_correction(150.0)
 			if correction.is_empty() or absf(float(correction.dv)) < 0.5:
 				correction_state = "done"
 				GameState.flight["correction"] = {"dv": 0.0}
@@ -595,6 +736,10 @@ func _coast_phase(_delta: float) -> void:
 		if _computer() or Time.get_ticks_msec() - offered_ms > (COUNTDOWN + GRACE) * 1000.0:
 			_correct(true)
 		return
+	hud.cap_warp(100000.0)
+	if not pred.is_empty() and (float(pred.closest) > Transfer.SOI or pred.impact):
+		_missed(tr("Your path hits the Moon.") if pred.impact else tr("Your path does not reach the Moon."))
+		return
 	var cap_s: float = m.capture_dv(pred) / Transfer.BURN_ACCEL if not pred.is_empty() else 100.0
 	capture_at = float(pred.get("t_closest", m.t + 1e9)) - cap_s * 0.5
 	m.advance(_time_to(capture_at - COUNTDOWN, get_process_delta_time(), "arrive"))
@@ -606,6 +751,8 @@ func _coast_phase(_delta: float) -> void:
 		phase = "capture"
 		phase_t = 0.0
 		last_count = -1
+		hud.hint(tr("You arrive too fast for the Moon to hold you: left alone you would swing past it and away. Braking now, against your motion, bends that fly-by into a circle around the Moon. The small map shows both: your path, and the orbit you are braking into."))
+		capture_at = m.t + COUNTDOWN   # fixed from here: the countdown is ten real seconds and always ends in the burn
 		if skip_step == "coast":
 			skip_step = "capture"
 
@@ -627,19 +774,14 @@ func _correct(by_computer: bool) -> void:
 
 # ===================================================================================== 4. CAPTURE
 func _capture_phase(delta: float) -> void:
-	if view_auto:
+	if view_auto and not braking:
 		view = "craft"
 	if not braking:
 		hud.cap_warp(1.0, tr("countdown"))
 		hud.auto_note = ""
 		m.advance(delta * hud.warp)
 		_refresh_pred(0.25)
-		if not pred.is_empty():
-			capture_at = float(pred.t_closest) - m.capture_dv(pred) / Transfer.BURN_ACCEL * 0.5
 		var left: float = capture_at - m.t
-		if left > COUNTDOWN + 20.0:
-			phase = "coast"          # the fresh path says the closest pass is later: time runs on to it
-			return
 		hud.action.label = "BRAKE"
 		hud.action.lit = true
 		var n := ceili(left)
@@ -647,6 +789,7 @@ func _capture_phase(delta: float) -> void:
 			last_count = n
 			sfx.beep.play()
 			hud.message(tr("BRAKE IN %d") % n if n > 0 else tr("BRAKE NOW"), tr("You fall past the Moon at %.1f km/s. Press SPACE to burn against your motion and stay.") % (m.about_moon().v / 1000.0), Kit.C_ACCENT, 0.0)
+		hud.ring_show(tr("BRAKE"), left / COUNTDOWN, 0.5 / COUNTDOWN)
 		if (_computer() and left <= 0.0) or left <= -GRACE:
 			_brake()
 		_refresh_pred(0.4)
@@ -654,16 +797,36 @@ func _capture_phase(delta: float) -> void:
 	throttle = 1.0 if _computer() else hud.throttle_keys(throttle, get_process_delta_time(), 0.9)
 	hud.lever.value = throttle
 	m.advance(delta * hud.warp, throttle, -1.0, true)
+	if view_auto:   # on the map, close on the Moon: the path is seen bending from a fly-by into a loop
+		view = "map"
+		map_view = "moon"
+	hud.gauge("burn", m.dv_used / maxf(brake_dv, 1.0) / 1.1, tr("%d of about %d m/s lost") % [roundi(m.dv_used), roundi(brake_dv)])
 	var o: Dictionary = m.moon_orbit()
+	# a brake that cannot work (far from the Moon, or the tanks' worth burned and still not held) is never left running
+	if m.about_moon().r > Transfer.SOI or m.dv_used > BRAKE_DV_MAX:
+		braking = false
+		throttle = 0.0
+		hud.lever.value = 0.0
+		_missed(tr("The Moon could not hold you."))
+		return
 	var here: float = m.about_moon().r - m.r_m
 	# the Moon holds the craft once the orbit's high point comes down to where the craft is: then it is nearly round;
 	# and the engine never brakes on into an orbit that would meet the ground
-	if o.high < maxf(LUNAR_ORBIT_HIGH, here + 40000.0) or (o.high < INF and o.low < 30000.0):
+	var left_dv: float = brake_dv - m.dv_used
+	hud.ring_show(tr("CUT"), left_dv / (brake_dv * 0.33), 0.03 / 0.33)
+	if not _computer() and left_dv < 220.0 and hud.warp > 5.0:
+		hud.set_warp(5.0)    # slow motion for the cut that rounds the orbit
+	if _computer():
+		if o.high < maxf(LUNAR_ORBIT_HIGH, here + 40000.0) or (o.high < INF and o.low < 30000.0):
+			_end_capture(true)
+	# the pilot cuts when the orbit is round; left burning, the engine stops before the low point meets the ground
+	elif o.high < INF and (o.low < 30000.0 or o.high < here + 12000.0 or m.dv_used > brake_dv * 1.15):
 		_end_capture(true)
 	_refresh_pred(0.4)
 
 
-func _brake() -> void:
+func _brake(by_pilot := false) -> void:
+	_grade("Brake", capture_at - m.t, 0.5, 1.5, by_pilot)
 	braking = true
 	burn_ms = Time.get_ticks_msec()
 	m.dv_used = 0.0
@@ -671,6 +834,9 @@ func _brake() -> void:
 	hud.lever.value = 1.0
 	hud.cap_warp(100.0, tr("engine on"))
 	hud.set_warp(BURN_WARP * 0.5)
+	brake_dv = m.capture_dv(pred) if not pred.is_empty() else 900.0
+	hud.show_gauge("burn", true)
+	hud.name_gauge("burn", tr("Speed lost"))
 	hud.action.label = "CUT"
 	hud.message(tr("BRAKING"), tr("Burning against your motion. The engine stops by itself once the Moon holds you."), Kit.C_ACCENT, 3.0)
 	sfx.beep.play()
@@ -683,6 +849,11 @@ func _end_capture(by_computer: bool) -> void:
 	if o.high == INF:
 		hud.message(tr("KEEP BRAKING"), tr("Still too fast to stay."), Kit.C_WARN, 1.5)
 		return
+	if by_computer and not _computer():
+		grades.append(tr("Orbit") + " " + tr("LATE"))
+		hud.ring_grade(tr("LATE"), Kit.C_WARN)
+	else:
+		_grade("Orbit", (o.high - o.low) / 1000.0, 60.0, 200.0, not by_computer)   # how round, in km
 	braking = false
 	throttle = 0.0
 	hud.lever.value = 0.0
@@ -690,32 +861,84 @@ func _end_capture(by_computer: bool) -> void:
 	phase_t = 0.0
 	hud.action.lit = false
 	hud.action.label = "LAND"
+	hud.show_gauge("burn", false)
 	sfx.chime.play()
 	GameState.flight["capture"] = {"dv": roundi(m.dv_used), "low_km": roundi(o.low / 1000.0), "high_km": roundi(o.high / 1000.0),
 		"by": "computer" if by_computer else "pilot", "met_s": roundi(m.t - t_launch)}
 	GameState.flight_moment("lunar_orbit", GameState.flight.capture)
 	hud.cap_warp(1000.0)
 	hud.set_warp(100.0)
-	hud.message(tr("IN ORBIT AROUND THE MOON"), tr("%d × %d km over its surface. The lander gets ready to go down.") % [roundi(o.low / 1000.0), roundi(o.high / 1000.0)], Kit.C_OK, 0.0)
-	hud.hint(tr("Each lap around the Moon takes about two hours. Next: the landing at Shackleton's rim."))
+	if view_auto:   # the map, close on the Moon: the player sees the orbit they are in before the landing
+		view = "map"
+		map_view = "moon"
+		zoom = 1.0
+	hud.message(tr("IN ORBIT AROUND THE MOON"), tr("%d × %d km over its surface.") % [roundi(o.low / 1000.0), roundi(o.high / 1000.0)] + "\n" + "  ·  ".join(grades), Kit.C_OK, 0.0)
+	hud.hint(tr("The Moon holds you now: you go round it without burning any fuel, a lap about every two hours. The small map shows your orbit. When you are ready, press SPACE to go down to Shackleton's rim."))
 
 
 func _lunar_phase(delta: float) -> void:
 	m.advance(delta * hud.warp)
 	_refresh_pred(0.5)
-	if phase_t > 6.0 and not leaving:
-		leaving = true
-		GameState.flight["arrival_met_s"] = roundi(m.t - t_launch)
-		main.go_faded("landing", 1.0, 1.0)
+	hud.action.label = "LAND"
+	hud.action.lit = true
+	# the pilot looks at the orbit as long as they like (SPACE goes down); left alone, the game goes on by itself
+	if phase_t > 25.0 or (_computer() and phase_t > 8.0):
+		_to_landing()
+
+
+func _to_landing() -> void:
+	if leaving:
+		return
+	leaving = true
+	GameState.flight["arrival_met_s"] = roundi(m.t - t_launch)
+	main.go_faded("landing", 1.0, 1.0)
+
+
+## A path that will not end around the Moon. Never a dead end: the game says so and offers the departure again.
+func _missed(why: String) -> void:
+	phase = "missed"
+	phase_t = 0.0
+	missed_ms = Time.get_ticks_msec()
+	throttle = 0.0
+	hud.cap_warp(1.0, tr("waiting for you"))
+	hud.auto_note = ""
+	hud.action.label = "RETRY"
+	hud.action.lit = true
+	sfx.alarm.play()
+	hud.message(tr("YOU MISSED THE MOON"), why + " " + tr("Press SPACE to go back to your orbit around the Earth and try the departure again."), Kit.C_WARN, 0.0)
+	hud.hint(tr("Real missions cannot go back, so they plan the departure with great care. Here you can: try again, or press Skip and the flight computer flies it."))
+	GameState.flight_moment("missed_moon", {})
+
+
+func _missed_phase(delta: float) -> void:
+	m.advance(delta)
+	_refresh_pred(1.0)
+	if hud.autopilot or Time.get_ticks_msec() - missed_ms > 30000:
+		_restart(hud.autopilot)
+
+
+## Back to the parking orbit to fly the trip again; `auto`: the flight computer flies it this time.
+func _restart(auto: bool) -> void:
+	if leaving:
+		return
+	leaving = true
+	main.go("flight", {"auto": auto})
 
 
 ## Skip: the flight computer flies the current step for the pilot (and the time runs to it as fast as it can).
 func _skip() -> void:
+	if phase == "missed":
+		_restart(true)
+		return
+	if phase == "plan" and not plan.is_empty():
+		_shift(0.0, true)   # the computer flies mission control's plan, not a departure that misses
+		_go_ahead()
 	skip_step = phase
+	hud.set_autopilot(true)   # Skip is the whole way: the flight computer flies on from here, and the switch shows it
 	held_for = ""
 	cur_stop = ""
 	if phase == "lunar":
-		phase_t = 99.0
+		_to_landing()
 	elif phase == "coast" and correction_state == "offered":
 		_correct(true)
 	hud.message(tr("FLIGHT COMPUTER"), tr("It flies this step for you."), Kit.C_ACCENT, 1.5)
@@ -894,6 +1117,10 @@ func _set_line(mi: MeshInstance3D, pts: PackedVector3Array, strip := true) -> vo
 
 # ===================================================================================== READOUTS AND CAMERA
 func _readouts() -> void:
+	if steps_shown != phase:
+		_show_steps()
+	now_lbl.text = "▶  " + _now_text()
+	minimap.queue_redraw()
 	hud.clock.text = FlightHud.met_text(m.t - t_launch)
 	var dtd := Time.get_datetime_dict_from_unix_time(UNIX_DAY0 + int(m.t))
 	hud.value("utc", "%d-%02d-%02d %02d:%02d" % [dtd.year, dtd.month, dtd.day, dtd.hour, dtd.minute])
@@ -910,6 +1137,8 @@ func _readouts() -> void:
 			next = tr("brake now") if braking or m.t >= capture_at else tr("brake in %s") % _span(capture_at - m.t)
 		"lunar":
 			next = tr("landing")
+		"missed":
+			next = tr("try again")
 	hud.value("next", next, Kit.C_ACCENT)
 	var p: Dictionary = shown if phase == "plan" else pred
 	if phase == "lunar":
@@ -958,7 +1187,12 @@ func _camera(delta: float, snap := false) -> void:
 	# the arrows (keys or the panel's buttons) turn the camera around what it looks at
 	var st: Vector2 = hud.steer()
 	yaw += st.x * delta * 1.4
-	pitch = clampf(pitch + st.y * delta * 1.0, -1.2, 1.35)
+	pitch = clampf(pitch + st.y * delta * 1.0, -1.2, 1.1)
+	# left alone for a while, the camera comes back behind the craft by itself
+	cam_idle = 0.0 if st.length() > 0.01 else cam_idle + delta
+	if cam_idle > 5.0 and not snap:
+		yaw = lerp_angle(yaw, 0.0, clampf(delta * 1.5, 0.0, 1.0))
+		pitch = lerpf(pitch, 0.0, clampf(delta * 1.5, 0.0, 1.0))
 	var k := 1.0 if snap else clampf(delta * 2.0, 0.0, 1.0)
 	if view == "craft":
 		var dist := 34.0 * zoom
@@ -978,7 +1212,9 @@ func _camera(delta: float, snap := false) -> void:
 		var dir := (behind * cos(pitch + 0.22) + up * sin(pitch + 0.22)).normalized()
 		world.cam.near = 0.1
 		world.cam.position = dir * dist + side * 0.0
-		world.cam.look_at(ahead * dist * 0.6, up)
+		# it looks past the craft, along the line from the camera through it, so the craft stays in view however far
+		# the arrows turn the camera (looking along the path alone left the craft behind the camera at half a turn)
+		world.cam.look_at(ahead.rotated(up, yaw) * dist * 0.6, up)
 		stars.position = world.cam.global_position
 		return
 	world.cam.near = 0.05
@@ -1020,3 +1256,82 @@ func _camera(delta: float, snap := false) -> void:
 	world.cam.position = cam_center + dir2 * cam_dist
 	world.cam.look_at(cam_center, Vector3.UP)
 	stars.position = world.cam.global_position
+
+
+## The small map of the trip (bottom left): drawn flat, seen from above the Earth's pole, at true scale. The Earth in
+## the middle, the Moon's orbit as a ring, the Moon, where the Moon will be when the craft arrives, the craft's path
+## ahead and the craft itself.
+class MiniMap:
+	extends Control
+	const K := preload("res://scripts/ui/kit.gd")
+	var screen
+	var _t := 0.0
+
+	func _init() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		custom_minimum_size = Vector2(240, 220)
+
+	func _process(delta: float) -> void:
+		_t += delta
+
+	func _draw() -> void:
+		if screen == null or screen.m == null:
+			return
+		var m = screen.m
+		var c := size * 0.5
+		var f := K.FONT_B
+		var about: Dictionary = m.about_moon()
+		if about.r < 6.61e7 * 0.6 or screen.phase in ["capture", "lunar"]:
+			_draw_moon(m, c, f, about)
+			return
+		var s: float = (minf(size.x, size.y) * 0.5 - 14.0) / 4.1e8   # pixels per metre: the Moon's orbit fits
+		draw_arc(c, 3.84e8 * s, 0.0, TAU, 64, Color(K.C_ON_DARK, 0.18), 1.0, true)
+		var p: Dictionary = screen.shown if screen.phase == "plan" else screen.pred
+		if not p.is_empty() and p.points.size() > 1:
+			var line := PackedVector2Array()
+			var step := maxi(1, p.points.size() / 120)
+			for i in range(0, p.points.size(), step):
+				line.append(c + Vector2(p.points[i].x, -p.points[i].y) * s)
+			draw_polyline(line, K.C_ACCENT, 1.5, true)
+			var ma: Array = p.moon_at
+			draw_arc(c + Vector2(ma[0], -ma[1]) * s, 6.0, 0.0, TAU, 20, Color(K.C_ON_DARK, 0.6), 1.0, true)
+		draw_circle(c, 4.0, K.C_ACCENT)
+		draw_string(f, c + Vector2(7, 14), TranslationServer.translate("Earth"), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(K.C_ON_DARK, 0.7))
+		var mo: Array = m.moon(m.t)
+		var mp := c + Vector2(mo[0], -mo[1]) * s
+		draw_circle(mp, 3.5, Color(0.82, 0.82, 0.86))
+		draw_string(f, mp + Vector2(7, 4), TranslationServer.translate("Moon"), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(K.C_ON_DARK, 0.7))
+		var cp := c + Vector2(m.x, -m.y) * s
+		draw_circle(cp, 4.0 + 1.5 * sin(_t * 5.0), K.C_GOLD)
+		draw_arc(cp, 9.0, 0.0, TAU, 20, Color(K.C_GOLD, 0.5), 1.0, true)
+		draw_string(f, cp + Vector2(10, -6), TranslationServer.translate("You"), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, K.C_GOLD)
+
+	## Near the Moon the map closes in on it: the Moon to scale, the ring of the orbit the craft is braking into, the
+	## craft's path as the Moon sees it (a fly-by that swings past, or a closed orbit once held) and the craft.
+	func _draw_moon(m, c: Vector2, f: Font, about: Dictionary) -> void:
+		var reach: float = maxf(about.r * 1.25, m.r_m * 3.2)
+		var s: float = (minf(size.x, size.y) * 0.5 - 12.0) / reach
+		draw_circle(c, maxf(m.r_m * s, 5.0), Color(0.62, 0.62, 0.66))
+		draw_arc(c, maxf(m.r_m * s, 5.0), 0.0, TAU, 40, Color(0.9, 0.9, 0.94), 1.5, true)
+		var ring: float = (m.r_m + 110000.0) * s
+		for k in 24:   # the orbit to stay in, dashed
+			if k % 2 == 0:
+				draw_arc(c, ring, TAU * k / 24.0, TAU * (k + 1) / 24.0, 4, Color(K.C_GOLD, 0.8), 1.5, true)
+		var p: Dictionary = screen.pred
+		if not p.is_empty() and p.points.size() > 1:
+			var line := PackedVector2Array()
+			var step := maxi(1, p.points.size() / 100)
+			for i in range(0, p.points.size(), step):
+				var mo: Array = m.moon(p.times[i])
+				var rel := Vector2(p.points[i].x - mo[0], -(p.points[i].y - mo[1]))
+				if rel.length() < reach * 1.05:
+					line.append(c + rel * s)
+			if line.size() > 1:
+				draw_polyline(line, K.C_ACCENT, 1.5, true)
+		var now: Array = m.moon(m.t)
+		var cp := c + Vector2(m.x - now[0], -(m.y - now[1])) * s
+		draw_circle(cp, 4.0 + 1.5 * sin(_t * 5.0), K.C_GOLD)
+		draw_arc(cp, 9.0, 0.0, TAU, 20, Color(K.C_GOLD, 0.5), 1.0, true)
+		draw_string(f, cp + Vector2(10, -6), TranslationServer.translate("You"), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, K.C_GOLD)
+		draw_string(f, c + Vector2(-16, 4), TranslationServer.translate("Moon"), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.08, 0.08, 0.1))
+		draw_string(f, Vector2(0, size.y - 4), TranslationServer.translate("- - the orbit to stay in"), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(K.C_GOLD, 0.9))

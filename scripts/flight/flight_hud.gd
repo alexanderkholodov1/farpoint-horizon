@@ -10,11 +10,14 @@ signal action_pressed                       ## The big button (STAGE, BURN...) o
 signal throttle_changed(value: float)       ## The pilot moved the lever.
 signal autopilot_toggled(on: bool)
 signal skip_pressed
+signal restart_pressed                      ## The pilot asked to fly this part again (add_restart()).
 signal warp_changed(value: float)           ## How fast time runs changed.
 signal warp_picked(value: float)            ## The pilot chose how fast time runs (a button or , .).
 
 ## How fast time can run: real time, then faster. The screen multiplies its real seconds by `warp`.
 const WARPS := [1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0]
+## How each gauge is drawn (Instruments.Gauge.look), by its name: what climbs is a rocket, what drains is a tank.
+const GAUGE_LOOK := {"orbit": "climb", "burn": "climb", "fuel": "tank", "stress": "needle"}
 
 const Kit := preload("res://scripts/ui/kit.gd")
 const Instruments := preload("res://scripts/flight/instruments.gd")
@@ -23,12 +26,12 @@ const Sound := preload("res://scripts/flight/sound.gd")
 var title: Label
 var clock: Label
 var readouts: GridContainer
-var gauges: VBoxContainer
+var gauges: HBoxContainer
 var dial: Instruments.Dial
 var instrument_box: PanelContainer
 var lever: Instruments.Lever
 var action: Instruments.BigButton
-var autopilot_btn: Button
+var autopilot_btn: Instruments.Switch
 var left_btn: Instruments.HoldButton
 var right_btn: Instruments.HoldButton
 var up_btn: Instruments.HoldButton
@@ -52,6 +55,11 @@ var _cap_why := ""         ## Why time may not run faster now, said beside the w
 var auto_note := ""        ## Set by a screen that runs time by itself ("Auto"), shown before the speed.
 
 
+var _top_right: HBoxContainer
+var ring: Instruments.TimingRing   ## The timing ring in the middle (ring_show, ring_grade).
+var _hint_tw: Tween
+
+
 func _init() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -70,16 +78,22 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 	_top = v
 	title = Kit.caps(heading)
 	v.add_child(title)
-	clock = Kit.lbl("", Kit.T_CLOCK, Kit.C_TEXT, Kit.font_num())
-	v.add_child(clock)
-	v.add_child(Kit.rule())
+	# the mission clock, as a lit display set into the console
+	var plate := PanelContainer.new()
+	plate.add_theme_stylebox_override("panel", Kit.flat(Color(0.0, 0.01, 0.03, 0.55), Color(Kit.C_GOLD, 0.35), 8, 1, 14, 4))
+	clock = Kit.lbl("", Kit.T_CLOCK, Kit.C_GOLD, Kit.font_num())
+	clock.add_theme_color_override("font_color", Color(1.0, 0.78, 0.42))
+	plate.add_child(clock)
+	v.add_child(plate)
 	readouts = GridContainer.new()
 	readouts.columns = 2
 	v.add_child(readouts)
-	gauges = Kit.vbox(8)
+	gauges = Kit.hbox(8)
 	v.add_child(gauges)
+	_console(p)
 	# the instrument, bottom left
 	instrument_box = Kit.panel_box(18)
+	_console(instrument_box)
 	Kit.place(instrument_box, 0, 1, 0, 1, 24, -262, 340, -24)
 	add_child(instrument_box)
 	if with_dial:
@@ -90,6 +104,7 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 		instrument_box.visible = false
 	# controls, bottom right
 	var cp := Kit.panel_box(20)
+	_console(cp)
 	Kit.place(cp, 1, 1, 1, 1, -476, -330, -24, -24)
 	add_child(cp)
 	var ch := Kit.hbox(18)
@@ -111,9 +126,8 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 		down_btn = Instruments.HoldButton.new("▼")
 		down_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		steer.add_child(down_btn)
-	autopilot_btn = Kit.btn(TranslationServer.translate("Autopilot"), func(): set_autopilot(not autopilot, true), Kit.T_BODY)
-	autopilot_btn.focus_mode = Control.FOCUS_NONE
-	autopilot_btn.custom_minimum_size = Vector2(136, Kit.BTN_H)
+	autopilot_btn = Instruments.Switch.new()
+	autopilot_btn.pressed.connect(func(): set_autopilot(not autopilot, true))
 	steer.add_child(autopilot_btn)
 	lever = Instruments.Lever.new()
 	lever.changed.connect(func(x): throttle_changed.emit(x))
@@ -125,47 +139,68 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 	action.label = action_label
 	action.pressed.connect(func(): action_pressed.emit())
 	av.add_child(action)
-	keys_lbl = Kit.lbl(keys_text, Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true)
+	keys_lbl = Kit.lbl(keys_text, Kit.T_CAPS, Kit.C_DIM, Kit.FONT_R, true)
+	keys_lbl.modulate.a = 0.75
 	keys_lbl.custom_minimum_size.x = 132
 	keys_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	av.add_child(keys_lbl)
 	# sound and skip, top right
+	var tr_panel := Kit.panel_box(8)
+	Kit.place(tr_panel, 1, 0, 1, 0, -Kit.MARGIN, Kit.MARGIN, -Kit.MARGIN, Kit.MARGIN)
+	tr_panel.grow_horizontal = Control.GROW_DIRECTION_BEGIN   # as wide as its buttons, against the right edge
+	add_child(tr_panel)
 	var tr_box := Kit.hbox(8)
-	Kit.place(tr_box, 1, 0, 1, 0, -380, 24, -24, 70)
-	tr_box.alignment = BoxContainer.ALIGNMENT_END
-	add_child(tr_box)
-	var snd := Kit.btn(_sound_text(), func(): pass, Kit.T_BODY, 128)
-	snd.focus_mode = Control.FOCUS_NONE
-	snd.custom_minimum_size.y = Kit.BTN_H
-	snd.pressed.connect(func():
-		Sound.set_muted(not Sound.is_muted())
-		snd.text = _sound_text())
-	tr_box.add_child(snd)
-	var skip := Kit.btn(TranslationServer.translate("Skip ▶▶"), func(): skip_pressed.emit(), Kit.T_BODY, 128)
+	tr_panel.add_child(tr_box)
+	var skip := Kit.btn(TranslationServer.translate("Skip ▶▶") + "  · K", func(): skip_pressed.emit(), Kit.T_BODY, 128)
 	skip.focus_mode = Control.FOCUS_NONE
 	skip.custom_minimum_size.y = Kit.BTN_H
 	tr_box.add_child(skip)
+	_top_right = tr_box
 	# the message, straight on the scene, and the hint in its own panel
 	big = Kit.lbl("", Kit.T_SHOUT, Kit.C_ON_DARK, Kit.FONT_T)
 	big.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	big.add_theme_constant_override("outline_size", 12)
 	big.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.55))
-	Kit.place(big, 0.5, 0.2, 0.5, 0.2, -600, -50, 600, 32)
+	Kit.place(big, 0, 0.2, 1, 0.2, 500, -50, -400, 32)
 	big.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(big)
 	sub = Kit.lbl("", Kit.T_ACTION, Kit.C_ON_DARK, Kit.FONT_B, true)
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	sub.add_theme_constant_override("outline_size", 7)
 	sub.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.6))
-	Kit.place(sub, 0.5, 0.2, 0.5, 0.2, -500, 38, 500, 110)
+	Kit.place(sub, 0, 0.2, 1, 0.2, 520, 38, -420, 110)   # the column between the readouts and the buttons, at any width
 	sub.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(sub)
+	ring = Instruments.TimingRing.new()
+	Kit.place(ring, 0.5, 0.5, 0.5, 0.5, -320, -250, 320, 330)
+	ring.visible = false
+	add_child(ring)
 	var hb: Array = Kit.hint_box()
 	hint_panel = hb[0]
 	hint_lbl = hb[1]
 	Kit.place(hint_panel, 0.5, 1, 0.5, 1, -440, -128, 300, -Kit.MARGIN)
 	add_child(hint_panel)
 	hint_panel.visible = false
+
+
+## Makes a panel read as a piece of the craft's console: a rivet in each corner and a warm bar at its top edge.
+func _console(p: PanelContainer) -> void:
+	p.draw.connect(func():
+		var sz := p.size
+		for q in [Vector2(11, 11), Vector2(sz.x - 11, 11), Vector2(11, sz.y - 11), Vector2(sz.x - 11, sz.y - 11)]:
+			p.draw_circle(q, 3.2, Color(Kit.C_TEXT, 0.32))
+			p.draw_circle(q, 1.3, Color(0, 0, 0, 0.55))
+		p.draw_line(Vector2(26, 1.5), Vector2(84, 1.5), Kit.C_GOLD, 3.0)
+		p.draw_line(Vector2(90, 1.5), Vector2(98, 1.5), Color(Kit.C_GOLD, 0.6), 3.0))
+
+
+## A Restart button beside Skip: the pilot can always fly this part again, whatever happened (never a dead end).
+func add_restart() -> void:
+	var b := Kit.btn(TranslationServer.translate("↺ Restart") + "  · R", func(): restart_pressed.emit(), Kit.T_BODY, 128)
+	b.focus_mode = Control.FOCUS_NONE
+	b.custom_minimum_size.y = Kit.BTN_H
+	_top_right.add_child(b)
+	_top_right.move_child(b, 1)
 
 
 func _sound_text() -> String:
@@ -175,19 +210,16 @@ func _sound_text() -> String:
 ## Adds the time control under the clock: real time and faster, chosen with the buttons or the keys , and . ;
 ## `cap` is the fastest allowed at first. A note says in words how fast time runs, so the clock never misleads.
 func add_time_warp(cap := 1.0) -> void:
-	var head := Kit.caps(TranslationServer.translate("Time"))
-	_top.add_child(head)
-	_top.move_child(head, 2)
 	warp_box = Kit.segmented()
 	for w in WARPS:
 		var b := Kit.choice(_warp_label(w), false, func(): set_warp(w, true), 66)
 		_warp_btns[w] = b
 		warp_box.add_child(b)
 	_top.add_child(warp_box)
-	_top.move_child(warp_box, 3)
+	_top.move_child(warp_box, 2)
 	warp_note = Kit.lbl("", Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R)
 	_top.add_child(warp_note)
-	_top.move_child(warp_note, 4)
+	_top.move_child(warp_note, 3)
 	cap_warp(cap)
 
 
@@ -230,8 +262,7 @@ func _show_warp() -> void:
 			b.remove_theme_stylebox_override(st)
 		for k in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
 			b.remove_theme_color_override(k)
-		b.disabled = w > warp_cap
-		b.modulate.a = 0.35 if b.disabled else 1.0
+		b.visible = w <= warp_cap   # only the speeds allowed now: fewer things to read
 		if w == lit_w:
 			Kit.accent_btn(b, Kit.C_ACCENT)
 	var t: String = TranslationServer.translate("Real time") if warp <= 1.0 else TranslationServer.translate("Time runs %s times faster") % _thousands(warp)
@@ -240,6 +271,7 @@ func _show_warp() -> void:
 	if _cap_why != "":
 		t += " · " + _cap_why
 	warp_note.text = t
+	warp_note.visible = warp > 1.0 or auto_note != ""   # at real time there is nothing to add
 
 
 ## 100000 as "100,000".
@@ -280,6 +312,7 @@ func value(name_: String, text: String, col := Color.WHITE) -> void:
 ## Adds a gauge; set it with gauge(name, 0..1, text).
 func add_gauge(name_: String, label: String, warn_at := 2.0, bad_at := 2.0, col := Color(0.4, 0.75, 1.0)) -> void:
 	var g := Instruments.Gauge.new()
+	g.look = GAUGE_LOOK.get(name_, "needle")
 	g.title = label
 	g.warn_at = warn_at
 	g.bad_at = bad_at
@@ -294,6 +327,25 @@ func gauge(name_: String, v: float, text := "") -> void:
 	g.text = text
 
 
+## Shows the timing ring this frame: `remaining` from 1 (far) to 0 (press now), `window` how near 0 is on time.
+func ring_show(label: String, remaining: float, window := 0.05) -> void:
+	ring.active = true
+	ring.label = label
+	ring.remaining = remaining
+	ring.window = window
+
+
+## Flashes how a timed press went ("PERFECT", "LATE"...).
+func ring_grade(text: String, col: Color) -> void:
+	ring.grade(text, col)
+	Sound.player(self, "chime" if col == Kit.C_OK else "beep").play()
+
+
+## Renames a gauge (the same instrument reads the speed added in a burn and the speed lost in a brake).
+func name_gauge(name_: String, label: String) -> void:
+	_gauges[name_].title = label
+
+
 func show_gauge(name_: String, on: bool) -> void:
 	_gauges[name_].visible = on
 
@@ -304,6 +356,10 @@ func message(big_text: String, small_text := "", col := Color.WHITE, time := 2.5
 		_msg_tw.kill()
 	big.text = big_text
 	sub.text = small_text
+	var fs := Kit.T_SHOUT
+	while fs > 30 and Kit.FONT_T.get_string_size(big_text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > maxf(size.x - 920.0, 300.0):
+		fs -= 2
+	big.add_theme_font_size_override("font_size", fs)
 	big.add_theme_color_override("font_color", col)
 	big.modulate.a = 1.0
 	sub.modulate.a = 1.0
@@ -324,16 +380,18 @@ func hint(text: String) -> void:
 	if hint_lbl.text != text:
 		hint_lbl.text = text
 		hint_panel.modulate.a = 0.0
-		hint_panel.create_tween().tween_property(hint_panel, "modulate:a", 1.0, 0.3)
+		# it comes in, stays long enough to be read (longer for a longer text) and steps aside: the screen stays clear
+		if _hint_tw and _hint_tw.is_valid():
+			_hint_tw.kill()
+		_hint_tw = hint_panel.create_tween()
+		_hint_tw.tween_property(hint_panel, "modulate:a", 1.0, 0.3)
+		_hint_tw.tween_interval(6.0 + text.length() * 0.06)
+		_hint_tw.tween_property(hint_panel, "modulate:a", 0.0, 1.0)
 
 
 func set_autopilot(on: bool, by_pilot := false) -> void:
 	autopilot = on
-	autopilot_btn.text = TranslationServer.translate("Autopilot on") if on else TranslationServer.translate("Autopilot")
-	if on:
-		Kit.accent_btn(autopilot_btn, Kit.C_OK)
-	else:
-		_plain(autopilot_btn)
+	autopilot_btn.on = on
 	if by_pilot:
 		autopilot_toggled.emit(on)
 
@@ -387,6 +445,15 @@ func pilot_input() -> bool:
 func _unhandled_input(e: InputEvent) -> void:
 	if e is InputEventKey and e.pressed and not e.echo and e.physical_keycode == KEY_SPACE:
 		action.press()
+		get_viewport().set_input_as_handled()
+	elif e is InputEventKey and e.pressed and not e.echo and e.physical_keycode == KEY_P:
+		set_autopilot(not autopilot, true)
+		get_viewport().set_input_as_handled()
+	elif e is InputEventKey and e.pressed and not e.echo and e.physical_keycode == KEY_K:
+		skip_pressed.emit()
+		get_viewport().set_input_as_handled()
+	elif e is InputEventKey and e.pressed and not e.echo and e.physical_keycode == KEY_R:
+		restart_pressed.emit()
 		get_viewport().set_input_as_handled()
 	elif e is InputEventKey and e.pressed and not e.echo and warp_box and (e.physical_keycode == KEY_PERIOD or e.physical_keycode == KEY_COMMA):
 		var i := WARPS.find(warp)

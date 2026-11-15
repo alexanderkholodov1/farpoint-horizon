@@ -235,10 +235,9 @@ func sees_earth(p: Vector3) -> bool:
 func build_mesh() -> Node3D:
 	var root := Node3D.new()
 	root.name = "LunarGround"
-	var m := StandardMaterial3D.new()
-	m.vertex_color_use_as_albedo = true
-	m.roughness = 1.0
-	m.albedo_color = Color(0.82, 0.8, 0.77)     # the regolith's grey, a little warm
+	# the regolith: LOLA's shape and the baked sunlight from the mesh, small craters and grain from the shader
+	var m := ShaderMaterial.new()
+	m.shader = preload("res://shaders/regolith.gdshader")
 	var near := MeshInstance3D.new()
 	near.mesh = _grid(-HALF, HALF, -HALF, HALF, SUB, false)
 	near.material_override = m

@@ -132,8 +132,8 @@ branches add entries at the same place (`.gitattributes`).
 
 ## The look: Earth, Moon, the Andes and the launch site (issue 12; scripts in `assets/source/`)
 - **S-moon-kit** NASA Goddard Space Flight Center, Scientific Visualization Studio. *CGI Moon Kit* (2019).
-  https://svs.gsfc.nasa.gov/4720. LRO LROC WAC colour map (`lroc_color_2k.jpg`, colour enhanced from LROC and Kaguya) and
-  LOLA elevation (`ldem_4.tif`); the game's Moon colour and relief (`textures/moon_color.jpg`, `moon_normal.jpg`, made by
+  https://svs.gsfc.nasa.gov/4720. LRO LROC WAC colour map (`lroc_color_poles_4k.tif`, colour enhanced from LROC and Kaguya) and
+  LOLA elevation (`ldem_16.tif`, 16 pixels per degree); the game's Moon colour and relief (`textures/moon_color.jpg`, `moon_normal.jpg`, made by
   `assets/source/planet_textures.py`). Credit: "NASA/GSFC/Scientific Visualization Studio, LRO". NASA media guidelines.
 - **S-gibs-earth** NASA GIBS WMS (see S-gibs), whole globe at 4096 x 2048: `BlueMarble_NextGeneration` and
   `BlueMarble_ShadedRelief` (August 2004, NASA Earth Observatory, Reto Stockli, MODIS), `VIIRS_Black_Marble` (2016,
