@@ -124,8 +124,8 @@ func _card(id: String, S: Dictionary, mult: float) -> Control:
 		return pc
 	if Progress.is_done(id):
 		chips.add_child(Kit.chip("✓ " + tr("Done"), Kit.C_OK))
-	chips.add_child(Kit.chip(Kit.money(S.budget * mult), Kit.C_GOLD))
-	chips.add_child(Kit.chip(tr("%d yr or more") % S.min_years))
+	chips.add_child(Kit.chip(tr("Budget %s") % Kit.money(S.budget * mult), Kit.C_GOLD))
+	chips.add_child(Kit.chip(tr("Must work %d+ years") % S.min_years))
 	pc.gui_input.connect(func(e: InputEvent):
 		if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
 			Kit.UiSound.play("click")
@@ -182,5 +182,10 @@ func _wrapped(text: String) -> String:
 
 
 func _choose(id: String) -> void:
+	var lock: String = Progress.locked_by(id, GameData.SCENARIOS[id])
+	if lock != "":   # a locked card answers: what opens it, and where "All open" is for a demo
+		var why: String = tr("Coming soon") if lock == "soon" else tr("Finish “%s” first to open it") % GameData.SCENARIOS[lock].name
+		toast("🔒 " + why + "  ·  " + tr("Settings → All open unlocks every mission"), Kit.C_WARN)
+		return
 	GameState.start_mission(id)
 	go("design", {"step": 0})

@@ -1,79 +1,168 @@
 {
- "doc": "Extra objectives a mission can pursue. When a mission starts, three are drawn at random from those of its scenario and the team chooses which to go for; each one met adds its points and never takes any away. `check` says what the flight must do (kinds are read by scripts/flight/objectives.gd): `target_m`, `pole_m`, `shadow_edge_m` (distance in metres at touchdown, at most `max`), `touchdown_mps` (touchdown speed, at most `max`), `fuel_left` (share of the lander's fuel left, at least `min`), `contact_kept` (Earth in view through the whole descent), `tli_error` (share off the burn toward the Moon, at most `max`), `ascent_error_deg` (mean degrees off the guidance marker on the climb, at most `max`). `photo` is the picture the mission sends home when the objective is met. Ids are stable keys, never shown to players.",
- "entries": {
-  "shadow_photo": {
-   "scenario": "moon_south_pole",
-   "name": "Look into the dark",
-   "desc": "Land within 300 m of the edge of the permanent shadow and photograph the crater floor that has not seen the Sun for billions of years, the way ShadowCam does from orbit.",
-   "points": 80,
-   "check": {"kind": "shadow_edge_m", "max": 300.0},
-   "photo": "res://assets/mission_photos/moon_south_pole/shackleton_floor_shadowcam.jpg",
-   "source": ["S-nasa-science", "S-svs-south-pole"],
-   "simplified": "The 300 m and the points are our game values; the photo is ShadowCam's real picture of Shackleton's floor."
-  },
-  "rim_landing": {
-   "scenario": "moon_south_pole",
-   "name": "Bullseye on the rim",
-   "desc": "Touch down within 60 m of the target on Shackleton's sunlit rim, where the Sun shines almost all month long.",
-   "points": 70,
-   "check": {"kind": "target_m", "max": 60.0},
-   "photo": "res://assets/mission_photos/moon_south_pole/shackleton_rim_lroc.jpg",
-   "source": ["S-nasa-science", "S-lola"],
-   "simplified": "The 60 m and the points are our game values."
-  },
-  "earth_contact": {
-   "scenario": "moon_south_pole",
-   "name": "Never lose Earth",
-   "desc": "Keep Earth in view of the antenna through the whole descent. From the pole Earth hangs low on the horizon, so a hill or the crater wall can hide it.",
-   "points": 60,
-   "check": {"kind": "contact_kept"},
-   "source": ["S-lola"],
-   "simplified": "Earth's height above the horizon is fixed at 3 degrees in the game; it really wobbles a few degrees over the month. The hills that hide it are the real LOLA heights."
-  },
-  "soft_touch": {
-   "scenario": "moon_south_pole",
-   "name": "Feather touch",
-   "desc": "Touch down slower than 1.5 m/s, gently enough not to spill a cup of coffee.",
-   "points": 60,
-   "check": {"kind": "touchdown_mps", "max": 1.5},
-   "source": ["S-apollo-gear"],
-   "simplified": "The 1.5 m/s is our game value. Touchdown speed and the slope under the legs are what decide a landing [S-apollo-gear]."
-  },
-  "fuel_hop": {
-   "scenario": "moon_south_pole",
-   "name": "Fuel for a hop",
-   "desc": "Land with a third of the lander's fuel left. Chandrayaan-3's lander used its spare fuel to rise 40 cm and land again a little farther on.",
-   "points": 50,
-   "check": {"kind": "fuel_left", "min": 0.33},
-   "source": ["S-chandrayaan3"],
-   "simplified": "The share of fuel and the points are our game values."
-  },
-  "pole_visit": {
-   "scenario": "moon_south_pole",
-   "name": "The bottom of the world",
-   "desc": "Touch down within 250 m of the geographic south pole, 90 degrees south, the spot every line of longitude meets.",
-   "points": 90,
-   "check": {"kind": "pole_m", "max": 250.0},
-   "source": ["S-lola"],
-   "simplified": "The pole's place is where the LOLA map's projection puts it; the 250 m and the points are our game values."
-  },
-  "true_burn": {
-   "scenario": "moon_south_pole",
-   "name": "Bullseye burn",
-   "desc": "End the burn toward the Moon within 1 % of the speed it needs, so no correction is needed on the way.",
-   "points": 50,
-   "check": {"kind": "tli_error", "max": 0.01},
-   "source": ["S-delta-v"],
-   "simplified": "The 1 % and the points are our game values."
-  },
-  "ride_marker": {
-   "scenario": "moon_south_pole",
-   "name": "Ride the marker",
-   "desc": "Fly the climb yourself and keep the rocket within 5 degrees of the guidance marker, on average, all the way to orbit.",
-   "points": 50,
-   "check": {"kind": "ascent_error_deg", "max": 5.0},
-   "source": ["S-delta-v"],
-   "simplified": "The 5 degrees and the points are our game values."
+  "doc": "Extra objectives a mission can pursue. When a mission starts, three are drawn at random from those of its scenario and the team chooses which to go for; each one met adds its points and never takes any away. `check` says what the flight must do (kinds are read by scripts/flight/objectives.gd): `target_m`, `pole_m`, `shadow_edge_m` (distance in metres at touchdown, at most `max`), `touchdown_mps` (touchdown speed, at most `max`), `fuel_left` (share of the lander's fuel left, at least `min`), `contact_kept` (Earth in view through the whole descent), `tli_error` (share off the burn toward the Moon, at most `max`), `ascent_error_deg` (mean degrees off the guidance marker on the climb, at most `max`). `photo` is the picture the mission sends home when the objective is met. Ids are stable keys, never shown to players. Objectives with scenario `any_orbit` serve every mission that has no landing of its own: `ascent_fuel_left` (share of the last stage's fuel left in orbit, at least `min`), `science_frac` (science gathered over the mission's goal, at least `min`), `budget_reserve` (share of the budget left, at least `min`).",
+  "entries": {
+    "shadow_photo": {
+      "scenario": "moon_south_pole",
+      "name": "Look into the dark",
+      "desc": "Land within 300 m of the edge of the permanent shadow and photograph the crater floor that has not seen the Sun for billions of years, the way ShadowCam does from orbit.",
+      "points": 80,
+      "check": {
+        "kind": "shadow_edge_m",
+        "max": 300.0
+      },
+      "photo": "res://assets/mission_photos/moon_south_pole/shackleton_floor_shadowcam.jpg",
+      "source": [
+        "S-nasa-science",
+        "S-svs-south-pole"
+      ],
+      "simplified": "The 300 m and the points are our game values; the photo is ShadowCam's real picture of Shackleton's floor."
+    },
+    "rim_landing": {
+      "scenario": "moon_south_pole",
+      "name": "Bullseye on the rim",
+      "desc": "Touch down within 60 m of the target on Shackleton's sunlit rim, where the Sun shines almost all month long.",
+      "points": 70,
+      "check": {
+        "kind": "target_m",
+        "max": 60.0
+      },
+      "photo": "res://assets/mission_photos/moon_south_pole/shackleton_rim_lroc.jpg",
+      "source": [
+        "S-nasa-science",
+        "S-lola"
+      ],
+      "simplified": "The 60 m and the points are our game values."
+    },
+    "earth_contact": {
+      "scenario": "moon_south_pole",
+      "name": "Never lose Earth",
+      "desc": "Keep Earth in view of the antenna through the whole descent. From the pole Earth hangs low on the horizon, so a hill or the crater wall can hide it.",
+      "points": 60,
+      "check": {
+        "kind": "contact_kept"
+      },
+      "source": [
+        "S-lola"
+      ],
+      "simplified": "Earth's height above the horizon is fixed at 3 degrees in the game; it really wobbles a few degrees over the month. The hills that hide it are the real LOLA heights."
+    },
+    "soft_touch": {
+      "scenario": "moon_south_pole",
+      "name": "Feather touch",
+      "desc": "Touch down slower than 1.5 m/s, gently enough not to spill a cup of coffee.",
+      "points": 60,
+      "check": {
+        "kind": "touchdown_mps",
+        "max": 1.5
+      },
+      "source": [
+        "S-apollo-gear"
+      ],
+      "simplified": "The 1.5 m/s is our game value. Touchdown speed and the slope under the legs are what decide a landing [S-apollo-gear]."
+    },
+    "fuel_hop": {
+      "scenario": "moon_south_pole",
+      "name": "Fuel for a hop",
+      "desc": "Land with a third of the lander's fuel left. Chandrayaan-3's lander used its spare fuel to rise 40 cm and land again a little farther on.",
+      "points": 50,
+      "check": {
+        "kind": "fuel_left",
+        "min": 0.33
+      },
+      "source": [
+        "S-chandrayaan3"
+      ],
+      "simplified": "The share of fuel and the points are our game values."
+    },
+    "pole_visit": {
+      "scenario": "moon_south_pole",
+      "name": "The bottom of the world",
+      "desc": "Touch down within 250 m of the geographic south pole, 90 degrees south, the spot every line of longitude meets.",
+      "points": 90,
+      "check": {
+        "kind": "pole_m",
+        "max": 250.0
+      },
+      "source": [
+        "S-lola"
+      ],
+      "simplified": "The pole's place is where the LOLA map's projection puts it; the 250 m and the points are our game values."
+    },
+    "true_burn": {
+      "scenario": "moon_south_pole",
+      "name": "Bullseye burn",
+      "desc": "End the burn toward the Moon within 1 % of the speed it needs, so no correction is needed on the way.",
+      "points": 50,
+      "check": {
+        "kind": "tli_error",
+        "max": 0.01
+      },
+      "source": [
+        "S-delta-v"
+      ],
+      "simplified": "The 1 % and the points are our game values."
+    },
+    "ride_marker": {
+      "scenario": "moon_south_pole",
+      "name": "Ride the marker",
+      "desc": "Fly the climb yourself and keep the rocket within 5 degrees of the guidance marker, on average, all the way to orbit.",
+      "points": 50,
+      "check": {
+        "kind": "ascent_error_deg",
+        "max": 5.0
+      },
+      "source": [
+        "S-delta-v"
+      ],
+      "simplified": "The 5 degrees and the points are our game values."
+    },
+    "fly_climb": {
+      "scenario": "any_orbit",
+      "name": "Fly the climb yourself",
+      "desc": "Take the stick for most of the climb and keep the needle within 6 degrees of the green marker on average, as a pilot does on a real launch.",
+      "points": 80,
+      "check": {
+        "kind": "ascent_error_deg",
+        "max": 6.0
+      },
+      "source": [],
+      "simplified": "The 6 degrees and the points are our game values."
+    },
+    "fuel_spare": {
+      "scenario": "any_orbit",
+      "name": "Reach orbit with fuel to spare",
+      "desc": "Arrive in orbit with at least 5 % of the last stage's fuel left: a clean climb wastes nothing.",
+      "points": 60,
+      "check": {
+        "kind": "ascent_fuel_left",
+        "min": 0.05
+      },
+      "source": [],
+      "simplified": "The 5 % and the points are our game values."
+    },
+    "science_goal": {
+      "scenario": "any_orbit",
+      "name": "Hit the science goal",
+      "desc": "Gather all the science points the mission asks for: enough power, a fast enough antenna and the right instruments.",
+      "points": 100,
+      "check": {
+        "kind": "science_frac",
+        "min": 1.0
+      },
+      "source": [],
+      "simplified": "The points are our game values."
+    },
+    "reserve": {
+      "scenario": "any_orbit",
+      "name": "Keep a quarter of the budget",
+      "desc": "Finish with at least 25 % of the budget left over, the reserve real agencies love to see.",
+      "points": 60,
+      "check": {
+        "kind": "budget_reserve",
+        "min": 0.25
+      },
+      "source": [],
+      "simplified": "The 25 % and the points are our game values; real missions keep 10 to 30 % for surprises."
+    }
   }
- }
 }

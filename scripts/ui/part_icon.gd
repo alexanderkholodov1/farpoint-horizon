@@ -34,6 +34,31 @@ func _shape(pts: Array, col: Color) -> void:
 	draw_polyline(p, col, 2.0, true)
 
 
+## A rocket bell from its throat at (cx, top) down h pixels: the curved contour of a real nozzle (a parabola that
+## opens fast after the throat and straightens toward the exit), half-widths `throat` and `exit`.
+func _bell(cx: float, top: float, h: float, throat: float, exit_r: float) -> Array:
+	var right: Array = []
+	for i in 9:
+		var f: float = i / 8.0
+		right.append(Vector2(cx + throat + (exit_r - throat) * sqrt(f), top + h * f))
+	var pts: Array = right.duplicate()
+	for i in range(right.size() - 1, -1, -1):
+		pts.append(Vector2(2.0 * cx - right[i].x, right[i].y))
+	return pts
+
+
+## A tank: a cylinder of half-width r from top to bottom with round domes.
+func _capsule(cx: float, top: float, bottom: float, r: float, col: Color) -> void:
+	var pts: Array = []
+	for i in 9:
+		var a: float = PI + PI * i / 8.0
+		pts.append(Vector2(cx, top + r) + Vector2.from_angle(a) * r)
+	for i in 9:
+		var a: float = PI * i / 8.0
+		pts.append(Vector2(cx, bottom - r) + Vector2.from_angle(a) * r)
+	_shape(pts, col)
+
+
 func _box(x0: float, y0: float, x1: float, y1: float, col: Color) -> void:
 	_shape([Vector2(x0, y0), Vector2(x1, y0), Vector2(x1, y1), Vector2(x0, y1)], col)
 
@@ -44,27 +69,44 @@ func _draw() -> void:
 	var w: Color = Kit.ink(Kit.C_GOLD)
 	var x := 32.0
 	match kind:
-		"engine":   # a thrust section, three bells and their flames
-			_box(x - 22, 10, x + 22, 26, c)
-			for dx in [-15.0, 0.0, 15.0]:
-				_shape([Vector2(x + dx - 3, 26), Vector2(x + dx + 3, 26), Vector2(x + dx + 7, 44), Vector2(x + dx - 7, 44)], c)
-				_shape([Vector2(x + dx - 5, 47), Vector2(x + dx + 5, 47), Vector2(x + dx, 64)], w)
-		"upper":    # a small stage: a tank and one wide bell
-			_box(x - 14, 8, x + 14, 32, c)
-			_shape([Vector2(x - 4, 32), Vector2(x + 4, 32), Vector2(x + 15, 58), Vector2(x - 15, 58)], c)
-			draw_line(Vector2(x - 26, 64), Vector2(x + 26, 64), Color(c, 0.5), 1.0)
-		"tank":     # a tall body with its two domes marked
-			_box(x - 14, 6, x + 14, 66, c)
-			draw_arc(Vector2(x, 20), 14.0, PI, TAU, 16, Color(c, 0.7), 1.5, true)
-			draw_arc(Vector2(x, 44), 14.0, 0.0, PI, 16, Color(c, 0.7), 1.5, true)
-		"booster":  # the core and a slim rocket on each side
-			_box(x - 8, 14, x + 8, 62, Color(c, 0.5))
-			for s in [-1.0, 1.0]:
-				_shape([Vector2(x + s * 20, 16), Vector2(x + s * 26, 28), Vector2(x + s * 26, 60), Vector2(x + s * 14, 60), Vector2(x + s * 14, 28)], c)
-				_shape([Vector2(x + s * 16, 62), Vector2(x + s * 24, 62), Vector2(x + s * 20, 71)], w)
-		"fairing":  # the nose shell
-			_shape([Vector2(x, 4), Vector2(x + 10, 16), Vector2(x + 16, 34), Vector2(x + 16, 66), Vector2(x - 16, 66), Vector2(x - 16, 34), Vector2(x - 10, 16)], c)
-			draw_line(Vector2(x, 4), Vector2(x, 66), Color(c, 0.6), 1.5)
+		"engine":   # nine engines seen from the side: a thrust plate, three curved bells, their flames
+			_box(x - 24, 8, x + 24, 16, c)
+			for dx in [-16.0, 0.0, 16.0]:
+				draw_line(Vector2(x + dx, 16), Vector2(x + dx, 22), c, 2.0)     # the engine's turbopump and feed
+				draw_circle(Vector2(x + dx + 4, 19), 2.2, Color(c, 0.6))
+				_shape(_bell(x + dx, 22, 22, 2.5, 7.5), c)
+				_shape([Vector2(x + dx - 6, 46), Vector2(x + dx + 6, 46), Vector2(x + dx + 2, 58), Vector2(x + dx, 66), Vector2(x + dx - 2, 58)], w)
+		"upper":    # an upper stage: a short tank on a long vacuum bell (much wider than a sea-level one)
+			_capsule(x, 6, 30, 11, c)
+			draw_line(Vector2(x, 30), Vector2(x, 34), c, 2.0)
+			_shape(_bell(x, 34, 30, 3.0, 15.0), c)
+			draw_line(Vector2(x - 26, 67), Vector2(x + 26, 67), Color(c, 0.4), 1.0)
+		"tank":     # a propellant tank: a cylinder with domed ends, the inner bulkhead between fuel and oxidizer
+			_capsule(x, 4, 68, 14, c)
+			draw_arc(Vector2(x, 34), 14.0, 0.0, PI, 16, Color(c, 0.75), 1.5, true)
+			draw_line(Vector2(x - 14, 34), Vector2(x + 14, 34), Color(c, 0.35), 1.0)
+			draw_string(Kit.FONT_B, Vector2(x - 5, 26), "O", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(c, 0.8))
+			draw_string(Kit.FONT_B, Vector2(x - 4, 56), "F", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(w, 0.9))
+		"booster":  # the core with a solid booster on each side, nose cones and plumes
+			_box(x - 7, 10, x + 7, 60, Color(c, 0.45))
+			for sd in [-1.0, 1.0]:
+				var bx: float = x + sd * 19.0
+				_shape([Vector2(bx, 14), Vector2(bx + 5, 22), Vector2(bx + 5, 58), Vector2(bx - 5, 58), Vector2(bx - 5, 22)], c)
+				draw_line(Vector2(bx - 5, 40), Vector2(bx + 5, 40), Color(c, 0.5), 1.0)
+				_shape([Vector2(bx - 5, 61), Vector2(bx + 5, 61), Vector2(bx, 71)], w)
+		"fairing":  # the nose fairing: an ogive in two halves, the craft tucked inside
+			var pts: Array = []
+			for i in 13:
+				var f: float = i / 12.0
+				pts.append(Vector2(x + 16.0 * sqrt(f), 4.0 + 34.0 * f))
+			pts.append(Vector2(x + 16, 66))
+			pts.append(Vector2(x - 16, 66))
+			for i in range(12, -1, -1):
+				var f: float = i / 12.0
+				pts.append(Vector2(x - 16.0 * sqrt(f), 4.0 + 34.0 * f))
+			_shape(pts, c)
+			draw_line(Vector2(x, 6), Vector2(x, 66), Color(c, 0.55), 1.5)
+			_box(x - 7, 44, x + 7, 58, w)
 		"orbit":    # a world and the path around it, the craft a warm dot
 			draw_circle(Vector2(x, 36), 13.0, Color(c, 0.2))
 			draw_arc(Vector2(x, 36), 13.0, 0.0, TAU, 32, c, 2.0, true)

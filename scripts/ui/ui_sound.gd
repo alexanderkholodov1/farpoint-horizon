@@ -103,6 +103,16 @@ static func _make(id: String) -> PackedFloat32Array:
 			return _mix(_mix(a, b, 1.0), c, 1.0)
 		"whoosh":
 			return _swell(rng, 0.38)
+		"fanfare":
+			# the mission done: a swell, a quick rising arpeggio (C E G C) and a long open chord with a high fifth on top
+			var run := _silence(0.0)
+			var notes := [523.25, 659.25, 783.99, 1046.5]
+			for i in notes.size():
+				run = _mix(run, _cat(_silence(0.11 * i), _tone([notes[i], notes[i] * 2.0], 0.5, 0.005, 0.32)), 0.8)
+			var chord := _cat(_silence(0.46), _tone([261.63, 392.0, 523.25, 659.25, 783.99, 1567.98], 2.6, 0.02, 1.7))
+			return _mix(_mix(_swell(rng, 0.5), run, 1.0), chord, 0.9)
+		"tick":
+			return _tone([1800.0], 0.02, 0.001, 0.01)
 		_:
 			return _tone([440.0], 0.08, 0.004, 0.05)
 

@@ -198,7 +198,8 @@ func _climb(delta: float) -> void:
 			if model.boosters_attached:
 				hud.hint(tr("The boosters are empty. Press STAGE to drop them and fly lighter."))
 			else:
-				hud.hint(tr("This stage is empty! Press STAGE (Space) to drop it and light the next engine."))
+				hud.message(tr("OUT OF FUEL · STAGE!"), tr("This stage's tank is empty and its engines went quiet. Press SPACE (or STAGE) to drop it and light the next one."), Kit.C_WARN, 3.5)
+				hud.hint(tr("Real rockets drop each empty stage: dead weight would only slow you down. If you wait, the flight computer does it for you."))
 				sfx.alarm.play()
 		if stage_wait > (0.6 if hud.autopilot else 3.5):
 			_on_stage()
@@ -240,8 +241,13 @@ func _hints() -> void:
 func _telemetry() -> void:
 	hud.clock.text = FlightHud.met_text(model.t)
 	hud.value("alt", ("%.1f km" % (model.h / 1000.0)) if model.h >= 1000.0 else ("%d m" % int(model.h)))
-	var v: float = sqrt(model.vx * model.vx + model.vy * model.vy)
-	hud.value("speed", ("%.2f km/s" % (v / 1000.0)) if v >= 1000.0 else ("%d m/s" % int(v)))
+	# low down the speed a player expects is over the ground (on the pad it is 0); higher up, the orbital speed,
+	# which counts the Earth's spin (the free 465 m/s that LIFTOFF! told about)
+	var low: bool = model.h < 40000.0
+	var gx: float = model.vx - (model.spin if low else 0.0)
+	var v: float = sqrt(gx * gx + model.vy * model.vy)
+	var vs: String = ("%.2f km/s" % (v / 1000.0)) if v >= 1000.0 else ("%d m/s" % int(v))
+	hud.value("speed", vs + ("" if low else "  " + tr("(orbital)")))
 	var op: float = model.orbit_progress()
 	hud.gauge("orbit", op, "%d %%" % roundi(op * 100.0))
 	hud.gauge("fuel", model.fuel(), "%d %%" % roundi(model.fuel() * 100.0))

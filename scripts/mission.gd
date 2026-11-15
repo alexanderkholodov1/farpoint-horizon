@@ -237,41 +237,41 @@ func _checks(r: Dictionary, S: Dictionary, B: Dictionary, O: Dictionary, L: Dict
 	var c: Array = []
 	# --- bloqueantes
 	if instruments.is_empty():
-		c.append(_ck("fatal", tr("Your craft needs an instrument"), tr("A craft with no instruments makes no science. Head to the Instruments step.")))
+		c.append(_ck("fatal", tr("Your craft needs an instrument"), tr("A craft with no instruments makes no science. Head to the Instruments step."), "instruments"))
 	if instruments.size() > B.slots:
-		c.append(_ck("fatal", tr("Too many instruments for this platform"), tr("%s has room for %d instrument(s) and you picked %d. Use a bigger platform or drop some instruments.") % [B.name, B.slots, instruments.size()]))
+		c.append(_ck("fatal", tr("Too many instruments for this platform"), tr("%s has room for %d instrument(s) and you picked %d. Use a bigger platform or drop some instruments.") % [B.name, B.slots, instruments.size()], "bus"))
 	for id in instruments:
 		var I: Dictionary = GameData.INSTRUMENTS[id]
 		if I.size > B.max_size:
-			c.append(_ck("fatal", tr("%s is too big") % I.name, tr("It needs a platform of size “%s” or larger.") % GameData.SIZE_NAMES[I.size]))
+			c.append(_ck("fatal", tr("%s is too big") % I.name, tr("It needs a platform of size “%s” or larger.") % GameData.SIZE_NAMES[I.size], "bus"))
 	if r.mass_total > B.max:
-		c.append(_ck("fatal", tr("The craft outweighs its platform"), tr("%.1f kg against %.1f kg allowed. The structure won't hold, so pick lighter parts or a bigger platform.") % [r.mass_total, B.max]))
+		c.append(_ck("fatal", tr("The craft outweighs its platform"), tr("%.1f kg against %.1f kg allowed. The structure won't hold, so pick lighter parts or a bigger platform.") % [r.mass_total, B.max], "bus"))
 	if r.launch_cap <= 0.0:
-		c.append(_ck("fatal", tr("This launcher can't reach that orbit"), tr("%s can't carry cargo to %s. Every rocket has its own destinations and capacity.") % [L.name, O.name]))
+		c.append(_ck("fatal", tr("This launcher can't reach that orbit"), tr("%s can't carry cargo to %s. Every rocket has its own destinations and capacity.") % [L.name, O.name], "launcher"))
 	elif r.mass_total > r.launch_cap:
-		c.append(_ck("fatal", tr("Too heavy for the rocket"), tr("The launcher carries at most %.0f kg to %s and your craft weighs %.1f kg. The farther or higher the orbit, the less it can carry.") % [r.launch_cap, O.short, r.mass_total]))
+		c.append(_ck("fatal", tr("Too heavy for the rocket"), tr("The launcher carries at most %.0f kg to %s and your craft weighs %.1f kg. The farther or higher the orbit, the less it can carry.") % [r.launch_cap, O.short, r.mass_total], "launcher"))
 	if r.cost_total > r.budget:
 		c.append(_ck("fatal", tr("Over budget"), tr("The mission costs %.1f M$ and only %.1f M$ is available. The agency won't sign off on it.") % [r.cost_total, r.budget]))
 	if r.orbit_mult <= 0.0:
-		c.append(_ck("fatal", tr("This orbit can't serve the goal"), tr("The goal of “%s” can't be observed from %s.") % [S.name, O.name]))
+		c.append(_ck("fatal", tr("This orbit can't serve the goal"), tr("The goal of “%s” can't be observed from %s.") % [S.name, O.name], "orbit"))
 	# --- advertencias (consecuencias que se verán en la simulación)
 	for n in r.needs:
 		if not n.ok:
-			c.append(_ck("warn", tr("Still to cover · %s") % n.label, tr("None of the chosen instruments serves this science goal.")))
+			c.append(_ck("warn", tr("Still to cover · %s") % n.label, tr("None of the chosen instruments serves this science goal."), "instruments"))
 	if r.power_margin < 0.0:
-		c.append(_ck("warn", tr("Power falls short (%d %%)") % int(r.power_margin * 100), tr("The panels average %.0f W and the craft draws %.0f W. Instruments will have to take turns, which means less science.") % [r.power_gen, r.power_load]))
+		c.append(_ck("warn", tr("Power falls short (%d %%)") % int(r.power_margin * 100), tr("The panels average %.0f W and the craft draws %.0f W. Instruments will have to take turns, which means less science.") % [r.power_gen, r.power_load], "panels"))
 	elif r.power_margin < 0.15:
-		c.append(_ck("warn", tr("Power margin is thin (%d %%)") % int(r.power_margin * 100), tr("Panels wear out over the years. A margin of at least 15 % is recommended.")))
+		c.append(_ck("warn", tr("Power margin is thin (%d %%)") % int(r.power_margin * 100), tr("Panels wear out over the years. A margin of at least 15 % is recommended."), "panels"))
 	if r.battery_ratio < 1.0:
-		c.append(_ck("warn", tr("The battery can't cover the eclipses"), tr("In Earth's shadow (%.0f min) you need ~%.0f Wh and have %.0f Wh. Instruments will switch off in every eclipse.") % [O.eclipse_min, r.battery_need, r.battery_wh]))
+		c.append(_ck("warn", tr("The battery can't cover the eclipses"), tr("In Earth's shadow (%.0f min) you need ~%.0f Wh and have %.0f Wh. Instruments will switch off in every eclipse.") % [O.eclipse_min, r.battery_need, r.battery_wh], "battery"))
 	if r.data_ratio < 1.0:
-		c.append(_ck("warn", tr("Not all the data fits down the link"), tr("You make %.1f GB per day and can send only %.2f GB per day. %d %% of the science will be lost.") % [r.data_gen, r.data_down, int((1.0 - r.data_ratio) * 100)]))
+		c.append(_ck("warn", tr("Not all the data fits down the link"), tr("You make %.1f GB per day and can send only %.2f GB per day. %d %% of the science will be lost.") % [r.data_gen, r.data_down, int((1.0 - r.data_ratio) * 100)], "comms"))
 	if r.pointing_bad.size() > 0:
-		c.append(_ck("warn", tr("Pointing is too coarse"), tr("%s need(s) finer attitude control. Images will come out blurred.") % ", ".join(r.pointing_bad)))
+		c.append(_ck("warn", tr("Pointing is too coarse"), tr("%s need(s) finer attitude control. Images will come out blurred.") % ", ".join(r.pointing_bad), "adcs"))
 	if not r.insertion_ok:
-		c.append(_ck("warn", tr("Not enough delta-v to reach the final orbit"), tr("You need %.0f m/s to enter %s and the propulsion gives %.0f m/s. The craft won't reach its destination.") % [r.dv_insert, O.short, r.dv_have]))
+		c.append(_ck("warn", tr("Not enough delta-v to reach the final orbit"), tr("You need %.0f m/s to enter %s and the propulsion gives %.0f m/s. The craft won't reach its destination.") % [r.dv_insert, O.short, r.dv_have], "propulsion"))
 	elif r.life_years < years:
-		c.append(_ck("warn", tr("The craft won't last %d years") % years, tr("With this orbit and propulsion it lasts ~%.1f years (fuel or air drag).") % r.life_years))
+		c.append(_ck("warn", tr("The craft won't last %d years") % years, tr("With this orbit and propulsion it lasts ~%.1f years (fuel or air drag).") % r.life_years, "propulsion"))
 	if years < S.min_years:
 		c.append(_ck("warn", tr("Design life is short"), tr("The goal asks for at least %d years of operation.") % S.min_years))
 	if B.cots and O.radiation >= 2 and not shielding:
@@ -290,8 +290,9 @@ func _checks(r: Dictionary, S: Dictionary, B: Dictionary, O: Dictionary, L: Dict
 	return c
 
 
-func _ck(level: String, title: String, detail: String) -> Dictionary:
-	return {"level": level, "title": title, "detail": detail}
+## One check. at: the design question (scripts/screens/design.gd QUESTIONS id) where it is fixed, "" if none.
+func _ck(level: String, title: String, detail: String, at := "") -> Dictionary:
+	return {"level": level, "title": title, "detail": detail, "at": at}
 
 
 func role_goals(r: Dictionary) -> Dictionary:
