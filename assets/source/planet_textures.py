@@ -43,8 +43,9 @@ FILES = {
     "reg_bm.jpg": REGION.format(layer="BlueMarble_NextGeneration", time="2004-08-01"),
     "reg_relief.jpg": REGION.format(layer="BlueMarble_ShadedRelief", time="2004-08-01"),
     "reg_viirs.jpg": REGION.format(layer="VIIRS_SNPP_CorrectedReflectance_TrueColor", time="2024-08-31"),
-    "moon.jpg": "https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/lroc_color_2k.jpg",
-    "ldem_4.tif": "https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/ldem_4.tif",
+    # the Moon at twice the detail (4096 x 2048): the kit's 4k colour map and its 16 pixels per degree elevation
+    "moon_4k.tif": "https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/lroc_color_poles_4k.tif",
+    "ldem_16.tif": "https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/ldem_16.tif",
 }
 
 
@@ -127,8 +128,8 @@ def region():
 
 
 def moon():
-    save(rgb("moon.jpg"), "moon_color.jpg", quality=86)
-    h = np.asarray(Image.open(os.path.join(SRC, "ldem_4.tif")), dtype=np.float32)   # km, 4 px per degree
+    save(rgb("moon_4k.tif"), "moon_color.jpg", quality=86)
+    h = np.asarray(Image.open(os.path.join(SRC, "ldem_16.tif")), dtype=np.float32)   # km, 16 px per degree
     # metres per pixel along a parallel shrink with latitude; the radius is 1737.4 km
     rows, cols = h.shape
     lat = (0.5 - (np.arange(rows) + 0.5) / rows) * np.pi
@@ -140,7 +141,7 @@ def moon():
     nx, ny, nz = -dx * k, -dy * k, np.ones_like(h)
     ln = np.sqrt(nx * nx + ny * ny + nz * nz)
     nrm = np.stack([nx / ln * 0.5 + 0.5, ny / ln * 0.5 + 0.5, nz / ln * 0.5 + 0.5], axis=2)
-    save(nrm, "moon_normal.jpg", quality=90)
+    save(nrm, "moon_normal.jpg", size=(4096, 2048), quality=80)
 
 
 if __name__ == "__main__":

@@ -93,3 +93,8 @@ AUTOPILOT,PILOTO AUTO
 "The Moon holds you now: you go round it without burning any fuel, a lap about every two hours. The small map shows your orbit. When you are ready, press SPACE to go down to Shackleton's rim.","La Luna ya te retiene: das vueltas a su alrededor sin gastar combustible, una vuelta cada dos horas más o menos. El mapa pequeño muestra tu órbita. Cuando quieras, pulsa ESPACIO para bajar al borde de Shackleton."
 - - the orbit to stay in,- - la órbita donde quedarse
 "Point at an option to know more. Keys: 1 to 9 choose, Enter goes on, Backspace goes back.","Señala una opción para saber más. Teclas: 1 a 9 eligen, Enter continúa, Retroceso vuelve."
+"The flight computer cut the engine for you, a little past the planned speed. The correction on the way fixes the rest.","La computadora de vuelo apagó el motor por ti, un poco pasada la velocidad planeada. La corrección en el camino arregla el resto."
+%d of about %d m/s lost,%d de unos %d m/s perdidos
+Braking: watch your path close into a loop around the Moon,Frenando: mira cómo tu trayectoria se cierra en un lazo alrededor de la Luna
+your plan first,primero tu plan
+Speed lost,Velocidad perdida

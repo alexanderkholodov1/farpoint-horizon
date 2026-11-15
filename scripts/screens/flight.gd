@@ -35,11 +35,12 @@ const CUT_GUARD_MS := 1500          ## A cut is refused this soon after lighting
 const BURN_WARP := 50.0             ## Time while an engine burns: a six-minute burn in about seven seconds.
 const SUN_LON_DEG := 233.0          ## The Sun's ecliptic longitude on 15 November 2026 (about; our simplification).
 const UNIX_DAY0 := 1794700800       ## 15 November 2026 00:00 UTC, the first row of the Moon's ephemeris.
+const OVERBURN := 1.002              ## The flight computer cuts the burn for a pilot who has not cut by the planned speed: 1 % more already passes the Moon thousands of km too far.
 const BRAKE_DV_MAX := 2500.0         ## m/s: a brake that has burned this much and still is not held has failed (a real one is about 900).
 const STEPS_TEXT := ["Plan", "Burn", "Coast", "Brake", "Moon orbit"]   ## The trip's steps, shown across the top.
 const STEP_OF := {"plan": 0, "burn": 1, "coast": 2, "missed": 2, "capture": 3, "lunar": 4}
 const LUNAR_ORBIT_HIGH := 160000.0  ## The capture burn ends when the orbit's high point is below this height (m).
-const STARS := 2400
+const STARS := 7000                ## Our own stars, scattered by a formula (not a catalogue): 45 % crowd into a Milky Way band.
 
 var m                                ## scripts/flight/transfer.gd
 var hud
@@ -69,6 +70,7 @@ var auto_fly := false                  ## This try is flown by the flight comput
 var missed_ms := 0
 var steps_row: HBoxContainer
 var cam_idle := 0.0
+var brake_dv := 900.0              ## The speed the brake has to take off (m/s), for its gauge.
 var now_lbl: Label
 var minimap: MiniMap
 var steps_shown := ""
@@ -244,8 +246,12 @@ func _starfield() -> MultiMeshInstance3D:
 	rng.seed = 7
 	for i in STARS:
 		var d := Vector3(rng.randfn(), rng.randfn(), rng.randfn()).normalized()
-		var bright := pow(rng.randf(), 3.0)
-		var s := lerpf(18.0, 70.0, bright)
+		var in_band := i < int(STARS * 0.45)
+		if in_band:   # pressed toward a great circle tilted across the sky
+			var pole := Vector3(0.35, 0.86, 0.36).normalized()
+			d = (d - pole * d.dot(pole) * 0.86).normalized()
+		var bright := pow(rng.randf(), 5.0 if in_band else 3.0)
+		var s := lerpf(14.0, 70.0, bright)
 		mm.set_instance_transform(i, Transform3D(Basis().scaled(Vector3.ONE * s), d * 40000.0))
 		var tint := Color(0.8, 0.88, 1.0).lerp(Color(1.0, 0.93, 0.82), rng.randf())
 		mm.set_instance_color(i, Color(tint.r, tint.g, tint.b, lerpf(0.25, 1.0, bright)))
@@ -336,7 +342,7 @@ func _now_text() -> String:
 				return tr("Press SPACE to correct your path")
 			return tr("Nothing to do: you coast toward the Moon and time runs by itself")
 		"capture":
-			return tr("Braking: the engine stops by itself") if braking else tr("Press SPACE at zero to brake and stay at the Moon")
+			return tr("Braking: watch your path close into a loop around the Moon") if braking else tr("Press SPACE at zero to brake and stay at the Moon")
 		"lunar":
 			return tr("You circle the Moon. Look at your orbit, then press SPACE to go down and land")
 		"missed":
@@ -453,7 +459,12 @@ func _replan() -> void:
 
 
 func _plan_phase(delta: float) -> void:
-	hud.cap_warp(100000.0)
+	# time may only run fast once the plan is taken: sped up while mission control planned, or while the player
+	# looked at the plan, the craft flew past the moment to leave and burned in the wrong place (it missed the Moon)
+	if plan_ok and not plan.is_empty():
+		hud.cap_warp(100000.0)
+	else:
+		hud.cap_warp(1.0, tr("your plan first"))
 	var dt: float = delta * hud.warp
 	if not job.is_empty():
 		if m.plan_work(job, 8.0):
@@ -478,6 +489,9 @@ func _plan_phase(delta: float) -> void:
 			_go_ahead()
 		return
 	var count_at := burn_start - COUNTDOWN
+	if m.t > burn_start + GRACE + 2.0 and not hud.action.lit:
+		_replan()   # the moment to leave has gone by: mission control plans the next one, it never burns late
+		return
 	if m.t < count_at:
 		m.advance(_time_to(count_at, get_process_delta_time(), "count"))
 		hud.action.lit = false
@@ -620,14 +634,14 @@ func _burn_phase(delta: float) -> void:
 		throttle = hud.throttle_keys(throttle, get_process_delta_time(), 0.9)
 	var step := dt
 	if throttle > 0.0 and (_computer() or m.dv_used < dv_plan):
-		step = minf(dt, maxf((dv_plan * (1.0 if _computer() else 1.08) - m.dv_used) / (Transfer.BURN_ACCEL * throttle), 0.0))
+		step = minf(dt, maxf((dv_plan * (1.0 if _computer() else OVERBURN) - m.dv_used) / (Transfer.BURN_ACCEL * throttle), 0.0))
 	m.advance(step, throttle, 1.0)
 	_refresh_pred(0.25)
 	hud.gauge("burn", m.dv_used / dv_plan / 1.1, "%d / %d m/s" % [roundi(m.dv_used), roundi(dv_plan)])
 	if _computer() and m.dv_used >= dv_plan - 0.05:
 		_cut(true)
-	elif m.dv_used >= dv_plan * 1.08:
-		hud.hint(tr("The flight computer cut the engine: past the planned speed."))
+	elif m.dv_used >= dv_plan * OVERBURN:
+		hud.hint(tr("The flight computer cut the engine for you, a little past the planned speed. The correction on the way fixes the rest."))
 		_cut(true)
 
 
@@ -725,7 +739,7 @@ func _correct(by_computer: bool) -> void:
 
 # ===================================================================================== 4. CAPTURE
 func _capture_phase(delta: float) -> void:
-	if view_auto:
+	if view_auto and not braking:
 		view = "craft"
 	if not braking:
 		hud.cap_warp(1.0, tr("countdown"))
@@ -747,6 +761,10 @@ func _capture_phase(delta: float) -> void:
 	throttle = 1.0 if _computer() else hud.throttle_keys(throttle, get_process_delta_time(), 0.9)
 	hud.lever.value = throttle
 	m.advance(delta * hud.warp, throttle, -1.0, true)
+	if view_auto:   # on the map, close on the Moon: the path is seen bending from a fly-by into a loop
+		view = "map"
+		map_view = "moon"
+	hud.gauge("burn", m.dv_used / maxf(brake_dv, 1.0) / 1.1, tr("%d of about %d m/s lost") % [roundi(m.dv_used), roundi(brake_dv)])
 	var o: Dictionary = m.moon_orbit()
 	# a brake that cannot work (far from the Moon, or the tanks' worth burned and still not held) is never left running
 	if m.about_moon().r > Transfer.SOI or m.dv_used > BRAKE_DV_MAX:
@@ -771,6 +789,9 @@ func _brake() -> void:
 	hud.lever.value = 1.0
 	hud.cap_warp(100.0, tr("engine on"))
 	hud.set_warp(BURN_WARP * 0.5)
+	brake_dv = m.capture_dv(pred) if not pred.is_empty() else 900.0
+	hud.show_gauge("burn", true)
+	hud.name_gauge("burn", tr("Speed lost"))
 	hud.action.label = "CUT"
 	hud.message(tr("BRAKING"), tr("Burning against your motion. The engine stops by itself once the Moon holds you."), Kit.C_ACCENT, 3.0)
 	sfx.beep.play()
@@ -790,6 +811,7 @@ func _end_capture(by_computer: bool) -> void:
 	phase_t = 0.0
 	hud.action.lit = false
 	hud.action.label = "LAND"
+	hud.show_gauge("burn", false)
 	sfx.chime.play()
 	GameState.flight["capture"] = {"dv": roundi(m.dv_used), "low_km": roundi(o.low / 1000.0), "high_km": roundi(o.high / 1000.0),
 		"by": "computer" if by_computer else "pilot", "met_s": roundi(m.t - t_launch)}

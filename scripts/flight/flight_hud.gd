@@ -167,7 +167,7 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	sub.add_theme_constant_override("outline_size", 7)
 	sub.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.6))
-	Kit.place(sub, 0.5, 0.2, 0.5, 0.2, -500, 38, 500, 110)
+	Kit.place(sub, 0, 0.2, 1, 0.2, 520, 38, -420, 110)   # the column between the readouts and the buttons, at any width
 	sub.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(sub)
 	var hb: Array = Kit.hint_box()
@@ -320,6 +320,11 @@ func gauge(name_: String, v: float, text := "") -> void:
 	var g: Instruments.Gauge = _gauges[name_]
 	g.value = v
 	g.text = text
+
+
+## Renames a gauge (the same instrument reads the speed added in a burn and the speed lost in a brake).
+func name_gauge(name_: String, label: String) -> void:
+	_gauges[name_].title = label
 
 
 func show_gauge(name_: String, on: bool) -> void:

@@ -22,11 +22,12 @@ float craters(vec2 p, float cell, float seed) {
 	for (int i = -1; i <= 1; i++) {
 		for (int j = -1; j <= 1; j++) {
 			vec2 c = g + vec2(float(i), float(j));
-			if (hash13(vec3(c, seed + 7.7)) < 0.42) {
+			if (hash13(vec3(c, seed + 7.7)) < 0.66) {   // most cells are bare ground
 				continue;
 			}
 			vec2 ctr = (c + vec2(hash13(vec3(c, seed)), hash13(vec3(c, seed + 3.1)))) * cell;
-			float rad = cell * (0.1 + 0.28 * hash13(vec3(c, seed + 11.3)));
+			float sz = hash13(vec3(c, seed + 11.3));
+			float rad = cell * (0.06 + 0.3 * sz * sz);   // many small ones, few large
 			float d = length(p - ctr) / rad;
 			if (d < 1.7) {
 				float bowl = d < 1.0 ? -(1.0 - d * d) : 0.0;
@@ -40,7 +41,7 @@ float craters(vec2 p, float cell, float seed) {
 
 float relief(vec2 p) {
 	// shallow: at the pole the Sun grazes the ground, so a little relief already throws long shade
-	return craters(p, 48.0, 1.0) * 0.4 + craters(p, 11.0, 5.0) * 0.35 + (fbm(vec3(p * 0.6, 0.0)) - 0.5) * 0.025;
+	return craters(p, 70.0, 1.0) * 0.4 + craters(p, 19.0, 5.0) * 0.35 + craters(p, 6.0, 9.0) * 0.3 + (fbm(vec3(p * 0.6, 0.0)) - 0.5) * 0.025;
 }
 
 void fragment() {
