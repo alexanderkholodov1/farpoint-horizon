@@ -50,8 +50,9 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
   corrections real missions make. Where we simplify, the code says what and why.
 - **Real time, said on screen.** Every simulation runs in real time by default. Faster time is a visible control
   (×1, ×10, ×100 ... as in `scripts/flight/flight_hud.gd`, keys `,` and `.`), the screen always says how fast time
-  runs, and a clock shows the true mission time. Never compress time silently. With an engine on, at most ×10; near
-  the ground, real time only.
+  runs, and a clock shows the true mission time. Never compress time silently, and never make the player wait: time
+  runs by itself to the next moment that needs the player and slows for it (a countdown in real time). With an
+  engine on, at most ×100; near the ground, real time only.
 - **True scale, made readable.** Sizes and distances keep their true proportions. What is too small to see gets a
   marker of constant screen size and a label; it is never scaled up (a craft is never drawn half a planet's size).
   What the player must act on (the orbit, the path, the target, where the target will be) is in view.
