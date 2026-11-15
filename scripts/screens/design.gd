@@ -34,6 +34,7 @@ const YEARS := [1, 2, 3, 5, 7, 10]
 
 static var _mission_id := 0     ## The mission the progress below belongs to.
 static var _reached := 0        ## The furthest question reached in it.
+static var _auto := {}          ## Questions whose answer the game chose (the player never picked one): they follow the craft.
 
 var q := 0                      ## Index in QUESTIONS of the question shown.
 var step_idx := 0               ## Index in GameData.STEPS of that question's step (the coach reads it).
@@ -53,6 +54,7 @@ func enter(args: Dictionary) -> void:
 	if mission.get_instance_id() != _mission_id:
 		_mission_id = mission.get_instance_id()
 		_reached = 0
+		_auto = {}
 	show_step(args.get("step", 0))
 
 
@@ -86,6 +88,8 @@ func _show(i: int) -> void:
 	var Q: Array = QUESTIONS[q]
 	if first_visit and GameState.room.can_edit(_step_of(Q[1]).role):
 		_start_on_best(Q[0])
+	if GameState.room.can_edit(_step_of(Q[1]).role):
+		_follow_the_craft()
 	for k in GameData.STEPS.size():
 		if GameData.STEPS[k].id == Q[1]:
 			step_idx = k
@@ -263,10 +267,60 @@ func _body_for(id: String) -> String:
 ## craft that falls short without knowing it.
 func _start_on_best(id: String) -> void:
 	var b := _best_for(id, mission.compute())
+	if b != "":
+		_auto[id] = true
 	if b != "" and str(mission.get(id)) != b:
 		mission.set(id, b)
 		GameState.room.design_edited(QUESTIONS[q][1])
 		world.rebuild_ship()
+
+
+## The answers the game chose follow the craft as it changes: when a later choice needs more (a faster antenna draws
+## more power), they move to the new best fit; and a craft that outgrew its body moves to a body that holds it.
+## Both say so. What the player chose is never changed.
+func _follow_the_craft() -> void:
+	var said := ""
+	for id in _auto.keys():
+		var r: Dictionary = mission.compute()
+		var b := _best_for(id, r)
+		if b == "" or str(mission.get(id)) == b or _enough(id, r, str(mission.get(id))):
+			continue
+		mission.set(id, b)
+		said = tr("Your choices changed what the craft needs, so its %s moved to the new best fit.") % tr(STAGES[QUESTIONS[_q_index(id)][2]])
+	var r2: Dictionary = mission.compute()
+	if r2.mass_total > GameData.BUSES[mission.bus].max:
+		var grown := ""
+		for b in GameData.BUSES:
+			var B: Dictionary = GameData.BUSES[b]
+			var need := 0
+			for j in mission.instruments:
+				need = maxi(need, int(GameData.INSTRUMENTS[j].size))
+			if B.max >= r2.mass_total * 1.15 and B.slots >= mission.instruments.size() and B.max_size >= need 					and (grown == "" or B.cost < GameData.BUSES[grown].cost):
+				grown = b
+		if grown != "" and grown != mission.bus:
+			mission.bus = grown
+			said = tr("Your craft outgrew its body (%s), so it moved to %s.") % [Kit.kg(r2.mass_total), GameData.BUSES[grown].name]
+	if said != "":
+		GameState.room.design_edited(QUESTIONS[q][1])
+		world.rebuild_ship()
+		toast(said, Kit.C_ACCENT, 3.5)
+
+
+## True when option `value` is enough for question `id` with the craft as it is.
+func _enough(id: String, r: Dictionary, value: String) -> bool:
+	var O: Dictionary = GameData.ORBITS[mission.orbit]
+	match id:
+		"panels":
+			return GameData.PANELS[value].power >= r.power_load * 1.15 / maxf(0.01, 1.0 - O.eclipse_frac)
+		"battery":
+			return GameData.BATTERIES[value].wh * 0.6 >= r.battery_need
+		"comms":
+			return _down(GameData.COMMS[value]) >= r.data_gen
+		"adcs":
+			return GameData.ADCS[value].level >= r.pointing_need
+		"propulsion":
+			return GameData.PROPULSION[value].dv >= r.dv_need
+	return true
 
 
 ## A choice can break something decided earlier (a faster antenna needs more power): say what, and where to fix it.
@@ -293,6 +347,7 @@ func _say(title: String, text: String) -> void:
 ## After a choice: approvals are void, the craft is rebuilt (unless rebuild_3d is false), and the screen goes on to
 ## the next question (advance) or stays on this one.
 func on_change(rebuild_3d := true, advance := false) -> void:
+	_auto.erase(QUESTIONS[q][0])   # the player chose this one: it is theirs now, the game never changes it
 	GameState.room.design_edited(QUESTIONS[q][1])
 	if rebuild_3d:
 		world.rebuild_ship()
@@ -525,7 +580,7 @@ func _fill_question(id: String, r: Dictionary) -> void:
 		"launcher":
 			left_box.add_child(Kit.lbl(tr("Your craft weighs %s and goes to %s.") % [Kit.kg(r.mass_total), O.short], Kit.T_BODY, Kit.C_TEXT, Kit.FONT_B, true))
 			var own := _tile("rocket", tr("Build your own rocket"), [tr("Engines, tanks, stages: your design")], false, func(): go("builder", {"back_step": step_idx}),
-				tr("Put a rocket together from real parts, from the engines up, and see if it can lift your craft."), "✦ " + tr("The fun one"), Kit.C_GOLD)
+				tr("Put a rocket together from real parts, from the engines up, and see if it can lift your craft."), tr("The fun one"), Kit.C_GOLD)
 			var own_sb := Kit.flat(Color(Kit.C_GOLD, 0.14), Kit.C_GOLD, 12, 2, 12, 12)
 			own_sb.shadow_color = Color(Kit.C_GOLD, 0.35)
 			own_sb.shadow_size = 8
