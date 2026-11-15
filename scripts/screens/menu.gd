@@ -55,10 +55,10 @@ func enter(args: Dictionary) -> void:
 	var tele := Kit.vbox(2)
 	Kit.place(tele, 1, 1, 1, 1, -380, -112, -100, -36)
 	add_child(tele)
-	var t1 := Kit.lbl(tr("EARTH") + " · QUITO " + QUITO, 12, Color(Kit.C_ON_DARK, 0.7), spaced(Kit.FONT_B, 1))
+	var t1 := Kit.legible(Kit.lbl(tr("EARTH") + " · QUITO " + QUITO, 12, Color(Kit.C_ON_DARK, 0.8), spaced(Kit.FONT_B, 1)), 1.4)
 	t1.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	tele.add_child(t1)
-	clock = Kit.lbl("", 24, Kit.C_ON_DARK, Kit.font_num())
+	clock = Kit.legible(Kit.lbl("", 24, Kit.C_ON_DARK, Kit.font_num()))
 	clock.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	tele.add_child(clock)
 	var tag := Kit.lbl("● Ecuador", 13, Color(1, 0.8, 0.3), Kit.FONT_B)
@@ -85,7 +85,7 @@ func _main_list(box: VBoxContainer) -> void:
 	play.grab_focus.call_deferred()   # the keyboard starts on Play: arrows move along the list, Enter chooses
 	box.add_child(Kit.spacer(10))
 	var items := [
-		[tr("First mission · guided"), func(): Coach.start(main)],
+		[tr("Guided first mission"), func(): Coach.start(main)],
 		[tr("How to play"), func(): main.overlay("howto")],
 		[tr("Credits"), func(): go("credits_film")],
 		[tr("Settings"), func(): go("menu", {"settings": true})]]
@@ -150,7 +150,7 @@ func _settings(box: VBoxContainer) -> void:
 			Kit.UiSound.set_muted(not on)
 			go("menu", again), 130))
 	rows.add_child(Kit.rule())
-	rows.add_child(Kit.lbl(tr("The Earth behind is NASA data: Blue Marble by day, Black Marble city lights at night, and the real clouds of 31 August 2024 from the VIIRS instrument."), 12, Kit.C_DIM, Kit.FONT_R, true))
+	# the imagery behind the menu is credited in Credits, not here (issue #82: short settings)
 	var back := Kit.btn(tr("◀ Menu"), func(): go("menu"), Kit.T_BODY, 340)
 	back.custom_minimum_size.y = Kit.BTN_H
 	rows.add_child(back)

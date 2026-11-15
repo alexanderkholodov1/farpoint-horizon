@@ -2,7 +2,7 @@
  "doc": "Communication systems.",
  "entries": {
   "uhf": {
-   "name": "UHF radio",
+   "name": "Simple radio (UHF)",
    "rate": 0.0096,
    "mass": 0.1,
    "power": 2.0,
@@ -15,7 +15,7 @@
    "simplified": "Rounded data rates of real radios of each band. Power, mass and cost are typical values, and the dish size only draws the craft."
   },
   "sband": {
-   "name": "S band",
+   "name": "Standard radio (S band)",
    "rate": 2.0,
    "mass": 0.6,
    "power": 6.0,
@@ -28,7 +28,7 @@
    "simplified": "Rounded data rates of real radios of each band. Power, mass and cost are typical values, and the dish size only draws the craft."
   },
   "xband": {
-   "name": "X band",
+   "name": "Fast radio (X band)",
    "rate": 150.0,
    "mass": 6.0,
    "power": 35.0,
@@ -41,7 +41,7 @@
    "simplified": "Rounded data rates of real radios of each band. Power, mass and cost are typical values, and the dish size only draws the craft."
   },
   "ka": {
-   "name": "Ka band high gain",
+   "name": "Fastest radio, with a dish (Ka band)",
    "rate": 1200.0,
    "mass": 25.0,
    "power": 90.0,

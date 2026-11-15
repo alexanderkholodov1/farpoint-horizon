@@ -269,7 +269,7 @@ func _checks(r: Dictionary, S: Dictionary, B: Dictionary, O: Dictionary, L: Dict
 	if r.pointing_bad.size() > 0:
 		c.append(_ck("warn", tr("Pointing is too coarse"), tr("%s need(s) finer attitude control. Images will come out blurred.") % ", ".join(r.pointing_bad), "adcs"))
 	if not r.insertion_ok:
-		c.append(_ck("warn", tr("Not enough delta-v to reach the final orbit"), tr("You need %.0f m/s to enter %s and the propulsion gives %.0f m/s. The craft won't reach its destination.") % [r.dv_insert, O.short, r.dv_have], "propulsion"))
+		c.append(_ck("warn", tr("Not enough fuel to reach the final orbit"), tr("You need %.0f m/s to enter %s and the propulsion gives %.0f m/s. The craft won't reach its destination.") % [r.dv_insert, O.short, r.dv_have], "propulsion"))
 	elif r.life_years < years:
 		c.append(_ck("warn", tr("The craft won't last %d years") % years, tr("With this orbit and propulsion it lasts ~%.1f years (fuel or air drag).") % r.life_years, "propulsion"))
 	if years < S.min_years:

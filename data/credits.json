@@ -4,7 +4,7 @@
  "people": [
   {
    "name": "Alexander Kholodov",
-   "role": "team lead; the mission, the flight to the Moon, the crew room and how the team works.",
+   "role": "team lead; the flight's real physics, the Moon landing, ground control, the online crew room and the NASA data.",
    "links": [
     {
      "label": "GitHub",
@@ -14,7 +14,7 @@
   },
   {
    "name": "Sebastián Amaguaya",
-   "role": "the rocket builder, the 3D models, the look and the sound of the game.",
+   "role": "the rocket builder, the 3D models, the visual identity, the guided design, the music and every sound.",
    "links": [
     {
      "label": "GitHub",
@@ -239,7 +239,7 @@
    "entries": [
     {
      "id": "S-moon-kit",
-     "text": "NASA Goddard Space Flight Center, Scientific Visualization Studio. CGI Moon Kit (2019). https://svs.gsfc.nasa.gov/4720. LRO LROC WAC colour map (lroc_color_2k.jpg, colour enhanced from LROC and Kaguya) and LOLA elevation (ldem_4.tif); the game's Moon colour and relief (textures/moon_color.jpg, moon_normal.jpg, made by assets/source/planet_textures.py). Credit: \"NASA/GSFC/Scientific Visualization Studio, LRO\". NASA media guidelines."
+     "text": "NASA Goddard Space Flight Center, Scientific Visualization Studio. CGI Moon Kit (2019). https://svs.gsfc.nasa.gov/4720. LRO LROC WAC colour map (lroc_color_poles_4k.tif, colour enhanced from LROC and Kaguya) and LOLA elevation (ldem_16.tif, 16 pixels per degree); the game's Moon colour and relief (textures/moon_color.jpg, moon_normal.jpg, made by assets/source/planet_textures.py). Credit: \"NASA/GSFC/Scientific Visualization Studio, LRO\". NASA media guidelines."
     },
     {
      "id": "S-gibs-earth",
@@ -359,9 +359,17 @@
     {
      "id": "S-soho-recovery",
      "text": "NASA/ESA. SOHO Mission Interruption and Recovery. https://soho.nascom.nasa.gov/about/Recovery/. SOHO's faint carrier found again on 3 August 1998, six weeks after the loss."
+    },
+    {
+     "id": "S-afj-loi",
+     "text": "O'Brien, F. Lunar Orbit Insertion, Apollo Flight Journal (NASA History Office, hosted at apollojournals.org, linked from https://www.nasa.gov/history/afj/). https://apollojournals.org/afj/loiessay.html. The crew had to \"perform and monitor the burn on the far side of the Moon, without assistance from the ground\": the trip's loss of signal when the braking burn happens behind the Moon."
+    },
+    {
+     "id": "S-eo-orbits",
+     "text": "Riebeek, H. Catalog of Earth Satellite Orbits, NASA Earth Observatory, 2009. https://earthobservatory.nasa.gov/features/OrbitsCatalog. Low, Sun-synchronous and geostationary orbits in plain words: the glossary of the game (issue #69) and the plain names of its orbits."
     }
    ]
   }
  ],
- "count": 69
+ "count": 71
 }
