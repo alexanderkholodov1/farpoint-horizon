@@ -58,7 +58,7 @@ Stages follow the Concept Maturity Levels (CML) of NASA's Jet Propulsion Laborat
 - **Constraints of budget, mass, power, communications, data and lifetime:** live bars updated at every choice.
   The review blocks a launch that cannot work and says where each problem is fixed.
 - **Up to four players with roles:** solo, or a team with four roles (director, scientist, engineer, operations).
-  The team plays on one screen or in an online crew room joined by a code. Bots take the empty roles.
+  The team plays together on one shared screen, and bots take the empty roles. Online play is planned for v0.3.0.
 - **Scenarios and difficulty:** 6 scenarios, including a sandbox, and 3 difficulties.
 - **Plain-language learning:** every option says why it matters, a cited glossary explains the words, and the
   report explains the outcome.
@@ -138,9 +138,15 @@ libraries, imagery from NASA. Every source (information, formula, data) is cited
 
 Team SK Horizon, Quito, Ecuador.
 
-- **Alexander Kholodov**: team lead; the flight's real physics, the Moon landing, ground control, the online crew room and the NASA data. [GitHub](https://github.com/alexanderkholodov1)
+- **Alexander Kholodov**: team lead; the flight's real physics, the Moon landing, ground control, the crew room and the NASA data. [GitHub](https://github.com/alexanderkholodov1)
 - **Sebastián Amaguaya**: the rocket builder, the 3D models, the visual identity, the guided design, the music and every sound. [GitHub](https://github.com/XebaxCode)
 
 ## License
 
 MIT, see LICENSE.
+
+## Demo and pitch
+
+- **Demo video (29 s):** [`docs/demo/farpoint_horizon_30s.mp4`](docs/demo/farpoint_horizon_30s.mp4), recorded from the game itself.
+- **Live game:** https://farpoint-horizon.web.app
+- **Pitch deck (7 slides):** in Spanish, [`docs/pitch/build/deck-es.pdf`](docs/pitch/build/deck-es.pdf), and in English, [`docs/pitch/build/deck-en.pdf`](docs/pitch/build/deck-en.pdf).
