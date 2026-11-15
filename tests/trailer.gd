@@ -80,9 +80,7 @@ func _ready() -> void:
 	await wait(1.0)
 
 	# 1. the opening: a sunrise over the real Earth, the title
-	g.go("credits_film") if "credits_film" in g.SCREENS else null
-	if g.screen_id != "credits_film":
-		g.go("menu")
+	g.go("credits_film")
 	cut("open")
 	await wait(9.5)
 
