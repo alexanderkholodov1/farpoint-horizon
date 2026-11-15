@@ -12,6 +12,24 @@ const Bots := preload("res://scripts/crew/bots.gd")
 var reveal: Array = []        ## Blocks that fade and rise in, one after another.
 
 
+var scroll: ScrollContainer
+
+
+## The keys (issue #58): Esc or Backspace close; the arrows, Page Up / Page Down, Home and End move through the list.
+func _unhandled_input(e: InputEvent) -> void:
+	if not (e is InputEventKey) or not e.pressed:
+		return
+	var k: int = e.physical_keycode
+	if k == KEY_ESCAPE or k == KEY_BACKSPACE:
+		queue_free()
+	elif scroll and k in [KEY_DOWN, KEY_UP, KEY_PAGEDOWN, KEY_PAGEUP, KEY_HOME, KEY_END]:
+		var step: int = {KEY_DOWN: 60, KEY_UP: -60, KEY_PAGEDOWN: 520, KEY_PAGEUP: -520, KEY_HOME: -1000000, KEY_END: 1000000}[k]
+		scroll.scroll_vertical = maxi(0, scroll.scroll_vertical + step)
+	else:
+		return
+	get_viewport().set_input_as_handled()
+
+
 func enter(_args: Dictionary) -> void:
 	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(CREDITS_PATH))
 	var shade := ColorRect.new()
@@ -25,10 +43,11 @@ func enter(_args: Dictionary) -> void:
 	var sc := ScrollContainer.new()
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	panel.add_child(sc)
+	scroll = sc
 	var box := Kit.vbox(Kit.GAP * 2)
 	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sc.add_child(box)
-	var close := Kit.btn(tr("Close ×"), queue_free, Kit.T_BODY)
+	var close := Kit.btn(tr("Close ×") + "  ·  Esc", queue_free, Kit.T_BODY)
 	Kit.place(close, 0.5, 0, 0.5, 0, 404, Kit.MARGIN + 14, 520, Kit.MARGIN + 14 + Kit.BTN_H)
 	add_child(close)
 

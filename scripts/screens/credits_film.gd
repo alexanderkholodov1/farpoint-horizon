@@ -72,8 +72,18 @@ func exit() -> void:
 
 
 func _unhandled_input(e: InputEvent) -> void:
-	if e.is_action_pressed("ui_cancel"):
+	if not (e is InputEventKey) or not e.pressed or e.echo:
+		return
+	var k: int = e.physical_keycode
+	if not at_end and k in [KEY_ESCAPE, KEY_ENTER, KEY_KP_ENTER, KEY_SPACE]:
 		_to_end()
+	elif at_end and k in [KEY_ESCAPE, KEY_ENTER, KEY_KP_ENTER, KEY_BACKSPACE]:
+		go("menu")   # the end card's main action (issue #58)
+	elif at_end and k == KEY_S:
+		main.overlay("credits")
+	else:
+		return
+	get_viewport().set_input_as_handled()
 
 
 # ===================================================================================== THE FILM
@@ -299,7 +309,11 @@ func _roll() -> void:
 
 
 ## The end card: the thanks, and the way out.
+var at_end := false
+
+
 func _to_end() -> void:
+	at_end = true
 	if ended:
 		return
 	ended = true
@@ -327,8 +341,8 @@ func _to_end() -> void:
 	var row := Kit.hbox(Kit.GAP)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	v.add_child(row)
-	row.add_child(Kit.btn(tr("Every source"), func(): main.overlay("credits"), Kit.T_BODY, 200))
-	row.add_child(Kit.accent_btn(Kit.btn(tr("Back to the menu"), func(): go("menu"), Kit.T_BODY, 200), Kit.C_GOLD))
+	row.add_child(Kit.btn(tr("Every source") + "  ·  S", func(): main.overlay("credits"), Kit.T_BODY, 200))
+	row.add_child(Kit.accent_btn(Kit.btn(tr("Back to the menu") + "  ·  Enter", func(): go("menu"), Kit.T_BODY, 200), Kit.C_GOLD))
 	v.modulate.a = 0.0
 	v.create_tween().tween_property(v, "modulate:a", 1.0, 1.2).set_delay(0.6)
 	a.progress = 0.0
