@@ -383,7 +383,7 @@ func stage_orbit() -> void:
 		el.position = Vector3(0, 14, 0)
 		stage.add_child(el)
 		var ml := Space.make_label(tr("The Moon's orbit"), Color(1, 1, 1, 0.6))
-		ml.position = across * 60.3 + Vector3(0, 4, 0)
+		ml.position = -sun_dir * 60.3 + Vector3(0, -6, 0)   # on the ring toward L2, clear of the Earth label and the log
 		stage.add_child(ml)
 		var l2l := Space.make_label(tr("L2 point · 1.5 million km"), Color(0.85, 0.75, 1.0))
 		l2l.position = l2 + Vector3(0, -8, 0)
