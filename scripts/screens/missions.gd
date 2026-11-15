@@ -76,11 +76,9 @@ func _card(id: String, S: Dictionary, mult: float) -> Control:
 		cap.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT, Control.PRESET_MODE_MINSIZE, 10)
 	# a mission that is not open yet: its picture in grey under a lock, and what opens it
 	var lock: String = Progress.locked_by(id, S)
+	var grey := false
 	if lock != "":
 		if pic:
-			var gm := ShaderMaterial.new()
-			gm.shader = GREY
-			pic.material = gm
 			var lp := PanelContainer.new()
 			lp.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			lp.add_theme_stylebox_override("panel", Kit.flat(Color(0.0, 0.02, 0.06, 0.7), Color(Kit.C_ON_DARK, 0.35), 14, 1, 14, 6))
@@ -88,7 +86,9 @@ func _card(id: String, S: Dictionary, mult: float) -> Control:
 			pic.add_child(lp)
 			lp.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
 		pc.mouse_default_cursor_shape = Control.CURSOR_ARROW
-		pc.modulate = Color(0.62, 0.64, 0.7)   # dimmed, never see-through
+		sb.bg_color = Color(0.2, 0.2, 0.2)   # a grey card, opaque
+		sb.border_color = Color(0.45, 0.45, 0.45)
+		grey = true
 	var pad := MarginContainer.new()
 	pad.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	for side in ["left", "right"]:
@@ -112,6 +112,12 @@ func _card(id: String, S: Dictionary, mult: float) -> Control:
 	t.add_child(chips)
 	if lock != "":
 		chips.add_child(Kit.chip(tr("Coming soon") if lock == "soon" else tr("Finish “%s” first") % GameData.SCENARIOS[lock].name, Kit.C_DIM))
+		if grey:   # the whole card in grey: the picture, the words, the chips
+			var gm := ShaderMaterial.new()
+			gm.shader = GREY
+			pc.material = gm
+			for c in pc.find_children("*", "CanvasItem", true, false):
+				(c as CanvasItem).use_parent_material = true
 		return pc
 	if Progress.is_done(id):
 		chips.add_child(Kit.chip("✓ " + tr("Done"), Kit.C_OK))

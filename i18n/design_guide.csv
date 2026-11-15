@@ -59,3 +59,24 @@ Backup parts,Piezas de respaldo
 %d to fix,%d por arreglar
 Ready to fly,Lista para volar
 %d warning(s),%d advertencia(s)
+costs %s · you have %s,cuesta %s · tienes %s
+weighs %s · limit %s,pesa %s · límite %s
+uses %s · makes %s,usa %s · genera %s
+needs %d Wh · holds %d Wh,necesita %d Wh · guarda %d Wh
+makes %s · sends %s a day,genera %s · envía %s al día
+needs %d m/s · has %d m/s,necesita %d m/s · tiene %d m/s
+%d points · goal %d,%d puntos · meta %d
+not chosen yet,aún sin elegir
+You have not chosen this yet: it comes in a later step.,Todavía no lo has elegido: viene en un paso posterior.
+Wait: mission control is planning your departure,Espera: el control de misión planea tu salida
+Press SPACE (or Ready) to take this plan,Pulsa ESPACIO (o Listo) para aceptar este plan
+Press SPACE at zero to light the engine,Pulsa ESPACIO en cero para encender el motor
+Wait: time runs by itself to the burn,Espera: el tiempo corre solo hasta el encendido
+Press SPACE to cut the engine when the bar reaches the mark,Pulsa ESPACIO para apagar el motor cuando la barra llegue a la marca
+Press SPACE to correct your path,Pulsa ESPACIO para corregir tu trayectoria
+Nothing to do: you coast toward the Moon and time runs by itself,Nada que hacer: viajas hacia la Luna y el tiempo corre solo
+Braking: the engine stops by itself,Frenando: el motor se apaga solo
+Press SPACE at zero to brake and stay at the Moon,Pulsa ESPACIO en cero para frenar y quedarte en la Luna
+You are in orbit around the Moon: the landing comes next,Estás en órbita alrededor de la Luna: sigue el alunizaje
+Press SPACE to try the departure again,Pulsa ESPACIO para intentar la salida otra vez
+Map · M for the big one,Mapa · M para el grande

@@ -12,6 +12,7 @@ extends "res://scripts/screens/screen.gd"
 const RocketDesign := preload("res://scripts/craft/rocket_design.gd")
 const Bots := preload("res://scripts/crew/bots.gd")
 const PartIcon := preload("res://scripts/ui/part_icon.gd")
+const Progress := preload("res://scripts/progress.gd")
 
 const STAGES := ["Orbit", "Craft", "Power", "Systems", "Rocket", "Launch"]
 ## The questions in order: [id, the GameData.STEPS id it belongs to, stage, the question, what it is about].
@@ -237,9 +238,16 @@ func _tile(kind: String, title: String, facts: Array, chosen: bool, on_click: Ca
 
 ## The mark of an option that is enough or not; `best` is the cheapest one that is enough.
 func _fit(ok: bool, best: bool, short_word: String) -> Array:
+	if not _guided():   # past the first mission the choice is the player's: only what falls short is said
+		return ["", Kit.C_DIM] if ok else [short_word, Kit.C_WARN]
 	if best:
 		return ["★ " + tr("Best fit"), Kit.C_OK]
 	return [tr("Enough"), Kit.C_DIM] if ok else [short_word, Kit.C_WARN]
+
+
+## The first mission (and the guided one) point at the best fit; from the second on the player decides alone.
+func _guided() -> bool:
+	return mission.scenario == Progress.ORDER[0] or main.has_node("Coach")
 
 
 ## The id of the cheapest option of `table` for which enough.call(entry) is true ("" if none); cost by `cost_key`.
@@ -269,7 +277,7 @@ func _fill_question(id: String, r: Dictionary) -> void:
 					mission.orbit = o
 					world.stage_design()
 					on_change(false, true), OO.desc + "\n" + tr("Shadow %s per lap · Contact %s per day · Δv to get there %d m/s") % [Kit.mins(OO.eclipse_min), Kit.mins(OO.contact_min), int(OO.insert_dv)],
-					"★ " + tr("Best fit") if m >= top else "", Kit.C_OK))
+					"★ " + tr("Best fit") if m >= top and _guided() else "", Kit.C_OK))
 		"bus":
 			for b in GameData.BUSES:
 				var B: Dictionary = GameData.BUSES[b]
@@ -453,17 +461,17 @@ func _fill_review(r: Dictionary) -> void:
 func _fill_board(r: Dictionary) -> void:
 	var S: Dictionary = GameData.SCENARIOS[mission.scenario]
 	board.add_child(Kit.caps(tr("Mission board")))
-	_row(tr("Budget"), tr("%s of %s") % [Kit.money(r.cost_total), Kit.money(r.budget)], r.cost_total / r.budget, 0.9,
+	_row(tr("Budget"), tr("costs %s · you have %s") % [Kit.money(r.cost_total), Kit.money(r.budget)], r.cost_total / r.budget, 0.9,
 		tr("Covers building, launch (%s) and operations for %d years (%s).") % [Kit.money(r.cost.launch), mission.years, Kit.money(r.cost.ops)] + " " + (tr("Reserve %s") % Kit.pct(r.reserve) if r.reserve >= 0.0 else tr("Over budget!")))
-	_row(tr("Mass"), tr("%s of %s") % [Kit.kg(r.mass_total), Kit.kg(r.mass_limit)], r.mass_total / max(0.001, r.mass_limit), 0.9,
+	_row(tr("Mass"), tr("weighs %s · limit %s") % [Kit.kg(r.mass_total), Kit.kg(r.mass_limit)], r.mass_total / max(0.001, r.mass_limit), 0.9,
 		tr("Limit") + " · " + tr("platform %s · rocket %s") % [Kit.kg(r.mass_bus_max), Kit.kg(r.launch_cap) if r.launch_cap > 0.0 else tr("can't reach")] + ". " + tr("Instruments %s · power %s · fuel %s · platform %s.") % [Kit.kg(r.mass.instruments), Kit.kg(r.mass.power), Kit.kg(r.mass.propellant), Kit.kg(r.mass.bus)])
-	_row(tr("Power"), tr("%s of %s") % [Kit.watts(r.power_load), Kit.watts(r.power_gen)], r.power_load / max(0.001, r.power_gen), 0.87,
-		tr("Draw against the panels' average generation (counting shadow).") + " " + tr("Margin %s") % Kit.pct(r.power_margin))
-	_row(tr("Battery"), tr("%.0f of %.0f Wh") % [r.battery_need, r.battery_wh], r.battery_need / max(0.001, r.battery_wh), 0.85, tr("Energy needed to cross the shadow."))
-	_row(tr("Data"), tr("%s of %s per day") % [Kit.gb(r.data_gen), Kit.gb(r.data_down)], r.data_gen / max(0.0001, r.data_down), 0.9, tr("Data made against what the antenna can send down."))
-	_row(tr("Fuel"), tr("%d of %d m/s") % [int(r.dv_need), int(r.dv_have)], r.dv_need / max(0.001, r.dv_have) if r.dv_have > 0.0 else (0.0 if r.dv_need <= 0.0 else 2.0), 0.9, tr("Change of speed needed to get there and hold the orbit."))
+	_row(tr("Power"), tr("uses %s · makes %s") % [Kit.watts(r.power_load), Kit.watts(r.power_gen)], r.power_load / max(0.001, r.power_gen), 0.87,
+		tr("Draw against the panels' average generation (counting shadow).") + " " + tr("Margin %s") % Kit.pct(r.power_margin), false, 3)
+	_row(tr("Battery"), tr("needs %d Wh · holds %d Wh") % [int(r.battery_need), int(r.battery_wh)], r.battery_need / max(0.001, r.battery_wh), 0.85, tr("Energy needed to cross the shadow."), false, 4)
+	_row(tr("Data"), tr("makes %s · sends %s a day") % [Kit.gb(r.data_gen), Kit.gb(r.data_down)], r.data_gen / max(0.0001, r.data_down), 0.9, tr("Data made against what the antenna can send down."), false, 5)
+	_row(tr("Fuel"), tr("needs %d m/s · has %d m/s") % [int(r.dv_need), int(r.dv_have)], r.dv_need / max(0.001, r.dv_have) if r.dv_have > 0.0 else (0.0 if r.dv_need <= 0.0 else 2.0), 0.9, tr("Change of speed needed to get there and hold the orbit."), false, 7)
 	var sf: float = r.expected_science / S.science_target
-	_row(tr("Science"), tr("%d of %d pts") % [int(r.expected_science), int(S.science_target)], sf, 0.0, tr("An estimate with no surprises."), true)
+	_row(tr("Science"), tr("%d points · goal %d") % [int(r.expected_science), int(S.science_target)], sf, 0.0, tr("An estimate with no surprises."), true, 2)
 	var nf := 0
 	var nw := 0
 	for c in r.checks:
@@ -481,8 +489,10 @@ func _fill_board(r: Dictionary) -> void:
 		facts.add_child(Kit.chip("✓ " + tr("Ready to fly"), Kit.C_OK))
 
 
-## One answer of the board. frac = use / what there is; above 1 is red, above warn amber; more_is_better flips it.
-func _row(label: String, value: String, frac: float, warn: float, explain: String, more_is_better := false) -> void:
+## One answer of the board. frac = use / what there is; above 1 is red (too much: it cannot fly like this), above
+## warn amber; more_is_better flips it. A row whose question (index from_q in QUESTIONS) has not been reached yet, or
+## that nothing provides yet, is grey: not chosen, which is not a fault.
+func _row(label: String, value: String, frac: float, warn: float, explain: String, more_is_better := false, from_q := -1) -> void:
 	var state := 1
 	if more_is_better:
 		state = 1 if frac >= 0.8 else (0 if frac >= 0.4 else -1)
@@ -490,20 +500,30 @@ func _row(label: String, value: String, frac: float, warn: float, explain: Strin
 		state = -1
 	elif frac > warn:
 		state = 0
+	var pending: bool = (from_q >= 0 and _reached < from_q) or (not more_is_better and frac >= 1.99) or (more_is_better and frac <= 0.0)
 	var col: Color = Kit.C_OK if state > 0 else (Kit.C_WARN if state == 0 else Kit.C_BAD)
 	var why := explain
-	if state < 0 and not more_is_better:
-		why = (tr("Nothing provides this yet: add the part that does") if frac >= 1.99 else tr("Too much: %s over what you have") % Kit.pct(frac - 1.0)) + ". " + explain
+	if pending:
+		col = Kit.C_DIM
+		value = tr("not chosen yet")
+		why = tr("You have not chosen this yet: it comes in a later step.") + " " + explain
+	elif state < 0 and not more_is_better:
+		why = tr("Too much: %s over what you have") % Kit.pct(frac - 1.0) + ". " + explain
+	var flagged: bool = state <= 0 and not pending
 	var pc := PanelContainer.new()
 	pc.mouse_filter = Control.MOUSE_FILTER_STOP
-	pc.add_theme_stylebox_override("panel", Kit.flat(Kit.C_CARD if state >= 0 else Color(col, 0.1), Color(col, 0.45 if state <= 0 else 0.0), 8, 1, 10, 5))
+	pc.add_theme_stylebox_override("panel", Kit.flat(Color(col, 0.1) if state < 0 and not pending else Kit.C_CARD, Color(col, 0.45 if flagged else 0.0), 8, 1, 10, 5))
+	var v := Kit.vbox(0)
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pc.add_child(v)
 	var h := Kit.hbox(8)
 	h.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	pc.add_child(h)
-	h.add_child(Kit.lbl("✓" if state > 0 else ("!" if state == 0 else "✗"), Kit.T_LEAD, col, Kit.FONT_T))
-	var n := Kit.lbl(label, Kit.T_BODY, Kit.C_TEXT, Kit.FONT_B)
-	n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	h.add_child(n)
-	h.add_child(Kit.lbl(value, Kit.T_SMALL, col if state <= 0 else Kit.C_DIM))
+	v.add_child(h)
+	h.add_child(Kit.lbl("○" if pending else ("✓" if state > 0 else ("!" if state == 0 else "✗")), Kit.T_LEAD, col, Kit.FONT_T))
+	h.add_child(Kit.lbl(label, Kit.T_BODY, Kit.C_DIM if pending else Kit.C_TEXT, Kit.FONT_B))
+	var val := Kit.lbl(value, Kit.T_SMALL, col if flagged else Kit.C_DIM)
+	val.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	val.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	h.add_child(val)
 	pc.mouse_entered.connect(func(): _say(label, why))
 	board.add_child(pc)

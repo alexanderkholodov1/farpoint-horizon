@@ -68,6 +68,8 @@ var leaving := false
 var auto_fly := false                  ## This try is flown by the flight computer (after Skip on a missed Moon).
 var missed_ms := 0
 var steps_row: HBoxContainer
+var now_lbl: Label
+var minimap: MiniMap
 var steps_shown := ""
 var plan_ok := false                   ## The pilot said the plan is good (or let it be for a while): time runs to the burn.
 var plan_shown_ms := 0
@@ -275,6 +277,8 @@ func _build_hud() -> void:
 	hud.warp_picked.connect(_on_warp_picked)
 	hud.set_autopilot(GameState.pilot_bot or auto_fly)
 	_build_steps()
+	_build_now()
+	_build_minimap()
 	_build_plan_panel()
 	hud.hint(tr("You are in orbit around the Earth. Mission control is working out when to leave so that you meet the Moon where it will be in three or four days."))
 
@@ -302,6 +306,56 @@ func _show_steps() -> void:
 	for i in STEPS_TEXT.size():
 		var col: Color = Kit.C_GOLD if i == at else (Kit.C_OK if i < at else Color(Kit.C_ON_DARK, 0.55))
 		steps_row.add_child(Kit.chip(("✓ " if i < at else "%d  " % (i + 1)) + tr(STEPS_TEXT[i]), col))
+
+
+## What to do right now, in one line under the steps: the player is never left guessing.
+func _build_now() -> void:
+	var p := Kit.panel_box(8)
+	p.add_theme_stylebox_override("panel", Kit.flat(Kit.C_BG, Kit.C_GOLD, 10, 1, 14, 6))
+	Kit.place(p, 0.5, 0, 0.5, 0, 0, 64, 0, 64)
+	p.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hud.add_child(p)
+	now_lbl = Kit.lbl("", Kit.T_LEAD, Kit.C_GOLD, Kit.FONT_B)
+	p.add_child(now_lbl)
+
+
+func _now_text() -> String:
+	match phase:
+		"plan":
+			if plan.is_empty():
+				return tr("Wait: mission control is planning your departure")
+			if not plan_ok:
+				return tr("Press SPACE (or Ready) to take this plan")
+			return tr("Press SPACE at zero to light the engine") if hud.action.lit else tr("Wait: time runs by itself to the burn")
+		"burn":
+			return tr("Press SPACE to cut the engine when the bar reaches the mark")
+		"coast":
+			if correction_state == "offered":
+				return tr("Press SPACE to correct your path")
+			return tr("Nothing to do: you coast toward the Moon and time runs by itself")
+		"capture":
+			return tr("Braking: the engine stops by itself") if braking else tr("Press SPACE at zero to brake and stay at the Moon")
+		"lunar":
+			return tr("You are in orbit around the Moon: the landing comes next")
+		"missed":
+			return tr("Press SPACE to try the departure again")
+	return ""
+
+
+## A small map, always in view: the Earth, the Moon on its orbit, your craft and the path it will follow.
+func _build_minimap() -> void:
+	var p := Kit.panel_box(12)
+	Kit.place(p, 0, 1, 0, 1, Kit.MARGIN, -300, Kit.MARGIN + 272, -Kit.MARGIN)
+	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hud.add_child(p)
+	var v := Kit.vbox(4)
+	p.add_child(v)
+	v.add_child(Kit.caps(tr("Map · M for the big one")))
+	minimap = MiniMap.new()
+	minimap.screen = self
+	minimap.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	v.add_child(minimap)
 
 
 ## The plan's own controls: move the burn earlier or later, make it bigger or smaller, or take mission control's plan.
@@ -738,6 +792,10 @@ func _end_capture(by_computer: bool) -> void:
 	GameState.flight_moment("lunar_orbit", GameState.flight.capture)
 	hud.cap_warp(1000.0)
 	hud.set_warp(100.0)
+	if view_auto:   # the map, close on the Moon: the player sees the orbit they are in before the landing
+		view = "map"
+		map_view = "moon"
+		zoom = 1.0
 	hud.message(tr("IN ORBIT AROUND THE MOON"), tr("%d × %d km over its surface. The lander gets ready to go down.") % [roundi(o.low / 1000.0), roundi(o.high / 1000.0)], Kit.C_OK, 0.0)
 	hud.hint(tr("Each lap around the Moon takes about two hours. Next: the landing at Shackleton's rim."))
 
@@ -745,7 +803,7 @@ func _end_capture(by_computer: bool) -> void:
 func _lunar_phase(delta: float) -> void:
 	m.advance(delta * hud.warp)
 	_refresh_pred(0.5)
-	if phase_t > 6.0 and not leaving:
+	if phase_t > 14.0 and not leaving:
 		leaving = true
 		GameState.flight["arrival_met_s"] = roundi(m.t - t_launch)
 		main.go_faded("landing", 1.0, 1.0)
@@ -976,6 +1034,8 @@ func _set_line(mi: MeshInstance3D, pts: PackedVector3Array, strip := true) -> vo
 func _readouts() -> void:
 	if steps_shown != phase:
 		_show_steps()
+	now_lbl.text = "▶  " + _now_text()
+	minimap.queue_redraw()
 	hud.clock.text = FlightHud.met_text(m.t - t_launch)
 	var dtd := Time.get_datetime_dict_from_unix_time(UNIX_DAY0 + int(m.t))
 	hud.value("utc", "%d-%02d-%02d %02d:%02d" % [dtd.year, dtd.month, dtd.day, dtd.hour, dtd.minute])
@@ -1104,3 +1164,48 @@ func _camera(delta: float, snap := false) -> void:
 	world.cam.position = cam_center + dir2 * cam_dist
 	world.cam.look_at(cam_center, Vector3.UP)
 	stars.position = world.cam.global_position
+
+
+## The small map of the trip (bottom left): drawn flat, seen from above the Earth's pole, at true scale. The Earth in
+## the middle, the Moon's orbit as a ring, the Moon, where the Moon will be when the craft arrives, the craft's path
+## ahead and the craft itself.
+class MiniMap:
+	extends Control
+	const K := preload("res://scripts/ui/kit.gd")
+	var screen
+	var _t := 0.0
+
+	func _init() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		custom_minimum_size = Vector2(240, 220)
+
+	func _process(delta: float) -> void:
+		_t += delta
+
+	func _draw() -> void:
+		if screen == null or screen.m == null:
+			return
+		var m = screen.m
+		var c := size * 0.5
+		var s: float = (minf(size.x, size.y) * 0.5 - 14.0) / 4.1e8   # pixels per metre: the Moon's orbit fits
+		var f := K.FONT_B
+		draw_arc(c, 3.84e8 * s, 0.0, TAU, 64, Color(K.C_ON_DARK, 0.18), 1.0, true)
+		var p: Dictionary = screen.shown if screen.phase == "plan" else screen.pred
+		if not p.is_empty() and p.points.size() > 1:
+			var line := PackedVector2Array()
+			var step := maxi(1, p.points.size() / 120)
+			for i in range(0, p.points.size(), step):
+				line.append(c + Vector2(p.points[i].x, -p.points[i].y) * s)
+			draw_polyline(line, K.C_ACCENT, 1.5, true)
+			var ma: Array = p.moon_at
+			draw_arc(c + Vector2(ma[0], -ma[1]) * s, 6.0, 0.0, TAU, 20, Color(K.C_ON_DARK, 0.6), 1.0, true)
+		draw_circle(c, 4.0, K.C_ACCENT)
+		draw_string(f, c + Vector2(7, 14), TranslationServer.translate("Earth"), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(K.C_ON_DARK, 0.7))
+		var mo: Array = m.moon(m.t)
+		var mp := c + Vector2(mo[0], -mo[1]) * s
+		draw_circle(mp, 3.5, Color(0.82, 0.82, 0.86))
+		draw_string(f, mp + Vector2(7, 4), TranslationServer.translate("Moon"), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(K.C_ON_DARK, 0.7))
+		var cp := c + Vector2(m.x, -m.y) * s
+		draw_circle(cp, 4.0 + 1.5 * sin(_t * 5.0), K.C_GOLD)
+		draw_arc(cp, 9.0, 0.0, TAU, 20, Color(K.C_GOLD, 0.5), 1.0, true)
+		draw_string(f, cp + Vector2(10, -6), TranslationServer.translate("You"), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, K.C_GOLD)

@@ -24,6 +24,7 @@ var cam_target := Vector3.ZERO
 var cam_auto := true
 var cam_auto_timer := 0.0
 var dragging := false
+var cam_pitch_max := 1.4    ## How far the drag may tilt the camera (the menu keeps the Earth's poles, where the map pinches, out of view).
 
 # ---- stage: what is shown now; clear_stage() replaces it
 var stage: Node3D
@@ -95,7 +96,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			cam_dist_goal = min(300.0, cam_dist_goal * 1.1)
 	elif event is InputEventMouseMotion and dragging:
 		cam_yaw -= event.relative.x * 0.006
-		cam_pitch = clamp(cam_pitch + event.relative.y * 0.005, -1.4, 1.4)
+		cam_pitch = clamp(cam_pitch + event.relative.y * 0.005, -cam_pitch_max, cam_pitch_max)
 
 
 ## Points the camera's yaw from the sun's side, plus `extra` radians.
@@ -148,6 +149,7 @@ func clear_stage() -> void:
 	ship_label = null
 	ship_lost = false
 	cam.h_offset = 0.0
+	cam_pitch_max = 1.4
 	world_env.environment.sky = Space.make_space_sky()
 	world_env.environment.ambient_light_energy = 0.35
 	world_env.environment.fog_enabled = false
@@ -176,6 +178,7 @@ func stage_menu() -> void:
 	# Earth sits right of the menu (an off-centre target made the planet swing across the screen when dragged)
 	cam_target = Vector3(0, 0.05, 0)
 	cam.h_offset = -1.25
+	cam_pitch_max = 0.5
 
 
 ## Puts the craft of mission m on a circular orbit (ring, craft, tr("YOUR CRAFT") label); _animate_world moves it.

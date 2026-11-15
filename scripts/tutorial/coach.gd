@@ -36,6 +36,7 @@ static func start(m) -> void:
 
 func _ready() -> void:
 	layer = 5
+	process_priority = 100   # after the screen has moved its lists this frame, so the frames never lag behind a scroll
 	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(TIPS_PATH))
 	for tip in data.get("tips", []):
 		tips[tip.ctx] = tip
@@ -168,8 +169,10 @@ func _follow() -> void:
 		if not is_instance_valid(c) or not c.is_visible_in_tree():
 			ring.visible = false
 			continue
-		ring.visible = true
 		var r := c.get_global_rect().grow(5)
+		var sc := _scroll_of(c)
+		# a frame is shown only while its option is whole inside its list: it never floats over the panel's edge
+		ring.visible = sc == null or sc.get_global_rect().grow(6).encloses(r)
 		ring.position = r.position
 		ring.size = r.size
 		ring.modulate.a = 0.75 + 0.25 * sin(t * 5.0)

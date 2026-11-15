@@ -140,13 +140,6 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 	add_child(tr_panel)
 	var tr_box := Kit.hbox(8)
 	tr_panel.add_child(tr_box)
-	var snd := Kit.btn(_sound_text(), func(): pass, Kit.T_BODY, 128)
-	snd.focus_mode = Control.FOCUS_NONE
-	snd.custom_minimum_size.y = Kit.BTN_H
-	snd.pressed.connect(func():
-		Sound.set_muted(not Sound.is_muted())
-		snd.text = _sound_text())
-	tr_box.add_child(snd)
 	var skip := Kit.btn(TranslationServer.translate("Skip ▶▶"), func(): skip_pressed.emit(), Kit.T_BODY, 128)
 	skip.focus_mode = Control.FOCUS_NONE
 	skip.custom_minimum_size.y = Kit.BTN_H
@@ -255,6 +248,7 @@ func _show_warp() -> void:
 	if _cap_why != "":
 		t += " · " + _cap_why
 	warp_note.text = t
+	warp_note.visible = warp > 1.0 or auto_note != "" or _cap_why != ""   # "real time" alone says nothing new
 
 
 ## 100000 as "100,000".

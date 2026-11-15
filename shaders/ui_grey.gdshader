@@ -1,7 +1,8 @@
 shader_type canvas_item;
-// A picture in grey and dimmed: a mission that is not open yet (scripts/screens/missions.gd).
+// Whatever it draws, in grey: a mission that is not open yet (scripts/screens/missions.gd). The card and everything
+// in it use this material, so the picture, the words and the chips all lose their colour.
+uniform float dim : hint_range(0.0, 1.0) = 0.75;
 void fragment() {
-	vec4 c = texture(TEXTURE, UV);
-	float g = dot(c.rgb, vec3(0.299, 0.587, 0.114));
-	COLOR = vec4(vec3(g) * 0.55, c.a);
+	float g = dot(COLOR.rgb, vec3(0.299, 0.587, 0.114));
+	COLOR.rgb = vec3(g) * dim;
 }
