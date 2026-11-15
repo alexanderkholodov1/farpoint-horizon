@@ -33,8 +33,9 @@ GIBS = ("https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&R
 ## times the whole-globe maps): the globe's shader blends it in so the Earth stays sharp right after the rocket leaves
 ## the Andes terrain (look, issue #12). Keep REGION_LONLAT in step with REGION_RECT in scripts/space_builder.gd.
 REGION_LONLAT = (-92.0, -12.0, -68.0, 12.0)
+## 4096 pixels over 24 degrees: about 650 m a pixel, near the Blue Marble's own 500 m (issue #56: sharper under the climb)
 REGION = ("https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1"
-          "&SRS=EPSG:4326&BBOX=-92,-12,-68,12&WIDTH=2048&HEIGHT=2048&FORMAT=image/jpeg&LAYERS={layer}&TIME={time}")
+          "&SRS=EPSG:4326&BBOX=-92,-12,-68,12&WIDTH=4096&HEIGHT=4096&FORMAT=image/jpeg&LAYERS={layer}&TIME={time}")
 FILES = {
     "bm.jpg": GIBS.format(layer="BlueMarble_NextGeneration", time="2004-08-01"),
     "relief.jpg": GIBS.format(layer="BlueMarble_ShadedRelief", time="2004-08-01"),
@@ -81,10 +82,11 @@ def smooth(e0, e1, x):
 
 def earth():
     day = rgb("bm.jpg")
-    save(day, "earth_day.jpg", quality=86)
+    save(day, "earth_day.jpg", quality=84)
     # relief: shaded / plain, centred on 0.5 (grey = flat)
     shaded = rgb("relief.jpg").mean(axis=2)
-    plain = day.mean(axis=2)
+    # the relief map is half the day map's size: compare it with the day map brought to its size
+    plain = np.asarray(Image.fromarray((day * 255).astype(np.uint8)).resize(shaded.shape[::-1], Image.LANCZOS), dtype=np.float32).mean(axis=2) / 255.0
     rel = np.clip(shaded / np.maximum(plain, 0.03), 0.0, 2.0) * 0.5
     rel = np.where(plain < 0.03, 0.5, rel)
     save(rel, "earth_relief.jpg", size=(2048, 1024), quality=85)
@@ -122,9 +124,9 @@ def region():
     shaded = rgb("reg_relief.jpg").mean(axis=2)
     plain = day.mean(axis=2)
     rel = np.where(plain < 0.03, 0.5, np.clip(shaded / np.maximum(plain, 0.03), 0.0, 2.0) * 0.5)
-    save(day, "earth_region_day.jpg", quality=85)
-    save(rel, "earth_region_relief.jpg", size=(1024, 1024), quality=85)
-    save(clouds_from(rgb("reg_viirs.jpg")), "earth_region_clouds.jpg", size=(1536, 1536), quality=78)
+    save(day, "earth_region_day.jpg", quality=82)
+    save(rel, "earth_region_relief.jpg", size=(2048, 2048), quality=85)
+    save(clouds_from(rgb("reg_viirs.jpg")), "earth_region_clouds.jpg", size=(2048, 2048), quality=78)
 
 
 def moon():
