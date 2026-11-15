@@ -53,6 +53,11 @@ var _warp_btns := {}        ## warp -> Button
 var _top: VBoxContainer
 var _cap_why := ""         ## Why time may not run faster now, said beside the warp.
 var auto_note := ""        ## Set by a screen that runs time by itself ("Auto"), shown before the speed.
+var extra_note := "":      ## Set by a screen to say what the speed changes in the picture, shown after it.
+	set(v):
+		if v != extra_note:
+			extra_note = v
+			_show_warp()
 
 
 var _top_right: HBoxContainer
@@ -159,15 +164,13 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 	# the message, straight on the scene, and the hint in its own panel
 	big = Kit.lbl("", Kit.T_SHOUT, Kit.C_ON_DARK, Kit.FONT_T)
 	big.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	big.add_theme_constant_override("outline_size", 12)
-	big.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.55))
+	Kit.legible(big)   # straight on the scene: readable over the white pad, clouds and the Moon
 	Kit.place(big, 0, 0.2, 1, 0.2, 500, -50, -400, 32)
 	big.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(big)
 	sub = Kit.lbl("", Kit.T_ACTION, Kit.C_ON_DARK, Kit.FONT_B, true)
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	sub.add_theme_constant_override("outline_size", 7)
-	sub.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.6))
+	Kit.legible(sub, 1.3)
 	Kit.place(sub, 0, 0.2, 1, 0.2, 520, 38, -420, 110)   # the column between the readouts and the buttons, at any width
 	sub.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(sub)
@@ -178,7 +181,7 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 	var hb: Array = Kit.hint_box()
 	hint_panel = hb[0]
 	hint_lbl = hb[1]
-	Kit.place(hint_panel, 0.5, 1, 0.5, 1, -440, -128, 300, -Kit.MARGIN)
+	Kit.place(hint_panel, 0.5, 1, 0.5, 1, -400, -128, 330, -Kit.MARGIN)   # clear of the mini-map on narrower screens (#76)
 	add_child(hint_panel)
 	hint_panel.visible = false
 
@@ -270,6 +273,8 @@ func _show_warp() -> void:
 		t = auto_note + " · " + t
 	if _cap_why != "":
 		t += " · " + _cap_why
+	if extra_note != "":
+		t += " · " + extra_note
 	warp_note.text = t
 	warp_note.visible = warp > 1.0 or auto_note != ""   # at real time there is nothing to add
 

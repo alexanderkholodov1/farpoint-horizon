@@ -178,8 +178,19 @@ func _set_speed(i: int) -> void:
 		else:
 			orbit_note.text = tr("At the pole the Sun circles the horizon once a lunar day (29.5 days), so its light sweeps round the ground; the crater's floor never sees it.")
 		return
+	if world.orbit_missed == "escape":
+		world.orbit_speed = 0.4
+		orbit_note.text = tr("Your craft could not brake at the Moon: it swung past it and sails on into space (amber). The faint ring is the orbit it was meant to reach.")
+		return
 	var period_s := float(GameData.ORBITS[mission.orbit].get("period_min", 90.0)) * 60.0
+	if world.orbit_missed == "transfer":
+		# the transfer ellipse from 200 km to GEO: a = 24,371 km, period 2 pi sqrt(a^3 / GM), GM 398,600 km3/s2 [S8]
+		period_s = TAU * sqrt(pow(24371.0, 3.0) / 398600.0)
 	var laps := warp / period_s
+	if world.orbit_missed == "transfer":
+		world.orbit_speed = TAU * minf(laps, 0.25)
+		orbit_note.text = tr("Without an engine your craft never climbed to GEO: it stays on the transfer orbit the rocket left it on (amber), from 200 km up to 35,786 km and back every %s, crossing the radiation belts. The faint ring is GEO.") % _span(period_s)
+		return
 	if laps > BLUR_LAPS:
 		world.orbit_speed = 0.0
 		orbit_note.text = tr("Your craft laps its orbit every %s. At this speed that is %s laps each second, a blur, so the orbit is drawn as a ring.") % [_span(period_s), _big(laps)]

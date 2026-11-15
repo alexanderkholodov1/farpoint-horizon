@@ -15,7 +15,7 @@ dest_files=["res://.godot/imported/earth_region_day.jpg-e8e3d4408a91c95b2e06ec4e
 
 [params]
 
-compress/mode=0
+compress/mode=1
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
