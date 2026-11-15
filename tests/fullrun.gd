@@ -51,7 +51,10 @@ func _ready() -> void:
 	g.screen._focus(1)
 	await wait(1.5)
 	await shot("crew_killa")
-	g.go("story", {"scenes": load("res://scripts/screens/story.gd").story(), "back": "crew_gallery"})
+	# FULLRUN_SCENES="pathfinder/intro,pathfinder/mission,pathfinder/outro" plays only those scenes
+	var only := OS.get_environment("FULLRUN_SCENES")
+	var scenes: Array = Array(only.split(",")) if only != "" else load("res://scripts/screens/story.gd").story()
+	g.go("story", {"scenes": scenes, "back": "crew_gallery"})
 	var last_screen := ""
 	var started := false
 	while secs() < 1500.0:
