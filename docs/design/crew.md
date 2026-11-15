@@ -54,3 +54,11 @@ reference.
 `assets/models/crew/crew_killa_meshy.glb`, built entirely in Blender by `assets/source/crew_killa.py`, measured on
 screenshots of the team's **Meshy** (AI) model from the front, the sides and the back (side by side with the reference:
 `crew_killa_compare.png`). No helmet.
+
+## Inti matched to the Meshy reference
+
+![Inti, four sides](crew_inti_meshy.png)
+
+`assets/models/crew/crew_inti_meshy.glb`, built entirely in Blender by `assets/source/crew_inti.py`, measured on
+screenshots of the team's **Meshy** (AI) model from the front, the sides and the back (side by side with the reference:
+`crew_inti_compare.png`). No helmet.
