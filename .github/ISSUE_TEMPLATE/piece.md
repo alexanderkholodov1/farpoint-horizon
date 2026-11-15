@@ -7,7 +7,7 @@ assignees: []
 ---
 
 <!-- Rules behind every line below: AGENTS.md (How we work, Working beside other agents). Claim the issue by assigning
-it to your person, then branch: git fetch origin && git switch -c work/<issue>-<name> origin/v0.2.0 -->
+it to your person, then branch: git fetch origin && git switch -c work/<issue>-<name> origin/<version branch> -->
 
 **What the player gets**
 <!-- In a player's words: what they can do or see when this is done. -->

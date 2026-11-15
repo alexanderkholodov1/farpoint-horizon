@@ -70,17 +70,15 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
 
 ## The cycle of a version
 1. The version branch collects finished pieces. Its pull request into `main` opens only when the version is complete.
-   Two lines run now (issue #72, `docs/state/versions.md`): **`v0.2.1`** takes every fix or adjustment to v0.2.0
-   (no new story or missions), and its pull request into `main` opens only once every issue in milestone v0.2.1 is
-   closed; **`v0.3.0`** takes the story campaign, minigames and the crew of friends. Pick the
-   branch by what your issue is (its milestone says it). `tools/pr-when-green.sh` and `tools/state.sh` default to
-   the newest version branch, so for a fix pass `v0.2.1` to them.
+   More than one line can run at once (`docs/state/versions.md` says which, today `v0.2.3` for fixes and `v0.3.0`
+   for the story); pick the branch by your issue's milestone. `tools/pr-when-green.sh` and `tools/state.sh` default
+   to the newest version branch, so for a fix pass the fix line's branch to them.
 2. Every piece of work is a GitHub issue, written with `.github/ISSUE_TEMPLATE/piece.md` (what the player gets, the
    files it owns, the real values to check, the done-when list). Claim it by assigning it to your person before starting.
 3. Build it on a branch of your own, made from the version branch and named after the issue:
-   `git fetch origin && git switch -c work/12-rockets origin/v0.2.1`. Commit small working steps in English, with no
+   `git fetch origin && git switch -c work/12-rockets origin/v0.3.0`. Commit small working steps in English, with no
    version numbers, and push often (CI runs on every push and must stay green; a red check is fixed first).
-4. Stay current by merging, never by rewriting: `git fetch origin && git merge origin/v0.2.1`. When your piece needs
+4. Stay current by merging, never by rewriting: `git fetch origin && git merge origin/v0.3.0`. When your piece needs
    another piece that is not integrated yet, merge that branch into yours (`git merge origin/work/6-builder`), or
    propose yours into it with a pull request. Never rebase or force-push a pushed branch: others may have merged it.
 5. When the piece works (CI green, played as a player, screenshots in the issue, every outside value cited), say so
@@ -99,8 +97,8 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
    game.
 
 ## Versions
-- `v0.1.0` is the first playable sketch with this base. `v0.2.0` is the second version, with everything the vision
-  asks for. The line stays `v0.X.Y` until the team calls the game impeccable; only then `v1.0.0`.
+- `v0.1.0` is the first playable sketch with this base, `v0.2.x` the whole mission the vision asks for, `v0.3.0` the
+  story campaign. The line stays `v0.X.Y` until the team calls the game impeccable; only then `v1.0.0`.
 - Only the version branch carries version numbers. Each integrated piece is one commit whose message starts with its
   step number, the patch numbers of the current line (`0.1.5`, `0.1.6`, ...), never a `-1`/`-2` suffix. The number
   is given at integration, so pieces built in parallel never collide on one. Work branches carry no numbers.
@@ -121,7 +119,7 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
 ## Working beside other agents
 - Nobody owns a part: both team members work side by side. Each piece is claimed through its issue and built on its
   own branch, so two agents never write the same branch; several agents on one machine use separate git worktrees.
-- Each package owns its files (`docs/plan/v0.2.0.md`). If your piece must change files that another open issue is
+- Each piece owns the files its issue lists. If your piece must change files that another open issue is
   changing, say so in both issues and agree who goes first. A change to something everyone uses (data formats, the
   mission model, `GameState`, `project.godot`, this file) is its own small piece, agreed by both team members and
   integrated first, so the others build on it.
