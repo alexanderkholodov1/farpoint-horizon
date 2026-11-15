@@ -24,7 +24,7 @@ BODY = os.path.join(HERE, "rumi_trellis_body.glb")
 
 NECK_Z = 0.118      # above this the generated head is cut off (the collar ring stays)
 HEAD_C = Vector((0.0, -0.01, 0.256))
-HEAD_R = Vector((0.19, 0.16, 0.175))
+HEAD_R = Vector((0.19, 0.205, 0.175))   # deep front to back: round seen from the side, as the reference
 
 CREAM = (1.0, 0.93, 0.85)
 GINGER = (0.97, 0.6, 0.2)
@@ -100,7 +100,7 @@ def body():
     HEAD_C.x = (min(xs) + max(xs)) / 2
     # forward, its face flush with the front of the chest (as the reference seen from the side): the neck opening is
     # deeper than the head, and the backpack sits behind it
-    HEAD_C.y = min(ys) + HEAD_R.y * 0.92 + 0.005
+    HEAD_C.y = min(ys) + HEAD_R.y * 0.96 + 0.005
     print("collar centre", round(HEAD_C.x, 3), round(HEAD_C.y, 3), "opening", round(max(xs) - min(xs), 3), "x", round(max(ys) - min(ys), 3))
     return b
 
@@ -128,7 +128,7 @@ def head():
         r = (abs(n.x) ** k + abs(n.y) ** k + abs(n.z) ** k) ** (1.0 / k)
         p = n / r
         p.x *= 1.0 + 0.08 * max(0.0, -p.z)
-        p.y *= 0.92 if p.y < 0 else 1.0           # a flatter face
+        p.y *= 0.96 if p.y < 0 else 1.0           # a slightly flatter face
         v.co = Vector((p.x * HEAD_R.x, p.y * HEAD_R.y, p.z * HEAD_R.z)) + HEAD_C
     bm.to_mesh(o.data)
     bm.free()
@@ -146,7 +146,7 @@ def head():
 
     def at(ux, uz, out=0.0):
         """A point on the face at unit (ux, uz), `out` metres in front of it."""
-        y = HEAD_C.y - HEAD_R.y * 0.92 * (1.0 - 0.35 * ux * ux) - out
+        y = HEAD_C.y - HEAD_R.y * 0.96 * (1.0 - 0.35 * ux * ux) - out
         return Vector((ux * HEAD_R.x, y, HEAD_C.z + uz * HEAD_R.z))
 
     line = mat("whisker", (0.32, 0.17, 0.08), 0.6)
@@ -183,13 +183,7 @@ def head():
     for sx in (-1, 1):
         ml = cyl("MouthL", mz + Vector((sx * 0.009, 0, -0.014)), 0.002, 0.022, line, verts=6)
         ml.rotation_euler = (0.0, -sx * 0.75, 0.0)
-    # the bubble helmet and its rim
-    sphere("Helmet", HEAD_C + Vector((0, 0.0, 0.03)), (0.245, 0.23, 0.225), mat("glass", (0.95, 0.97, 1.0), 0.02, alpha=0.05), 48, 24)
-    bpy.ops.mesh.primitive_torus_add(major_radius=0.243, minor_radius=0.0045, location=HEAD_C + Vector((0, 0.0, 0.03)),
-                                     rotation=(math.pi / 2, 0, 0), major_segments=64, minor_segments=8)
-    rim = bpy.context.object
-    rim.name = "HelmetRim"
-    finish(rim, mat("rim", (0.92, 0.93, 0.95), 0.25, 0.6))
+    # no helmet: the face is in the open, easier to read and to animate (team decision)
 
 
 def main():
