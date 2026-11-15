@@ -1,13 +1,36 @@
 extends "res://scripts/screens/screen.gd"
-## Operation: the craft on its orbit while the months of GameState.last_sim play back: the mission log, the time bar,
-## the science bar, and speed controls. At the end (or if the craft is lost) it fades to the report.
+## Operation: the months of GameState.last_sim play back (the mission log, the time and science bars) while the craft
+## is shown where it really is (issue #30):
+##   - landed (GameState.flight.landing): the lander standing where it touched down, on NASA's LOLA ground at
+##     Shackleton's rim [S-lola]. At the pole the Sun circles the horizon once a lunar day, so its light sweeps round
+##     the ground month by month, while the crater's interior stays in permanent shadow [S-nasa-science] and the Earth
+##     hangs low over the near side;
+##   - in orbit: the craft on its orbit, turning at its true period (data/orbits.json, period_min) at the speed time
+##     runs; when that would be a blur, the orbit is drawn as a ring and the screen says how many laps a second it is.
+## The time panel says in words how fast time runs (the rule of AGENTS.md: real time, said on screen). At the end (or
+## when the craft is lost) it fades to the report.
+
+const Space := preload("res://scripts/space_builder.gd")
+const FlightData := preload("res://scripts/flight/flight_data.gd")
+const Scene3D := preload("res://scripts/flight/flight_scene.gd")
+const Terrain := preload("res://scripts/flight/terrain.gd")
+const Descent := preload("res://scripts/flight/descent.gd")
+
+const MONTH_S := 30.44 * 86400.0    ## A calendar month in seconds (the mission log counts calendar months).
+const LUNAR_DAY_S := 29.53 * 86400.0   ## From one sunrise to the next on the Moon, the synodic month [S-nssdc-planets].
+const MONTH_REAL_S := 0.7           ## Real seconds one month takes at the slowest speed.
+const SPEEDS := [1.0, 3.0, 10.0]
+const EARTH_DIST := 9000.0          ## Metres to the Earth's globe in the sky (a backdrop: true angular size, not distance).
+const EARTH_ANGLE_DEG := 1.9        ## The Earth's width in the Moon's sky [S-nssdc-planets].
+const BLUR_LAPS := 0.5              ## Laps a second above which an orbit is drawn as a ring instead of a moving craft.
 
 var months_total := 0
-var speed := 1.0            ## Months per 0.7 s.
-var month_f := 0.0          ## Playback position in months; 9999 jumps to the end.
+var base := 1.0                     ## Months per MONTH_REAL_S at ×1 (a long mission plays a little faster).
+var speed := 1.0                    ## Months per MONTH_REAL_S now.
+var month_f := 0.0                  ## Playback position in months; 9999 jumps to the end.
 var shown_month := -1
 var shown_events := 0
-var end_t := -1.0           ## Seconds since the last month was shown (-1 before).
+var end_t := -1.0                   ## Seconds since the last month was shown (-1 before).
 var leaving := false
 var month_lbl: Label
 var time_bar: ProgressBar
@@ -15,74 +38,211 @@ var sci_bar: ProgressBar
 var sci_lbl: Label
 var log_box: VBoxContainer
 var log_scroll: ScrollContainer
+var time_note: Label
+var orbit_note: Label
+var speed_btns: Array = []
+
+var landed := false
+var land: Dictionary
+var terrain
+var lander: Node3D
+var sun_az0 := Vector2(-1, -1)
+var cam_ang := 0.6
+var old_far := 2000.0
+var old_ambient: Array = []
+var lost_shown := false
 
 
 func enter(_args: Dictionary) -> void:
-	world.stage_orbit()
 	months_total = mission.years * 12
-	speed = max(1.0, months_total / 36.0)
-	var S: Dictionary = GameData.SCENARIOS[mission.scenario]
-	# top bar
-	var top := Kit.panel_box(12)
-	Kit.place(top, 0, 0, 1, 0, 468, 12, -16, 112)
+	base = maxf(1.0, months_total / 36.0)
+	speed = base
+	land = GameState.flight.get("landing", {})
+	landed = bool(land.get("landed", false)) and FlightData.has_landing(mission.scenario)
+	if landed:
+		_note_landing()
+		_stage_surface()
+	else:
+		world.stage_orbit()
+	_build_ui()
+	_set_speed(0)
+
+
+func exit() -> void:
+	if landed:
+		world.cam.far = old_far
+		var env: Environment = world.world_env.environment
+		env.ambient_light_source = old_ambient[0]
+		env.ambient_light_color = old_ambient[1]
+
+
+# ===================================================================================== THE LANDER ON THE GROUND
+func _stage_surface() -> void:
+	var fl: Dictionary = FlightData.scenario_flight(mission.scenario).landing
+	world.cam_free = false
+	world.clear_stage()
+	var env: Environment = world.world_env.environment
+	old_ambient = [env.ambient_light_source, env.ambient_light_color]
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.ambient_light_color = Color(0.62, 0.63, 0.66)
+	env.ambient_light_energy = 0.6
+	old_far = world.cam.far
+	world.cam.far = 14000.0
+	terrain = Terrain.new()
+	terrain.setup(fl, true)          # the light of a whole month: what stays dark is permanent shadow
+	world.stage.add_child(terrain.build_mesh())
+	var az: Array = fl.get("sun_azimuth", [-1.0, -1.0])
+	sun_az0 = Vector2(float(az[0]), float(az[1])).normalized()
+	world.sun.light_energy = 1.6
+	var earth := Space.make_earth(EARTH_DIST * tan(deg_to_rad(EARTH_ANGLE_DEG * 0.5)), false)
+	earth.position = terrain.earth_dir * EARTH_DIST
+	world.stage.add_child(earth)
+	lander = Scene3D.lander(mission, 3.2, Descent.LEG)
+	var x := float(land.get("x", 0.0))
+	var z := float(land.get("z", 0.0))
+	lander.position = Vector3(x, terrain.height(x, z) + Descent.LEG, z)
+	if land.get("grade", "") == "rough":
+		lander.rotate_object_local(Vector3(1, 0, 0.4).normalized(), deg_to_rad(9.0))
+	world.stage.add_child(lander)
+	_place_sun()
+	_surface_camera(1.0)
+
+
+## The mission log said "In orbit" for month 0, as for any mission; a craft that landed says where and how it landed
+## (the log and the report read the same events).
+func _note_landing() -> void:
+	var orbit_title := tr("In orbit at %s") % GameData.ORBITS[mission.orbit].short
+	for e in GameState.last_sim.get("events", []):
+		if e.month == 0 and e.title == orbit_title:
+			e.title = tr("Landed at Shackleton's rim")
+			e.text = tr("Touchdown at %.1f m/s, %d m from the target. The lander is working.") % [float(land.get("touchdown_mps", 0.0)), roundi(float(land.get("target_m", 0.0)))]
+
+
+## The Sun low on the horizon, its azimuth turning once a lunar day with the mission's time.
+func _place_sun() -> void:
+	var t := month_f * MONTH_S if month_f < 9000.0 else 0.0
+	var a := sun_az0.rotated(TAU * t / LUNAR_DAY_S)
+	var e := deg_to_rad(float(FlightData.scenario_flight(mission.scenario).landing.get("sun_elevation_deg", 1.5)))
+	var to_sun := Vector3(a.x * cos(e), sin(e), a.y * cos(e)).normalized()
+	world.sun.basis = Basis.looking_at(-to_sun, Vector3.UP)
+
+
+## A slow walk around the lander at eye height, the ground and the sky behind it changing as it turns.
+func _surface_camera(delta: float) -> void:
+	cam_ang += delta * 0.09
+	var p: Vector3 = lander.position
+	var want := p + Vector3(cos(cam_ang) * 15.0, 0.0, sin(cam_ang) * 15.0)
+	want.y = maxf(terrain.height(want.x, want.z) + 2.2, p.y + 1.2)
+	world.cam.position = want
+	world.cam.look_at(p + Vector3(0, 0.6, 0), Vector3.UP)
+
+
+# ===================================================================================== THE PANELS
+func _build_ui() -> void:
+	# the top bar: what this is, the month, time and science
+	var top := Kit.panel_box(Kit.PAD)
+	Kit.place(top, 0, 0, 1, 0, 480, Kit.MARGIN, -Kit.MARGIN, 0)
 	add_child(top)
-	var tv := Kit.vbox(4)
+	var tv := Kit.vbox(Kit.GAP)
 	top.add_child(tv)
 	var th := Kit.hbox(10)
 	tv.add_child(th)
-	var tt := Kit.lbl(tr("OPERATIONS") + " · " + GameData.ORBITS[mission.orbit].name, 15, Kit.C_ACCENT, Kit.FONT_B)
+	var where: String = tr("On the Moon · Shackleton's rim") if landed else GameData.ORBITS[mission.orbit].name
+	var tt := Kit.caps(tr("Operations") + " · " + where)
 	tt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	th.add_child(tt)
-	month_lbl = Kit.lbl(tr("Month 0 of %d") % months_total, 15, Kit.C_TEXT, Kit.FONT_B)
+	month_lbl = Kit.lbl(tr("Month 0 of %d") % months_total, Kit.T_VALUE, Kit.C_TEXT, Kit.font_num())
 	th.add_child(month_lbl)
 	time_bar = ProgressBar.new()
 	time_bar.show_percentage = false
 	time_bar.custom_minimum_size = Vector2(0, 8)
 	time_bar.max_value = months_total
 	tv.add_child(time_bar)
-	var sh := Kit.hbox(10)
+	var sh := Kit.hbox(12)
 	tv.add_child(sh)
-	var sl := Kit.lbl(tr("Science"), 14, Kit.C_TEXT, Kit.FONT_B)
-	sh.add_child(sl)
+	sh.add_child(Kit.lbl(tr("Science"), Kit.T_BODY, Kit.C_DIM))
 	sci_bar = ProgressBar.new()
 	sci_bar.show_percentage = false
 	sci_bar.custom_minimum_size = Vector2(0, 12)
 	sci_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sci_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var S: Dictionary = GameData.SCENARIOS[mission.scenario]
 	sci_bar.max_value = S.science_target
 	sci_bar.add_theme_stylebox_override("fill", Kit.flat(Kit.C_OK, Color(0, 0, 0, 0), 4, 0, 0, 0))
 	sh.add_child(sci_bar)
-	sci_lbl = Kit.lbl("0 / %d" % int(S.science_target), 13, Kit.C_DIM)
+	sci_lbl = Kit.lbl("0 / %d" % int(S.science_target), Kit.T_BODY, Kit.C_TEXT, Kit.font_num())
 	sh.add_child(sci_lbl)
-	# mission log
-	var log_p := Kit.panel_box(12)
-	Kit.place(log_p, 0, 0, 0, 1, 12, 12, 452, -12)
+	# the mission log
+	var log_p := Kit.panel_box(Kit.PAD)
+	Kit.place(log_p, 0, 0, 0, 1, Kit.MARGIN, Kit.MARGIN, 456, -Kit.MARGIN)
 	add_child(log_p)
-	var lv := Kit.vbox(6)
+	var lv := Kit.vbox(Kit.GAP)
 	log_p.add_child(lv)
-	lv.add_child(Kit.lbl(tr("Mission log"), 20, Kit.C_TEXT, Kit.FONT_T))
+	lv.add_child(Kit.caps(tr("Mission log")))
+	lv.add_child(Kit.rule())
 	log_scroll = ScrollContainer.new()
 	log_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	log_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	lv.add_child(log_scroll)
-	log_box = Kit.vbox(6)
+	log_box = Kit.vbox(8)
 	log_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	log_scroll.add_child(log_box)
-	# speed controls
-	var ctl := Kit.hbox(6)
-	Kit.place(ctl, 1, 1, 1, 1, -420, -60, -16, -16)
-	ctl.alignment = BoxContainer.ALIGNMENT_END
-	add_child(ctl)
-	for sp in [1.0, 3.0, 10.0]:
-		ctl.add_child(Kit.btn("×%d" % int(sp), func(): speed = sp * max(1.0, months_total / 36.0), 14))
-	ctl.add_child(Kit.accent_btn(Kit.btn(tr("See report ▶▶"), func(): month_f = 9999.0, 14), Kit.C_WARN))
+	# time: how fast it runs, in words, and the report
+	var tp := Kit.panel_box(Kit.PAD)
+	Kit.place(tp, 1, 1, 1, 1, -520, -236, -Kit.MARGIN, -Kit.MARGIN)
+	add_child(tp)
+	var tb := Kit.vbox(Kit.GAP)
+	tp.add_child(tb)
+	tb.add_child(Kit.caps(tr("Time")))
+	var row := Kit.segmented()
+	tb.add_child(row)
+	for i in SPEEDS.size():
+		var b := Kit.choice("×%d" % int(SPEEDS[i]), false, func(): _set_speed(i), 80)
+		speed_btns.append(b)
+		row.add_child(b)
+	time_note = Kit.lbl("", Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true)
+	tb.add_child(time_note)
+	orbit_note = Kit.lbl("", Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true)
+	tb.add_child(orbit_note)
+	var rep := Kit.accent_btn(Kit.btn(tr("See report ▶▶"), func(): month_f = 9999.0, Kit.T_BODY), Kit.C_GOLD)
+	rep.custom_minimum_size.y = Kit.BTN_H
+	tb.add_child(rep)
+
+
+## Speed i of SPEEDS: the time note says how fast that is, and an orbit turns at its true pace (or becomes a ring).
+func _set_speed(i: int) -> void:
+	speed = SPEEDS[i] * base
+	for k in speed_btns.size():
+		var b: Button = speed_btns[k]
+		for st in ["normal", "hover", "pressed"]:
+			b.remove_theme_stylebox_override(st)
+		b.remove_theme_color_override("font_color")
+		if k == i:
+			Kit.accent_btn(b, Kit.C_ACCENT)
+	var per_month := MONTH_REAL_S / speed
+	var warp := MONTH_S * speed / MONTH_REAL_S
+	time_note.text = tr("A month every %.1f s: time runs %s times faster than real.") % [per_month, _big(warp)]
+	if landed:
+		orbit_note.text = tr("At the pole the Sun circles the horizon once a lunar day (29.5 days), so its light sweeps round the ground; the crater's floor never sees it.")
+		return
+	var period_s := float(GameData.ORBITS[mission.orbit].get("period_min", 90.0)) * 60.0
+	var laps := warp / period_s
+	if laps > BLUR_LAPS:
+		world.orbit_speed = 0.0
+		orbit_note.text = tr("Your craft laps its orbit every %s. At this speed that is %s laps each second, a blur, so the orbit is drawn as a ring.") % [_span(period_s), _big(laps)]
+	else:
+		world.orbit_speed = TAU * laps
+		orbit_note.text = tr("Your craft laps its orbit every %s: one lap every %.1f s at this speed.") % [_span(period_s), 1.0 / laps]
 
 
 func process(delta: float) -> void:
+	if landed and lander and is_instance_valid(lander):
+		_place_sun()
+		_surface_camera(delta)
 	var sim: Dictionary = GameState.last_sim
 	if sim.is_empty() or leaving:
 		return
-	month_f += delta * speed / 0.7
+	month_f += delta * speed / MONTH_REAL_S
 	var target := int(floor(month_f))
 	var months: int = sim.months
 	var events: Array = sim.events
@@ -103,7 +263,7 @@ func process(delta: float) -> void:
 			shown_events += 1
 		end_t = 0.0
 		if sim.status == "lost" or months < months_total:
-			world.lose_ship()
+			_lose()
 	if end_t >= 0.0:
 		end_t += delta
 		if end_t > (2.5 if month_f < 9000.0 else 0.3):
@@ -111,14 +271,26 @@ func process(delta: float) -> void:
 			main.go_faded("report", 0.8, 0.6)
 
 
+## The craft stops working: in orbit it fades away; on the ground the lander goes dark where it stands.
+func _lose() -> void:
+	if lost_shown:
+		return
+	lost_shown = true
+	if not landed:
+		world.lose_ship()
+		return
+	for mi in lander.find_children("*", "MeshInstance3D", true, false):
+		(mi as MeshInstance3D).transparency = 0.0
+		mi.create_tween().tween_property(mi, "transparency", 0.55, 1.5)
+
+
 func _log_event(e: Dictionary) -> void:
 	var col: Color = Kit.C_OK if e.kind == "good" else (Kit.C_BAD if e.kind == "bad" else Kit.C_ACCENT)
-	var pc := PanelContainer.new()
-	pc.add_theme_stylebox_override("panel", Kit.flat(Color(col.r, col.g, col.b, 0.08), Color(col.r, col.g, col.b, 0.55), 6, 1, 10, 7))
+	var pc := Kit.tile(col, 12, 9)
 	var v := Kit.vbox(2)
 	pc.add_child(v)
-	v.add_child(Kit.lbl(tr("Month %d · %s") % [e.month, e.title], 14, col, Kit.FONT_B, true))
-	v.add_child(Kit.lbl(e.text, 13, Kit.C_DIM, Kit.FONT_R, true))
+	v.add_child(Kit.lbl(tr("Month %d · %s") % [e.month, e.title], Kit.T_BODY, Kit.ink(col), Kit.FONT_B, true))
+	v.add_child(Kit.lbl(e.text, Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true))
 	log_box.add_child(pc)
 	pc.modulate.a = 0.0
 	pc.create_tween().tween_property(pc, "modulate:a", 1.0, 0.4)
@@ -131,3 +303,23 @@ func _log_event(e: Dictionary) -> void:
 
 func _scroll_log_to_end() -> void:
 	log_scroll.scroll_vertical = int(log_scroll.get_v_scroll_bar().max_value)
+
+
+## 3757000 as "3.8 million", 680 as "680".
+func _big(v: float) -> String:
+	if v >= 1.0e6:
+		return tr("%.1f million") % (v / 1.0e6)
+	if v >= 1000.0:
+		return "%d,%03d" % [int(v / 1000.0), int(fmod(v, 1000.0))]
+	return "%d" % roundi(v) if v >= 10.0 else "%.1f" % v
+
+
+## A period in words: "92 min", "24 h", "6 months".
+func _span(s: float) -> String:
+	if s < 3.0 * 3600.0:
+		return tr("%d min") % roundi(s / 60.0)
+	if s < 3.0 * 86400.0:
+		return tr("%d h") % roundi(s / 3600.0)
+	if s < 60.0 * 86400.0:
+		return tr("%d days") % roundi(s / 86400.0)
+	return tr("%d months") % roundi(s / MONTH_S)

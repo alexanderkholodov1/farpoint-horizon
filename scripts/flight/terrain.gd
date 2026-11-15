@@ -34,7 +34,10 @@ var noise := FastNoiseLite.new()
 var meta := {}
 
 
-func setup(landing: Dictionary) -> void:
+## sweep: the Sun's light over a whole lunar day instead of one moment. At the pole the Sun circles the horizon once a
+## month, so `lit` then marks the ground the Sun reaches at some time of the month, and what stays 0 is ground in
+## permanent shadow (as Shackleton's floor is). Used by the operation's view of the landed craft (#30).
+func setup(landing: Dictionary, sweep := false) -> void:
 	var d: Dictionary = FlightData.terrain(str(landing.get("terrain", "data/nasa/lola_south_pole.json")))
 	meta = d.get("meta", {})
 	h = d.get("heights", [])
@@ -56,7 +59,7 @@ func setup(landing: Dictionary) -> void:
 	noise.frequency = 1.0 / 90.0
 	noise.fractal_octaves = 3
 	_make_craters()
-	_make_light()
+	_make_light(sweep)
 
 
 # ===================================================================================== HEIGHTS
@@ -130,14 +133,19 @@ func _make_craters() -> void:
 
 # ===================================================================================== LIGHT
 ## Marches from each tile cell toward the Sun; a cell is dark when the ground rises above the ray.
-func _make_light() -> void:
+func _make_light(sweep := false) -> void:
 	lit = PackedFloat32Array()
 	lit.resize(rows * cols)
-	var d := Vector2(sun_dir.x, sun_dir.z).normalized() * 1.5     # 1.5 cells per march step
+	var flat := Vector2(sun_dir.x, sun_dir.z).normalized()
 	var rise := sun_dir.y / Vector2(sun_dir.x, sun_dir.z).length() * step * 1.5
-	for r in rows:
-		for c in cols:
-			lit[r * cols + c] = 1.0 if _ray_clear(r, c, d, rise, 70) else 0.0
+	var turns := 12 if sweep else 1
+	for k in turns:
+		var d := flat.rotated(TAU * k / turns) * 1.5     # 1.5 cells per march step
+		for r in rows:
+			for c in cols:
+				if lit[r * cols + c] < 1.0 and _ray_clear(r, c, d, rise, 70):
+					lit[r * cols + c] = 1.0
+	_shade_bowl()
 	shadow_pts = PackedVector2Array()
 	for r in range(maxi(tr_row - HALF, 0), mini(tr_row + HALF, rows)):
 		for c in range(maxi(tr_col - HALF, 0), mini(tr_col + HALF, cols)):
@@ -170,6 +178,31 @@ func light_at(x: float, z: float) -> float:
 	var a := lerpf(lit[r0 * cols + c0], lit[r0 * cols + c0 + 1], col - c0)
 	var b := lerpf(lit[(r0 + 1) * cols + c0], lit[(r0 + 1) * cols + c0 + 1], col - c0)
 	return lerpf(a, b, row - r0)
+
+
+## Shackleton's interior never sees the Sun ("illuminated rim, shadowed interior" [S-nasa-science]). The tile holds
+## only the near part of the crater, so a ray from its floor leaves the tile before meeting the far rim; the bowl is
+## therefore taken from the LOLA heights themselves [S-lola]: every cell below the reference sphere that joins the
+## deepest point is in shadow. Our simplification of where the crater's shadow ends.
+func _shade_bowl() -> void:
+	var deepest := 0
+	for i in rows * cols:
+		if float(h[i / cols][i % cols]) < float(h[deepest / cols][deepest % cols]):
+			deepest = i
+	var seen := {deepest: true}
+	var todo: Array = [deepest]
+	while not todo.is_empty():
+		var i: int = todo.pop_back()
+		lit[i] = 0.0
+		var r := i / cols
+		var c := i % cols
+		for n in [[r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1]]:
+			if n[0] < 0 or n[1] < 0 or n[0] >= rows or n[1] >= cols:
+				continue
+			var j: int = n[0] * cols + n[1]
+			if not seen.has(j) and float(h[n[0]][n[1]]) < 0.0:
+				seen[j] = true
+				todo.append(j)
 
 
 ## Distance in metres from x, z to the nearest shadowed ground near the target (INF when none).
