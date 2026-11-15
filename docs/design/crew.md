@@ -5,14 +5,14 @@ Our own design, modelled by script in Blender (`assets/source/crew_cuy.py`): no 
 
 ![The crew](crew_lineup.png)
 
-| Name (proposed) | Station | Coat | Suit stripe | Prop |
-|---|---|---|---|---|
-| Rumi (stone) | Engineer | white, ginger and chocolate patches | sunrise amber | a wrench |
-| Killa (moon) | Scientist | chocolate, white blaze | horizon blue | a flask |
-| Inti (sun) | Pilot | ginger, cream muzzle | sunrise amber | goggles |
-| Wayra (wind) | Ground control | white, slate patches | horizon blue | a headset |
+| Name (proposed) | Station | Build and face | Coat | Stripe | Prop |
+|---|---|---|---|---|---|
+| Rumi (stone) | Engineer | short and stocky; unimpressed, one brow up, a flat mouth | white, ginger and chocolate | amber | a wrench |
+| Killa (moon) | Scientist | tall and slim; wide open eyes, brows up, a small "o" | chocolate, white blaze | blue | a flask |
+| Inti (sun) | Pilot | middle; eyes narrowed, brows slanted in, a half smile | ginger, cream muzzle | amber | goggles |
+| Wayra (wind) | Ground control | middle, softest corners; nearly asleep, the cuy's "y" mouth | white, slate | blue | a headset |
 
-The look: a bean-shaped body with no neck, a deadpan face (small dark eyes half under a flat lid, a pink nose, a tiny
+The look: an upright, slightly boxy body with no neck (as the reference sticker's cuy), a deadpan face (small dark eyes half under a flat lid, a pink nose, a tiny
 mouth, whiskers), fur in three colours as vertex colours, a short white suit in the game's palette, and a clear bubble
 helmet so the face reads. Stylized next to documentary-real craft, as `docs/design/criteria.md` allows for characters.
 
