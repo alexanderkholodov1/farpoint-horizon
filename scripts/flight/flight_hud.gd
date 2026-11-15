@@ -134,10 +134,12 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 	keys_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	av.add_child(keys_lbl)
 	# sound and skip, top right
+	var tr_panel := Kit.panel_box(8)
+	Kit.place(tr_panel, 1, 0, 1, 0, -Kit.MARGIN, Kit.MARGIN, -Kit.MARGIN, Kit.MARGIN)
+	tr_panel.grow_horizontal = Control.GROW_DIRECTION_BEGIN   # as wide as its buttons, against the right edge
+	add_child(tr_panel)
 	var tr_box := Kit.hbox(8)
-	Kit.place(tr_box, 1, 0, 1, 0, -380, 24, -24, 70)
-	tr_box.alignment = BoxContainer.ALIGNMENT_END
-	add_child(tr_box)
+	tr_panel.add_child(tr_box)
 	var snd := Kit.btn(_sound_text(), func(): pass, Kit.T_BODY, 128)
 	snd.focus_mode = Control.FOCUS_NONE
 	snd.custom_minimum_size.y = Kit.BTN_H
@@ -178,7 +180,6 @@ func add_restart() -> void:
 	var b := Kit.btn(TranslationServer.translate("↺ Restart"), func(): restart_pressed.emit(), Kit.T_BODY, 128)
 	b.focus_mode = Control.FOCUS_NONE
 	b.custom_minimum_size.y = Kit.BTN_H
-	_top_right.offset_left -= 136.0
 	_top_right.add_child(b)
 	_top_right.move_child(b, 1)
 
@@ -245,8 +246,7 @@ func _show_warp() -> void:
 			b.remove_theme_stylebox_override(st)
 		for k in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
 			b.remove_theme_color_override(k)
-		b.disabled = w > warp_cap
-		b.modulate.a = 0.35 if b.disabled else 1.0
+		b.visible = w <= warp_cap   # only the speeds allowed now: fewer things to read
 		if w == lit_w:
 			Kit.accent_btn(b, Kit.C_ACCENT)
 	var t: String = TranslationServer.translate("Real time") if warp <= 1.0 else TranslationServer.translate("Time runs %s times faster") % _thousands(warp)

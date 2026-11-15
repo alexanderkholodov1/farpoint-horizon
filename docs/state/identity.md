@@ -14,3 +14,9 @@ light appearance), shots in `shots/id_*.png`.
 
 Left to do: the launch's pitch gauge still has a green marker (its text says "the green marker"); the map's planned
 path in the flight is green; the design's left column is still text-heavy.
+
+Since then (same branch): the menu is a list with Settings and Quit; the rocket builder is guided (one choice at a
+time, only the parts that fit, a drawing and two facts per part, the rest when pointed at; `scripts/screens/builder.gd`);
+the launch HUD's groups are all frosted panels of one tint (0.9) and show only the time speeds allowed now; each design
+step says what to do in one line; a red board bar says in words what is wrong. The trip to the Moon has no dead ends
+(`tests/flightsafe.tscn`).

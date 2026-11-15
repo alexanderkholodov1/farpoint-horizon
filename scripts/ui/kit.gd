@@ -128,7 +128,8 @@ static func _apply(m: String) -> void:
 		C_LINE = Color(0.6, 0.75, 1.0, 0.16)
 		C_SHADE = Color(0.0, 0.01, 0.03, 0.55)
 	var f := frost()
-	f.set_shader_parameter("tint", 0.84 if m == "light" else 0.8)
+	# the panel colour covers most of the blur, so a panel over a bright sky, white smoke or dark space reads the same
+	f.set_shader_parameter("tint", 0.88 if m == "light" else 0.9)
 	f.set_shader_parameter("lift", 0.55 if m == "light" else 0.0)
 	f.set_shader_parameter("lift_to", Color(1, 1, 1) if m == "light" else Color(0, 0, 0))
 

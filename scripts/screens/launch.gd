@@ -231,6 +231,7 @@ func _telemetry() -> void:
 	hud.gauge("orbit", op, "%d %%" % roundi(op * 100.0))
 	hud.gauge("fuel", model.fuel(), "%d %%" % roundi(model.fuel() * 100.0))
 	var sf: float = model.stress / Ascent.STRESS_BREAK
+	hud.show_gauge("stress", sf >= 0.3)   # shown when it matters
 	hud.gauge("stress", sf, tr("high") if sf >= 0.85 else (tr("rising") if sf >= 0.45 else tr("calm")))
 	hud.dial.pitch = model.pitch
 	hud.dial.marker = model.marker
