@@ -50,6 +50,7 @@ const T_ACTION := 21     ## The one main action's button.
 const T_STAT := 26       ## The big number of a stat card.
 const T_CLOCK := 40      ## Clocks and the one key number of a screen.
 const T_SHOUT := 60      ## A big message straight on the scene.
+const T_CINEMA := 92     ## A title card of the credits film, alone on the screen.
 ## Spacing, in pixels.
 const MARGIN := 24       ## From the window's edge to a panel.
 const PAD := 22          ## Inside a panel.

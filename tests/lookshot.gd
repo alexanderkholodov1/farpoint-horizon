@@ -28,6 +28,17 @@ func _ready() -> void:
 	await wait(1.2)
 	if only == "" or "menu" in only:
 		await shot("menu")
+	if "film" in only:
+		g.go("credits_film")
+		for at in [3.5, 9.0, 18.5, 26.5, 37.5, 45.0, 56.0, 68.5, 80.0]:
+			while g.screen.t < at:
+				await wait(0.1)
+			await shot("film_%02d" % int(at))
+		g.screen._to_end()
+		await wait(2.5)
+		await shot("film_end")
+		g.go("menu")
+		await wait(0.5)
 	if "credits" in only:
 		g.screen.main.overlay("credits") if false else g.overlay("credits")
 		await wait(0.8)
