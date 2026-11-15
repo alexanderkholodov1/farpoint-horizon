@@ -3,6 +3,7 @@ extends "res://scripts/screens/screen.gd"
 ## Earth turns behind it, framed by a viewfinder with live telemetry (UTC clock, Quito's coordinates).
 
 const Horizon := preload("res://scripts/ui/horizon.gd")
+const Music := preload("res://scripts/ui/music.gd")
 const VERSION := "v0.2.0"
 const QUITO := "0.18° S · 78.47° W"   ## Quito, the team's city (the Ecuador marker on the globe).
 
@@ -12,6 +13,7 @@ var arc: Control
 
 func enter(_args: Dictionary) -> void:
 	world.stage_menu()
+	Music.ensure(main)   # the game's music, from here on (scripts/ui/music.gd)
 	# ---------- the panel on the left: frosted glass over space
 	var panel := Kit.panel_box(34)
 	Kit.place(panel, 0, 0, 0, 0, 56, 60, 616, 60)   # grows to its content
