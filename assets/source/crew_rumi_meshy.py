@@ -90,7 +90,11 @@ def body():
     bm = bmesh.new()
     bm.from_mesh(b.data)
     # only the head goes: the backpack, behind it (y > 0.15), rises above the collar too and stays whole
-    bmesh.ops.delete(bm, geom=[v for v in bm.verts if v.co.z > NECK_Z and v.co.y < 0.15], context="VERTS")
+    # the generated head goes; the backpack behind it stays whole. Measured from the side: the backpack's front face
+    # stands at y 0.11..0.12 up to its top at z 0.22, and the old head's back reaches y 0.125 only above that
+    def old_head(c):
+        return c.z > NECK_Z and (c.y < 0.09 or (c.z > 0.225 and c.y < 0.15))
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if old_head(v.co)], context="VERTS")
     bm.to_mesh(b.data)
     bm.free()
     # the head sits on the collar: its centre over the middle of the neck opening, not where the generated head was
