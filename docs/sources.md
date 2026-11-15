@@ -261,3 +261,7 @@ All checked 2026-11-14; the research behind them is `kb/research/in-flight-failu
   Voyager 2's carrier when it was too faint to carry data: the idea of "Find the carrier".
 - **S-soho-recovery** NASA/ESA. *SOHO Mission Interruption and Recovery*. https://soho.nascom.nasa.gov/about/Recovery/.
   SOHO's faint carrier found again on 3 August 1998, six weeks after the loss.
+- **S-afj-loi** O'Brien, F. *Lunar Orbit Insertion*, Apollo Flight Journal (NASA History Office, hosted at apollojournals.org, linked from https://www.nasa.gov/history/afj/). https://apollojournals.org/afj/loiessay.html. The crew had to "perform and monitor the burn on the far side of the Moon, without assistance from the ground": the trip's loss of signal when the braking burn happens behind the Moon.
+- **S-eo-orbits** Riebeek, H. *Catalog of Earth Satellite Orbits*, NASA Earth Observatory, 2009.
+  https://earthobservatory.nasa.gov/features/OrbitsCatalog. Low, Sun-synchronous and geostationary orbits in plain
+  words: the glossary of the game (issue #69) and the plain names of its orbits.

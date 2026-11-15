@@ -14,6 +14,7 @@ const Bots := preload("res://scripts/crew/bots.gd")
 const PartIcon := preload("res://scripts/ui/part_icon.gd")
 const Progress := preload("res://scripts/progress.gd")
 const Objectives := preload("res://scripts/flight/objectives.gd")
+const Glossary := preload("res://scripts/ui/glossary.gd")
 
 const STAGES := ["Mission", "Craft", "Power", "Systems", "Rocket", "Launch"]
 ## The questions in order: [id, the GameData.STEPS id it belongs to, stage, the question, what it is about].
@@ -149,7 +150,8 @@ func _show(i: int) -> void:
 	# ---------- bottom centre: what the pointed thing is, and the actions
 	var hb: Array = Kit.hint_box()
 	var ip: Control = hb[0]
-	Kit.place(ip, 0, 1, 1, 1, 496, -214, -388, -110)
+	Kit.place(ip, 0, 1, 1, 1, 496, -110, -388, -110)
+	ip.grow_vertical = Control.GROW_DIRECTION_BEGIN   # grows up with what it says, never under the buttons
 	add_child(ip)
 	info_body = hb[1]
 	info_body.add_theme_font_size_override("font_size", Kit.T_BODY)
@@ -425,9 +427,10 @@ func _tile(kind: String, title: String, facts: Array, chosen: bool, on_click: Ca
 		if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
 			Kit.UiSound.play("click")
 			on_click.call())
+	var words: String = Glossary.notes(title, 1)   # the word in its name a newcomer may not know (issue #69)
 	pc.mouse_entered.connect(func():
 		sb.border_color = Kit.C_GOLD
-		_say(title, more))
+		_say(title, more + ("\n" + words if words != "" else "")))
 	pc.mouse_exited.connect(func(): sb.border_color = Kit.C_GOLD if chosen else Kit.C_LINE)
 	return pc
 
@@ -495,7 +498,7 @@ func _fill_question(id: String, r: Dictionary) -> void:
 				left_box.add_child(_tile("orbit", OO.name, [view_word, reach_word], mission.orbit == o, func():
 					mission.orbit = o
 					world.stage_design()
-					on_change(false), OO.desc + "\n" + tr("Shadow %s per lap · Contact %s per day · Δv to get there %d m/s") % [Kit.mins(OO.eclipse_min), Kit.mins(OO.contact_min), int(OO.insert_dv)],
+					on_change(false), OO.desc + "\n" + tr("Shadow %s per lap · Contact %s per day · speed change to get there %d m/s") % [Kit.mins(OO.eclipse_min), Kit.mins(OO.contact_min), int(OO.insert_dv)],
 					"★ " + tr("Best fit") if m >= top and _guided() else "", Kit.C_OK))
 		"bus":
 			# once the craft has parts, each body says whether it can carry them (its mass and its instruments)
@@ -591,7 +594,7 @@ func _fill_question(id: String, r: Dictionary) -> void:
 				var PR: Dictionary = GameData.PROPULSION[p]
 				var f: Array = _fit(PR.dv >= r.dv_need, p == best, tr("Too little"), _keeps_mass("propulsion", p))
 				left_box.add_child(_tile("none" if PR.dv <= 0.0 else "thruster", PR.name, [tr("+%s mass") % Kit.pct(PR.mass_pct), "%d m/s" % int(PR.dv)], mission.propulsion == p, func(): mission.propulsion = p; on_change(true),
-					PR.desc + "\n" + tr("Δv %d m/s · fuel ≈ %s of the mass") % [int(PR.dv), Kit.pct(PR.mass_pct)], f[0], f[1]))
+					PR.desc + "\n" + tr("Can change its speed by %d m/s · fuel ≈ %s of the mass") % [int(PR.dv), Kit.pct(PR.mass_pct)], f[0], f[1]))
 		"launcher":
 			left_box.add_child(Kit.lbl(tr("Your craft weighs %s and goes to %s.") % [Kit.kg(r.mass_total), O.short], Kit.T_BODY, Kit.C_TEXT, Kit.FONT_B, true))
 			var own := _tile("rocket", tr("Build your own rocket"), [tr("Engines, tanks, stages: your design")], false, func(): go("builder", {"back_step": step_idx}),

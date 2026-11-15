@@ -1,33 +1,92 @@
 extends "res://scripts/screens/screen.gd"
-## Overlay: how to play, in plain words. Opened with main.overlay("howto").
+## Overlay: how to play, at a glance (issue #82): five short cards, one idea each with its drawing, and the words a
+## newcomer may not know on a tab of their own (data/glossary.json, issue #69). Opened with main.overlay("howto") (the
+## menu) or from the pause card. Esc, Enter or Backspace close it; 1 and 2 switch the tabs.
+
+const PartIcon := preload("res://scripts/ui/part_icon.gd")
+const Glossary := preload("res://scripts/ui/glossary.gd")
+## [drawing, title, one line]
+const STEPS := [
+	["star", "Pick a mission", "Each one answers a real science question."],
+	["bus", "Build your craft", "One question at a time. The ★ option is the best fit."],
+	["rocket", "Launch", "Arrows lean the rocket. Space drops an empty stage."],
+	["orbit", "Fly it", "Plan, give the GO; the flight computer flies the burns."],
+	["camera", "Get your science", "Your craft works for months and sends real NASA photos home."],
+]
+
+var body: VBoxContainer
+var tabs: HBoxContainer
+var tab := 0
 
 
 func enter(_args: Dictionary) -> void:
-	var v := Kit.overlay(self, tr("How to play"), 960, 680, queue_free)
-	var rt := RichTextLabel.new()
-	rt.bbcode_enabled = true
-	rt.fit_content = false
-	rt.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	rt.text = tr("""[b]1. Choose a goal[/b] (CML 1). Every mission starts with a science question. When will a volcano erupt? Is El Niño coming?
+	var v := Kit.overlay(self, tr("How to play"), 900, 560, queue_free)
+	tabs = Kit.segmented()
+	v.add_child(tabs)
+	var sc := ScrollContainer.new()
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	sc.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	v.add_child(sc)
+	body = Kit.vbox(Kit.GAP)
+	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sc.add_child(body)
+	v.add_child(Kit.lbl(tr("Enter goes on · Backspace goes back · Esc pauses a mission · Esc or Enter closes this"), Kit.T_SMALL, Kit.C_DIM))
+	_show(0)
 
-[b]2. Design the mission step by step[/b] (CML 2 to 4), like NASA's Mission Design Lab: orbit, platform, instruments, power, communications, control, propulsion and launcher. Every decision changes the others, and the board on the right shows it live.
 
-[b]3. Review and launch.[/b] Red blocks the launch (it doesn't fit, or the money isn't there). Yellow can launch… but will have consequences in operations.
+func _show(i: int) -> void:
+	tab = i
+	for c in tabs.get_children():
+		c.queue_free()
+	tabs.add_child(Kit.choice(tr("How it works"), i == 0, func(): _show(0), 180))
+	tabs.add_child(Kit.choice(tr("Words"), i == 1, func(): _show(1), 180))
+	for c in body.get_children():
+		c.queue_free()
+	if i == 0:
+		for s in STEPS:
+			body.add_child(_card(s[0], tr(s[1]), tr(s[2])))
+	else:
+		for e in Glossary.all():
+			body.add_child(_word(tr(str(e.term)), tr(str(e.meaning))))
 
-[b]4. Operate the mission.[/b] Watch the months go by with solar storms, space debris, failures… and discoveries. A good design rides out the surprises.
 
-[b]5. Learn from the report[/b] and redesign. There is no single right answer.
+## One idea: its drawing, a short title, one line.
+func _card(kind: String, title: String, line: String) -> Control:
+	var p := Kit.tile(Kit.C_LINE, 14, 8)
+	var h := Kit.hbox(16)
+	p.add_child(h)
+	var icon := PartIcon.new()
+	icon.kind = kind
+	icon.k = 0.7
+	h.add_child(icon)
+	var t := Kit.vbox(2)
+	t.alignment = BoxContainer.ALIGNMENT_CENTER
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	h.add_child(t)
+	t.add_child(Kit.lbl(title, Kit.T_VALUE, Kit.C_TEXT, Kit.FONT_B))
+	t.add_child(Kit.lbl(line, Kit.T_BODY, Kit.C_DIM, Kit.FONT_R, true))
+	return p
 
-[b]Key resources[/b]
-• [b]Mass.[/b] Everything weighs. The platform and the rocket both have a limit.
-• [b]Power.[/b] Panels make nothing in Earth's shadow, and the battery must cover that time.
-• [b]Data.[/b] An instrument that makes more data than the antenna can send wastes science.
-• [b]Delta-v.[/b] The “change of speed” propulsion gives you. Going to the Moon or GEO takes a lot.
-• [b]Budget and time.[/b] More years in operation means more science and more cost.
 
-[b]Team mode.[/b] Up to 4 players with roles (Direction, Science, Engineering and Operations). Each role has its goal, and everyone must approve the design before launch.
+## One word and what it means.
+func _word(term: String, meaning: String) -> Control:
+	var h := Kit.hbox(14)
+	var t := Kit.lbl(term, Kit.T_BODY, Kit.C_ACCENT, Kit.FONT_B)
+	t.custom_minimum_size.x = 170
+	t.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	h.add_child(t)
+	h.add_child(Kit.lbl(meaning, Kit.T_BODY, Kit.C_TEXT, Kit.FONT_R, true))
+	return h
 
-[b]Controls.[/b] Drag with the mouse to turn the camera, scroll to zoom.
 
-Based on NASA resources, “Design and Develop Science Missions”, “CubeSat 101”, and JPL's Concept Maturity Levels (CML).""")
-	v.add_child(rt)
+func _unhandled_input(e: InputEvent) -> void:
+	if not (e is InputEventKey) or not e.pressed or e.echo:
+		return
+	var k: int = e.physical_keycode
+	if k in [KEY_ESCAPE, KEY_ENTER, KEY_KP_ENTER, KEY_BACKSPACE]:
+		queue_free()
+	elif k == KEY_1 or k == KEY_2:
+		_show(k - KEY_1)
+	else:
+		return
+	get_viewport().set_input_as_handled()
