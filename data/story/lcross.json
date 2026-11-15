@@ -1,0 +1,151 @@
+{
+ "doc": "Chapter 4, LCROSS (October 2009) (issue #48; story: docs/design/story-v0.3.0.md). Every fact from NASA pages (S-lcross-nasa, S-lcross-nssdc). The crew fly it from mission control: the craft is meant to crash, so nobody rides it. The story's lines: Killa 'The plan is to crash?', Wayra 'Yes.', Killa 'OK.'. Same format as pathfinder.json.",
+ "order": [
+  "intro",
+  "mission",
+  "outro"
+ ],
+ "intro": [
+  "intro"
+ ],
+ "mission": "Between intro and outro the player plays the mission: the aim at Cabeus, then the four minutes (scripts/screens/lcross.gd).",
+ "outro": [
+  "outro"
+ ],
+ "scenes": {
+  "intro": [
+   {
+    "set": "lcross_space",
+    "title": "Mission 4: LCROSS",
+    "sub": "October 9, 2009 · Cabeus crater, the Moon",
+    "shot": "approach",
+    "wait": 5.0
+   },
+   {
+    "who": "narrator",
+    "shot": "stack",
+    "text": "Twelve years after Mars, a rocket's empty upper stage flew to the Moon with a small craft riding on it.",
+    "fact": "LCROSS launched on June 18, 2009, with the Lunar Reconnaissance Orbiter, on an Atlas V.",
+    "source": "S-lcross-nasa"
+   },
+   {
+    "set": "houston",
+    "cast": ["wayra", "killa", "rumi", "inti"],
+    "who": "wayra",
+    "mood": "alert",
+    "act": "talk",
+    "shot": "wide",
+    "text": "Here is the plan. The empty Centaur hits a dark crater at the south pole. Our craft follows four minutes behind and looks at what it throws up.",
+    "fact": "The Centaur hit Cabeus at 11:31 UT; the shepherding craft flew through the plume and hit four minutes later.",
+    "source": "S-lcross-nasa"
+   },
+   {
+    "who": "killa",
+    "mood": "curious",
+    "act": "point",
+    "shot": "wide",
+    "text": "The plan is to crash?"
+   },
+   {
+    "who": "wayra",
+    "mood": "flat",
+    "act": "talk",
+    "shot": "wide",
+    "text": "Yes."
+   },
+   {
+    "who": "killa",
+    "mood": "happy",
+    "act": "shrug",
+    "shot": "wide",
+    "text": "OK."
+   },
+   {
+    "who": "rumi",
+    "mood": "pleased",
+    "act": "talk",
+    "shot": "wide",
+    "text": "Two thousand kilograms of empty rocket at two and a half kilometers a second. That is a big splash.",
+    "fact": "The 2000 kg Centaur upper stage hit at about 2.5 km/s.",
+    "source": "S-lcross-nssdc"
+   },
+   {
+    "who": "inti",
+    "mood": "determined",
+    "act": "talk",
+    "shot": "wide",
+    "text": "And I keep our craft looking into the splash. From down here. For once nobody rides it."
+   },
+   {
+    "set": "lcross_space",
+    "shot": "separate",
+    "cut": true,
+    "wait": 4.0
+   },
+   {
+    "set": "houston",
+    "cast": ["wayra", "killa", "rumi", "inti"],
+    "who": "wayra",
+    "mood": "determined",
+    "act": "talk",
+    "shot": "wide",
+    "text": "Separation now. Aim the Centaur at the dark floor of Cabeus.",
+    "fact": "The shepherding craft separated from the Centaur at 01:50 UT on October 9, 2009, and let it go ahead.",
+    "source": "S-lcross-nssdc"
+   }
+  ],
+  "mission": [
+   {
+    "set": "lcross_space",
+    "title": "Your turn",
+    "shot": "separate",
+    "wait": 2.5,
+    "play": "lcross"
+   }
+  ],
+  "outro": [
+   {
+    "set": "houston",
+    "cast": ["wayra", "killa", "rumi", "inti"],
+    "shot": "wide",
+    "wait": 0.5
+   },
+   {
+    "who": "killa",
+    "mood": "happy",
+    "act": "cheer",
+    "all": "happy",
+    "shot": "wide",
+    "text": "Water! In the light from the splash. I knew it!",
+    "fact": "On November 13, 2009, NASA announced that the data showed the mission had found water near the Moon's south pole.",
+    "source": "S-lcross-nasa"
+   },
+   {
+    "who": "rumi",
+    "mood": "flat",
+    "act": "shrug",
+    "shot": "wide",
+    "text": "We crashed twice. On purpose. And it worked."
+   },
+   {
+    "who": "inti",
+    "mood": "happy",
+    "act": "cheer",
+    "shot": "wide",
+    "text": "Best landing I never made."
+   },
+   {
+    "who": "wayra",
+    "mood": "curious",
+    "act": "talk",
+    "shot": "close",
+    "text": "Next one is bigger. They want to push an asteroid."
+   },
+   {
+    "title": "To be continued",
+    "sub": "Next: push an asteroid, 2022",
+    "wait": 4.0
+   }
+  ]
+ }
+}
