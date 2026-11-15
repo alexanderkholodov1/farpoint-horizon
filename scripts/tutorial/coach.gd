@@ -17,6 +17,9 @@ var ctx := ""
 var dismissed := {}            ## ctx -> true, tips the player closed
 var card: PanelContainer
 var rings: Array = []          ## Highlight panels, one per lit target.
+var lit_targets: Array = []    ## The texts of what is lit, to find it again when its list is rebuilt.
+var lit_col := Color.WHITE
+var relight_t := 0.0
 var lit: Array = []            ## The controls they follow.
 var t := 0.0
 var last_q := -1               ## The design question the targets were last lit for.
@@ -144,6 +147,8 @@ func _relight() -> void:
 
 func _light(targets: Array, col: Color) -> void:
 	_clear_rings()
+	lit_targets = targets
+	lit_col = col
 	for txt in targets:
 		var c := _find(tr(txt))
 		if c == null:
@@ -163,6 +168,14 @@ func _light(targets: Array, col: Color) -> void:
 
 
 func _follow() -> void:
+	# the screen rebuilt its list (a choice, "Show all"): find the lit options again, so a frame never stays behind
+	# on a freed or moved control
+	relight_t -= get_process_delta_time()
+	for c in lit:
+		if not is_instance_valid(c) and relight_t <= 0.0:
+			relight_t = 0.3
+			_light(lit_targets, lit_col)
+			break
 	for i in rings.size():
 		var ring: Panel = rings[i]
 		var c: Control = lit[i]

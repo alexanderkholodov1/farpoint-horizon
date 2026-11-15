@@ -121,11 +121,12 @@ func _card(id: String, S: Dictionary, mult: float) -> Control:
 			pc.material = gm
 			for c in pc.find_children("*", "CanvasItem", true, false):
 				(c as CanvasItem).use_parent_material = true
-		return pc
-	if Progress.is_done(id):
-		chips.add_child(Kit.chip("✓ " + tr("Done"), Kit.C_OK))
-	chips.add_child(Kit.chip(Kit.money(S.budget * mult), Kit.C_GOLD))
-	chips.add_child(Kit.chip(tr("%d yr or more") % S.min_years))
+	else:
+		if Progress.is_done(id):
+			chips.add_child(Kit.chip("✓ " + tr("Done"), Kit.C_OK))
+		chips.add_child(Kit.chip(tr("Budget %s") % Kit.money(S.budget * mult), Kit.C_GOLD))
+		chips.add_child(Kit.chip(tr("Must work %d+ years") % S.min_years))
+	# every card answers a click: an open one starts its mission, a locked one says what opens it
 	pc.gui_input.connect(func(e: InputEvent):
 		if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
 			Kit.UiSound.play("click")
@@ -151,10 +152,8 @@ func _unhandled_input(e: InputEvent) -> void:
 		return
 	var k: int = e.physical_keycode
 	if k >= KEY_1 and k <= KEY_9 and k - KEY_1 < order.size():
-		var id: String = order[k - KEY_1]
-		if Progress.locked_by(id, GameData.SCENARIOS[id]) == "":
-			Kit.UiSound.play("click")
-			_choose(id)
+		Kit.UiSound.play("click")
+		_choose(order[k - KEY_1])   # a locked one says what opens it
 	elif k == KEY_BACKSPACE or k == KEY_ESCAPE:
 		go("menu")
 	else:
@@ -182,5 +181,10 @@ func _wrapped(text: String) -> String:
 
 
 func _choose(id: String) -> void:
+	var lock: String = Progress.locked_by(id, GameData.SCENARIOS[id])
+	if lock != "":   # a locked card answers: what opens it, and where "All open" is for a demo
+		var why: String = tr("Coming soon") if lock == "soon" else tr("Finish “%s” first to open it") % GameData.SCENARIOS[lock].name
+		toast("🔒 " + why + "  ·  " + tr("Settings → All open unlocks every mission"), Kit.C_WARN)
+		return
 	GameState.start_mission(id)
 	go("design", {"step": 0})

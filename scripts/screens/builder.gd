@@ -7,7 +7,7 @@ extends "res://scripts/screens/screen.gd"
 ## Top: the steps, the current one lit; a done step can be clicked to choose again. Centre: the rocket in 3D at real
 ## proportions on the pad; a new part drops onto the stack and snaps. Right: "Will it fly?", three answers (lifts
 ## off, reaches the orbit, carries the craft) with the numbers behind them when pointed at.
-## "Fly this rocket" makes it the mission's launcher (RocketDesign.CUSTOM) and goes back to the launcher step.
+## "Use this rocket" makes it the mission's launcher (RocketDesign.CUSTOM) and goes back to the launcher step.
 ## args: {"back_step": index of GameData.STEPS to return to}.
 
 const Space := preload("res://scripts/space_builder.gd")
@@ -253,7 +253,7 @@ func _build_ui() -> void:
 	var back := Kit.btn(tr("◀ Back"), func(): go("design", {"step": back_step}), Kit.T_BODY, 150)
 	back.custom_minimum_size.y = Kit.BTN_H + 8
 	bar.add_child(back)
-	fly_btn = Kit.btn(tr("Fly this rocket ▶"), _use, Kit.T_ACTION, 280)
+	fly_btn = Kit.btn(tr("Use this rocket ▶"), _use, Kit.T_ACTION, 280)
 	fly_btn.custom_minimum_size.y = Kit.BTN_H + 8
 	bar.add_child(fly_btn)
 
@@ -351,7 +351,7 @@ func _tile(slot: String, id: String, summary := false) -> Control:
 	else:
 		var P: Dictionary = RocketDesign.part(id)
 		title = tr(P.name)
-		more = tr(P.desc) + "\n" + _part_line(P) + "  ·  " + _sources_line(P)
+		more = tr(P.desc) + "\n" + _part_line(P) + "  ·  " + tr("A real part: its sources are in the Credits")
 		chips.add_child(Kit.chip(Kit.money(P.cost_musd * float(P.get("count", 1) if P.category == "booster" else 1)), Kit.C_GOLD))
 		chips.add_child(Kit.chip(_fact(P)))
 	v.add_child(Kit.lbl(title, Kit.T_BODY if summary else Kit.T_LEAD, Kit.C_TEXT, Kit.FONT_B, true))

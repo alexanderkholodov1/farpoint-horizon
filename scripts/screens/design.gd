@@ -34,6 +34,7 @@ const YEARS := [1, 2, 3, 5, 7, 10]
 
 static var _mission_id := 0     ## The mission the progress below belongs to.
 static var _reached := 0        ## The furthest question reached in it.
+static var _auto := {}          ## Questions whose answer the game chose (the player never picked one): they follow the craft.
 
 var q := 0                      ## Index in QUESTIONS of the question shown.
 var step_idx := 0               ## Index in GameData.STEPS of that question's step (the coach reads it).
@@ -45,6 +46,8 @@ var info_body: Label
 var main_btn: Button
 var back_btn: Button
 var picks: Array = []             ## What each tile on screen does, in order (the number keys choose them).
+var later: Array = []             ## Notices to show once the screen is drawn ([text, colour]): drawing clears the screen.
+var last_problems := {}           ## The problems shown last time, by title (to tell what a new choice broke).
 
 
 func enter(args: Dictionary) -> void:
@@ -52,6 +55,7 @@ func enter(args: Dictionary) -> void:
 	if mission.get_instance_id() != _mission_id:
 		_mission_id = mission.get_instance_id()
 		_reached = 0
+		_auto = {}
 	show_step(args.get("step", 0))
 
 
@@ -80,8 +84,13 @@ func show_step(idx: int) -> void:
 ## Draws the screen at question i.
 func _show(i: int) -> void:
 	q = clampi(i, _first_q(), QUESTIONS.size() - 1)
+	var first_visit := q > _reached
 	_reached = maxi(_reached, q)
 	var Q: Array = QUESTIONS[q]
+	if first_visit and GameState.room.can_edit(_step_of(Q[1]).role):
+		_start_on_best(Q[0])
+	if GameState.room.can_edit(_step_of(Q[1]).role):
+		_follow_the_craft()
 	for k in GameData.STEPS.size():
 		if GameData.STEPS[k].id == Q[1]:
 			step_idx = k
@@ -91,6 +100,7 @@ func _show(i: int) -> void:
 	if not world.stage or world.ship == null:
 		world.stage_design()
 	var r: Dictionary = mission.compute()
+	_tell_new_problems(r, Q[0])
 	var STEP: Dictionary = GameData.STEPS[step_idx]
 	var room = GameState.room
 	# ---------- top: the stages
@@ -132,6 +142,7 @@ func _show(i: int) -> void:
 	# ---------- right: the mission board
 	var rp := Kit.panel_box(Kit.PAD)
 	Kit.place(rp, 1, 0, 1, 0, -364, 84, -Kit.MARGIN, 84)   # grows to its content
+	rp.grow_horizontal = Control.GROW_DIRECTION_BEGIN     # to the left, never past the window's edge
 	add_child(rp)
 	board = Kit.vbox(6)
 	rp.add_child(board)
@@ -168,6 +179,10 @@ func _show(i: int) -> void:
 	bar.add_child(main_btn)
 	_fill_question(Q[0], r)
 	_fill_board(r)
+	_fill_resources(r)
+	for n in later:   # notices from this redraw's own changes, shown now that the screen is drawn
+		toast(n[0], n[1], 3.5)
+	later = []
 	if not room.can_edit(STEP.role):
 		left_box.modulate.a = 0.6
 		for c in left_box.find_children("*", "Control", true, false):
@@ -189,6 +204,151 @@ func _first_of(stage: int) -> int:
 	return 0
 
 
+## The step of GameData.STEPS with this id.
+func _step_of(id: String) -> Dictionary:
+	for k in GameData.STEPS.size():
+		if GameData.STEPS[k].id == id:
+			return GameData.STEPS[k]
+	return GameData.STEPS[0]
+
+
+## The index in QUESTIONS of the question with this id (-1 if none).
+func _q_index(id: String) -> int:
+	for i in QUESTIONS.size():
+		if QUESTIONS[i][0] == id:
+			return i
+	return -1
+
+
+## The best fit of a one-choice question for the craft as it is now: the cheapest option that is enough for its own
+## need and keeps the craft within its body's mass limit (a best fit must never be what blocks the launch). When no
+## option does both, the cheapest that is enough; "" when nothing is enough, or for other questions.
+func _best_for(id: String, r: Dictionary) -> String:
+	var O: Dictionary = GameData.ORBITS[mission.orbit]
+	match id:
+		"panels":
+			var need: float = r.power_load * 1.15 / maxf(0.01, 1.0 - O.eclipse_frac)
+			return _best("panels", GameData.PANELS, func(P): return P.power >= need, "cost")
+		"battery":
+			return _best("battery", GameData.BATTERIES, func(BT): return BT.wh * 0.6 >= r.battery_need, "cost")
+		"comms":
+			return _best("comms", GameData.COMMS, func(C): return _down(C) >= r.data_gen, "cost")
+		"adcs":
+			return _best("adcs", GameData.ADCS, func(A): return A.level >= r.pointing_need, "cost_pct")
+		"propulsion":
+			return _best("propulsion", GameData.PROPULSION, func(PR): return PR.dv >= r.dv_need, "mass_pct")
+	return ""
+
+
+## What an antenna sends down per day in this orbit, GB.
+func _down(C: Dictionary) -> float:
+	var O: Dictionary = GameData.ORBITS[mission.orbit]
+	return C.rate * O.comm_factor * O.contact_min * 60.0 / 8.0 / 1000.0
+
+
+## True when choosing option `id` for `field` keeps the craft within its body's mass limit.
+func _keeps_mass(field: String, id: String) -> bool:
+	var old = mission.get(field)
+	mission.set(field, id)
+	var r2: Dictionary = mission.compute()
+	mission.set(field, old)
+	return r2.mass_total <= GameData.BUSES[mission.bus].max
+
+
+## The cheapest body that holds instrument `id` and every instrument already chosen ("" if none does).
+func _body_for(id: String) -> String:
+	var need: int = GameData.INSTRUMENTS[id].size
+	for j in mission.instruments:
+		need = maxi(need, int(GameData.INSTRUMENTS[j].size))
+	var best := ""
+	for b in GameData.BUSES:
+		var B: Dictionary = GameData.BUSES[b]
+		if B.max_size >= need and B.slots >= mission.instruments.size() + 1 and (best == "" or B.cost < GameData.BUSES[best].cost):
+			best = b
+	return best
+
+
+## A question seen for the first time starts on its best fit, so a player who only presses Continue never builds a
+## craft that falls short without knowing it.
+func _start_on_best(id: String) -> void:
+	var b := _best_for(id, mission.compute())
+	if b != "":
+		_auto[id] = true
+	if b != "" and str(mission.get(id)) != b:
+		mission.set(id, b)
+		GameState.room.design_edited(QUESTIONS[q][1])
+		world.rebuild_ship()
+
+
+## The answers the game chose follow the craft as it changes: when a later choice needs more (a faster antenna draws
+## more power), they move to the new best fit; and a craft that outgrew its body moves to a body that holds it.
+## Both say so. What the player chose is never changed.
+func _follow_the_craft() -> void:
+	var said := ""
+	for id in _auto.keys():
+		var r: Dictionary = mission.compute()
+		var b := _best_for(id, r)
+		if b == "" or str(mission.get(id)) == b or _enough(id, r, str(mission.get(id))):
+			continue
+		mission.set(id, b)
+		said = tr("Your choices changed what the craft needs, so its %s moved to the new best fit.") % tr(STAGES[QUESTIONS[_q_index(id)][2]])
+	var r2: Dictionary = mission.compute()
+	if r2.mass_total > GameData.BUSES[mission.bus].max:
+		var grown := ""
+		for b in GameData.BUSES:
+			var B: Dictionary = GameData.BUSES[b]
+			var need := 0
+			for j in mission.instruments:
+				need = maxi(need, int(GameData.INSTRUMENTS[j].size))
+			if B.max >= r2.mass_total * 1.15 and B.slots >= mission.instruments.size() and B.max_size >= need 					and (grown == "" or B.cost < GameData.BUSES[grown].cost):
+				grown = b
+		if grown != "" and grown != mission.bus:
+			mission.bus = grown
+			said = tr("Your craft outgrew its body (%s), so it moved to %s.") % [Kit.kg(r2.mass_total), GameData.BUSES[grown].name]
+	if said != "":
+		GameState.room.design_edited(QUESTIONS[q][1])
+		world.rebuild_ship()
+		_later(said, Kit.C_ACCENT)
+
+
+## True when option `value` is enough for question `id` with the craft as it is.
+func _enough(id: String, r: Dictionary, value: String) -> bool:
+	var O: Dictionary = GameData.ORBITS[mission.orbit]
+	match id:
+		"panels":
+			return GameData.PANELS[value].power >= r.power_load * 1.15 / maxf(0.01, 1.0 - O.eclipse_frac)
+		"battery":
+			return GameData.BATTERIES[value].wh * 0.6 >= r.battery_need
+		"comms":
+			return _down(GameData.COMMS[value]) >= r.data_gen
+		"adcs":
+			return GameData.ADCS[value].level >= r.pointing_need
+		"propulsion":
+			return GameData.PROPULSION[value].dv >= r.dv_need
+	return true
+
+
+## A choice can break something decided earlier (a faster antenna needs more power): say what, and where to fix it.
+func _tell_new_problems(r: Dictionary, here: String) -> void:
+	var now := {}
+	for c in r.checks:
+		if c.level != "ok":
+			now[c.title] = c
+	if not last_problems.is_empty():
+		for t in now:
+			var c: Dictionary = now[t]
+			var at := _q_index(str(c.get("at", "")))
+			if not last_problems.has(t) and at >= 0 and at < q and c.at != here:
+				_later(tr("%s · fix it in %s (click it on the board)") % [t, tr(STAGES[QUESTIONS[at][2]])], Kit.C_BAD if c.level == "fatal" else Kit.C_WARN)
+				break
+	last_problems = now
+
+
+## A notice shown once the screen is drawn again (drawing clears whatever is on it).
+func _later(text: String, col: Color) -> void:
+	later.append([text, col])
+
+
 func _say(title: String, text: String) -> void:
 	if info_body and is_instance_valid(info_body):
 		info_body.text = (title + "\n" if title != "" else "") + text
@@ -197,6 +357,7 @@ func _say(title: String, text: String) -> void:
 ## After a choice: approvals are void, the craft is rebuilt (unless rebuild_3d is false), and the screen goes on to
 ## the next question (advance) or stays on this one.
 func on_change(rebuild_3d := true, advance := false) -> void:
+	_auto.erase(QUESTIONS[q][0])   # the player chose this one: it is theirs now, the game never changes it
 	GameState.room.design_edited(QUESTIONS[q][1])
 	if rebuild_3d:
 		world.rebuild_ship()
@@ -272,7 +433,9 @@ func _tile(kind: String, title: String, facts: Array, chosen: bool, on_click: Ca
 
 
 ## The mark of an option that is enough or not; `best` is the cheapest one that is enough.
-func _fit(ok: bool, best: bool, short_word: String) -> Array:
+func _fit(ok: bool, best: bool, short_word: String, light := true) -> Array:
+	if ok and not light and not best:   # enough, but it would push the craft past its body's limit
+		return [tr("Too heavy for this body"), Kit.C_WARN]
 	if not _guided():   # past the first mission the choice is the player's: only what falls short is said
 		return ["", Kit.C_DIM] if ok else [short_word, Kit.C_WARN]
 	if best:
@@ -286,12 +449,17 @@ func _guided() -> bool:
 
 
 ## The id of the cheapest option of `table` for which enough.call(entry) is true ("" if none); cost by `cost_key`.
-func _best(table: Dictionary, enough: Callable, cost_key: String) -> String:
+func _best(field: String, table: Dictionary, enough: Callable, cost_key: String) -> String:
 	var best := ""
+	var best_any := ""
 	for id in table:
-		if enough.call(table[id]) and (best == "" or float(table[id][cost_key]) < float(table[best][cost_key])):
+		if not enough.call(table[id]):
+			continue
+		if best_any == "" or float(table[id][cost_key]) < float(table[best_any][cost_key]):
+			best_any = id
+		if _keeps_mass(field, id) and (best == "" or float(table[id][cost_key]) < float(table[best][cost_key])):
 			best = id
-	return best
+	return best if best != "" else best_any
 
 
 # ===================================================================================== QUESTIONS
@@ -322,16 +490,23 @@ func _fill_question(id: String, r: Dictionary) -> void:
 				var m: float = S.orbit_mult.get(o, 0.0)
 				if m <= 0.0 and mission.orbit != o:
 					continue   # an orbit that cannot serve this goal is not offered
-				left_box.add_child(_tile("orbit", OO.name, [tr("science ×%.1f") % m, tr("%d m/s to get there") % int(OO.insert_dv)], mission.orbit == o, func():
+				var view_word: String = tr("Best view of the target") if m >= top else tr("%d %% less science") % roundi((1.0 - m / maxf(top, 0.001)) * 100.0)
+				var reach_word: String = tr("The rocket takes it there") if OO.insert_dv <= 0.0 else tr("Its own engine adds %d m/s") % int(OO.insert_dv)
+				left_box.add_child(_tile("orbit", OO.name, [view_word, reach_word], mission.orbit == o, func():
 					mission.orbit = o
 					world.stage_design()
-					on_change(false, true), OO.desc + "\n" + tr("Shadow %s per lap · Contact %s per day · Δv to get there %d m/s") % [Kit.mins(OO.eclipse_min), Kit.mins(OO.contact_min), int(OO.insert_dv)],
+					on_change(false), OO.desc + "\n" + tr("Shadow %s per lap · Contact %s per day · Δv to get there %d m/s") % [Kit.mins(OO.eclipse_min), Kit.mins(OO.contact_min), int(OO.insert_dv)],
 					"★ " + tr("Best fit") if m >= top and _guided() else "", Kit.C_OK))
 		"bus":
+			# once the craft has parts, each body says whether it can carry them (its mass and its instruments)
+			var weigh: bool = _reached > _q_index("instruments")
 			for b in GameData.BUSES:
 				var B: Dictionary = GameData.BUSES[b]
-				left_box.add_child(_tile("bus", B.name, [Kit.money(B.cost), tr("%d instrument(s)") % B.slots], mission.bus == b, func(): mission.bus = b; on_change(true, true),
-					B.desc + "\n" + tr("Max load %s · %d slot(s) · instruments up to “%s” · %s") % [Kit.kg(B.max), B.slots, GameData.SIZE_NAMES[B.max_size], Kit.money(B.cost)]))
+				var small: bool = weigh and (B.max < r.mass_total or B.slots < mission.instruments.size())
+				var bmark: String = (tr("Too small for your craft") if small else tr("Carries it")) if weigh else ""
+				left_box.add_child(_tile("bus", B.name, [Kit.money(B.cost), (tr("Holds 1 instrument") if B.slots == 1 else tr("Holds %d instruments") % B.slots)], mission.bus == b, func(): mission.bus = b; on_change(true),
+					B.desc + "\n" + tr("Max load %s · %d slot(s) · instruments up to “%s” · %s") % [Kit.kg(B.max), B.slots, GameData.SIZE_NAMES[B.max_size], Kit.money(B.cost)],
+					bmark, Kit.C_WARN if small else Kit.C_DIM))
 		"instruments":
 			var B: Dictionary = GameData.BUSES[mission.bus]
 			var over: bool = mission.instruments.size() > B.slots
@@ -359,8 +534,13 @@ func _fill_question(id: String, r: Dictionary) -> void:
 					mark = tr("Needs a bigger body")
 				left_box.add_child(_tile("camera", I.name, [Kit.money(I.cost), Kit.kg(I.mass)], has, func():
 					if not has and not fits:
-						toast(tr("%s doesn't fit on %s") % [I.name, B.name], Kit.C_BAD)
-						return
+						# it does not fit this body: grow the craft to the cheapest body that holds it and everything chosen
+						var grown := _body_for(i)
+						if grown == "":
+							toast(tr("%s doesn't fit on %s") % [I.name, B.name], Kit.C_BAD)
+							return
+						mission.bus = grown
+						_later(tr("Your craft grew to %s so the %s fits.") % [GameData.BUSES[grown].name, I.name], Kit.C_ACCENT)
 					mission.toggle_instrument(i)
 					on_change(), I.desc + "\n" + tr("%s · %s · %s per day · %s · %s pointing") % [Kit.kg(I.mass), Kit.watts(I.power), Kit.gb(I.data), Kit.money(I.cost), [tr("free"), tr("coarse"), tr("fine"), tr("precise")][I.pointing]],
 					mark, Kit.C_OK if rel >= 0.95 and fits else (Kit.C_WARN if not fits else Kit.C_DIM), not fits))
@@ -373,55 +553,59 @@ func _fill_question(id: String, r: Dictionary) -> void:
 		"panels":
 			var need: float = r.power_load * 1.15 / maxf(0.01, 1.0 - O.eclipse_frac)
 			left_box.add_child(Kit.lbl(tr("Your craft needs %s of panels.") % Kit.watts(need), Kit.T_BODY, Kit.C_TEXT, Kit.FONT_B, true))
-			var best := _best(GameData.PANELS, func(P): return P.power >= need, "cost")
+			var best := _best_for("panels", r)
 			for p in GameData.PANELS:
 				var P: Dictionary = GameData.PANELS[p]
-				var f: Array = _fit(P.power >= need, p == best, tr("Too little"))
-				left_box.add_child(_tile("panel", P.name, [Kit.money(P.cost), Kit.watts(P.power)], mission.panels == p, func(): mission.panels = p; on_change(true, true),
+				var f: Array = _fit(P.power >= need, p == best, tr("Too little"), _keeps_mass("panels", p))
+				left_box.add_child(_tile("panel", P.name, [Kit.money(P.cost), Kit.watts(P.power)], mission.panels == p, func(): mission.panels = p; on_change(true),
 					P.desc + "\n" + tr("%s in sunlight · %s · %s") % [Kit.watts(P.power), Kit.kg(P.mass), Kit.money(P.cost)], f[0], f[1]))
 		"battery":
 			left_box.add_child(Kit.lbl(tr("In the shadow it needs %.0f Wh.") % r.battery_need, Kit.T_BODY, Kit.C_TEXT, Kit.FONT_B, true))
-			var best := _best(GameData.BATTERIES, func(BT): return BT.wh * 0.6 >= r.battery_need, "cost")
+			var best := _best_for("battery", r)
 			for b in GameData.BATTERIES:
 				var BT: Dictionary = GameData.BATTERIES[b]
 				var ok: bool = BT.wh * 0.6 >= r.battery_need
-				var f: Array = _fit(ok, b == best, tr("Falls short"))
-				left_box.add_child(_tile("battery", BT.name, [Kit.money(BT.cost), "%d Wh" % int(BT.wh)], mission.battery == b, func(): mission.battery = b; on_change(true, true),
+				var f: Array = _fit(ok, b == best, tr("Falls short"), _keeps_mass("battery", b))
+				left_box.add_child(_tile("battery", BT.name, [Kit.money(BT.cost), "%d Wh" % int(BT.wh)], mission.battery == b, func(): mission.battery = b; on_change(true),
 					BT.desc + "\n" + "%s · %s" % [Kit.kg(BT.mass), Kit.money(BT.cost)] + " · " + tr("Only 60 % of a battery is used, so it lasts many cycles."), f[0], f[1]))
 		"comms":
 			left_box.add_child(Kit.lbl(tr("Your instruments make %s per day.") % Kit.gb(r.data_gen), Kit.T_BODY, Kit.C_TEXT, Kit.FONT_B, true))
-			var down := func(C: Dictionary) -> float: return C.rate * O.comm_factor * O.contact_min * 60.0 / 8.0 / 1000.0
-			var best := _best(GameData.COMMS, func(C): return down.call(C) >= r.data_gen, "cost")
+			var best := _best_for("comms", r)
 			for c in GameData.COMMS:
 				var C: Dictionary = GameData.COMMS[c]
-				var d: float = down.call(C)
-				var f: Array = _fit(d >= r.data_gen, c == best, tr("Too slow"))
-				left_box.add_child(_tile("antenna", C.name, [Kit.money(C.cost), tr("sends %s a day") % Kit.gb(d)], mission.comms == c, func(): mission.comms = c; on_change(true, true),
+				var d: float = _down(C)
+				var f: Array = _fit(d >= r.data_gen, c == best, tr("Too slow"), _keeps_mass("comms", c))
+				left_box.add_child(_tile("antenna", C.name, [Kit.money(C.cost), tr("sends %s a day") % Kit.gb(d)], mission.comms == c, func(): mission.comms = c; on_change(true),
 					C.desc + "\n" + tr("Sends %s per day · %s · %s · %s") % [Kit.gb(d), Kit.kg(C.mass), Kit.watts(C.power), Kit.money(C.cost)], f[0], f[1]))
 		"adcs":
-			var best := _best(GameData.ADCS, func(A): return A.level >= r.pointing_need, "cost_pct")
+			var best := _best_for("adcs", r)
 			for a in GameData.ADCS:
 				var A: Dictionary = GameData.ADCS[a]
 				var f: Array = _fit(A.level >= r.pointing_need, a == best, tr("Too coarse"))
-				left_box.add_child(_tile("wheel", A.name, [tr("+%s cost") % Kit.pct(A.cost_pct), [tr("coarse"), tr("coarse"), tr("fine"), tr("precise")][clampi(A.level, 0, 3)]], mission.adcs == a, func(): mission.adcs = a; on_change(true, true),
+				left_box.add_child(_tile("wheel", A.name, [tr("+%s cost") % Kit.pct(A.cost_pct), [tr("coarse"), tr("coarse"), tr("fine"), tr("precise")][clampi(A.level, 0, 3)]], mission.adcs == a, func(): mission.adcs = a; on_change(true),
 					A.desc + "\n" + tr("Your instruments need pointing level %d.") % r.pointing_need + " " + tr("Level %d · %s of the platform's cost") % [A.level, Kit.pct(A.cost_pct)], f[0], f[1]))
 		"propulsion":
 			left_box.add_child(Kit.lbl(tr("It needs %d m/s for this orbit and %d years.") % [int(r.dv_need), mission.years], Kit.T_BODY, Kit.C_TEXT, Kit.FONT_B, true))
-			var best := _best(GameData.PROPULSION, func(PR): return PR.dv >= r.dv_need, "mass_pct")
+			var best := _best_for("propulsion", r)
 			for p in GameData.PROPULSION:
 				var PR: Dictionary = GameData.PROPULSION[p]
-				var f: Array = _fit(PR.dv >= r.dv_need, p == best, tr("Too little"))
-				left_box.add_child(_tile("none" if PR.dv <= 0.0 else "thruster", PR.name, [tr("+%s mass") % Kit.pct(PR.mass_pct), "%d m/s" % int(PR.dv)], mission.propulsion == p, func(): mission.propulsion = p; on_change(true, true),
+				var f: Array = _fit(PR.dv >= r.dv_need, p == best, tr("Too little"), _keeps_mass("propulsion", p))
+				left_box.add_child(_tile("none" if PR.dv <= 0.0 else "thruster", PR.name, [tr("+%s mass") % Kit.pct(PR.mass_pct), "%d m/s" % int(PR.dv)], mission.propulsion == p, func(): mission.propulsion = p; on_change(true),
 					PR.desc + "\n" + tr("Δv %d m/s · fuel ≈ %s of the mass") % [int(PR.dv), Kit.pct(PR.mass_pct)], f[0], f[1]))
 		"launcher":
 			left_box.add_child(Kit.lbl(tr("Your craft weighs %s and goes to %s.") % [Kit.kg(r.mass_total), O.short], Kit.T_BODY, Kit.C_TEXT, Kit.FONT_B, true))
-			left_box.add_child(_tile("rocket", tr("Build your own rocket"), [tr("part by part")], false, func(): go("builder", {"back_step": step_idx}),
-				tr("Put a rocket together from real parts, from the engines up, and see if it can lift your craft.")))
+			var own := _tile("rocket", tr("Build your own rocket"), [tr("Engines, tanks, stages: your design")], false, func(): go("builder", {"back_step": step_idx}),
+				tr("Put a rocket together from real parts, from the engines up, and see if it can lift your craft."), tr("The fun one"), Kit.C_GOLD)
+			var own_sb := Kit.flat(Color(Kit.C_GOLD, 0.14), Kit.C_GOLD, 12, 2, 12, 12)
+			own_sb.shadow_color = Color(Kit.C_GOLD, 0.35)
+			own_sb.shadow_size = 8
+			own.add_theme_stylebox_override("panel", own_sb)
+			left_box.add_child(own)
 			if RocketDesign.current != null:
 				var CL: Dictionary = RocketDesign.current.launcher_info()
 				var ccap: float = CL.cap[mission.orbit]
 				var cok: bool = ccap >= r.mass_total and ccap > 0.0
-				left_box.add_child(_tile("rocket", tr(CL.name), [Kit.money(CL.cost), tr("lifts %s") % Kit.kg(ccap)], mission.launcher == RocketDesign.CUSTOM, func(): mission.launcher = RocketDesign.CUSTOM; on_change(false, true),
+				left_box.add_child(_tile("rocket", tr(CL.name), [Kit.money(CL.cost), tr("lifts %s") % Kit.kg(ccap)], mission.launcher == RocketDesign.CUSTOM, func(): mission.launcher = RocketDesign.CUSTOM; on_change(false),
 					tr(CL.desc), tr("Fits") if cok else (tr("Can't reach") if ccap <= 0.0 else tr("Too heavy")), Kit.C_OK if cok else Kit.C_WARN, ccap <= 0.0))
 			var cost_of := func(L: Dictionary) -> float: return max(L.min_cost, L.cost + L.cost_per_kg * r.mass_total)
 			var best := ""
@@ -435,7 +619,7 @@ func _fill_question(id: String, r: Dictionary) -> void:
 				if cap <= 0.0 and mission.launcher != l:
 					continue   # a rocket that cannot reach this orbit is not offered
 				var f: Array = _fit(cap >= r.mass_total, l == best, tr("Too heavy"))
-				left_box.add_child(_tile("rocket", L.name, [Kit.money(cost_of.call(L)), tr("lifts %s") % Kit.kg(cap)], mission.launcher == l, func(): mission.launcher = l; on_change(false, true),
+				left_box.add_child(_tile("rocket", L.name, [Kit.money(cost_of.call(L)), tr("lifts %s") % Kit.kg(cap)], mission.launcher == l, func(): mission.launcher = l; on_change(false),
 					L.desc + "\n" + tr("Up to %s to %s · %s · reliability %s") % [Kit.kg(cap), O.short, Kit.money(cost_of.call(L)), Kit.pct(1.0 - L.fail)], f[0], f[1]))
 		"review":
 			_fill_review(r)
@@ -455,7 +639,18 @@ func _fill_review(r: Dictionary) -> void:
 		var col: Color = Kit.C_BAD if c.level == "fatal" else Kit.C_WARN
 		var pc := Kit.tile(col, 12, 8)
 		pc.mouse_filter = Control.MOUSE_FILTER_STOP
-		pc.add_child(Kit.lbl(("✗ " if c.level == "fatal" else "! ") + c.title, Kit.T_BODY, col, Kit.FONT_B, true))
+		var row := Kit.hbox(8)
+		row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		pc.add_child(row)
+		row.add_child(Kit.lbl(("✗ " if c.level == "fatal" else "! ") + c.title, Kit.T_BODY, col, Kit.FONT_B, true))
+		var at: int = _q_index(str(c.get("at", "")))
+		if at >= 0:
+			row.add_child(Kit.lbl(tr("Fix in %s ▶") % tr(STAGES[QUESTIONS[at][2]]), Kit.T_SMALL, Kit.C_TEXT, Kit.FONT_B))
+			pc.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+			pc.gui_input.connect(func(e: InputEvent):
+				if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
+					Kit.UiSound.play("click")
+					_show(at))
 		pc.mouse_entered.connect(func(): _say(c.title, c.detail))
 		left_box.add_child(pc)
 	if fine == checks.size():
@@ -505,6 +700,52 @@ func _fill_review(r: Dictionary) -> void:
 			left_box.add_child(Kit.lbl(tr("The whole crew still has to sign off."), Kit.T_SMALL + 1, Kit.C_WARN, Kit.FONT_B, true))
 
 
+# ===================================================================================== YOUR RESOURCES
+## Bottom right: what the player has and how much of it the craft already uses, as bars that fill up (the board
+## above says whether each is fine; this says how much is left). A bar past its end turns red.
+func _fill_resources(r: Dictionary) -> void:
+	var p := Kit.panel_box(16)
+	Kit.place(p, 1, 1, 1, 1, -364, -Kit.MARGIN, -Kit.MARGIN, -Kit.MARGIN)
+	p.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	p.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(p)
+	var v := Kit.vbox(7)
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	p.add_child(v)
+	v.add_child(Kit.caps(tr("Your resources")))
+	var B: Dictionary = GameData.BUSES[mission.bus]
+	_meter(v, tr("Money"), r.cost_total, r.budget, tr("%s left of %s") % [Kit.money(maxf(0.0, r.budget - r.cost_total)), Kit.money(r.budget)], true)
+	_meter(v, tr("Weight"), r.mass_total, r.mass_limit, tr("%s of %s") % [Kit.kg(r.mass_total), Kit.kg(r.mass_limit)], true)
+	_meter(v, tr("Instrument places"), mission.instruments.size(), B.slots, tr("%d of %d used") % [mission.instruments.size(), B.slots], true)
+	if _reached >= _q_index("panels"):
+		_meter(v, tr("Power"), r.power_load, r.power_gen, tr("uses %s of %s") % [Kit.watts(r.power_load), Kit.watts(r.power_gen)], true)
+	if _reached >= _q_index("comms"):
+		_meter(v, tr("Data link"), r.data_gen, r.data_down, tr("%s of %s a day") % [Kit.gb(r.data_gen), Kit.gb(r.data_down)], true)
+
+
+## One resource: its name, how much is used of what there is (in words), and a bar.
+func _meter(parent: VBoxContainer, label: String, used: float, have: float, words: String, _less_is_better: bool) -> void:
+	var f: float = used / maxf(have, 0.0001)
+	var col: Color = Kit.C_ACCENT if f <= 0.85 else (Kit.C_WARN if f <= 1.0 else Kit.C_BAD)
+	var h := Kit.hbox(6)
+	h.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	parent.add_child(h)
+	var n := Kit.lbl(label, Kit.T_SMALL + 1, Kit.C_TEXT, Kit.FONT_B)
+	n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	h.add_child(n)
+	h.add_child(Kit.lbl(words, Kit.T_SMALL, Kit.ink(col) if f > 0.85 else Kit.C_DIM, Kit.font_num()))
+	var bar := ProgressBar.new()
+	bar.show_percentage = false
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bar.custom_minimum_size = Vector2(0, 8)
+	bar.max_value = 1.0
+	bar.value = clampf(f, 0.0, 1.0)
+	bar.add_theme_stylebox_override("background", Kit.flat(Kit.C_LINE, Color(0, 0, 0, 0), 4, 0, 0, 0))
+	bar.add_theme_stylebox_override("fill", Kit.flat(col, Color(0, 0, 0, 0), 4, 0, 0, 0))
+	parent.add_child(bar)
+
+
 # ===================================================================================== THE MISSION BOARD
 ## Seven short answers: what the craft uses against what it has (the numbers after _row's text are the index in
 ## QUESTIONS of the question that decides each: until it is reached the row is grey). Pointing at one tells the numbers behind it.
@@ -514,7 +755,7 @@ func _fill_board(r: Dictionary) -> void:
 	_row(tr("Budget"), tr("costs %s · you have %s") % [Kit.money(r.cost_total), Kit.money(r.budget)], r.cost_total / r.budget, 0.9,
 		tr("Covers building, launch (%s) and operations for %d years (%s).") % [Kit.money(r.cost.launch), mission.years, Kit.money(r.cost.ops)] + " " + (tr("Reserve %s") % Kit.pct(r.reserve) if r.reserve >= 0.0 else tr("Over budget!")))
 	_row(tr("Mass"), tr("weighs %s · limit %s") % [Kit.kg(r.mass_total), Kit.kg(r.mass_limit)], r.mass_total / max(0.001, r.mass_limit), 0.9,
-		tr("Limit") + " · " + tr("platform %s · rocket %s") % [Kit.kg(r.mass_bus_max), Kit.kg(r.launch_cap) if r.launch_cap > 0.0 else tr("can't reach")] + ". " + tr("Instruments %s · power %s · fuel %s · platform %s.") % [Kit.kg(r.mass.instruments), Kit.kg(r.mass.power), Kit.kg(r.mass.propellant), Kit.kg(r.mass.bus)])
+		tr("Limit") + " · " + tr("platform %s · rocket %s") % [Kit.kg(r.mass_bus_max), Kit.kg(r.launch_cap) if r.launch_cap > 0.0 else tr("can't reach")] + ". " + tr("Instruments %s · power %s · fuel %s · platform %s.") % [Kit.kg(r.mass.instruments), Kit.kg(r.mass.power), Kit.kg(r.mass.propellant), Kit.kg(r.mass.bus)], false, 2)
 	_row(tr("Power"), tr("uses %s · makes %s") % [Kit.watts(r.power_load), Kit.watts(r.power_gen)], r.power_load / max(0.001, r.power_gen), 0.87,
 		tr("Draw against the panels' average generation (counting shadow).") + " " + tr("Margin %s") % Kit.pct(r.power_margin), false, 4)
 	_row(tr("Battery"), tr("needs %d Wh · holds %d Wh") % [int(r.battery_need), int(r.battery_wh)], r.battery_need / max(0.001, r.battery_wh), 0.85, tr("Energy needed to cross the shadow."), false, 5)
@@ -525,6 +766,9 @@ func _fill_board(r: Dictionary) -> void:
 	var nf := 0
 	var nw := 0
 	for c in r.checks:
+		var at := _q_index(str(c.get("at", "")))
+		if at > _reached or (at < 0 and _reached < _q_index("review")):
+			continue   # a step not reached yet is not a fault yet
 		if c.level == "fatal":
 			nf += 1
 		elif c.level == "warn":
@@ -532,10 +776,19 @@ func _fill_board(r: Dictionary) -> void:
 	var facts := Kit.hbox(6)
 	board.add_child(facts)
 	if nf > 0:
-		facts.add_child(Kit.chip("✗ " + tr("%d to fix") % nf, Kit.C_BAD))
+		var fix := Kit.chip("✗ " + tr("%d to fix") % nf, Kit.C_BAD)
+		fix.mouse_filter = Control.MOUSE_FILTER_STOP
+		fix.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		fix.gui_input.connect(func(e: InputEvent):
+			if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
+				for c in r.checks:
+					if c.level == "fatal" and _q_index(str(c.get("at", ""))) >= 0:
+						_show(_q_index(str(c.at)))
+						return)
+		facts.add_child(fix)
 	if nw > 0:
 		facts.add_child(Kit.chip("! " + tr("%d warning(s)") % nw, Kit.C_WARN))
-	if nf == 0 and nw == 0:
+	if nf == 0 and nw == 0 and _reached >= _q_index("review"):
 		facts.add_child(Kit.chip("✓ " + tr("Ready to fly"), Kit.C_OK))
 
 
@@ -550,7 +803,9 @@ func _row(label: String, value: String, frac: float, warn: float, explain: Strin
 		state = -1
 	elif frac > warn:
 		state = 0
-	var pending: bool = (from_q >= 0 and _reached < from_q) or (not more_is_better and frac >= 1.99) or (more_is_better and frac <= 0.0)
+	var pending: bool = (from_q >= 0 and _reached < from_q) or (more_is_better and mission.instruments.is_empty())
+	if more_is_better and state < 0:
+		state = 0   # little science is a cost, never a fault: amber, not red
 	var col: Color = Kit.C_OK if state > 0 else (Kit.C_WARN if state == 0 else Kit.C_BAD)
 	var why := explain
 	if pending:
@@ -576,4 +831,10 @@ func _row(label: String, value: String, frac: float, warn: float, explain: Strin
 	val.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	h.add_child(val)
 	pc.mouse_entered.connect(func(): _say(label, why))
+	if from_q >= 0 and from_q <= _reached and from_q != q:
+		pc.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		pc.gui_input.connect(func(e: InputEvent):
+			if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
+				Kit.UiSound.play("click")
+				_show(from_q))
 	board.add_child(pc)

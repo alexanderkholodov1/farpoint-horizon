@@ -299,6 +299,6 @@ func settle_extras() -> void:
 			if last_sim.has("events"):
 				last_sim.events.append({"month": 0, "kind": "good", "title": tr("Extra objective · %s") % all[id].name, "text": all[id].desc})
 	flight.extras = met
-	flight.bonus = bonus
+	flight.bonus = bonus + int(flight.get("ground", {}).get("bonus", 0))   # ground control's mini-games (#9)
 	flight.photos = photos
 	changed.emit()
