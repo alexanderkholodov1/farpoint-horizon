@@ -5,7 +5,7 @@ extends "res://scripts/screens/screen.gd"
 
 const Horizon := preload("res://scripts/ui/horizon.gd")
 const Music := preload("res://scripts/ui/music.gd")
-const VERSION := "v0.2.0"
+const VERSION := "v0.2.2"
 const Coach := preload("res://scripts/tutorial/coach.gd")
 const Progress := preload("res://scripts/progress.gd")
 const QUITO := "0.18° S · 78.47° W"   ## Quito, the team's city (the Ecuador marker on the globe).
