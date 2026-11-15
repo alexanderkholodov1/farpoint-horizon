@@ -144,6 +144,20 @@ func _build_ui() -> void:
 
 
 ## Speed i of SPEEDS: the time note says how fast that is, and an orbit turns at its true pace (or becomes a ring).
+## The keyboard: 1, 2 and 3 set how fast the months go by, Enter jumps to the report.
+func _unhandled_input(e: InputEvent) -> void:
+	if not (e is InputEventKey) or not e.pressed or e.echo:
+		return
+	var k: int = e.physical_keycode
+	if k >= KEY_1 and k <= KEY_3:
+		_set_speed(k - KEY_1)
+	elif k == KEY_ENTER or k == KEY_KP_ENTER:
+		month_f = 9999.0
+	else:
+		return
+	get_viewport().set_input_as_handled()
+
+
 func _set_speed(i: int) -> void:
 	speed = SPEEDS[i] * base
 	for k in speed_btns.size():

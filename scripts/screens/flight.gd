@@ -338,7 +338,7 @@ func _now_text() -> String:
 		"capture":
 			return tr("Braking: the engine stops by itself") if braking else tr("Press SPACE at zero to brake and stay at the Moon")
 		"lunar":
-			return tr("You are in orbit around the Moon: the landing comes next")
+			return tr("You circle the Moon. Look at your orbit, then press SPACE to go down and land")
 		"missed":
 			return tr("Press SPACE to try the departure again")
 	return ""
@@ -570,6 +570,8 @@ func _on_action() -> void:
 				_brake()
 			elif braking:
 				_end_capture(false)
+		"lunar":
+			_to_landing()
 		"missed":
 			_restart(false)
 
@@ -700,6 +702,7 @@ func _coast_phase(_delta: float) -> void:
 		phase = "capture"
 		phase_t = 0.0
 		last_count = -1
+		hud.hint(tr("You arrive too fast for the Moon to hold you: left alone you would swing past it and away. Braking now, against your motion, bends that fly-by into a circle around the Moon. The small map shows both: your path, and the orbit you are braking into."))
 		capture_at = m.t + COUNTDOWN   # fixed from here: the countdown is ten real seconds and always ends in the burn
 		if skip_step == "coast":
 			skip_step = "capture"
@@ -798,16 +801,25 @@ func _end_capture(by_computer: bool) -> void:
 		map_view = "moon"
 		zoom = 1.0
 	hud.message(tr("IN ORBIT AROUND THE MOON"), tr("%d × %d km over its surface. The lander gets ready to go down.") % [roundi(o.low / 1000.0), roundi(o.high / 1000.0)], Kit.C_OK, 0.0)
-	hud.hint(tr("Each lap around the Moon takes about two hours. Next: the landing at Shackleton's rim."))
+	hud.hint(tr("The Moon holds you now: you go round it without burning any fuel, a lap about every two hours. The small map shows your orbit. When you are ready, press SPACE to go down to Shackleton's rim."))
 
 
 func _lunar_phase(delta: float) -> void:
 	m.advance(delta * hud.warp)
 	_refresh_pred(0.5)
-	if phase_t > 14.0 and not leaving:
-		leaving = true
-		GameState.flight["arrival_met_s"] = roundi(m.t - t_launch)
-		main.go_faded("landing", 1.0, 1.0)
+	hud.action.label = "LAND"
+	hud.action.lit = true
+	# the pilot looks at the orbit as long as they like (SPACE goes down); left alone, the game goes on by itself
+	if phase_t > 25.0 or (_computer() and phase_t > 8.0):
+		_to_landing()
+
+
+func _to_landing() -> void:
+	if leaving:
+		return
+	leaving = true
+	GameState.flight["arrival_met_s"] = roundi(m.t - t_launch)
+	main.go_faded("landing", 1.0, 1.0)
 
 
 ## A path that will not end around the Moon. Never a dead end: the game says so and offers the departure again.
@@ -854,7 +866,7 @@ func _skip() -> void:
 	held_for = ""
 	cur_stop = ""
 	if phase == "lunar":
-		phase_t = 99.0
+		_to_landing()
 	elif phase == "coast" and correction_state == "offered":
 		_correct(true)
 	hud.message(tr("FLIGHT COMPUTER"), tr("It flies this step for you."), Kit.C_ACCENT, 1.5)
@@ -1195,8 +1207,12 @@ class MiniMap:
 			return
 		var m = screen.m
 		var c := size * 0.5
-		var s: float = (minf(size.x, size.y) * 0.5 - 14.0) / 4.1e8   # pixels per metre: the Moon's orbit fits
 		var f := K.FONT_B
+		var about: Dictionary = m.about_moon()
+		if about.r < 6.61e7 * 0.6 or screen.phase in ["capture", "lunar"]:
+			_draw_moon(m, c, f, about)
+			return
+		var s: float = (minf(size.x, size.y) * 0.5 - 14.0) / 4.1e8   # pixels per metre: the Moon's orbit fits
 		draw_arc(c, 3.84e8 * s, 0.0, TAU, 64, Color(K.C_ON_DARK, 0.18), 1.0, true)
 		var p: Dictionary = screen.shown if screen.phase == "plan" else screen.pred
 		if not p.is_empty() and p.points.size() > 1:
@@ -1217,3 +1233,33 @@ class MiniMap:
 		draw_circle(cp, 4.0 + 1.5 * sin(_t * 5.0), K.C_GOLD)
 		draw_arc(cp, 9.0, 0.0, TAU, 20, Color(K.C_GOLD, 0.5), 1.0, true)
 		draw_string(f, cp + Vector2(10, -6), TranslationServer.translate("You"), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, K.C_GOLD)
+
+	## Near the Moon the map closes in on it: the Moon to scale, the ring of the orbit the craft is braking into, the
+	## craft's path as the Moon sees it (a fly-by that swings past, or a closed orbit once held) and the craft.
+	func _draw_moon(m, c: Vector2, f: Font, about: Dictionary) -> void:
+		var reach: float = maxf(about.r * 1.25, m.r_m * 3.2)
+		var s: float = (minf(size.x, size.y) * 0.5 - 12.0) / reach
+		draw_circle(c, maxf(m.r_m * s, 5.0), Color(0.62, 0.62, 0.66))
+		draw_arc(c, maxf(m.r_m * s, 5.0), 0.0, TAU, 40, Color(0.9, 0.9, 0.94), 1.5, true)
+		var ring: float = (m.r_m + 110000.0) * s
+		for k in 24:   # the orbit to stay in, dashed
+			if k % 2 == 0:
+				draw_arc(c, ring, TAU * k / 24.0, TAU * (k + 1) / 24.0, 4, Color(K.C_GOLD, 0.8), 1.5, true)
+		var p: Dictionary = screen.pred
+		if not p.is_empty() and p.points.size() > 1:
+			var line := PackedVector2Array()
+			var step := maxi(1, p.points.size() / 100)
+			for i in range(0, p.points.size(), step):
+				var mo: Array = m.moon(p.times[i])
+				var rel := Vector2(p.points[i].x - mo[0], -(p.points[i].y - mo[1]))
+				if rel.length() < reach * 1.05:
+					line.append(c + rel * s)
+			if line.size() > 1:
+				draw_polyline(line, K.C_ACCENT, 1.5, true)
+		var now: Array = m.moon(m.t)
+		var cp := c + Vector2(m.x - now[0], -(m.y - now[1])) * s
+		draw_circle(cp, 4.0 + 1.5 * sin(_t * 5.0), K.C_GOLD)
+		draw_arc(cp, 9.0, 0.0, TAU, 20, Color(K.C_GOLD, 0.5), 1.0, true)
+		draw_string(f, cp + Vector2(10, -6), TranslationServer.translate("You"), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, K.C_GOLD)
+		draw_string(f, c + Vector2(-16, 4), TranslationServer.translate("Moon"), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.08, 0.08, 0.1))
+		draw_string(f, Vector2(0, size.y - 4), TranslationServer.translate("- - the orbit to stay in"), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(K.C_GOLD, 0.9))

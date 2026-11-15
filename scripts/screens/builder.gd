@@ -39,6 +39,7 @@ var steps_row: HBoxContainer
 var info_title: Label
 var info_body: Label
 var fly_btn: Button
+var picks: Array = []          ## What each tile on screen does, in order (the number keys choose them).
 
 
 func enter(args: Dictionary) -> void:
@@ -198,6 +199,22 @@ func _use() -> void:
 	go("design", {"step": back_step})
 
 
+## The keyboard: 1 to 9 choose a part, Enter flies the rocket, Backspace goes back to the design.
+func _unhandled_input(e: InputEvent) -> void:
+	if not (e is InputEventKey) or not e.pressed or e.echo:
+		return
+	var k: int = e.physical_keycode
+	if k >= KEY_1 and k <= KEY_9 and k - KEY_1 < picks.size():
+		picks[k - KEY_1].call()
+	elif k == KEY_ENTER or k == KEY_KP_ENTER:
+		_use()
+	elif k == KEY_BACKSPACE:
+		go("design", {"step": back_step})
+	else:
+		return
+	get_viewport().set_input_as_handled()
+
+
 # ===================================================================================== UI
 func _build_ui() -> void:
 	clear()
@@ -262,6 +279,7 @@ func _fill_steps() -> void:
 
 
 func _fill_left() -> void:
+	picks = []
 	for c in left_box.get_children():
 		c.queue_free()
 	var order := _order()
@@ -344,6 +362,7 @@ func _tile(slot: String, id: String, summary := false) -> Control:
 	else:
 		v.add_child(chips)
 	if not summary:
+		picks.append(func(): _pick(slot, id))
 		pc.gui_input.connect(func(e: InputEvent):
 			if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
 				_pick(slot, id))

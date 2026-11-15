@@ -82,6 +82,7 @@ func _main_list(box: VBoxContainer) -> void:
 	play.custom_minimum_size.y = 60
 	play.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	box.add_child(play)
+	play.grab_focus.call_deferred()   # the keyboard starts on Play: arrows move along the list, Enter chooses
 	box.add_child(Kit.spacer(10))
 	var items := [
 		[tr("First mission · guided"), func(): Coach.start(main)],
@@ -153,6 +154,10 @@ func _settings(box: VBoxContainer) -> void:
 	var back := Kit.btn(tr("◀ Menu"), func(): go("menu"), Kit.T_BODY, 340)
 	back.custom_minimum_size.y = Kit.BTN_H
 	rows.add_child(back)
+	# the keyboard reaches every choice: arrows move, Enter chooses
+	for n in rows.find_children("*", "Button", true, false):
+		(n as Button).focus_mode = Control.FOCUS_ALL
+	back.grab_focus.call_deferred()
 
 
 func process(_delta: float) -> void:

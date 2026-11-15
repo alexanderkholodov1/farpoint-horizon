@@ -541,11 +541,10 @@ static func cover(tex: Texture2D, h: float, region := Rect2()) -> TextureRect:
 static func menu_item(text: String, cb: Callable, size := T_ACTION) -> Button:
 	var b := btn(text, cb, size)
 	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	b.focus_mode = Control.FOCUS_NONE
 	var clear := Color(0, 0, 0, 0)
-	for st in ["normal", "hover", "pressed"]:
+	for st in ["normal", "hover", "pressed", "focus"]:   # the keyboard's focus looks as the pointer's hover
 		var sb := StyleBoxFlat.new()
-		sb.bg_color = clear if st == "normal" else Color(C_GOLD.r, C_GOLD.g, C_GOLD.b, 0.1 if st == "hover" else 0.2)
+		sb.bg_color = clear if st == "normal" else Color(C_GOLD.r, C_GOLD.g, C_GOLD.b, 0.2 if st == "pressed" else 0.1)
 		sb.border_color = clear if st == "normal" else C_GOLD
 		sb.border_width_left = 3
 		sb.set_corner_radius_all(4)

@@ -45,6 +45,10 @@ var old_far := 2000.0
 var cam_off := Vector3(6.5, 1.5, 11.0)
 var cam_aim := Vector3.INF     ## Where the camera looks, from the rocket's base, damped (INF until the first frame).
 var cam_t := 0.0               ## Clock of the camera's wobble.
+var user_yaw := 0.0            ## How far the player turned the camera around the rocket (radians).
+var user_pitch := 0.0          ## ... and raised or lowered it.
+var user_zoom := 1.0           ## ... and moved it nearer (below 1) or farther.
+var auto_time := true          ## Time picks its own speed until the pilot picks one.
 var base_fov := 75.0           ## The camera's field of view on entering, restored on exit.
 var smoke: CPUParticles3D       ## Steam and smoke thrown sideways at ignition (the look of #12).
 
@@ -111,6 +115,7 @@ func _build_hud() -> void:
 	hud.action_pressed.connect(_on_stage)
 	hud.autopilot_toggled.connect(func(on): _say_autopilot(on))
 	hud.skip_pressed.connect(_skip)
+	hud.warp_picked.connect(func(_w): auto_time = false; hud.auto_note = "")
 	hud.add_restart()
 	hud.restart_pressed.connect(func(): main.go("launch"))   # fly this part again, whatever happened
 	hud.set_autopilot(GameState.pilot_bot)
@@ -175,6 +180,14 @@ func _climb(delta: float) -> void:
 	model.throttle = throttle
 	model.autopilot = hud.autopilot
 	hud.cap_warp(10.0, tr("engine on"))
+	# time by itself: the liftoff in real time, then ten times faster, and back to real time for the moments that
+	# need the pilot (a stage nearly empty, a rocket under stress, the last of the climb); a speed the pilot picks stays
+	if auto_time:
+		var calm: bool = phase_t > 14.0 and model.fuel() > 0.07 and model.stress < Ascent.STRESS_WARN and model.orbit_progress() < 0.97
+		var want_w := 10.0 if calm else 1.0
+		if hud.warp != want_w:
+			hud.set_warp(want_w)
+		hud.auto_note = tr("Auto") if want_w > 1.0 else ""
 	model.step(delta, steer, hud.warp)
 	# staging: the pilot's job; the autopilot does it at once, the flight computer after a few seconds
 	if model.wants_stage():
@@ -302,7 +315,21 @@ func _camera(delta: float) -> void:
 		cam_off = cam.position - rp
 	else:
 		cam_off = cam_off.lerp(want, clampf(delta * 1.2, 0.0, 1.0))
-		cam.position = rp + cam_off
+		# the player turns the camera around the rocket (drag, or Q and E) and moves it nearer or farther (the wheel,
+		# or the + and - keys); the view the game picks is the starting point, never a cage
+		if Input.is_physical_key_pressed(KEY_Q):
+			user_yaw -= delta * 1.2
+		if Input.is_physical_key_pressed(KEY_E):
+			user_yaw += delta * 1.2
+		if Input.is_physical_key_pressed(KEY_EQUAL) or Input.is_physical_key_pressed(KEY_KP_ADD):
+			user_zoom = maxf(0.4, user_zoom - delta * 0.8)
+		if Input.is_physical_key_pressed(KEY_MINUS) or Input.is_physical_key_pressed(KEY_KP_SUBTRACT):
+			user_zoom = minf(3.0, user_zoom + delta * 0.8)
+		var off: Vector3 = cam_off.rotated(Vector3.UP, user_yaw)
+		var flat := Vector3(off.x, 0.0, off.z)
+		var len := off.length() * user_zoom
+		var elev := clampf(atan2(off.y, flat.length()) + user_pitch, -0.6, 1.35)
+		cam.position = rp + (flat.normalized() * cos(elev) + Vector3.UP * sin(elev)) * len
 	var shake_now: float = shake + (model.stress / Ascent.STRESS_BREAK * 0.6 if phase == "climb" else 0.0)
 	if phase == "climb" and model.h < 3000.0:
 		shake_now += throttle * 0.35
@@ -518,3 +545,14 @@ func _skip() -> void:
 	_telemetry()
 	_place_rocket()
 	cam_off = Vector3(-4.0, 3.5, 8.0) * maxf(rocket_h / 6.0, 0.6)
+
+
+## The mouse turns the camera around the rocket (drag) and moves it nearer or farther (the wheel).
+func _unhandled_input(e: InputEvent) -> void:
+	if e is InputEventMouseMotion and (e.button_mask & (MOUSE_BUTTON_MASK_LEFT | MOUSE_BUTTON_MASK_RIGHT)) != 0:
+		user_yaw -= e.relative.x * 0.006
+		user_pitch = clampf(user_pitch + e.relative.y * 0.005, -1.2, 1.2)
+	elif e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_WHEEL_UP:
+		user_zoom = maxf(0.4, user_zoom * 0.9)
+	elif e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+		user_zoom = minf(3.0, user_zoom * 1.1)

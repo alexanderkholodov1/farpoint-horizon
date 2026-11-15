@@ -31,7 +31,7 @@ var dial: Instruments.Dial
 var instrument_box: PanelContainer
 var lever: Instruments.Lever
 var action: Instruments.BigButton
-var autopilot_btn: Button
+var autopilot_btn: Instruments.Switch
 var left_btn: Instruments.HoldButton
 var right_btn: Instruments.HoldButton
 var up_btn: Instruments.HoldButton
@@ -125,9 +125,8 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 		down_btn = Instruments.HoldButton.new("▼")
 		down_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		steer.add_child(down_btn)
-	autopilot_btn = Kit.btn(TranslationServer.translate("Autopilot"), func(): set_autopilot(not autopilot, true), Kit.T_BODY)
-	autopilot_btn.focus_mode = Control.FOCUS_NONE
-	autopilot_btn.custom_minimum_size = Vector2(136, Kit.BTN_H)
+	autopilot_btn = Instruments.Switch.new()
+	autopilot_btn.pressed.connect(func(): set_autopilot(not autopilot, true))
 	steer.add_child(autopilot_btn)
 	lever = Instruments.Lever.new()
 	lever.changed.connect(func(x): throttle_changed.emit(x))
@@ -151,7 +150,7 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 	add_child(tr_panel)
 	var tr_box := Kit.hbox(8)
 	tr_panel.add_child(tr_box)
-	var skip := Kit.btn(TranslationServer.translate("Skip ▶▶"), func(): skip_pressed.emit(), Kit.T_BODY, 128)
+	var skip := Kit.btn(TranslationServer.translate("Skip ▶▶") + "  · K", func(): skip_pressed.emit(), Kit.T_BODY, 128)
 	skip.focus_mode = Control.FOCUS_NONE
 	skip.custom_minimum_size.y = Kit.BTN_H
 	tr_box.add_child(skip)
@@ -192,7 +191,7 @@ func _console(p: PanelContainer) -> void:
 
 ## A Restart button beside Skip: the pilot can always fly this part again, whatever happened (never a dead end).
 func add_restart() -> void:
-	var b := Kit.btn(TranslationServer.translate("↺ Restart"), func(): restart_pressed.emit(), Kit.T_BODY, 128)
+	var b := Kit.btn(TranslationServer.translate("↺ Restart") + "  · R", func(): restart_pressed.emit(), Kit.T_BODY, 128)
 	b.focus_mode = Control.FOCUS_NONE
 	b.custom_minimum_size.y = Kit.BTN_H
 	_top_right.add_child(b)
@@ -364,11 +363,7 @@ func hint(text: String) -> void:
 
 func set_autopilot(on: bool, by_pilot := false) -> void:
 	autopilot = on
-	autopilot_btn.text = TranslationServer.translate("Autopilot on") if on else TranslationServer.translate("Autopilot")
-	if on:
-		Kit.accent_btn(autopilot_btn, Kit.C_OK)
-	else:
-		_plain(autopilot_btn)
+	autopilot_btn.on = on
 	if by_pilot:
 		autopilot_toggled.emit(on)
 
@@ -422,6 +417,15 @@ func pilot_input() -> bool:
 func _unhandled_input(e: InputEvent) -> void:
 	if e is InputEventKey and e.pressed and not e.echo and e.physical_keycode == KEY_SPACE:
 		action.press()
+		get_viewport().set_input_as_handled()
+	elif e is InputEventKey and e.pressed and not e.echo and e.physical_keycode == KEY_P:
+		set_autopilot(not autopilot, true)
+		get_viewport().set_input_as_handled()
+	elif e is InputEventKey and e.pressed and not e.echo and e.physical_keycode == KEY_K:
+		skip_pressed.emit()
+		get_viewport().set_input_as_handled()
+	elif e is InputEventKey and e.pressed and not e.echo and e.physical_keycode == KEY_R:
+		restart_pressed.emit()
 		get_viewport().set_input_as_handled()
 	elif e is InputEventKey and e.pressed and not e.echo and warp_box and (e.physical_keycode == KEY_PERIOD or e.physical_keycode == KEY_COMMA):
 		var i := WARPS.find(warp)

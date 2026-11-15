@@ -43,6 +43,8 @@ var board: VBoxContainer
 var stages_row: HBoxContainer
 var info_body: Label
 var main_btn: Button
+var back_btn: Button
+var picks: Array = []             ## What each tile on screen does, in order (the number keys choose them).
 
 
 func enter(args: Dictionary) -> void:
@@ -85,6 +87,7 @@ func _show(i: int) -> void:
 			step_idx = k
 	GameState.room.enter_step(Q[1])   # the bot that holds this step's station decides now
 	clear()
+	picks = []
 	if not world.stage or world.ship == null:
 		world.stage_design()
 	var r: Dictionary = mission.compute()
@@ -139,7 +142,7 @@ func _show(i: int) -> void:
 	add_child(ip)
 	info_body = hb[1]
 	info_body.add_theme_font_size_override("font_size", Kit.T_BODY)
-	_say("", tr("Point at an option to know more. Drag to turn the craft, scroll to zoom."))
+	_say("", tr("Point at an option to know more. Keys: 1 to 9 choose, Enter goes on, Backspace goes back."))
 	var bp := Kit.panel_box(10)
 	Kit.place(bp, 0, 1, 1, 1, 496, -96, -388, -Kit.MARGIN)
 	add_child(bp)
@@ -152,6 +155,7 @@ func _show(i: int) -> void:
 	var back := Kit.btn(tr("◀ Back"), func(): _show(q - 1), Kit.T_BODY, 130)
 	back.custom_minimum_size.y = Kit.BTN_H + 8
 	back.disabled = q <= _first_q()
+	back_btn = back
 	bar.add_child(back)
 	if Q[0] == "review":
 		main_btn = Kit.accent_btn(Kit.btn(tr("LAUNCH!"), func(): main.launch(), Kit.T_ACTION, 260), Kit.C_GOLD)
@@ -200,6 +204,25 @@ func on_change(rebuild_3d := true, advance := false) -> void:
 	_show(q + 1 if advance else q)
 
 
+## The keyboard: 1 to 9 choose an option, Enter goes on (or launches), Backspace goes back.
+func _unhandled_input(e: InputEvent) -> void:
+	if not (e is InputEventKey) or not e.pressed or e.echo:
+		return
+	var k: int = e.physical_keycode
+	if k >= KEY_1 and k <= KEY_9 and k - KEY_1 < picks.size():
+		Kit.UiSound.play("click")
+		picks[k - KEY_1].call()
+	elif k == KEY_ENTER or k == KEY_KP_ENTER:
+		if main_btn and is_instance_valid(main_btn) and not main_btn.disabled:
+			main_btn.pressed.emit()
+	elif k == KEY_BACKSPACE:
+		if back_btn and is_instance_valid(back_btn) and not back_btn.disabled:
+			back_btn.pressed.emit()
+	else:
+		return
+	get_viewport().set_input_as_handled()
+
+
 # ===================================================================================== TILES
 ## One option: its drawing, its name, two facts and a mark (the best fit, enough, too little). Pointing at it tells
 ## the rest. dim: it cannot be chosen here.
@@ -221,6 +244,11 @@ func _tile(kind: String, title: String, facts: Array, chosen: bool, on_click: Ca
 	v.alignment = BoxContainer.ALIGNMENT_CENTER
 	h.add_child(v)
 	v.add_child(Kit.lbl(("● " if chosen else "") + title, Kit.T_BODY + 1, Kit.C_TEXT, Kit.FONT_B, true))
+	picks.append(on_click)
+	if picks.size() <= 9:   # its key, as on a keycap
+		var key := Kit.lbl(str(picks.size()), Kit.T_CAPS, Kit.C_DIM, Kit.FONT_B)
+		key.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		h.add_child(key)
 	var chips := HFlowContainer.new()
 	chips.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	chips.add_theme_constant_override("h_separation", 6)

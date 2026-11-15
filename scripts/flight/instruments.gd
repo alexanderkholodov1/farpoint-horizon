@@ -270,14 +270,65 @@ class BigButton extends Control:
 		draw_string(Kit.FONT_T, c + Vector2(-r, fs * 0.38 + _down * 3.0), word, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, fs, Color.WHITE if lit else Color(1, 1, 1, 0.55))
 
 
-## A button that reports while it is held (hold-to-steer for touch screens and mice). `held` is true while down.
+## A key of the steering pad that reports while it is held (hold-to-steer for touch screens and mice): a dark keycap
+## with a bevel, its arrow in the console's amber; it lights while down. `held` is true while down.
 class HoldButton extends Button:
 	var held := false
 
 	func _init(text_: String = "") -> void:
 		text = text_
 		focus_mode = Control.FOCUS_NONE
-		custom_minimum_size = Vector2(64, 52)
-		add_theme_font_size_override("font_size", 20)
+		custom_minimum_size = Vector2(64, 50)
+		add_theme_font_size_override("font_size", 18)
 		button_down.connect(func(): held = true)
 		button_up.connect(func(): held = false)
+		for st in ["normal", "hover", "pressed"]:
+			var sb := StyleBoxFlat.new()
+			sb.bg_color = Color(0.13, 0.15, 0.2) if st == "normal" else (Color(0.18, 0.21, 0.28) if st == "hover" else Color(1.0, 0.66, 0.26))
+			sb.set_corner_radius_all(10)
+			sb.border_color = Color(0.0, 0.0, 0.0, 0.7)
+			sb.border_width_bottom = 1 if st == "pressed" else 5   # the cap sinks when pressed
+			sb.border_width_left = 1
+			sb.border_width_right = 1
+			sb.border_width_top = 1
+			sb.content_margin_top = 4.0 if st == "pressed" else 0.0
+			add_theme_stylebox_override(st, sb)
+		add_theme_color_override("font_color", Color(1.0, 0.78, 0.42))
+		add_theme_color_override("font_hover_color", Color(1.0, 0.86, 0.6))
+		add_theme_color_override("font_pressed_color", Color(0.05, 0.06, 0.1))
+
+
+## A toggle switch with its lamp, as on a console: the name on the left, the lever on the right. Clicking flips it.
+class Switch extends Button:
+	var on := false:
+		set(v):
+			on = v
+			queue_redraw()
+	var label := "AUTOPILOT"
+	var _k := 0.0     ## Where the lever is drawn, easing between off (0) and on (1).
+
+	func _init() -> void:
+		flat = true
+		focus_mode = Control.FOCUS_NONE
+		custom_minimum_size = Vector2(136, 46)
+		mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+
+	func _process(delta: float) -> void:
+		var goal := 1.0 if on else 0.0
+		if absf(_k - goal) > 0.001:
+			_k = lerpf(_k, goal, clampf(delta * 14.0, 0.0, 1.0))
+			queue_redraw()
+
+	func _draw() -> void:
+		var lit: Color = Kit.C_OK
+		draw_style_box(Kit.flat(Color(0.0, 0.01, 0.03, 0.45), Color(Kit.C_TEXT, 0.18), 10, 1, 0, 0), Rect2(Vector2.ZERO, size))
+		var word := TranslationServer.translate(label) + " · P"   # its key
+		var fs := 11
+		while fs > 8 and Kit.FONT_B.get_string_size(word, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > size.x - 66.0:
+			fs -= 1
+		draw_string(Kit.FONT_B, Vector2(12, size.y * 0.5 + fs * 0.36), word, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, lit if on else Kit.C_DIM)
+		var track := Rect2(Vector2(size.x - 52.0, size.y * 0.5 - 10.0), Vector2(40.0, 20.0))
+		draw_style_box(Kit.flat(Color(lit, 0.35 * _k) if _k > 0.02 else Color(1, 1, 1, 0.08), Color(Kit.C_TEXT, 0.3), 10, 1, 0, 0), track)
+		var kx := lerpf(track.position.x + 10.0, track.end.x - 10.0, _k)
+		draw_circle(Vector2(kx, size.y * 0.5), 8.0, Color(0.9, 0.93, 0.98).lerp(lit, _k))
+		draw_circle(Vector2(kx, size.y * 0.5), 3.0, Color(0, 0, 0, 0.25))

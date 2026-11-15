@@ -14,6 +14,8 @@ const PICTURES := {
 	"moon_south_pole": ["res://assets/mission_photos/moon_south_pole/south_pole_wide_lroc_wac.jpg", [], "The Moon's south pole · LRO"],
 }
 const PHOTO_H := 150.0
+
+var order: Array = []      ## The missions as shown, for the number keys.
 const Progress := preload("res://scripts/progress.gd")
 const GREY := preload("res://shaders/ui_grey.gdshader")
 
@@ -41,6 +43,7 @@ func enter(_args: Dictionary) -> void:
 	for id in GameData.SCENARIOS:
 		if not ids.has(id):
 			ids.append(id)
+	order = ids
 	for id in ids:
 		grid.add_child(_card(id, GameData.SCENARIOS[id], mult))
 	var back := Kit.btn(tr("◀ Menu"), func(): go("menu"))
@@ -99,7 +102,7 @@ func _card(id: String, S: Dictionary, mult: float) -> Control:
 	var t := Kit.vbox(6)
 	t.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	pad.add_child(t)
-	var kind := Kit.caps(S.type)
+	var kind := Kit.caps("%d  ·  %s" % [order.find(id) + 1, S.type])
 	kind.add_theme_color_override("font_color", Kit.C_GOLD)
 	t.add_child(kind)
 	t.add_child(Kit.lbl(S.name, 22, Kit.C_TEXT, Kit.FONT_T, true))
@@ -140,6 +143,23 @@ func _card(id: String, S: Dictionary, mult: float) -> Control:
 		if pic:
 			pic.create_tween().tween_property(pic, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_SINE))
 	return pc
+
+
+## The keyboard: 1 to 6 choose a mission that is open, Backspace or Escape go back to the menu.
+func _unhandled_input(e: InputEvent) -> void:
+	if not (e is InputEventKey) or not e.pressed or e.echo:
+		return
+	var k: int = e.physical_keycode
+	if k >= KEY_1 and k <= KEY_9 and k - KEY_1 < order.size():
+		var id: String = order[k - KEY_1]
+		if Progress.locked_by(id, GameData.SCENARIOS[id]) == "":
+			Kit.UiSound.play("click")
+			_choose(id)
+	elif k == KEY_BACKSPACE or k == KEY_ESCAPE:
+		go("menu")
+	else:
+		return
+	get_viewport().set_input_as_handled()
 
 
 ## The brief's first sentence, the card's one line.
