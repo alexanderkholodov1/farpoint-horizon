@@ -112,7 +112,7 @@ libraries, imagery from NASA. Every source (information, formula, data) is cited
 
 - Engine: [Godot Engine](https://godotengine.org) (MIT).
 - Font: Inter by Rasmus Andersson, [SIL Open Font License 1.1](https://rsms.me/inter/) (see `fonts/FONTS_LICENSE.txt`).
-- Earth and Moon textures: NASA Blue Marble, Black Marble, VIIRS and the SVS CGI Moon Kit, made by `assets/source/planet_textures.py` (sources S-gibs-earth and S-moon-kit in `docs/sources.md`); the old `earth_albedo.jpg` of unknown source is gone.
+- Earth and Moon textures: NASA Blue Marble, Black Marble, VIIRS and the SVS CGI Moon Kit, made by `assets/source/planet_textures.py` (sources S-gibs-earth and S-moon-kit in `docs/sources.md`).
 - 3D modeling: [Blender](https://www.blender.org) (GPL), driven by our scripts in `assets/source/`. The craft, the launchers, the tanks, fairings and interstages, the craft components and the launch site are our own models.
 - Outside 3D models: Merlin Engine by hoahluke, Merlin 1D Vacuum by MartianDays, Rocket Nozzle Part by Zachary (corncob_127), all Sketchfab, CC BY 4.0; the Space Shuttle Solid Rocket Booster of NASA 3D Resources (public domain). Sources S-merlin-model, S-mvac-model, S-nozzle-model and S-srb-model in `docs/sources.md`.
 - NASA data in the game: Earth and Moon imagery, the Andes relief under the launch site, the Moon's south pole ground, the photos each mission returns, positions and constants; every item in `docs/sources.md`.
@@ -121,6 +121,9 @@ libraries, imagery from NASA. Every source (information, formula, data) is cited
 ## Team
 
 Team SK Horizon, Quito, Ecuador.
+
+- **Alexander Kholodov**: team lead; the mission, the flight to the Moon, the crew room and how the team works. [GitHub](https://github.com/alexanderkholodov1)
+- **Sebastián Amaguaya**: the rocket builder, the 3D models, the look and the sound of the game. [GitHub](https://github.com/XebaxCode)
 
 ## License
 

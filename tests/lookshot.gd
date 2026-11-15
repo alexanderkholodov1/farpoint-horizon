@@ -33,7 +33,13 @@ func _ready() -> void:
 		await wait(0.8)
 		await shot("credits")
 		var sc: ScrollContainer = g.screen.find_children("*", "ScrollContainer", true, false)[0]
-		sc.scroll_vertical = 1400
+		sc.scroll_vertical = 700
+		await wait(0.4)
+		await shot("credits_mid")
+		for b in g.screen.find_children("*", "Button", true, false):
+			if (b as Button).text.begins_with("▸  NASA data"):
+				(b as Button).pressed.emit()
+		sc.scroll_vertical = 1500
 		await wait(0.4)
 		await shot("credits_sources")
 	GameState.start_solo()
