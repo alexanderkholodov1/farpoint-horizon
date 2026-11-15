@@ -443,7 +443,11 @@ static func gb(x: float) -> String:
 		return "%.0f GB" % x
 	if x >= 0.1:
 		return "%.1f GB" % x
-	return "%.3f GB" % x
+	if x <= 0.0:
+		return "0 GB"
+	if x >= 0.001:
+		return "%d MB" % roundi(x * 1000.0)   # small amounts in MB: "0.004 GB" reads as nothing at all
+	return "<1 MB"
 
 
 ## Minutes as "45 min", "1.5 h" or "24 h".
