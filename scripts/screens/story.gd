@@ -79,7 +79,7 @@ func enter(args: Dictionary) -> void:
 
 ## What the sets change in the shared world, put back when the film ends.
 ## The story so far, in order: the prologue, then each chapter (its intro, the mission, its outro), as scene refs.
-static func story(chapters := ["prologue", "apollo13", "sts61", "pathfinder", "lcross"]) -> Array:
+static func story(chapters := ["prologue", "apollo13", "sts61", "pathfinder", "lcross", "dart"]) -> Array:
 	var out := []
 	for c in chapters:
 		var data = JSON.parse_string(FileAccess.get_file_as_string("res://data/story/%s.json" % c))
@@ -332,6 +332,9 @@ func _fx(fx: String) -> void:
 			Kit.UiSound.play("snap", 0.0)
 		"moonflash":
 			mflash_t = 0.0
+			if S.has("ejecta"):
+				(S.ejecta as CPUParticles3D).restart()
+				(S.ejecta as CPUParticles3D).emitting = true
 			flash.color = Color(1.0, 0.97, 0.9, 0.35)
 			Kit.UiSound.play("whoosh", 0.0)
 
