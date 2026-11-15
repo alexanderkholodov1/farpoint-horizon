@@ -23,12 +23,12 @@ OUT = os.path.abspath(sys.argv[sys.argv.index("--") + 1]) if "--" in sys.argv el
 BODY = os.path.join(HERE, "rumi_trellis_body.glb")
 
 NECK_Z = 0.118      # above this the generated head is cut off (the collar ring stays)
-HEAD_C = Vector((0.0, -0.01, 0.282))
-HEAD_R = Vector((0.186, 0.158, 0.162))
+HEAD_C = Vector((0.0, -0.01, 0.27))
+HEAD_R = Vector((0.19, 0.16, 0.175))
 
-CREAM = (0.98, 0.9, 0.82)
-GINGER = (0.96, 0.52, 0.12)
-BROWN = (0.42, 0.18, 0.07)
+CREAM = (1.0, 0.93, 0.85)
+GINGER = (0.97, 0.6, 0.2)
+BROWN = (0.5, 0.21, 0.08)
 PINK = (0.97, 0.6, 0.66)
 DARK = (0.06, 0.04, 0.04)
 
@@ -40,7 +40,7 @@ def mat(name, color, rough=0.6, metal=0.0, alpha=1.0, emit=0.0):
     m = bpy.data.materials.new(name)
     m.use_nodes = True
     b = m.node_tree.nodes["Principled BSDF"]
-    b.inputs["Base Color"].default_value = (*color, 1.0)
+    b.inputs["Base Color"].default_value = (color[0] ** 2.2, color[1] ** 2.2, color[2] ** 2.2, 1.0)   # sRGB in, linear for Blender
     b.inputs["Roughness"].default_value = rough
     b.inputs["Metallic"].default_value = metal
     if alpha < 1.0:
@@ -97,77 +97,89 @@ def body():
 
 
 def head():
-    """The head: a soft block with the coat's patches painted on its vertices."""
+    """The head, measured on the reference: a dome, round on top and wide at the cheeks, cream, a big ginger patch over
+    its right side (the viewer's left) from the crown down past the eye, a brown one over its left side down to the
+    eye, the forehead between them cream; glossy black eyes set wide, thin brows, a big pink nose, a small "Λ"
+    mouth, three brown whiskers a side, round ears on the top corners, pink inside."""
     m = bpy.data.materials.new("coat_rumi")
     m.use_nodes = True
     bsdf = m.node_tree.nodes["Principled BSDF"]
-    bsdf.inputs["Roughness"].default_value = 0.75
-    bsdf.inputs["Sheen Weight"].default_value = 0.4
+    bsdf.inputs["Roughness"].default_value = 0.6
     vc = m.node_tree.nodes.new("ShaderNodeVertexColor")
     vc.layer_name = "Col"
     m.node_tree.links.new(vc.outputs["Color"], bsdf.inputs["Base Color"])
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=96, ring_count=64, radius=1.0)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=128, ring_count=96, radius=1.0)
     o = bpy.context.object
     o.name = "Head"
     bm = bmesh.new()
     bm.from_mesh(o.data)
     for v in bm.verts:
         n = v.co.normalized()
-        k = 2.8
+        k = 1.85 if n.z >= 0.0 else 3.0            # a round dome above, squarer, fuller cheeks below
         r = (abs(n.x) ** k + abs(n.y) ** k + abs(n.z) ** k) ** (1.0 / k)
         p = n / r
-        p.x *= 1.0 + 0.05 * max(0.0, -p.z)     # fuller cheeks below
+        p.x *= 1.0 + 0.08 * max(0.0, -p.z)
+        p.y *= 0.92 if p.y < 0 else 1.0           # a flatter face
         v.co = Vector((p.x * HEAD_R.x, p.y * HEAD_R.y, p.z * HEAD_R.z)) + HEAD_C
     bm.to_mesh(o.data)
     bm.free()
     ca = o.data.color_attributes.new(name="Col", type="FLOAT_COLOR", domain="POINT")
-    # patches on the unit head: ginger around the right eye (viewer's left, -x) reaching the ear and the cheek;
-    # brown around the left eye, over the top right and the back
-    patches = [((-0.62, -0.55, 0.35), 0.62, GINGER), ((0.62, -0.5, 0.42), 0.58, BROWN), ((0.5, 0.45, 0.6), 0.6, BROWN)]
+    # patches, in the unit head (x right, y front -, z up): ginger and brown over the two upper sides
+    patches = [((-0.72, -0.5, 0.33), 0.66, GINGER), ((0.74, -0.45, 0.48), 0.62, BROWN), ((0.55, 0.6, 0.5), 0.55, BROWN), ((-0.55, 0.6, 0.4), 0.5, GINGER)]
     for v in o.data.vertices:
         u = Vector(((v.co.x - HEAD_C.x) / HEAD_R.x, (v.co.y - HEAD_C.y) / HEAD_R.y, (v.co.z - HEAD_C.z) / HEAD_R.z))
         col = Vector(CREAM)
         for c, rr, pc in patches:
-            d = (u - Vector(c)).length / rr + 0.12 * noise.noise(u * 4.0 + Vector(c))
-            col = col.lerp(Vector(pc), max(0.0, min(1.0, (1.0 - d) / 0.07)))
-        # the muzzle and the chin stay cream
-        if u.y < -0.6 and u.z < 0.1 and abs(u.x) < 0.45:
-            col = Vector(CREAM)
+            d = (u - Vector(c)).length / rr + 0.05 * noise.noise(u * 3.0 + Vector(c))
+            col = col.lerp(Vector(pc), max(0.0, min(1.0, (1.0 - d) / 0.035)))
         ca.data[v.index].color = (col.x ** 2.2, col.y ** 2.2, col.z ** 2.2, 1.0)   # float colours are linear
     finish(o, m)
-    fy = HEAD_C.y - HEAD_R.y
-    line = mat("line", DARK, 0.6)
-    for sx, ear_col in ((-1, GINGER), (1, BROWN)):
-        # eyes: glossy black, a highlight
-        ex = Vector((sx * 0.062, fy + 0.012, HEAD_C.z + 0.012))
-        sphere("Eye", ex, (0.024, 0.016, 0.028), mat("eye", (0.01, 0.01, 0.012), 0.08), 24, 12)
-        sphere("Glint", ex + Vector((0.008, -0.014, 0.012)), (0.007, 0.004, 0.007), mat("glint", (1, 1, 1), 0.2, emit=3.0), 12, 6)
-        # a small brow, a little worried
-        br = cyl("Brow", (ex.x, fy + 0.006, ex.z + 0.046), 0.0055, 0.04, mat("brow_%d" % sx, BROWN if sx > 0 else (0.75, 0.35, 0.08), 0.6))
+
+    def at(ux, uz, out=0.0):
+        """A point on the face at unit (ux, uz), `out` metres in front of it."""
+        y = HEAD_C.y - HEAD_R.y * 0.92 * (1.0 - 0.35 * ux * ux) - out
+        return Vector((ux * HEAD_R.x, y, HEAD_C.z + uz * HEAD_R.z))
+
+    line = mat("whisker", (0.32, 0.17, 0.08), 0.6)
+    for sx, ear_col, brow_col in ((-1, GINGER, (0.78, 0.38, 0.06)), (1, BROWN, (0.32, 0.12, 0.04))):
+        e = at(sx * 0.44, 0.17, 0.006)
+        sphere("Eye", e + Vector((0, -0.004, 0)), (0.02, 0.013, 0.024), mat("eye", (0.01, 0.01, 0.012), 0.05), 32, 16)
+        sphere("Glint", e + Vector((-0.007, -0.012, 0.012)), (0.0065, 0.004, 0.0075), mat("glint", (1, 1, 1), 0.2, emit=3.0), 12, 6)
+        b = at(sx * 0.44, 0.4, 0.004)
+        br = cyl("Brow", b, 0.0052, 0.046, mat("brow_%d" % sx, brow_col, 0.6))
         br.rotation_euler = (0.0, math.pi / 2 + sx * 0.18, 0.0)
-        # ears: round, set on the top corners, pink inside
-        at = HEAD_C + Vector((sx * 0.135, 0.0, HEAD_R.z * 0.88))
-        e = sphere("Ear", at, (0.052, 0.024, 0.048), mat("ear_%d" % sx, ear_col, 0.75), 24, 12)
-        e.rotation_euler = (0.15, sx * 0.45, sx * 0.3)
-        i = sphere("EarIn", at + Vector((sx * -0.004, -0.014, -0.004)), (0.034, 0.012, 0.032), mat("earin", PINK, 0.6), 24, 12)
-        i.rotation_euler = (0.15, sx * 0.45, sx * 0.3)
-        # whiskers
-        for k, ang in enumerate((-0.12, 0.02, 0.16)):
-            w = cyl("Whisker", (sx * 0.1, fy + 0.008, HEAD_C.z - 0.03 + k * 0.011), 0.0016, 0.1, line, verts=6)
-            w.rotation_euler = (0.0, math.pi / 2, sx * ang)
-    nz = HEAD_C.z - 0.028
-    sphere("Nose", (0, fy - 0.004, nz), (0.022, 0.012, 0.015), mat("nose", PINK, 0.45), 24, 12)
-    cyl("Mouth", (0, fy - 0.001, nz - 0.022), 0.0026, 0.02, line, verts=6)
+        # ears: big, round, on the top corners, leaning out, pink inside
+        ea = HEAD_C + Vector((sx * HEAD_R.x * 0.7, 0.0, HEAD_R.z * 0.88))
+        ear = sphere("Ear", ea, (0.052, 0.024, 0.05), mat("ear_%d" % sx, ear_col, 0.7), 32, 16)
+        ear.rotation_euler = (0.1, sx * 0.5, sx * 0.38)
+        inn = sphere("EarIn", ea + Vector((sx * 0.004, -0.018, -0.006)), (0.04, 0.012, 0.038), mat("earin", PINK, 0.55), 24, 12)
+        inn.rotation_euler = (0.1, sx * 0.5, sx * 0.38)
+        # whiskers: three a side, from the cheek beside the nose, fanning out and down
+        for k, ang in enumerate((0.06, -0.12, -0.3)):
+            root = at(sx * 0.2, -0.3 - k * 0.06, 0.007)
+            L = 0.085
+            w = cyl("Whisker", root + Vector((sx * math.cos(ang) * L / 2, 0, math.sin(ang) * L / 2)), 0.0016, L, line, verts=6)
+            w.rotation_euler = (0.0, math.pi / 2 - sx * ang, 0.0)
+    # the nose: a big rounded triangle, wider at the top
+    nose = sphere("Nose", at(0.0, -0.2, 0.012), (0.028, 0.015, 0.019), mat("nose", PINK, 0.4), 32, 16)
+    bm = bmesh.new()
+    bm.from_mesh(nose.data)
+    for v in bm.verts:
+        v.co.x *= 1.0 + 0.4 * v.co.z
+    bm.to_mesh(nose.data)
+    bm.free()
+    # the mouth: a short line down from the nose, then two strokes down and out (a small "Λ")
+    mz = at(0.0, -0.38, 0.006)
+    cyl("Mouth", mz, 0.002, 0.02, line, verts=6)
     for sx in (-1, 1):
-        m2 = cyl("MouthL", (sx * 0.01, fy - 0.001, nz - 0.034), 0.0026, 0.024, line, verts=6)
-        m2.rotation_euler = (0.0, sx * 1.0, 0.0)
+        ml = cyl("MouthL", mz + Vector((sx * 0.009, 0, -0.014)), 0.002, 0.022, line, verts=6)
+        ml.rotation_euler = (0.0, -sx * 0.75, 0.0)
     # the bubble helmet and its rim
-    sphere("Helmet", HEAD_C + Vector((0, 0.0, 0.018)), (0.235, 0.22, 0.215), mat("glass", (0.9, 0.95, 1.0), 0.02, alpha=0.1), 48, 24)
-    bpy.ops.mesh.primitive_torus_add(major_radius=0.233, minor_radius=0.004, location=HEAD_C + Vector((0, 0.0, 0.018)),
+    sphere("Helmet", HEAD_C + Vector((0, 0.0, 0.03)), (0.245, 0.23, 0.225), mat("glass", (0.95, 0.97, 1.0), 0.02, alpha=0.05), 48, 24)
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.243, minor_radius=0.0045, location=HEAD_C + Vector((0, 0.0, 0.03)),
                                      rotation=(math.pi / 2, 0, 0), major_segments=64, minor_segments=8)
     rim = bpy.context.object
     rim.name = "HelmetRim"
-    rim.scale = (1.0, 0.98, 1.0)
     finish(rim, mat("rim", (0.92, 0.93, 0.95), 0.25, 0.6))
 
 

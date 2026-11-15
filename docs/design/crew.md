@@ -35,5 +35,5 @@ the README's "Use of AI" says so. The pilot (Inti) waits for its reference. Mode
 `assets/models/crew/crew_rumi_meshy.glb`, built by `assets/source/crew_rumi_meshy.py`. The body (suit, tool belt,
 tools, knee pads, boots, tape, backpack) is `assets/source/rumi_trellis_body.glb`, made with **TRELLIS** (an AI
 image-to-3D model, Hugging Face Space trellis-community/TRELLIS) from a screenshot of the team's **Meshy** (AI) model;
-the head, the face, the patches and the helmet are built in Blender by the script. Both tools are AI: if this model
+the head, the face, the patches and the helmet are built in Blender by the script, measured on the reference (side by side: `crew_rumi_head_compare.png`, the reference on the left). Both tools are AI: if this model
 is used, the README's "Use of AI" and `docs/sources.md` say so. About 40,000 faces.
