@@ -423,21 +423,29 @@ func _reach_orbit() -> void:
 	hud.hint(tr("Average distance from the marker %.1f degrees. Fuel left in the last stage %d %%.") % [s.mean_error_deg, roundi(s.fuel_left * 100.0)])
 
 
-func _orbit(_delta: float) -> void:
-	# the craft separates from the upper stage and drifts away, turning slowly
+func _orbit(delta: float) -> void:
+	# in orbit nothing stops: the stage and the craft keep crossing the sky at orbital speed (7.8 km/s), so the Earth
+	# keeps turning beneath them at the speed time runs
+	var dt: float = delta * hud.warp
+	model.x += (model.vx - model.spin) * dt
+	Scene3D.horizon_place(horizon, rocket.position, HORIZON_R, model.h * 6.0, model.R, model.x)
+	# the craft separates: springs push it off the stage at about half a metre a second; the stage turns slowly away
 	if craft == null and phase_t > 1.6:
 		craft = Ship.build(mission)
 		var r: float = craft.get_meta("radius")
 		craft.scale = Vector3.ONE * (rocket_h * 0.12 / r)
 		craft.position = rocket.position + rocket.global_transform.basis.y * rocket_h * 1.02
 		world.stage.add_child(craft)
-		world.stage.add_child(Scene3D.puff(craft.position, rocket_h * 0.08))
+		world.stage.add_child(Scene3D.puff(craft.position, rocket_h * 0.05))
 		sfx.clunk.play()
-		hud.message(tr("CRAFT AWAY"), tr("Your craft is on its own now."), Color.WHITE, 2.2)
+		hud.message(tr("CRAFT AWAY"), tr("Springs push your craft off the rocket's last stage. It is on its own now."), Color.WHITE, 3.0)
 	if craft:
-		craft.position += rocket.global_transform.basis.y * 0.08 * rocket_h * get_process_delta_time()
-		craft.rotate_y(0.25 * get_process_delta_time())
-	if phase_t > 6.0 and not leaving:
+		var push := rocket.global_transform.basis.y * 0.5 * VIS * dt      # 0.5 m/s, in scene units
+		craft.position += push
+		rocket.position -= push * 0.3                                    # the heavier stage recoils a little
+		craft.rotate_object_local(Vector3.UP, 0.04 * dt)
+		rocket.rotate_object_local(Vector3.FORWARD, -0.02 * dt)          # the stage turns away from the craft
+	if phase_t > 7.0 and not leaving:
 		leaving = true
 		var next := "operation"
 		if FlightData.has_landing(mission.scenario) and main.SCREENS.has("flight"):

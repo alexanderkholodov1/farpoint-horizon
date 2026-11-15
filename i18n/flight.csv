@@ -73,3 +73,54 @@ near the ground,cerca del suelo
 The Moon,La Luna
 The Moon when you pass it,La Luna cuando pases junto a ella
 Time,Tiempo
+LAND,ALUNIZAR
+"Space: act · ← → ↑ ↓ camera · M map · , . time","Espacio: actuar · ← → ↑ ↓ cámara · M mapa · , . tiempo"
+Autopilot on: the flight computer flies every step.,Piloto automático activado: la computadora de vuelo hace cada paso.
+Your departure,Tu salida
+Try it: move the burn or change its size and watch where your path meets the Moon.,Pruébalo: mueve el encendido o cambia su tamaño y mira dónde tu trayectoria encuentra a la Luna.
+◀ Earlier,◀ Antes
+Later ▶,Después ▶
+Slower trip,Viaje más lento
+Faster trip,Viaje más rápido
+Mission control's plan,El plan del control de misión
+Ready ▶,Listo ▶
+Auto,Automático
+No departure on this lap meets the Moon with this burn; try another size.,Ninguna salida en esta vuelta llega a la Luna con este encendido; prueba otro tamaño.
+YOUR PLAN,TU PLAN
+"Burn at the green mark, on the far side of the Earth from where the Moon will be.","Enciende en la marca verde, al otro lado de la Tierra respecto a donde estará la Luna."
+"Your path (green) swings out and meets the Moon where the Moon will be in three or four days. Try the departure panel, then press SPACE (or Ready): time runs to the burn.",Tu trayectoria (verde) se abre y encuentra a la Luna donde estará en tres o cuatro días. Prueba el panel de salida y luego pulsa ESPACIO (o Listo): el tiempo corre hasta el encendido.
+countdown,cuenta regresiva
+BURN IN %d,ENCENDIDO EN %d
+BURN NOW,ENCIENDE YA
+Press SPACE to light the engine.,Pulsa ESPACIO para encender el motor.
+The flight computer lit the engine for you.,La computadora de vuelo encendió el motor por ti.
+ON TO THE BURN,RUMBO AL ENCENDIDO
+Time runs by itself to the countdown.,El tiempo corre solo hasta la cuenta regresiva.
+The burn comes with a ten-second countdown: press SPACE when it says BURN.,El encendido llega con una cuenta regresiva de diez segundos: pulsa ESPACIO cuando diga ENCENDER.
+"One degree moves your pass over the Moon by thousands of kilometres: real missions plan the departure carefully, and correct on the way.",Un grado mueve tu paso sobre la Luna miles de kilómetros: las misiones reales planifican la salida con cuidado y corrigen en el camino.
+The countdown comes first: the burn is in %s.,Primero la cuenta regresiva: el encendido es en %s.
+KEEP BURNING,SIGUE ENCENDIENDO
+Your path does not reach the Moon yet. Cut when the gauge reaches the mark.,Tu trayectoria aún no llega a la Luna. Corta cuando el indicador llegue a la marca.
+IGNITION,IGNICIÓN
+Press SPACE again to cut when the gauge reaches %d m/s.,Pulsa ESPACIO otra vez para cortar cuando el indicador llegue a %d m/s.
+"Six minutes of burning, sped up. Watch your path stretch out toward the Moon on the map (M).","Seis minutos de encendido, acelerados. Mira en el mapa (M) cómo tu trayectoria se estira hacia la Luna."
+The flight computer cut the engine: past the planned speed.,La computadora de vuelo cortó el motor: pasaste la velocidad planificada.
+ON YOUR WAY TO THE MOON,RUMBO A LA LUNA
+Off by %.1f %%. A perfect burn.,Error de %.1f %%. Un encendido perfecto.
+Engine off. You coast for days: the Earth's pull slows you as you climb. Time runs by itself.,Motor apagado. Vas en crucero durante días: la gravedad de la Tierra te frena mientras subes. El tiempo corre solo.
+A %.1f m/s burn brings your pass to %d km over the Moon. Press SPACE.,Un encendido de %.1f m/s deja tu paso a %d km sobre la Luna. Pulsa ESPACIO.
+THE MOON'S PULL,LA GRAVEDAD DE LA LUNA
+You enter the Moon's sphere of influence: its pull now beats the Earth's and bends your path.,Entras en la esfera de influencia de la Luna: su gravedad ya supera a la de la Tierra y curva tu trayectoria.
+BRAKE IN %d,FRENADO EN %d
+BRAKE NOW,FRENA YA
+You fall past the Moon at %.1f km/s. Press SPACE to burn against your motion and stay.,Pasas junto a la Luna a %.1f km/s. Pulsa ESPACIO para encender contra tu movimiento y quedarte.
+BRAKING,FRENANDO
+Burning against your motion. The engine stops by itself once the Moon holds you.,Encendido contra tu movimiento. El motor se apaga solo cuando la Luna te atrapa.
+KEEP BRAKING,SIGUE FRENANDO
+Still too fast to stay.,Todavía demasiado rápido para quedarte.
+FLIGHT COMPUTER,COMPUTADORA DE VUELO
+It flies this step for you.,Hace este paso por ti.
+correction in %s,corrección en %s
+"The map, at true scale","El mapa, a escala real"
+Next to your craft,Junto a tu nave
+Springs push your craft off the rocket's last stage. It is on its own now.,Unos resortes separan tu nave de la última etapa del cohete. Ya va por su cuenta.

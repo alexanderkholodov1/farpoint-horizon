@@ -10,7 +10,8 @@ signal action_pressed                       ## The big button (STAGE, BURN...) o
 signal throttle_changed(value: float)       ## The pilot moved the lever.
 signal autopilot_toggled(on: bool)
 signal skip_pressed
-signal warp_changed(value: float)           ## The pilot changed how fast time runs.
+signal warp_changed(value: float)           ## How fast time runs changed.
+signal warp_picked(value: float)            ## The pilot chose how fast time runs (a button or , .).
 
 ## How fast time can run: real time, then faster. The screen multiplies its real seconds by `warp`.
 const WARPS := [1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0]
@@ -48,6 +49,7 @@ var warp_note: Label
 var _warp_btns := {}        ## warp -> Button
 var _top: VBoxContainer
 var _cap_why := ""         ## Why time may not run faster now, said beside the warp.
+var auto_note := ""        ## Set by a screen that runs time by itself ("Auto"), shown before the speed.
 
 
 func _init() -> void:
@@ -194,13 +196,15 @@ static func _warp_label(w: float) -> String:
 
 
 ## Sets how fast time runs (kept at most warp_cap).
-func set_warp(w: float, _by_pilot := false) -> void:
+func set_warp(w: float, by_pilot := false) -> void:
 	w = clampf(w, 1.0, warp_cap)
 	var changed := w != warp
 	warp = w
 	_show_warp()
 	if changed:
 		warp_changed.emit(warp)
+	if by_pilot:
+		warp_picked.emit(warp)
 
 
 ## The fastest time may run now; why is said in the note. Lowers the current warp when it is above.
@@ -215,14 +219,24 @@ func cap_warp(cap: float, why := "") -> void:
 func _show_warp() -> void:
 	if warp_box == null:
 		return
+	# the chosen speed lit in the accent colour (the largest button not above it), the ones not allowed now faded
+	var lit_w := 1.0
+	for w in _warp_btns:
+		if w <= warp + 0.001:
+			lit_w = maxf(lit_w, w)
 	for w in _warp_btns:
 		var b: Button = _warp_btns[w]
+		for st in ["normal", "hover", "pressed", "disabled"]:
+			b.remove_theme_stylebox_override(st)
+		for k in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
+			b.remove_theme_color_override(k)
 		b.disabled = w > warp_cap
-		if w == warp:
+		b.modulate.a = 0.35 if b.disabled else 1.0
+		if w == lit_w:
 			Kit.accent_btn(b, Kit.C_ACCENT)
-		else:
-			_plain(b)
 	var t: String = TranslationServer.translate("Real time") if warp <= 1.0 else TranslationServer.translate("Time runs %s times faster") % _thousands(warp)
+	if auto_note != "":
+		t = auto_note + " · " + t
 	if _cap_why != "":
 		t += " · " + _cap_why
 	warp_note.text = t
