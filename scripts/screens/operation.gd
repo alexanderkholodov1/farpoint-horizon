@@ -90,6 +90,8 @@ func _build_ui() -> void:
 	var where: String = tr("On the Moon · Shackleton's rim") if landed else GameData.ORBITS[mission.orbit].name
 	var tt := Kit.caps(tr("Operations") + " · " + where)
 	tt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tt.clip_text = true   # a long orbit name is cut, never pushes the bar past the screen (issue #93)
+	tt.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	th.add_child(tt)
 	month_lbl = Kit.lbl(tr("Month 0 of %d") % months_total, Kit.T_VALUE, Kit.C_TEXT, Kit.font_num())
 	th.add_child(month_lbl)
@@ -354,7 +356,7 @@ func _log_event(e: Dictionary) -> void:
 	log_box.add_child(pc)
 	pc.modulate.a = 0.0
 	pc.create_tween().tween_property(pc, "modulate:a", 1.0, 0.4)
-	if e.kind != "info" and month_f < 9000.0:
+	if e.kind != "info" and month_f < 9000.0 and not Kit.compact:   # on a phone the log says it; a toast would cover it
 		Kit.toast(self, e.title, col, 1.8, 196.0)   # below the top bar, never over the science
 	# scroll to the newest entry once the log has its new size (next frame); freed with the screen if it leaves first
 	if not get_tree().process_frame.is_connected(_scroll_log_to_end):

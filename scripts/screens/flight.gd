@@ -300,6 +300,34 @@ func _on_autopilot(on: bool) -> void:
 		hud.hint(tr("Autopilot on: the flight computer flies every step."))
 
 
+## On a phone nothing covers anything (issue #93): the plan starts under Skip, and the line of what to do now wraps in
+## the gap between the readouts and the panels on the right.
+func _fit_compact() -> void:
+	var view: Vector2 = hud.get_viewport_rect().size
+	var top_right: Rect2 = hud._top_right.get_parent().get_global_rect()
+	plan_panel.offset_top = top_right.end.y + 6.0
+	plan_panel.offset_bottom = plan_panel.offset_top
+	var l: float = hud.readouts_panel.get_global_rect().end.x + 8.0
+	var r: float = (plan_panel.get_global_rect().position.x if plan_panel.visible else top_right.position.x) - 8.0
+	var p: Control = now_lbl.get_parent()
+	p.anchor_left = 0.0
+	p.anchor_right = 0.0
+	p.grow_horizontal = Control.GROW_DIRECTION_END
+	p.offset_left = l
+	p.offset_right = r
+	now_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	now_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	now_lbl.custom_minimum_size.x = maxf(80.0, r - l - 30.0)
+	# the big message starts under that line, never behind it
+	var top: float = p.get_global_rect().end.y + 6.0 if p.visible else 60.0
+	for pair in [[hud.big, 0.0, 56.0], [hud.sub, 58.0, 140.0]]:
+		var lb: Control = pair[0]
+		lb.anchor_top = 0.0
+		lb.anchor_bottom = 0.0
+		lb.offset_top = top + pair[1]
+		lb.offset_bottom = top + pair[2]
+
+
 ## The trip's steps across the top, the one being flown lit: the player always knows where they are and what comes.
 func _build_steps() -> void:
 	steps_row = Kit.hbox(6)
@@ -368,6 +396,7 @@ func _build_minimap() -> void:
 		Kit.place(p, 0, 1, 0, 1, Kit.MARGIN, -300, Kit.MARGIN + 272, -Kit.MARGIN)
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud.add_child(p)
+	hud.left_panel = p   # on a phone it shrinks under the readouts and the hint starts after it
 	var v := Kit.vbox(4)
 	p.add_child(v)
 	v.add_child(Kit.caps(tr("Map · M for the big one")))
@@ -382,6 +411,7 @@ func _build_plan_panel() -> void:
 	plan_panel = Kit.panel_box(Kit.PAD)
 	if Kit.compact:
 		Kit.place(plan_panel, 1, 0, 1, 0, -300, 58, -Kit.MARGIN, 58)
+		hud.right_panel = plan_panel
 	else:
 		Kit.place(plan_panel, 1, 0, 1, 0, -380, 90, -Kit.MARGIN, 90)
 	hud.add_child(plan_panel)
@@ -447,6 +477,7 @@ func process(delta: float) -> void:
 	plan_panel.visible = phase == "plan" and not plan.is_empty() and not plan_ok
 	if Kit.compact:   # on a phone the plan and the controls share the right side: only one at a time
 		hud.controls_panel.visible = not plan_panel.visible
+		_fit_compact()
 	# seen from beside the craft, fast time is the Earth flashing from day to night every few seconds: the map shows it
 	if view_auto and view == "craft" and hud.warp > 300.0:
 		view = "map"
