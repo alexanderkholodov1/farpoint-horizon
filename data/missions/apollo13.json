@@ -1,5 +1,5 @@
 {
- "doc": "Mission 1, Apollo 13: 'Square peg, round hole' (issue #45). Inside the powered-down lunar module the carbon dioxide climbs; the player builds the adapter that lets the command module's square canisters clean the air through the lunar module's system, picking each part as Mission Control reads the steps. NASA facts: the materials (plastic bags, cardboard and tape, all carried on board), square canisters against round openings, the CO2 warning after a day and a half in the LM, and the LM made for two men for two days and asked to keep three for about four days [S-apollo13-nasa]; the real adapter in the photo AS13-62-9004 [S-apollo13-mailbox]. No NASA page we could read gives the build steps or CO2 numbers: the order of the steps and the gauge's pace are our simplification, said on screen.",
+ "doc": "Mission 1, Apollo 13: 'Square peg, round hole' (issue #45). Inside the powered-down lunar module the carbon dioxide climbs; the player builds the adapter that lets the command module's square canisters clean the air through the lunar module's system, picking each part, in order, as Mission Control (Wayra) reads the steps; at the top of the scale the air runs out and it is tried again. NASA facts: the materials (plastic bags, cardboard and tape, all carried on board), square canisters against round openings, the CO2 warning after a day and a half in the LM, and the LM made for two men for two days and asked to keep three for about four days [S-apollo13-nasa]; the real adapter in the photo AS13-62-9004 [S-apollo13-mailbox]. No NASA page we could read gives the build steps or CO2 numbers: the order of the steps and the gauge's pace are our simplification, said on screen.",
  "gauge": {
   "start": 0.42,
   "warning": 0.7,
@@ -7,7 +7,7 @@
   "wrong_pick": 0.03,
   "fall_per_s": 0.03,
   "clean": 0.3,
-  "note": "Our simplification: a gauge from clean air (0) to the top of the scale (1), the warning light at 0.7, about two minutes from the start to the top. Its pace is set for play (the real work took the crew hours), not measured."
+  "note": "Our simplification: a gauge from clean air (0) to the top of the scale (1), the warning light at 0.7, about two minutes from the start to the top, where the air runs out and the game is tried again. Its pace is set for play (the real work took the crew hours), not measured."
  },
  "parts": [
   {
@@ -71,7 +71,6 @@
   }
  ],
  "wrong": "Negative, that will not help with this step.",
- "hint": "Houston here: the part you need is lit. Take your time, we are with you.",
  "win": "The CO2 reading turns around!",
  "win_sub": "The square canister cleans the air of the round-hole spacecraft.",
  "photo": {
@@ -93,8 +92,9 @@
  "urgent": {
   "60": "Aquarius, Houston. We are watching your numbers. Keep going, you are doing fine.",
   "30": "Thirty seconds of margin. Steady hands, Aquarius.",
-  "10": "Ten seconds. Finish it!",
-  "0": "We are past the line. Stay with it: the part you need is lit."
+  "10": "Ten seconds. Finish it!"
  },
- "saved": "Saved!"
+ "saved": "Saved!",
+ "lost": "The air ran out.",
+ "lost_sub": "That is not how it went: the crew made it. Try again."
 }

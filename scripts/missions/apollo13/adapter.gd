@@ -2,7 +2,7 @@ extends RefCounted
 ## Mission 1, Apollo 13: the adapter game's rules, with no screen (issue #45), so a test can play it.
 ## The CO2 climbs at the gauge's pace; each step of Mission Control asks for one part of the table; a wrong part costs
 ## a little air; the tape step needs its presses (graded by the timing ring); the last part turns the reading around.
-## Never a fail: at the top of the scale the gauge holds and Mission Control lights the part. Data:
+## At the top of the scale the air runs out: lost, and the game is tried again (the team's choice). Data:
 ## data/missions/apollo13.json (the gauge's numbers are our simplification, said there and on screen).
 ##   var A = Adapter.new(); A.update(dt); A.pick("cardboard"); A.press(grade)
 
@@ -15,7 +15,7 @@ var presses := 0              ## Presses done in the tape step.
 var wrong := 0                ## Wrong parts picked.
 var perfect := 0              ## Presses graded perfect.
 var peak := 0.0               ## The highest CO2 reached.
-var hinted := false           ## Mission Control has lit the part (the gauge reached the top).
+var lost := false             ## The air ran out (the gauge reached the top).
 var done := false             ## The adapter works: the CO2 falls.
 var t := 0.0
 
@@ -47,12 +47,14 @@ func presses_needed() -> int:
 ## Picks a part from the table. Returns "ok" (the step's part; a step with presses waits for them), "next" (the step is
 ## done), "wrong", or "" once finished.
 func pick(id: String) -> String:
-	if step >= D.steps.size():
+	if step >= D.steps.size() or lost:
 		return ""
 	if id != needed():
 		wrong += 1
 		co2 = minf(1.0, co2 + float(D.gauge.wrong_pick))
 		peak = maxf(peak, co2)
+		if co2 >= 1.0:
+			lost = true
 		return "wrong"
 	if presses_needed() > 0:
 		return "ok"
@@ -62,7 +64,7 @@ func pick(id: String) -> String:
 ## A press in a step that needs them (the tape); grade "perfect", "good" or "late". Every press counts: a late one
 ## only earns less.
 func press(grade: String) -> String:
-	if presses_needed() == 0:
+	if presses_needed() == 0 or lost:
 		return ""
 	presses += 1
 	if grade == "perfect":
@@ -85,10 +87,12 @@ func update(dt: float) -> void:
 	if done:
 		co2 = maxf(float(D.gauge.clean), co2 - float(D.gauge.fall_per_s) * dt)
 		return
+	if lost:
+		return
 	co2 = minf(1.0, co2 + float(D.gauge.rise_per_s) * dt)
 	peak = maxf(peak, co2)
 	if co2 >= 1.0:
-		hinted = true
+		lost = true
 
 
 ## Stars, 1 to 3: finished (always 1), no wrong part and a clean peak, perfect taping.

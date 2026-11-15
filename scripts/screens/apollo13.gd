@@ -4,9 +4,10 @@ extends "res://scripts/screens/screen.gd"
 ## adapter takes shape in the middle; the tape is pressed on with the timing ring (Space). The last part turns the
 ## reading around; then the real NASA photo of the crew's "Mail Box". It is an emergency against the clock: the air
 ## left counts down, the master alarm and a heartbeat speed up, the lights flicker, and in the danger zone the view
-## blurs and darkens at the edges (too much CO2 makes people dizzy). Never a fail screen: a wrong part costs seconds,
-## and past the line the clock runs into overtime while Mission Control lights the right part. The win is a moment of
-## slow motion, a flash and the fans starting: the needle turns around and the clock freezes on "Saved!".
+## blurs and darkens at the edges (too much CO2 makes people dizzy). A part out of order costs seconds; when the clock
+## reaches zero the air runs out and the player tries again (the team's choice). The win is a moment of slow motion,
+## a flash and the fans starting: the needle turns around and the clock freezes on "Saved!". Only the crew's version:
+## the story's scenes give the context, this screen only the task, with Rumi and Killa working beside the adapter.
 ## Rules: scripts/missions/apollo13/adapter.gd; data: data/missions/apollo13.json. Played on its own
 ## (go("apollo13")) or inside the story (args {"campaign": true, "then": [scene refs], "back": id}), where Rumi and
 ## Killa work beside the adapter and the story's outro follows.
@@ -62,6 +63,7 @@ var actors := {}
 var saved := {}
 var taping := false            ## The tape is picked: the ring runs until its presses are done.
 var finish_t := -1.0
+var lost_t := -1.0
 var clock: Label
 var clock_cap: Label
 var penalty: Label
@@ -102,7 +104,7 @@ func enter(args: Dictionary) -> void:
 	alarm = Sound.player(self, "alarm", -16.0)
 	heart = Sound.player(self, "thud", -8.0)
 	tick = Sound.player(self, "beep", -14.0)
-	if campaign:
+	if true:
 		for id in ["rumi", "killa"]:
 			var a = CuyActor.new()
 			a.id = id
@@ -228,7 +230,6 @@ func _build_ui() -> void:
 	over.add_theme_color_override("font_color", Color(Kit.C_ON_DARK, 0.75))
 	head.add_child(over)
 	head.add_child(Kit.lbl(tr("Square peg, round hole"), Kit.T_CLOCK, Kit.C_GOLD, Kit.FONT_T))
-	head.add_child(Kit.lbl(tr("Build an adapter so the square filter can clean the air, before the CO2 gets too high."), Kit.T_BODY, Kit.C_ON_DARK, Kit.FONT_B, true))
 	# left: the gauge
 	var gp := Kit.panel_box(Kit.PAD)
 	Kit.place(gp, 0, 0, 0, 1, Kit.MARGIN, 150, Kit.MARGIN + 190, -230)
@@ -250,8 +251,8 @@ func _build_ui() -> void:
 	hp.add_child(hv)
 	var hh := Kit.hbox(Kit.GAP)
 	hv.add_child(hh)
-	hh.add_child(Kit.chip(tr("Mission Control"), Kit.C_ACCENT))
-	hh.add_child(Kit.lbl(tr("Houston, on the radio"), Kit.T_SMALL, Kit.C_DIM))
+	hh.add_child(Kit.chip("Wayra", Kit.C_ACCENT))
+	hh.add_child(Kit.lbl(tr("Mission Control, on the radio"), Kit.T_SMALL, Kit.C_DIM))
 	houston = Kit.lbl("", Kit.T_ACTION - 2, Kit.C_TEXT, Kit.FONT_B, true)
 	houston.custom_minimum_size.x = 380
 	hv.add_child(houston)
@@ -352,14 +353,14 @@ func _show_step() -> void:
 
 func _light_tiles() -> void:
 	for id in part_tiles:
-		var lit: bool = A.hinted and id == A.needed()
+		var lit := false
 		var pc: PanelContainer = part_tiles[id]
 		pc.add_theme_stylebox_override("panel", Kit.flat(Color(Kit.C_GOLD, 0.18) if lit else Kit.C_CARD, Kit.C_GOLD if lit else Kit.C_EDGE, 10, 2 if lit else 1, 8, 8))
 
 
 # ===================================================================================== PLAY
 func _pick(id: String) -> void:
-	if A.done:
+	if A.done or A.lost:
 		return
 	if taping and id == A.needed():
 		return                          # already taping: the ring does it
@@ -461,6 +462,47 @@ func _win() -> void:
 		actors[k].set_mood("happy")
 
 
+## The air ran out: the cabin goes dark and red, the crew slump, and the game is tried again.
+func _lose() -> void:
+	lost_t = 0.0
+	taping = false
+	alarm.stop()
+	Kit.UiSound.play("error", 0.0)
+	clock.text = "0:00"
+	clock.add_theme_color_override("font_color", Kit.C_BAD)
+	for k in actors:
+		actors[k].act = "hide"
+		actors[k].set_mood("tired")
+	var shade := ColorRect.new()
+	shade.color = Color(0.08, 0.0, 0.0, 0.0)
+	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(shade)
+	shade.create_tween().tween_property(shade, "color:a", 0.75, 1.2)
+	var v := Kit.vbox(Kit.GAP)
+	v.alignment = BoxContainer.ALIGNMENT_CENTER
+	v.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	v.modulate.a = 0.0
+	add_child(v)
+	var big := Kit.lbl(tr(A.D.lost), Kit.T_SHOUT, Kit.C_BAD, Kit.FONT_T)
+	big.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(big)
+	var sub := Kit.lbl(tr(A.D.lost_sub), Kit.T_ACTION, Kit.C_ON_DARK, Kit.FONT_B)
+	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(sub)
+	var row := Kit.hbox(Kit.GAP)
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	v.add_child(row)
+	var again := Kit.btn(tr("Try again  ·  Enter"), _again, Kit.T_BODY)
+	Kit.accent_btn(again, Kit.C_GOLD)
+	row.add_child(again)
+	v.create_tween().tween_property(v, "modulate:a", 1.0, 0.8).set_delay(0.8)
+	again.grab_focus()
+
+
+func _again() -> void:
+	go("apollo13", {"campaign": campaign, "then": then_scenes, "back": back})
+
+
 ## The real thing: NASA's photo of the crew's adapter, the stars earned, and what comes next.
 func _show_photo() -> void:
 	photo_shown = true
@@ -543,10 +585,10 @@ func process(delta: float) -> void:
 	(haze.material as ShaderMaterial).set_shader_parameter("amount", dz)
 	(haze.material as ShaderMaterial).set_shader_parameter("pulse", 0.5 + 0.5 * sin(_t * 5.0))
 	flash.color.a = maxf(0.0, flash.color.a - delta * 1.5)
-	if not A.done:
+	if not A.done and not A.lost:
 		var left := A.seconds_left()
 		var sec := int(ceil(left))
-		clock.text = _mmss(left) if left > 0.0 else tr("Overtime")
+		clock.text = _mmss(left)
 		var col: Color = Kit.C_BAD if left <= 30.0 else (Kit.C_WARN if left <= 60.0 else Kit.C_GOLD)
 		clock.add_theme_color_override("font_color", col if left > 10.0 or int(_t * 4.0) % 2 == 0 else Kit.C_TEXT)
 		clock.pivot_offset = clock.size * 0.5
@@ -554,7 +596,7 @@ func process(delta: float) -> void:
 		if sec != _last_sec and sec <= 10 and sec > 0:
 			tick.play()
 		_last_sec = sec
-		for k in ["60", "30", "10", "0"]:
+		for k in ["60", "30", "10"]:
 			if left <= float(k) and not _said.has(k) and not taping:
 				_said[k] = true
 				houston.text = tr(A.D.urgent[k])
@@ -575,10 +617,8 @@ func process(delta: float) -> void:
 	if S.has("alarm_lamp"):
 		var am := (S.alarm_lamp as MeshInstance3D).material_override as StandardMaterial3D
 		am.emission_energy_multiplier = (4.0 * pulse) if A.warning() and not A.done else 0.2
-	if A.hinted and not A.done:
-		_light_tiles()
-		if houston.text != tr(A.D.hint) and finish_t < 0.0 and not taping:
-			houston.text = tr(A.D.hint)
+	if A.lost and lost_t < 0.0:
+		_lose()
 	# the tape's ring
 	var tr_ring := ring as Instruments.TimingRing
 	if taping and not A.done:
@@ -603,7 +643,12 @@ func _unhandled_input(e: InputEvent) -> void:
 	if not (e is InputEventKey) or not e.pressed or e.echo:
 		return
 	var k: int = e.physical_keycode
-	if photo_shown:
+	if lost_t >= 0.0:
+		if k == KEY_ENTER or k == KEY_KP_ENTER or k == KEY_R:
+			_again()
+		else:
+			return
+	elif photo_shown:
 		if k == KEY_ENTER or k == KEY_KP_ENTER:
 			_continue()
 		elif k == KEY_R:

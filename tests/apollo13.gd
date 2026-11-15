@@ -1,7 +1,7 @@
 extends SceneTree
 ## Mission 1, Apollo 13 (issue #45): the adapter game's rules played through. A clean run finishes with three stars
-## and turns the CO2 around; wrong parts cost air and stars but never end the game; at the top of the scale the gauge
-## holds and Mission Control lights the part; the data's facts name sources listed in docs/sources.md, and every text
+## and turns the CO2 around; a part out of order costs air and a star; at the top of the scale the air runs out (lost,
+## tried again) and no part is taken any more; the data's facts name sources listed in docs/sources.md, and every text
 ## has its Spanish version in i18n/apollo13.csv.
 ## Run: tools/godot.sh --headless --path . -s res://tests/apollo13.gd
 ## check: ^ok apollo13
@@ -38,18 +38,27 @@ func _initialize() -> void:
 	# mistakes and a long wait: never a fail
 	var B = Adapter.new()
 	var c0: float = B.co2
-	if B.pick("food") != "wrong" or B.co2 <= c0:
-		fail("a wrong part costs no air")
+	if B.pick("tape") != "wrong" or B.co2 <= c0:
+		fail("a part out of order costs no air")
+	if B.pick("food") != "wrong":
+		fail("the food packet is not a part of the adapter")
+	var secs: float = B.seconds_left()
+	if secs < 90.0 or secs > 130.0:
+		fail("about two minutes of air: %.0f s" % secs)
 	for i in 400:
 		B.update(0.5)
-	if B.co2 > 1.0 or not B.hinted:
-		fail("top of the scale: co2=%.2f hinted=%s" % [B.co2, B.hinted])
+	if B.co2 > 1.0 or not B.lost or B.pick("cardboard") != "":
+		fail("top of the scale: co2=%.2f lost=%s" % [B.co2, B.lost])
+	# a slow but successful run: one wrong part, late tape
+	var C = Adapter.new()
+	C.pick("hose")
 	for id in order:
-		if B.pick(id) == "ok":
-			for i in B.presses_needed():
-				B.press("late")
-	if not B.done or B.stars() != 1:
-		fail("slow run: done=%s stars=%d" % [B.done, B.stars()])
+		C.update(5.0)
+		if C.pick(id) == "ok":
+			for i in C.presses_needed():
+				C.press("late")
+	if not C.done or C.stars() != 1:
+		fail("slow run: done=%s stars=%d" % [C.done, C.stars()])
 	# sources and Spanish
 	var md := FileAccess.get_file_as_string("res://docs/sources.md")
 	var D: Dictionary = A.D
@@ -64,7 +73,7 @@ func _initialize() -> void:
 		var row := f.get_csv_line()
 		if row.size() >= 2:
 			es[row[0]] = row[1]
-	var texts := [D.wrong, D.hint, D.win, D.win_sub, D.photo.caption]
+	var texts: Array = [D.wrong, D.lost, D.lost_sub, D.win, D.win_sub, D.photo.caption] + D.urgent.values()
 	for P in D.parts:
 		texts += [P.name, P.line]
 	for St in D.steps:
@@ -74,5 +83,5 @@ func _initialize() -> void:
 	for t in texts:
 		if not es.has(t):
 			fail("no Spanish for: " + t)
-	print("ok apollo13 %d steps, stars clean %d, slow %d" % [order.size(), A.stars(), B.stars()] if bad == 0 else "FAILED apollo13 %d" % bad)
+	print("ok apollo13 %d steps, stars clean %d, slow %d" % [order.size(), A.stars(), C.stars()] if bad == 0 else "FAILED apollo13 %d" % bad)
 	quit()

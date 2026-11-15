@@ -38,11 +38,10 @@
    {"who": "rumi", "mood": "determined", "act": "work", "shot": "close", "text": "Square peg, round hole. Classic."}
   ],
   "mission": [
-   {"set": "lm", "fx": "dim", "title": "Your turn", "sub": "Build the CO2 adapter before the air runs out, then fly them home", "shot": "window", "wait": 5.0, "play": "apollo13"}
+   {"set": "lm", "fx": "dim", "title": "Your turn", "shot": "window", "wait": 2.5, "play": "apollo13"}
   ],
   "fixed": [
-   {"set": "lm", "title": "A few hours later", "sub": "The adapter is in place", "shot": "wide", "fx": "dim", "wait": 3.0},
-   {"who": "killa", "mood": "relieved", "act": "cheer", "acts": {"rumi": "idle"}, "text": "The air is getting better!"},
+   {"set": "lm", "fx": "dim", "shot": "wide", "wait": 0.5},
    {"who": "inti", "mood": "determined", "act": "point", "shot": "low", "text": "Around the Moon, and home.", "fact": "As they approached the Moon, a long five-minute burn sped up the return home.", "source": "S-apollo13-nasa"}
   ],
   "home": [

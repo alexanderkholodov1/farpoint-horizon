@@ -2,10 +2,10 @@
 
 - `go("apollo13")` plays it on its own; inside the story the "Your turn" card (`data/story/apollo13.json`, scene
   `mission`, `"play": "apollo13"`) hands over to it and the outro follows when it is done.
-- An emergency against the clock in the dark lunar module: the air left counts down (about two minutes), the master
-  alarm and a heartbeat speed up, the lights flicker, and in the danger zone the view blurs and darkens at the edges.
-  Mission Control reads the four steps (cardboard, bag, tape on the timing ring, hose); a wrong part costs 6 s.
-  Never a fail: past the line the clock reads Overtime and the right part is lit. The win: slow motion, a flash, the
+- Only the crew's version (team choice, 2026-11-15): the story gives the context; this screen only the task, with
+  Rumi and Killa beside the adapter. An emergency against the clock: about two minutes of air, alarm, heartbeat,
+  blur in the danger zone. Wayra (Mission Control) reads four steps; the table holds only what the crew had.
+  When the air runs out the game is lost and tried again (team choice). The win: slow motion, a flash,
   needle turns around, "Saved!", then NASA's photo of the real "Mail Box" (AS13-62-9004) and up to three stars.
 - Rules in `scripts/missions/apollo13/adapter.gd` (tested by `tests/apollo13.gd`), data in
   `data/missions/apollo13.json`. NASA facts only from S-apollo13-nasa and S-apollo13-mailbox; the steps' order and

@@ -43,8 +43,8 @@ func _ready() -> void:
 	await wait(1.2)
 	await shot("danger")
 	g.screen.A.co2 = 0.995
-	await wait(1.8)
-	await shot("overtime")
+	await wait(3.5)
+	await shot("lost")
 	g.go("apollo13", {"back": "menu"})
 	await wait(1.5)
 	await shot("start")
