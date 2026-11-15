@@ -477,7 +477,12 @@ func _orbit(delta: float) -> void:
 		world.stage.add_child(craft)
 		world.stage.add_child(Scene3D.puff(craft.position, rocket_h * 0.05))
 		sfx.clunk.play()
-		hud.message(tr("CRAFT AWAY"), tr("Springs push your craft off the rocket's last stage. It is on its own now."), Color.WHITE, 3.0)
+		var O: Dictionary = GameData.ORBITS.get(mission.orbit, {})
+		var up: String = ""
+		if not O.is_empty() and str(O.get("body", "tierra")) == "tierra":
+			# real launches stop in a low parking orbit first; the last stage or the craft climbs to the final one later
+			up = "  " + tr("From this low parking orbit it climbs on to its own: %s.") % tr(str(O.get("name", "")))
+		hud.message(tr("CRAFT AWAY"), tr("Springs push your craft off the rocket's last stage. It is on its own now.") + up, Color.WHITE, 3.5)
 	if craft:
 		var push := rocket.global_transform.basis.y * 0.5 * VIS * dt      # 0.5 m/s, in scene units
 		craft.position += push
