@@ -114,6 +114,8 @@ func _build_hud() -> void:
 	hud.action_pressed.connect(_hover)
 	hud.autopilot_toggled.connect(func(on): hud.hint(tr("Autopilot on. It sets you down on the target; touch any control to fly it yourself.") if on else tr("You have the controls.")))
 	hud.skip_pressed.connect(_skip)
+	hud.add_restart()
+	hud.restart_pressed.connect(func(): main.go("landing"))   # fly this part again, whatever happened
 	hud.set_autopilot(GameState.pilot_bot)
 	if GameState.pilot_bot:
 		hud.hint(tr("The bot pilot is landing. Touch the throttle or the arrows to take the controls."))

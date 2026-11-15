@@ -10,6 +10,7 @@ signal action_pressed                       ## The big button (STAGE, BURN...) o
 signal throttle_changed(value: float)       ## The pilot moved the lever.
 signal autopilot_toggled(on: bool)
 signal skip_pressed
+signal restart_pressed                      ## The pilot asked to fly this part again (add_restart()).
 signal warp_changed(value: float)           ## How fast time runs changed.
 signal warp_picked(value: float)            ## The pilot chose how fast time runs (a button or , .).
 
@@ -50,6 +51,9 @@ var _warp_btns := {}        ## warp -> Button
 var _top: VBoxContainer
 var _cap_why := ""         ## Why time may not run faster now, said beside the warp.
 var auto_note := ""        ## Set by a screen that runs time by itself ("Auto"), shown before the speed.
+
+
+var _top_right: HBoxContainer
 
 
 func _init() -> void:
@@ -145,6 +149,7 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 	skip.focus_mode = Control.FOCUS_NONE
 	skip.custom_minimum_size.y = Kit.BTN_H
 	tr_box.add_child(skip)
+	_top_right = tr_box
 	# the message, straight on the scene, and the hint in its own panel
 	big = Kit.lbl("", Kit.T_SHOUT, Kit.C_ON_DARK, Kit.FONT_T)
 	big.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -166,6 +171,16 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 	Kit.place(hint_panel, 0.5, 1, 0.5, 1, -440, -128, 300, -Kit.MARGIN)
 	add_child(hint_panel)
 	hint_panel.visible = false
+
+
+## A Restart button beside Skip: the pilot can always fly this part again, whatever happened (never a dead end).
+func add_restart() -> void:
+	var b := Kit.btn(TranslationServer.translate("↺ Restart"), func(): restart_pressed.emit(), Kit.T_BODY, 128)
+	b.focus_mode = Control.FOCUS_NONE
+	b.custom_minimum_size.y = Kit.BTN_H
+	_top_right.offset_left -= 136.0
+	_top_right.add_child(b)
+	_top_right.move_child(b, 1)
 
 
 func _sound_text() -> String:

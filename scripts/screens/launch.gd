@@ -109,6 +109,8 @@ func _build_hud() -> void:
 	hud.action_pressed.connect(_on_stage)
 	hud.autopilot_toggled.connect(func(on): _say_autopilot(on))
 	hud.skip_pressed.connect(_skip)
+	hud.add_restart()
+	hud.restart_pressed.connect(func(): main.go("launch"))   # fly this part again, whatever happened
 	hud.set_autopilot(GameState.pilot_bot)
 	hud.clock.text = "T-00:03"
 	hud.value("alt", "0 m")

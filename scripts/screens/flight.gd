@@ -35,6 +35,7 @@ const CUT_GUARD_MS := 1500          ## A cut is refused this soon after lighting
 const BURN_WARP := 50.0             ## Time while an engine burns: a six-minute burn in about seven seconds.
 const SUN_LON_DEG := 233.0          ## The Sun's ecliptic longitude on 15 November 2026 (about; our simplification).
 const UNIX_DAY0 := 1794700800       ## 15 November 2026 00:00 UTC, the first row of the Moon's ephemeris.
+const BRAKE_DV_MAX := 2500.0         ## m/s: a brake that has burned this much and still is not held has failed (a real one is about 900).
 const LUNAR_ORBIT_HIGH := 160000.0  ## The capture burn ends when the orbit's high point is below this height (m).
 const STARS := 2400
 
@@ -51,7 +52,7 @@ var shown := {}
 var burn_start := 0.0
 var burn_t0 := 0.0
 var burn_ms := 0
-var phase := "plan"                  ## plan, burn, coast, capture, lunar
+var phase := "plan"                  ## plan, burn, coast, capture, lunar, missed
 var phase_t := 0.0
 var throttle := 1.0
 var pred := {}
@@ -62,6 +63,8 @@ var offered_ms := 0
 var capture_at := 0.0
 var braking := false
 var leaving := false
+var auto_fly := false                  ## This try is flown by the flight computer (after Skip on a missed Moon).
+var missed_ms := 0
 var plan_ok := false                   ## The pilot said the plan is good (or let it be for a while): time runs to the burn.
 var plan_shown_ms := 0
 var cur_stop := ""                   ## The moment time is running to now ("count", "correct", "arrive").
@@ -110,7 +113,8 @@ var stars: MultiMeshInstance3D
 var plan_panel: PanelContainer
 
 
-func enter(_args: Dictionary) -> void:
+func enter(args: Dictionary) -> void:
+	auto_fly = bool(args.get("auto", false))
 	m = Transfer.new()
 	m.setup()
 	u = m.r_e / EARTH_U
@@ -262,8 +266,10 @@ func _build_hud() -> void:
 	hud.action_pressed.connect(_on_action)
 	hud.autopilot_toggled.connect(_on_autopilot)
 	hud.skip_pressed.connect(_skip)
+	hud.add_restart()
+	hud.restart_pressed.connect(func(): _restart(false))
 	hud.warp_picked.connect(_on_warp_picked)
-	hud.set_autopilot(GameState.pilot_bot)
+	hud.set_autopilot(GameState.pilot_bot or auto_fly)
 	_build_plan_panel()
 	hud.hint(tr("You are in orbit around the Earth. Mission control is working out when to leave so that you meet the Moon where it will be in three or four days."))
 
@@ -313,6 +319,8 @@ func process(delta: float) -> void:
 			_capture_phase(delta)
 		"lunar":
 			_lunar_phase(delta)
+		"missed":
+			_missed_phase(delta)
 	plan_panel.visible = phase == "plan" and not plan.is_empty() and not plan_ok
 	_draw_map()
 	_draw_craft_view()
@@ -482,6 +490,8 @@ func _on_action() -> void:
 				_brake()
 			elif braking:
 				_end_capture(false)
+		"missed":
+			_restart(false)
 
 
 # ===================================================================================== 2. THE BURN
@@ -595,6 +605,10 @@ func _coast_phase(_delta: float) -> void:
 		if _computer() or Time.get_ticks_msec() - offered_ms > (COUNTDOWN + GRACE) * 1000.0:
 			_correct(true)
 		return
+	hud.cap_warp(100000.0)
+	if not pred.is_empty() and (float(pred.closest) > Transfer.SOI or pred.impact):
+		_missed(tr("Your path hits the Moon.") if pred.impact else tr("Your path does not reach the Moon."))
+		return
 	var cap_s: float = m.capture_dv(pred) / Transfer.BURN_ACCEL if not pred.is_empty() else 100.0
 	capture_at = float(pred.get("t_closest", m.t + 1e9)) - cap_s * 0.5
 	m.advance(_time_to(capture_at - COUNTDOWN, get_process_delta_time(), "arrive"))
@@ -606,6 +620,7 @@ func _coast_phase(_delta: float) -> void:
 		phase = "capture"
 		phase_t = 0.0
 		last_count = -1
+		capture_at = m.t + COUNTDOWN   # fixed from here: the countdown is ten real seconds and always ends in the burn
 		if skip_step == "coast":
 			skip_step = "capture"
 
@@ -634,12 +649,7 @@ func _capture_phase(delta: float) -> void:
 		hud.auto_note = ""
 		m.advance(delta * hud.warp)
 		_refresh_pred(0.25)
-		if not pred.is_empty():
-			capture_at = float(pred.t_closest) - m.capture_dv(pred) / Transfer.BURN_ACCEL * 0.5
 		var left: float = capture_at - m.t
-		if left > COUNTDOWN + 20.0:
-			phase = "coast"          # the fresh path says the closest pass is later: time runs on to it
-			return
 		hud.action.label = "BRAKE"
 		hud.action.lit = true
 		var n := ceili(left)
@@ -655,6 +665,13 @@ func _capture_phase(delta: float) -> void:
 	hud.lever.value = throttle
 	m.advance(delta * hud.warp, throttle, -1.0, true)
 	var o: Dictionary = m.moon_orbit()
+	# a brake that cannot work (far from the Moon, or the tanks' worth burned and still not held) is never left running
+	if m.about_moon().r > Transfer.SOI or m.dv_used > BRAKE_DV_MAX:
+		braking = false
+		throttle = 0.0
+		hud.lever.value = 0.0
+		_missed(tr("The Moon could not hold you."))
+		return
 	var here: float = m.about_moon().r - m.r_m
 	# the Moon holds the craft once the orbit's high point comes down to where the craft is: then it is nearly round;
 	# and the engine never brakes on into an orbit that would meet the ground
@@ -709,9 +726,47 @@ func _lunar_phase(delta: float) -> void:
 		main.go_faded("landing", 1.0, 1.0)
 
 
+## A path that will not end around the Moon. Never a dead end: the game says so and offers the departure again.
+func _missed(why: String) -> void:
+	phase = "missed"
+	phase_t = 0.0
+	missed_ms = Time.get_ticks_msec()
+	throttle = 0.0
+	hud.cap_warp(1.0, tr("waiting for you"))
+	hud.auto_note = ""
+	hud.action.label = "RETRY"
+	hud.action.lit = true
+	sfx.alarm.play()
+	hud.message(tr("YOU MISSED THE MOON"), why + " " + tr("Press SPACE to go back to your orbit around the Earth and try the departure again."), Kit.C_WARN, 0.0)
+	hud.hint(tr("Real missions cannot go back, so they plan the departure with great care. Here you can: try again, or press Skip and the flight computer flies it."))
+	GameState.flight_moment("missed_moon", {})
+
+
+func _missed_phase(delta: float) -> void:
+	m.advance(delta)
+	_refresh_pred(1.0)
+	if hud.autopilot or Time.get_ticks_msec() - missed_ms > 30000:
+		_restart(hud.autopilot)
+
+
+## Back to the parking orbit to fly the trip again; `auto`: the flight computer flies it this time.
+func _restart(auto: bool) -> void:
+	if leaving:
+		return
+	leaving = true
+	main.go("flight", {"auto": auto})
+
+
 ## Skip: the flight computer flies the current step for the pilot (and the time runs to it as fast as it can).
 func _skip() -> void:
+	if phase == "missed":
+		_restart(true)
+		return
+	if phase == "plan" and not plan.is_empty():
+		_shift(0.0, true)   # the computer flies mission control's plan, not a departure that misses
+		_go_ahead()
 	skip_step = phase
+	hud.set_autopilot(true)   # Skip is the whole way: the flight computer flies on from here, and the switch shows it
 	held_for = ""
 	cur_stop = ""
 	if phase == "lunar":
@@ -910,6 +965,8 @@ func _readouts() -> void:
 			next = tr("brake now") if braking or m.t >= capture_at else tr("brake in %s") % _span(capture_at - m.t)
 		"lunar":
 			next = tr("landing")
+		"missed":
+			next = tr("try again")
 	hud.value("next", next, Kit.C_ACCENT)
 	var p: Dictionary = shown if phase == "plan" else pred
 	if phase == "lunar":
