@@ -9,7 +9,8 @@ extends "res://scripts/screens/screen.gd"
 ## "moves" ({id: [x, z]}: walk there), "act" (the speaker's body) and "acts" ({id: act}), "mood" and "all" (moods),
 ## "shot" (close, two, low, wide, or a camera of the set by name) with "cut", and "fx" (shake, alarm, dim, calm,
 ## liftoff, splashdown). A line with "wait" and no words lets the stage play.
-## Enter or a click goes on, Esc skips to the end. args: {"chapter": "apollo13", "scenes": [...], "back": screen id}.
+## Enter or a click goes on, Esc skips to the end. args: {"chapter": "apollo13", "scenes": [...], "back": screen id}; a
+## scene may be "chapter/scene", so one film can run on from the prologue into a mission (story(): the whole story).
 
 const CuyActor := preload("res://scripts/story/cuy_actor.gd")
 const Dialogue := preload("res://scripts/story/dialogue.gd")
@@ -73,6 +74,17 @@ func enter(args: Dictionary) -> void:
 
 
 ## What the sets change in the shared world, put back when the film ends.
+## The story so far, in order: the prologue, then each chapter (its intro, the mission, its outro), as scene refs.
+static func story(chapters := ["prologue", "apollo13"]) -> Array:
+	var out := []
+	for c in chapters:
+		var data = JSON.parse_string(FileAccess.get_file_as_string("res://data/story/%s.json" % c))
+		if data is Dictionary:
+			for sc in data.get("order", []):
+				out.append("%s/%s" % [c, sc])
+	return out
+
+
 func _save_world() -> void:
 	var env: Environment = world.world_env.environment
 	for k in ["background_mode", "background_color", "background_energy_multiplier", "ambient_light_source",
@@ -127,7 +139,12 @@ func _next_scene() -> void:
 		_leave()
 		return
 	dialogue = Dialogue.new()
-	dialogue.lines = Dialogue.load_scene(chapter, scenes[scene_at])
+	var ref: String = scenes[scene_at]
+	var ch := chapter
+	if "/" in ref:
+		ch = ref.get_slice("/", 0)
+		ref = ref.get_slice("/", 1)
+	dialogue.lines = Dialogue.load_scene(ch, ref)
 	dialogue.live = false
 	dialogue.show_portrait = false
 	dialogue.line_started.connect(_on_line)

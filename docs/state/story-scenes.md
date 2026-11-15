@@ -14,3 +14,6 @@
 - Each mission sits between two films: the chapter's "intro" scenes (context, the problem) play before the mission,
   its "outro" scenes (what came of it, a hint of the next) after it, then the next chapter's intro, and so on
   (`data/story/<chapter>.json` keys `intro`, `outro`; `order` plays the whole film). The campaign (#43) chains them.
+- The story is linear: `data/story/prologue.json` (who the cuyes are, why they go, how they reach Florida and Houston)
+  plays once before mission 1; then each chapter's intro, the mission (today a "Your turn" card where the playable
+  part will go, #45), its outro. `story.gd` story() lists the whole film as "chapter/scene" refs.

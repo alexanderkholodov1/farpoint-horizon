@@ -121,13 +121,13 @@ func _build_ui() -> void:
 	var row := Kit.hbox(Kit.GAP)
 	v.add_child(row)
 	row.add_child(Kit.btn(tr("All four"), func(): _focus(-1), Kit.T_BODY))
-	v.add_child(Kit.btn(tr("Play the Apollo 13 scene"), func(): _play_story(), Kit.T_BODY))
+	v.add_child(Kit.btn(tr("Play the story"), func(): _play_story(), Kit.T_BODY))
 	row.add_child(Kit.btn(tr("◀ Menu"), func(): go("menu"), Kit.T_BODY))
 
 
-## Chapter 1 as a short film on the story stage (issue #66).
+## The story from the start: the prologue, then mission 1 (issue #66).
 func _play_story() -> void:
-	go("story", {"chapter": "apollo13", "back": "crew_gallery"})
+	go("story", {"scenes": load("res://scripts/screens/story.gd").story(), "back": "crew_gallery"})
 
 
 func _focus(i: int) -> void:

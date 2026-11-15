@@ -1,25 +1,12 @@
 {
- "doc": "Chapter 1, Apollo 13 (April 1970), told from the beginning (issue #66; story: docs/design/story-v0.3.0.md). Every fact is from NASA's own page, its source id in docs/sources.md (S-apollo13-nasa). The cuyes never change history: they are stowaways who react; the outcome is NASA's. The prologue (who the cuyes are, why they go) is our fiction. Lines: who (a cuy or narrator), text, mood, fact + source; stage directions: set, cast, place, moves, act, acts, all, shot, cut, fx (scripts/screens/story.gd); a line with title (+ sub) and no who is a title card; a line with only wait lets the stage play.",
- "order": ["origin", "pad", "problem", "lifeboat", "fixed", "home"],
- "intro": ["origin", "pad", "problem", "lifeboat"],
+ "doc": "Chapter 1, Apollo 13 (April 1970), told from the beginning (issue #66; story: docs/design/story-v0.3.0.md). Every fact is from NASA's own page, its source id in docs/sources.md (S-apollo13-nasa). The cuyes never change history: they are stowaways who react; the outcome is NASA's. The prologue (data/story/prologue.json) tells who the cuyes are and why they go. Lines: who (a cuy or narrator), text, mood, fact + source; stage directions: set, cast, place, moves, act, acts, all, shot, cut, fx (scripts/screens/story.gd); a line with title (+ sub) and no who is a title card; a line with only wait lets the stage play.",
+ "order": ["pad", "problem", "lifeboat", "mission", "fixed", "home"],
+ "intro": ["pad", "problem", "lifeboat"],
  "mission": "Between intro and outro the player plays the mission: build the CO2 adapter from the parts list before the CO2 climbs, then fly the return (docs/design/story-v0.3.0.md).",
  "outro": ["fixed", "home"],
  "scenes": {
-  "origin": [
-   {"set": "andes", "title": "Ecuador, April 1970", "sub": "A farm on the slopes of Cotopaxi", "shot": "behind", "wait": 4.0},
-   {"who": "narrator", "shot": "wide", "text": "High in the Andes lived four cuyes who were not like the others."},
-   {"who": "narrator", "shot": "wide", "acts": {"wayra": "work"}, "text": "Every night they climbed the hill with an old radio, to listen to the astronauts."},
-   {"who": "wayra", "mood": "sleepy", "act": "work", "text": "Houston, this is... static. Hold on. There. They are talking about the Moon again."},
-   {"who": "killa", "mood": "dreamy", "act": "point", "shot": "moon", "text": "Next week, three astronauts fly there. Apollo 13.", "fact": "Apollo 13 was supposed to land in the Fra Mauro area of the Moon.", "source": "S-apollo13-nasa"},
-   {"who": "inti", "mood": "proud", "act": "hips", "shot": "low", "moves": {"inti": [0.2, 0.15, -10]}, "text": "Then we fly too. Somebody has to keep an eye on them."},
-   {"who": "rumi", "mood": "flat", "act": "shrug", "text": "We are guinea pigs."},
-   {"who": "inti", "mood": "determined", "act": "point", "shot": "two", "text": "Exactly. Guinea pigs go first."},
-   {"who": "wayra", "mood": "calm", "act": "talk", "acts": {"rumi": "idle", "inti": "idle"}, "text": "I will go to Houston and sit by the radio. Someone has to answer when you call."},
-   {"who": "killa", "mood": "happy", "all": "happy", "act": "cheer", "acts": {"inti": "cheer"}, "shot": "wide", "text": "Florida, here we come!"},
-   {"who": "narrator", "shot": "moon", "acts": {"killa": "idle", "inti": "idle"}, "text": "They were small. Nobody would notice four stowaways."}
-  ],
   "pad": [
-   {"set": "pad", "title": "April 11, 1970", "sub": "Launch Pad 39A, Florida", "shot": "pad_wide", "wait": 4.5},
+   {"set": "pad", "title": "Mission 1: Apollo 13", "sub": "April 11, 1970 · Launch Pad 39A, Florida", "shot": "pad_wide", "wait": 5.0},
    {"wait": 5.0, "shot": "rocket_up", "cut": true},
    {"who": "inti", "mood": "proud", "act": "point", "shot": "low", "text": "Three astronauts. One Saturn V. And a supply crate with our names on it.", "fact": "Apollo 13 lifted off on April 11, 1970, at 1:13 p.m. CST, from Launch Pad 39A.", "source": "S-apollo13-nasa"},
    {"who": "killa", "mood": "curious", "act": "work", "text": "Thermometer, notebook, snacks. Mostly snacks. Wait, where is Rumi?"},
@@ -49,6 +36,9 @@
    {"set": "houston", "who": "wayra", "mood": "alert", "act": "work", "shot": "close", "text": "Mission Control sent a recipe: plastic bags, cardboard and tape.", "fact": "Mission Control worked out an adapter from plastic bags, cardboard and tape.", "source": "S-apollo13-nasa"},
    {"set": "lm", "who": "rumi", "mood": "pleased", "act": "cheer", "fx": "dim", "text": "Did someone say tape?"},
    {"who": "rumi", "mood": "determined", "act": "work", "shot": "close", "text": "Square peg, round hole. Classic."}
+  ],
+  "mission": [
+   {"set": "lm", "fx": "dim", "title": "Your turn", "sub": "Build the CO2 adapter before the air runs out, then fly them home", "shot": "window", "wait": 5.0}
   ],
   "fixed": [
    {"set": "lm", "title": "A few hours later", "sub": "The adapter is in place", "shot": "wide", "fx": "dim", "wait": 3.0},

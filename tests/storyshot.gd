@@ -33,7 +33,7 @@ func _ready() -> void:
 	g.go("crew_gallery")
 	await wait(1.5)
 	await shot("crew")
-	g.go("story", {"chapter": "apollo13", "back": "crew_gallery"})
+	g.go("story", {"scenes": load("res://scripts/screens/story.gd").story(), "back": "crew_gallery"})
 	var guard := 0
 	while g.screen and g.screen.get_script().resource_path.ends_with("story.gd") and guard < 200:
 		guard += 1
@@ -43,7 +43,7 @@ func _ready() -> void:
 			continue
 		var at: int = d.at
 		var L: Dictionary = d.lines[at]
-		var tag := "%s_%d" % [g.screen.scenes[g.screen.scene_at], at]
+		var tag := ("%s_%d" % [g.screen.scenes[g.screen.scene_at], at]).replace("/", "-")
 		if L.has("title") and not L.has("who"):
 			await wait(1.6)
 			await shot(tag + "_title")

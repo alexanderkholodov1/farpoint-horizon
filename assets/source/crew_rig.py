@@ -64,16 +64,19 @@ def landmarks(meshes, cid):
     if cid == "rumi":
         body = [o for o in meshes if o.name == "Body"][0]
         ws = [body.matrix_world @ v.co for v in body.data.vertices]
-        xmax = max(abs(w.x) for w in ws)
+        # the arms are above the belt (z > 0.4); below it, the tool pouches and the holster stick out as far as the
+        # hands do, so the hands are measured only above the belt (slices of the mesh: the arm runs from about
+        # x 0.18, z 0.60 at the shoulder down to x 0.41, z 0.44 at the hand)
         for s in (-1, 1):
-            arm = [w for w in ws if w.x * s > xmax - 0.1]
+            arm = [w for w in ws if w.z > 0.41 and w.z < 0.6 and w.x * s > 0.33]
             hz = sum(w.z for w in arm) / len(arm)
             hy = sum(w.y for w in arm) / len(arm)
+            hx = max(w.x * s for w in arm)
             feet = [w for w in ws if w.z < 0.08 and w.x * s > 0.03]
             fx = sum(w.x for w in feet) / len(feet)
             fy = sum(w.y for w in feet) / len(feet)
-            L[s] = {"shoulder": Vector((s * 0.2, hy, hz + 0.08)), "wrist": Vector((s * (xmax - 0.12), hy, hz + 0.01)),
-                    "hand": Vector((s * xmax, hy, hz)), "hip": Vector((fx, fy + 0.02, 0.24)),
+            L[s] = {"shoulder": Vector((s * 0.18, hy, 0.6)), "wrist": Vector((s * (hx - 0.07), hy, hz + 0.03)),
+                    "hand": Vector((s * hx, hy, hz)), "hip": Vector((fx, fy + 0.02, 0.24)),
                     "ankle": Vector((fx, fy + 0.02, 0.08)), "toe": Vector((fx, fy - 0.1, 0.03))}
         L["hip_z"] = 0.24
         return L
@@ -148,8 +151,13 @@ def skin_rumi(body, arm, L):
         P = L[s]
         weights = {}
         ax = abs(w.x)
-        arm_k = smooth(abs(P["shoulder"].x) - 0.03, abs(P["shoulder"].x) + 0.05, ax) * smooth(hz + 0.05, hz + 0.12, w.z)
-        hand_k = smooth(abs(P["wrist"].x) - 0.02, abs(P["wrist"].x) + 0.03, ax)
+        # the arm: near the segment from the shoulder to the hand, and above the belt
+        a, b = P["shoulder"], P["hand"]
+        ab = b - a
+        t = max(0.0, min(1.0, (w - a).dot(ab) / ab.length_squared))
+        d = (w - (a + ab * t)).length
+        arm_k = (1 - smooth(0.065, 0.1, d)) * smooth(0.0, 0.2, t) * smooth(0.385, 0.42, w.z)
+        hand_k = smooth(0.62, 0.8, t)
         leg_k = (1 - smooth(hz - 0.06, hz + 0.02, w.z)) * smooth(0.02, 0.06, ax)
         foot_k = 1 - smooth(P["ankle"].z - 0.02, P["ankle"].z + 0.03, w.z)
         torso = 1 - arm_k
