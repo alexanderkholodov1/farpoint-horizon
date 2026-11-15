@@ -61,11 +61,23 @@ func _setup_ui() -> void:
 # ===================================================================================== SCREENS OF EVERY SIZE (issue #76)
 var turn_card: Control
 const MIN_SCALE := 0.8
+## The phone adaptation (bigger text, compact layouts, the turn card) is off by the team's decision of 2026-11-15: on a
+## phone the game is drawn as on a laptop, only smaller, so nothing covers anything. The compact layouts stay in the
+## code, off; true turns them on again.
+const PHONE_ADAPT := false
 
 ## The interface grows on small screens so its text stays readable (a phone in landscape is about 390 CSS pixels tall:
 ## the 1600 x 900 layout shrunk to it makes 13 px text about 6 px), and a phone held upright is asked to turn: the
 ## game's panels are laid out for a wide screen. Layouts were checked at 1.25 (shots/dev_phone125_*).
 func _fit_screen() -> void:
+	if not PHONE_ADAPT:
+		if absf(get_window().content_scale_factor - 1.0) > 0.01:
+			get_window().content_scale_factor = 1.0
+		if Kit.compact:
+			Kit.set_compact(false)
+		if turn_card:
+			turn_card.visible = false
+		return
 	var px: Vector2 = Vector2(DisplayServer.window_get_size())
 	var css_h: float = px.y / maxf(DisplayServer.screen_get_scale(), 1.0)
 	if OS.has_feature("web"):
