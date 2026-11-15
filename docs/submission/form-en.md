@@ -17,10 +17,10 @@ Farpoint HORIZON
 
 ---
 
-## Summary  (limit 1500 characters; they suggest 50-200 words; this one: 198 words, 1,128 characters)
+## Summary  (limit 1500 characters; they suggest 50-200 words; this one: 189 words, 1,037 characters)
 
 ```
-You don't read about a space mission in Farpoint HORIZON: you fly one. Students learn orbits, rockets and instruments in separate chapters and never see how one choice pulls on all the others. Our 3D browser game closes that gap with the whole mission in one chain. Choose a science question, from Ecuador's volcanoes to ice at the Moon's south pole. Design the craft and stack your own rocket while live gauges trade mass, power, data, delta-v, budget and lifetime. Then fly it: a real-physics climb from the equator, a trip to the Moon timed to JPL Horizons, and a landing on NASA's LOLA map of Shackleton's rim. Keep it alive from the ground through the Deep Space Network and NOAA's solar storms. Everything moves by real physics, in real time and at true scale, checked against real missions, and every number cites its source. Failing is never a game-over screen: you see why, change one thing and fly again. In v0.3.0, four Andean guinea-pig astronauts (cuyes) guide players through six real NASA missions in order, from Apollo 13 to Artemis I. One player or a team of four can play, in English or Spanish, on any device.
+Farpoint HORIZON is a 3D space game that lets anyone, alone or with up to three friends, live a space mission from the first idea to the moment the data comes home. Players build a spacecraft and the rocket that carries it, launch it from the equator, fly to the Moon, land on the real ground of its south pole and keep the mission alive from Earth. Every choice has a price in weight, energy, data, money and time, so players discover what NASA teams know: everything in a mission depends on everything else. A crew of four Andean guinea pigs, the cuyes, guides the way through six real NASA missions in the order they happened: Apollo 13, Hubble's first repair, Mars Pathfinder, LCROSS, DART and Artemis I, told exactly as NASA tells them. Everything moves as it does in reality and is built on NASA data, from the Moon's terrain to the pictures each mission sends home. Failing is never "game over": players see why, change one thing and try again. It runs in any web browser, in English and Spanish, so a classroom can play it today.
 ```
 
 ---
@@ -51,46 +51,47 @@ and from the game's credits. If the form allows only one link, the live game is 
 
 ```
 WHAT IT IS
-Farpoint HORIZON is a 3D space-mission game that runs in any browser, with no install. One player, or a team of up to four, takes a mission from a science question to data coming home, and lives every trade-off a real mission team faces along the way.
+Farpoint HORIZON is a 3D space game that runs in any web browser. Alone or with up to three friends, players live a whole space mission: they decide what to explore, build the spacecraft and its rocket, launch it, fly it, land it and keep it working until the data comes home.
 
-THE PROBLEM WE SOLVE
-A space mission is one system: a better instrument is heavier, a heavier craft needs a bigger rocket, a bigger rocket eats the budget, more data needs more power and a faster radio. Students meet these ideas one at a time, in separate classes and tools (an orbit calculator here, a rocket simulator there), and almost never see how they pull on each other. The challenge asks for a game that closes that gap. Ours puts the whole chain in the player's hands.
+WHY IT MATTERS
+A space mission is a chain of decisions where everything depends on everything else. A better camera weighs more, a heavier spacecraft needs a bigger rocket, a bigger rocket costs more, and sending more pictures takes more power. This balancing act is the heart of how NASA builds missions, but students usually learn the pieces separately and never see them come together. Our game puts the whole chain in their hands, so they learn it the way mission teams do: by deciding, trying, sometimes falling short, and understanding why.
 
-HOW IT WORKS
-1. Ask a question. Every mission starts with a need: watch Ecuador's volcanoes, follow El Niño, map the Moon, look at distant galaxies, find ice at the lunar south pole. The steps follow NASA JPL's Concept Maturity Levels.
-2. Design. Choose the orbit (5, each explained in plain words), the platform (from a 3U CubeSat to a large observatory, 6 in all), 16 instruments, solar panels, battery, radio, attitude control, propulsion and lifetime. Live gauges show mass, power, data, delta-v, cost and years at every choice. The craft is assembled in 3D, and the part causing a problem glows on it.
-3. Build the rocket. Stack real engines, tanks and boosters; the rocket equation decides what reaches orbit. With no tuning, the presets match the real vehicles: an Electron-type rocket carries 313 kg to low orbit (real: 300 kg), a Falcon 9-type 17.2 t (real: about 17.5 t). The review blocks a launch that cannot work and says where to fix it.
-4. Fly it. The launch is about eight minutes of real climb from the equator, over the Andes and Cotopaxi, with gravity, drag, Max-Q and staging. The trip to the Moon uses the pull of both the Earth and the Moon, with the Moon where JPL Horizons puts it on the flight day. Mission control times the departure so the craft meets the Moon where it will be. Then a mid-course correction, braking into lunar orbit on the far side with no radio (as Apollo's crews did), and a powered landing on NASA LOLA elevation data at Shackleton crater's rim.
-5. Ground control. Find the craft's faint carrier through the Deep Space Network (as engineers did for Voyager 2 in 2023), answer the computer's 1202 alarm (as Apollo 11 did), and decide how to ride out a solar storm forecast on NOAA's scales.
-6. The report. A score out of 1000, a grade, extra goals, why the mission worked or not, the real photos a mission like yours sends home (Cotopaxi from Landsat 8, Shackleton crater from LRO and ShadowCam), and the real missions that made the same choices. Redesign and fly again in one click.
+THE STORY: THE CUYES WHO WERE THERE
+NASA learned by failing, bouncing and crashing, and it always came back stronger. Four cuy astronauts (the Andean guinea pig) were "there" at six real missions, played in the order they happened. History stays exactly as NASA tells it; the cuyes help, panic, joke and celebrate.
+- Apollo 13 (1970): build an air filter from bags, cardboard and tape before the air runs out.
+- Hubble's first repair, STS-61 (1993): five spacewalks against the clock to give the telescope "glasses".
+- Mars Pathfinder (1997): land on Mars by bouncing on airbags, then roll the Sojourner rover onto the ground.
+- LCROSS (2009): crash into the Moon's darkest crater on purpose and catch the water ice it throws up.
+- DART (2022): hit an asteroid to change its path, the first test of planetary defense.
+- Artemis I (2022): the final mission, around the Moon and back home, where everything learned comes together.
+Each crew member is one of the four stations of a mission team: Rumi the engineer, Killa the scientist, Inti the pilot and Wayra ground control.
 
-NEW IN v0.3.0: THE CUYES WHO WERE THERE
-NASA learned by failing, bouncing and crashing, and it always came back. A crew of four cuy astronauts (the Andean guinea pig) takes the player through six real NASA missions in the order they happened. History stays exactly as NASA tells it; the cuyes help, panic and joke, while the real numbers decide what happens. Each crew member is one of the game's four stations: Rumi the engineer, Killa the scientist, Inti the pilot, Wayra ground control.
-- Apollo 13 (1970): build the CO2 adapter from bags, cardboard and tape before the air runs out.
-- STS-61 (1993): five spacewalks against their clocks to fix Hubble, then bring galaxy M100 into focus.
-- Mars Pathfinder (1997): the real descent, the airbag bounces, and Sojourner's first wheel on Mars.
-- LCROSS (2009), DART (2022) and Artemis I (2022) complete the campaign.
+YOUR OWN MISSION
+Players pick a question worth answering (watch Ecuador's volcanoes, follow El Niño, map the Moon, look at distant galaxies, find ice at the Moon's south pole). Then they design the spacecraft, build the rocket, fly the launch from the equator, travel to the Moon, land on the real ground of its south pole and handle alarms and solar storms from the ground. At the end they see the real pictures their mission would send home, with a report that explains what went well and what to try next.
 
-WHY IT IS DIFFERENT
-- The whole system in one game. Each choice shows up everywhere downstream, which is exactly what the challenge asks players to understand.
-- Real behaviour, never a drawing. Nothing moves along a hand-drawn curve. Paths come from gravity with real constants and ephemerides. Time runs in real time, faster time is a visible control, and sizes and distances keep their true proportions.
-- Checked against reality. Automated tests fly the game and compare it with real values: a 87.7-minute low orbit, a coast to the Moon of about 82 h (Apollo 11: 76 h), a lunar orbit of about 110 km. Our simplifications are written where they are made.
-- NASA data is the ground you fly over and land on, not decoration.
-- Failure teaches instead of punishing. Missing something is never a game-over screen; achieving more is rewarded.
-- Built for everyone. A guided first mission, a cited glossary, one-line explanations, English and Spanish, and it runs on school computers, tablets and phones.
-- Made to be played together. Four stations each own their decisions, like a real mission team, and bots that follow the same rules take any empty station.
+PLAYING TOGETHER
+Up to four players share a mission, on one screen or online. Each holds a station (engineer, scientist, pilot, ground control) with its own decisions, and the mission flies only when the team agrees. Crew bots fill any empty station.
 
-BENEFITS AND INTENDED IMPACT
-Students, teachers and space fans get an environment where they can try a whole mission, fail safely and understand why. Teachers can run a mission as a class activity in a browser. Because it is made in Ecuador, launches from the equator and opens with a mission that watches our own volcanoes, it brings space engineering close to Latin American students in their own language.
+WHAT MAKES IT SPECIAL
+- The whole mission, not one piece of it: every decision connects to the next.
+- It behaves like the real thing: rockets, orbits and landings follow real physics, in real time and at true size, with a control to speed time up. What players learn by playing is true.
+- Built on NASA data: the Earth, the Moon, the landing ground, where the Moon is on the day you fly, and the pictures your mission sends home.
+- Failing teaches instead of punishing: no game-over screen, and doing more is always rewarded.
+- Anyone can play: a guided first mission, simple explanations, English and Spanish, on school computers, tablets and phones.
+- Fun first: humor, original music, and the pride of watching your own rocket lift off.
+- From the equator: made in Quito, it launches over the Andes and starts by watching our own volcanoes.
 
-TOOLS AND TECHNOLOGY
-Godot 4.7 (GL Compatibility renderer, single-threaded web export, so it runs on integrated GPUs and any static host), GDScript, Python (data pipelines and 3D model scripts), Blender driven by scripts for every model of ours, Firebase Hosting, GitHub Actions CI that runs the physics tests and builds the web version on every push. Content and balance live in JSON data files apart from the code, and every entry carries its source. More than 80 sources are cited in docs/sources.md and in the in-game credits. MIT license.
+BENEFITS AND IMPACT
+Students, teachers and space fans get a place to try a complete mission, fail safely and understand why. A teacher can run it as a class activity in a browser, with no installation. Made in Ecuador and in two languages, it brings space engineering and NASA's history close to Latin American students.
 
-CREATIVITY AND FACTORS WE CONSIDERED
-We chose real physics over scripted animation so that what players learn is true. We chose true scale with readable markers, real time with a visible clock, and a campaign told only from NASA's own pages. The cuyes bring humor and an Andean identity without changing history. We designed for low-end school hardware, for players who have never heard the word delta-v, for two languages, and for the challenge's rules: no NASA logos or insignia, and every AI use disclosed.
+TOOLS
+Godot Engine (free and open source), Blender for the 3D models, Python for preparing NASA data, Firebase for hosting the web version, GitHub for the code. Every outside number, fact, image and model is listed with its source in the repository and in the game's credits. MIT license.
+
+CREATIVITY AND WHAT WE CONSIDERED
+We chose real physics over scripted animation so that what players learn is true, and a story told only from NASA's own pages. The cuyes add humor and an Andean identity without changing history. We designed for modest school computers, for players who have never studied space, for two languages, and for the challenge's rules: no NASA logos or insignia, and every use of AI disclosed.
 
 Repository: https://github.com/alexanderkholodov1/farpoint-horizon
-Team SK Horizon, Quito, Ecuador: Alexander Kholodov (lead), Sebastián Amaguaya.
+Team SK Horizon, Quito, Ecuador: Alexander Kholodov (lead) and Sebastián Amaguaya.
 ```
 
 ---
