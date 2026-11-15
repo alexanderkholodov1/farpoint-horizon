@@ -187,10 +187,10 @@ func stage_menu() -> void:
 
 
 ## Puts the craft of mission m on a circular orbit (ring, craft, tr("YOUR CRAFT") label); _animate_world moves it.
-func setup_orbit_ship(m, center: Vector3, radius: float, incl: float, ship_size: float) -> void:
+func setup_orbit_ship(m, center: Vector3, radius: float, incl: float, ship_size: float, nodes_yaw := 0.0) -> void:
 	orbit_center = center
 	orbit_radius = radius
-	var ring := Space.make_orbit_ring(radius, incl, Color(0.4, 0.8, 1.0, 0.45))
+	var ring := Space.make_orbit_ring(radius, incl, Color(0.4, 0.8, 1.0, 0.45), nodes_yaw)
 	ring.position = center
 	stage.add_child(ring)
 	orbit_basis = ring.basis
@@ -243,15 +243,21 @@ func stage_orbit() -> void:
 	var mission = GameState.mission
 	var O: Dictionary = GameData.ORBITS[mission.orbit]
 	var ship_size := 0.11
+	# The orbit's line of nodes runs obliquely across the first view (about 55 degrees from the line of sight), so an
+	# inclined orbit opens towards the player and passes in front of the planet, instead of showing edge-on as a stroke
+	# (issue #64: a polar orbit looked like a line off to one side) or face-on as a halo at the limb.
+	# Where the nodes lie in reality depends on the hour of launch; the game does not model it, so it picks the view.
+	face_sun()
+	var nodes := cam_yaw + PI / 2.0 - 0.6
 	if mission.orbit == "lunar":
 		planet = Space.make_moon(1.0)
 		stage.add_child(planet)
 		var earth := Space.make_earth(1.4, false)
 		earth.position = Vector3(-30, 6, -40)
 		stage.add_child(earth)
-		setup_orbit_ship(mission, Vector3.ZERO, O.radius, O.incl, ship_size)
+		setup_orbit_ship(mission, Vector3.ZERO, O.radius, O.incl, ship_size, nodes)
 		cam_target = Vector3.ZERO
-		cam_dist_goal = 3.6
+		cam_dist_goal = 4.2
 	elif mission.orbit == "l2":
 		planet = Space.make_earth(1.0)
 		stage.add_child(planet)
@@ -270,9 +276,10 @@ func stage_orbit() -> void:
 		stage.add_child(planet)
 		if mission.orbit == "geo":
 			ship_size = 0.2
-		setup_orbit_ship(mission, Vector3.ZERO, O.radius, O.incl, ship_size)
+		setup_orbit_ship(mission, Vector3.ZERO, O.radius, O.incl, ship_size, nodes)
 		cam_target = Vector3.ZERO
-		cam_dist_goal = 3.4 if O.radius < 2.0 else 8.5
+		# a low orbit hugs the planet; GEO, at its true 6.6 Earth radii, needs the camera far enough to hold it all
+		cam_dist_goal = 4.2 if O.radius < 2.0 else O.radius * 2.3
 	orbit_speed = {"leo": 0.5, "sso": 0.45, "geo": 0.12, "lunar": 0.45, "l2": 0.6}.get(mission.orbit, 0.4)
 	cam_dist = cam_dist_goal
 	cam_auto = true

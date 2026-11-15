@@ -157,12 +157,17 @@ static func make_moon(radius := 1.0) -> Node3D:
 	return root
 
 
-static func make_orbit_ring(radius: float, incl_deg: float, color: Color) -> Node3D:
+## A circular orbit of `radius` (in body radii) tilted `incl_deg` from the equator. `nodes_yaw` (radians) turns its line
+## of nodes, where it crosses the equator, about the body's axis: a ring seen along that line is a flat stroke.
+static func make_orbit_ring(radius: float, incl_deg: float, color: Color, nodes_yaw := 0.0) -> Node3D:
 	var pivot := Node3D.new()
-	pivot.rotation_degrees = Vector3(0, 0, incl_deg if incl_deg <= 90.0 else 180.0 - incl_deg)
+	# Godot applies Z (the tilt, about the line of nodes, which starts on +Z) before Y (where that line points)
+	pivot.rotation = Vector3(0, nodes_yaw, deg_to_rad(incl_deg if incl_deg <= 90.0 else 180.0 - incl_deg))
 	var t := TorusMesh.new()
-	t.inner_radius = radius - 0.004
-	t.outer_radius = radius + 0.004
+	# a wider orbit is seen from farther away, so its line grows with it to keep the same width on screen
+	var half := 0.004 * maxf(1.0, radius / 1.2)
+	t.inner_radius = radius - half
+	t.outer_radius = radius + half
 	t.rings = 128
 	t.ring_segments = 6
 	var m := StandardMaterial3D.new()
