@@ -7,6 +7,7 @@ extends Node3D
 const Mission := preload("res://scripts/mission.gd")
 const Ship := preload("res://scripts/ship_builder.gd")
 const Space := preload("res://scripts/space_builder.gd")
+const CraftView := preload("res://scripts/craft/craft_view.gd")
 
 var world_env: WorldEnvironment
 var sun: DirectionalLight3D
@@ -212,10 +213,14 @@ func stage_design() -> void:
 
 ## Rebuilds the designed craft from GameState's mission (after a part changes).
 func rebuild_ship() -> void:
+	var old_keys: Array = []
 	if ship and is_instance_valid(ship):
+		old_keys = ship.get_meta("part_keys", [])
 		ship.queue_free()
 	ship = Ship.build(GameState.mission)
 	stage.add_child(ship)
+	# the new part snaps on, and the part a problem comes from glows (C1, scripts/craft/craft_view.gd)
+	CraftView.refresh(ship, old_keys, GameState.mission, GameState.mission.compute())
 	var r: float = ship.get_meta("radius")
 	cam_dist_goal = r * 2.6 + 0.9
 

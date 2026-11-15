@@ -5,6 +5,7 @@ extends "res://scripts/screens/screen.gd"
 const Horizon := preload("res://scripts/ui/horizon.gd")
 const Music := preload("res://scripts/ui/music.gd")
 const VERSION := "v0.2.0"
+const Coach := preload("res://scripts/tutorial/coach.gd")
 const QUITO := "0.18° S · 78.47° W"   ## Quito, the team's city (the Ecuador marker on the globe).
 
 var clock: Label
@@ -37,6 +38,10 @@ func enter(_args: Dictionary) -> void:
 	var play := Kit.accent_btn(Kit.btn(tr("▶  Play"), func(): go("team"), 21, 340), Kit.C_GOLD)
 	play.custom_minimum_size.y = 56
 	box.add_child(play)
+	# the first mission, guided by the crew (scripts/tutorial/coach.gd)
+	var first := Kit.btn(tr("First mission · guided by the crew"), func(): Coach.start(main), Kit.T_BODY, 340)
+	first.custom_minimum_size.y = Kit.BTN_H
+	box.add_child(first)
 	box.add_child(Kit.spacer(4))
 	# ---------- settings: difficulty and appearance, each a row of joined choices
 	box.add_child(rule())
@@ -76,8 +81,9 @@ func enter(_args: Dictionary) -> void:
 	box.add_child(rule())
 	var hh := Kit.hbox(8)
 	box.add_child(hh)
-	hh.add_child(Kit.btn(tr("How to play"), func(): main.overlay("howto"), 15, 180))
-	hh.add_child(Kit.btn("Ranking", func(): main.overlay("ranking"), 15, 180))
+	hh.add_child(Kit.btn(tr("How to play"), func(): main.overlay("howto"), 15, 150))
+	hh.add_child(Kit.btn("Ranking", func(): main.overlay("ranking"), 15, 150))
+	hh.add_child(Kit.btn(tr("Credits"), func(): go("credits_film"), 15, 150))
 	box.add_child(Kit.spacer(2))
 	box.add_child(Kit.lbl(tr("The Earth behind is NASA data: Blue Marble by day, Black Marble city lights at night, and the real clouds of 31 August 2024 from the VIIRS instrument."), 12, Kit.C_DIM, Kit.FONT_R, true))
 	# entrance: the panel slides in from the left as the arc draws itself
