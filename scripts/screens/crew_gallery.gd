@@ -14,6 +14,8 @@ const CREW := [
 	["wayra", "Wayra", "Ground control", "The voice on the radio. Half asleep, never misses a word."],
 ]
 const SPACING := 1.25
+const Sets := preload("res://scripts/story/sets.gd")
+var saved := {}
 const CuyActor := preload("res://scripts/story/cuy_actor.gd")
 
 var root: Node3D
@@ -23,26 +25,9 @@ var name_btns: Array = []
 
 
 func enter(_args: Dictionary) -> void:
-	world.clear_stage()
-	var env: Environment = world.world_env.environment
-	Space.apply_day(env)
-	env.ambient_light_energy = 0.55
-	world.sun.light_energy = 1.0
-	world.sun.rotation_degrees = Vector3(-40, -30, 0)
-	world.cam.far = 200.0
-	# a plain studio floor
-	var floor_mi := MeshInstance3D.new()
-	var disc := CylinderMesh.new()
-	disc.top_radius = 4.0
-	disc.bottom_radius = 4.0
-	disc.height = 0.04
-	floor_mi.mesh = disc
-	var fm := StandardMaterial3D.new()
-	fm.albedo_color = Color(0.2, 0.22, 0.27)
-	fm.roughness = 0.9
-	floor_mi.material_override = fm
-	floor_mi.position = Vector3(0, -0.02, 0)
-	world.stage.add_child(floor_mi)
+	# the crew stand in the bay of a spaceship, the Earth in the window behind (scripts/story/sets.gd, "crew_ship")
+	saved = Sets.save_world(world)
+	Sets.build("crew_ship", world)
 	root = Node3D.new()
 	world.stage.add_child(root)
 	for i in CREW.size():
@@ -148,6 +133,10 @@ func _focus(i: int) -> void:
 	else:
 		world.cam_target = Vector3((i - 1.5) * SPACING - 0.45, 0.55, 0)
 		world.cam_dist_goal = 2.1
+
+
+func exit() -> void:
+	Sets.restore_world(world, saved)
 
 
 func process(delta: float) -> void:

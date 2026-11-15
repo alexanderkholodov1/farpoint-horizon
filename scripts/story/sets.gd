@@ -44,6 +44,8 @@ static func build(id: String, world) -> Dictionary:
 			S = _mars(world, env)
 		"mars_approach":
 			S = _mars_approach(world, env)
+		"crew_ship":
+			S = _crew_ship(world, env)
 		_:
 			S = _andes(world, env)
 	S["id"] = id
@@ -1020,7 +1022,8 @@ void fragment() {
 	cyl(base, 0.55, 0.55, 0.3, Vector3(0, 0.15, 0), mat(Color(0.8, 0.78, 0.72), 0.5, 0.4), 3)
 	for i in 6:
 		var a := i * TAU / 6.0 + 0.3
-		var heap := ball(base, rng.randf_range(0.5, 0.8), Vector3(sin(a) * 1.7, 0.2, cos(a) * 1.7), mat(Color(0.88, 0.85, 0.76), 0.9), Vector3(1.4, 0.45, 1.0))
+		# the airbags pulled in lie in low heaps around the lander, clear of the crew and the camera
+		var heap := ball(base, rng.randf_range(0.45, 0.65), Vector3(sin(a) * 2.7, 0.08, cos(a) * 2.7), mat(Color(0.88, 0.85, 0.76), 0.9), Vector3(1.4, 0.3, 1.0))
 		heap.name = "Heap%d" % i
 	var ramp := Node3D.new()
 	ramp.name = "Ramp"
@@ -1121,6 +1124,91 @@ void fragment() {
 		},
 		"act": "float",
 	}
+
+
+# ===================================================================================== THE CREW'S SHIP
+## Where the crew stand to be met (The crew screen): the bay of a spaceship, our own design, not a real craft. A metal
+## floor, ribs along the hull, consoles with screens at the sides, light strips above, and a wide window behind with
+## the Earth below and the stars. The crew stand on the floor (y 0) along x.
+static func _crew_ship(world, env: Environment) -> Dictionary:
+	var st: Node3D = world.stage
+	env.sky = Space.make_space_sky()
+	env.background_energy_multiplier = 1.0
+	env.glow_enabled = true
+	env.ambient_light_color = Color(0.55, 0.62, 0.78)
+	env.ambient_light_energy = 0.45
+	world.sun.light_energy = 1.2
+	world.sun.light_color = Color(1.0, 0.95, 0.88)
+	world.sun.rotation_degrees = Vector3(-25, 30, 0)
+	world.cam.far = 3000.0
+	var hull := mat(Color(0.32, 0.35, 0.4), 0.55, 0.6)
+	var dark := mat(Color(0.12, 0.13, 0.16), 0.6, 0.4)
+	var trim := mat(Color(1.0, 0.66, 0.26), 0.4, 0.2, 1.4)
+	var bay := Node3D.new()
+	st.add_child(bay)
+	# the floor: plates with a lit edge
+	box(bay, Vector3(16, 0.2, 9), Vector3(0, -0.1, -1.0), dark)
+	for i in 8:
+		box(bay, Vector3(1.9, 0.02, 7.5), Vector3(-7.0 + i * 2.0, 0.01, -1.0), hull)
+	box(bay, Vector3(16, 0.03, 0.06), Vector3(0, 0.02, 2.6), trim)
+	# the back wall with the wide window: four pieces around the opening, a frame
+	var wall_z := -4.2
+	box(bay, Vector3(16, 1.0, 0.3), Vector3(0, 0.5, wall_z), hull)
+	box(bay, Vector3(16, 1.2, 0.3), Vector3(0, 4.4, wall_z), hull)
+	box(bay, Vector3(2.0, 5.0, 0.3), Vector3(-7.0, 2.5, wall_z), hull)
+	box(bay, Vector3(2.0, 5.0, 0.3), Vector3(7.0, 2.5, wall_z), hull)
+	for x in [-6.0, -3.0, 0.0, 3.0, 6.0]:
+		box(bay, Vector3(0.18, 2.8, 0.36), Vector3(x, 2.4, wall_z), dark)
+	box(bay, Vector3(12.2, 0.12, 0.4), Vector3(0, 1.0, wall_z + 0.05), trim)
+	# ribs along the hull, and the ceiling with its light strips
+	for x in [-7.5, -5.0, -2.5, 0.0, 2.5, 5.0, 7.5]:
+		box(bay, Vector3(0.3, 5.0, 0.3), Vector3(x, 2.5, -3.9), dark)
+		box(bay, Vector3(0.3, 0.3, 7.0), Vector3(x, 5.0, -0.6), dark)
+	box(bay, Vector3(16, 0.2, 7.5), Vector3(0, 5.2, -0.6), hull)
+	for z in [-2.4, 0.4]:
+		box(bay, Vector3(14, 0.05, 0.25), Vector3(0, 5.08, z), mat(Color(0.85, 0.92, 1.0), 0.3, 0.0, 2.2))
+	# consoles at the sides, their screens alive
+	var screen := shader_mat("""
+shader_type spatial;
+render_mode unshaded;
+uniform float seed = 0.0;
+float h(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233)) + seed) * 43758.5453); }
+void fragment() {
+	float row = floor(UV.y * 10.0);
+	float on = step(0.4, h(vec2(row, floor(UV.x * 20.0)))) * step(0.15, fract(UV.y * 10.0)) * step(fract(UV.y * 10.0), 0.7);
+	on *= step(h(vec2(row, 2.0)) * 0.8, UV.x);
+	vec3 tint = mix(vec3(0.47, 0.72, 1.0), vec3(1.0, 0.66, 0.26), step(0.8, h(vec2(row, 7.0))));
+	ALBEDO = tint * (0.1 + on * 0.9);
+	EMISSION = tint * on * 0.9;
+}
+""")
+	for sx in [-1, 1]:
+		var desk := Node3D.new()
+		desk.position = Vector3(sx * 5.6, 0, -1.6)
+		desk.rotation.y = -sx * 0.5
+		bay.add_child(desk)
+		box(desk, Vector3(2.4, 1.0, 0.9), Vector3(0, 0.5, 0), hull)
+		var top := box(desk, Vector3(2.4, 0.08, 0.9), Vector3(0, 1.05, 0.1), dark)
+		top.rotation.x = 0.35
+		for k in 2:
+			var q := MeshInstance3D.new()
+			var qm := QuadMesh.new()
+			qm.size = Vector2(1.0, 0.6)
+			q.mesh = qm
+			var sm := screen.duplicate() as ShaderMaterial
+			sm.set_shader_parameter("seed", float(k + (sx + 1) * 3))
+			q.material_override = sm
+			q.position = Vector3(-0.55 + k * 1.1, 1.65, -0.3)
+			q.rotation.x = -0.25
+			desk.add_child(q)
+	# the Earth outside, below the window, and the stars of the sky
+	var earth: Node3D = Space.make_earth(40.0, false)
+	earth.position = Vector3(10, -34, -95)
+	st.add_child(earth)
+	world.planet = earth
+	omni(bay, Vector3(0, 4.2, 1.0), Color(0.9, 0.95, 1.0), 1.4, 12.0)
+	omni(bay, Vector3(0, 1.5, 3.0), Color(1.0, 0.85, 0.7), 0.6, 8.0)
+	return {"marks": {}, "cast": [], "cams": {}, "act": "idle"}
 
 
 # ===================================================================================== THE PACIFIC
