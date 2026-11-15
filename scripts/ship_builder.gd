@@ -172,29 +172,31 @@ static func build(m) -> Node3D:
 	const OUT_BACK := Vector3(0, 0, -1)
 
 	# ---------------- the bus
+	var bus_g := _grp(root, "bus:" + m.bus)
 	if cots:
-		_cubesats(root, m, d)
+		_cubesats(bus_g, m, d)
 	else:
-		box(root, d, Vector3.ZERO, mli_mat())
+		box(bus_g, d, Vector3.ZERO, mli_mat())
 		# silver optical solar reflector radiators on the top and bottom, the faces that see the least Sun
 		var osr := mli_mat(Color(0.85, 0.87, 0.9))
-		box(root, Vector3(d.x * 0.82, 0.01, d.z * 0.7), Vector3(0, -d.y / 2.0 - 0.004, -d.z * 0.05), osr)
-		box(root, Vector3(d.x * 0.5, 0.01, d.z * 0.4), Vector3(d.x * 0.18, d.y / 2.0 + 0.004, d.z * 0.22), osr)
+		box(bus_g, Vector3(d.x * 0.82, 0.01, d.z * 0.7), Vector3(0, -d.y / 2.0 - 0.004, -d.z * 0.05), osr)
+		box(bus_g, Vector3(d.x * 0.5, 0.01, d.z * 0.4), Vector3(d.x * 0.18, d.y / 2.0 + 0.004, d.z * 0.22), osr)
 		# the aluminium frame along the edges
 		var e := 0.025 * maxf(k, 0.6)
 		for sa in [-1, 1]:
 			for sb in [-1, 1]:
-				box(root, Vector3(e, e, d.z + e), Vector3(sa * d.x / 2.0, sb * d.y / 2.0, 0), alu)
-				box(root, Vector3(d.x + e, e, e), Vector3(0, sa * d.y / 2.0, sb * d.z / 2.0), alu)
-				box(root, Vector3(e, d.y + e, e), Vector3(sa * d.x / 2.0, 0, sb * d.z / 2.0), alu)
+				box(bus_g, Vector3(e, e, d.z + e), Vector3(sa * d.x / 2.0, sb * d.y / 2.0, 0), alu)
+				box(bus_g, Vector3(d.x + e, e, e), Vector3(0, sa * d.y / 2.0, sb * d.z / 2.0), alu)
+				box(bus_g, Vector3(e, d.y + e, e), Vector3(sa * d.x / 2.0, 0, sb * d.z / 2.0), alu)
 		# the launch adapter ring at the back, the engine inside it
-		part(root, "AdapterRing", Vector3(0, 0, -d.z / 2.0), OUT_BACK, minf(d.x, d.y) * 0.62, 0.8)
+		part(bus_g, "AdapterRing", Vector3(0, 0, -d.z / 2.0), OUT_BACK, minf(d.x, d.y) * 0.62, 0.8)
 		# coarse sun sensors on the top corners
 		for sx in [-1, 1]:
-			part(root, "SunSensor", Vector3(sx * d.x * 0.4, d.y / 2.0, d.z * 0.42), Vector3.UP, 0.09 * k)
+			part(bus_g, "SunSensor", Vector3(sx * d.x * 0.4, d.y / 2.0, d.z * 0.42), Vector3.UP, 0.09 * k)
 		if m.panels == "body":
+			var body_g := _grp(root, "panels:body")
 			for sx in [-1, 1]:
-				box(root, Vector3(d.y * 0.86, 0.01, d.z * 0.86), Vector3(sx * (d.x / 2.0 + 0.008), 0, 0), solar_mat(), Vector3(0, 0, 90))
+				box(body_g, Vector3(d.y * 0.86, 0.01, d.z * 0.86), Vector3(sx * (d.x / 2.0 + 0.008), 0, 0), solar_mat(), Vector3(0, 0, 90))
 
 	# ---------------- solar wings: a drive on each side, a yoke, then panels hinged edge to edge
 	var span: float = P.span
@@ -203,11 +205,12 @@ static func build(m) -> Node3D:
 		var yoke_len: float = 0.25 * maxf(k, 0.5)
 		var segs := int(ceil(span / 1.3))
 		var seg_w := (span - yoke_len) / segs
+		var wings_g := _grp(root, "panels:" + m.panels)
 		for side in [-1, 1]:
 			var wing := Node3D.new()
 			wing.name = "Wing" + ("L" if side < 0 else "R")
 			wing.position = Vector3(side * d.x / 2.0, 0, 0)
-			root.add_child(wing)
+			wings_g.add_child(wing)
 			var out := Vector3(side, 0, 0)
 			if not cots:
 				part(wing, "Sada", Vector3.ZERO, out, 0.12 * k, 0.5)
@@ -224,14 +227,15 @@ static func build(m) -> Node3D:
 					box(wing, Vector3(0.03, 0.03, 0.05), Vector3(side * (yoke_len + seg_w * sgi), 0, hz * h), alu)
 
 	# ---------------- communications
+	var comms_g := _grp(root, "comms:" + m.comms)
 	if C.dish > 0.0:
 		var dr: float = C.dish * maxf(0.6, k * 0.55)
-		part(root, "Dish", Vector3(0, d.y / 2.0, -d.z * 0.2), Vector3(0, 1, -0.25), dr)
+		part(comms_g, "Dish", Vector3(0, d.y / 2.0, -d.z * 0.2), Vector3(0, 1, -0.25), dr)
 	else:
 		var wire := mat(Color(0.85, 0.85, 0.85), 0.9, 0.2)
 		for sx in [-1, 1]:
-			cyl(root, 0.006, 0.006, 0.5, Vector3(sx * d.x * 0.35, -d.y / 2.0 - 0.22, d.z * 0.45), wire, Vector3(0, 0, sx * 25))
-			cyl(root, 0.006, 0.006, 0.5, Vector3(sx * d.x * 0.35, d.y / 2.0 + 0.22, d.z * 0.45), wire, Vector3(0, 0, -sx * 25))
+			cyl(comms_g, 0.006, 0.006, 0.5, Vector3(sx * d.x * 0.35, -d.y / 2.0 - 0.22, d.z * 0.45), wire, Vector3(0, 0, sx * 25))
+			cyl(comms_g, 0.006, 0.006, 0.5, Vector3(sx * d.x * 0.35, d.y / 2.0 + 0.22, d.z * 0.45), wire, Vector3(0, 0, -sx * 25))
 
 	# ---------------- instruments on the front (+Z), looking out
 	var list: Array = m.instruments
@@ -245,45 +249,47 @@ static func build(m) -> Node3D:
 		var cy: float = (float(i / cols) - (rows - 1) / 2.0) * d.y / rows
 		var s: float = min(d.x / cols, d.y / rows) * 0.7
 		var front := Vector3(cx, cy, d.z / 2.0)
+		var ig := _grp(root, "instrument:" + id)
 		match I.shape:
 			"box":
 				if id.begins_with("ir"):
-					part(root, "Radiometer", front, OUT_FRONT, s * 0.9)
+					part(ig, "Radiometer", front, OUT_FRONT, s * 0.9)
 				elif id.begins_with("gas"):
-					part(root, "Spectrometer", front, OUT_FRONT, s * 0.9)
+					part(ig, "Spectrometer", front, OUT_FRONT, s * 0.9)
 				else:
-					part(root, "CamBox", front, OUT_FRONT, s * 0.8)
+					part(ig, "CamBox", front, OUT_FRONT, s * 0.8)
 			"cyl":
 				if id.begins_with("gas"):
-					part(root, "Spectrometer", front, OUT_FRONT, s)
+					part(ig, "Spectrometer", front, OUT_FRONT, s)
 				elif id == "gamma":
-					cyl(root, s * 0.36, s * 0.36, s * 0.7, front + Vector3(0, 0, s * 0.35), white, Vector3(90, 0, 0))
-					cyl(root, s * 0.38, s * 0.38, s * 0.06, front + Vector3(0, 0, s * 0.7), alu, Vector3(90, 0, 0))
+					cyl(ig, s * 0.36, s * 0.36, s * 0.7, front + Vector3(0, 0, s * 0.35), white, Vector3(90, 0, 0))
+					cyl(ig, s * 0.38, s * 0.38, s * 0.06, front + Vector3(0, 0, s * 0.7), alu, Vector3(90, 0, 0))
 				else:
-					part(root, "CamTelescope", front, OUT_FRONT, s * 0.95)
+					part(ig, "CamTelescope", front, OUT_FRONT, s * 0.95)
 			"tube":
-				part(root, "CamTelescope", front, OUT_FRONT, s * 1.05, d.z * 0.9 / (s * 1.05))
+				part(ig, "CamTelescope", front, OUT_FRONT, s * 1.05, d.z * 0.9 / (s * 1.05))
 			"bigtube":
-				_telescope(root, d)
+				_telescope(ig, d)
 			"panel":
-				var sar := part(root, "SarPanel", Vector3(0, -d.y / 2.0 - 0.02, 0), Vector3.DOWN, 1.0)
+				var sar := part(ig, "SarPanel", Vector3(0, -d.y / 2.0 - 0.02, 0), Vector3.DOWN, 1.0)
 				sar.scale = Vector3(d.x * 1.9, 1.0, d.z * 1.25)
 			"dish":
-				part(root, "Dish", Vector3(cx, -d.y / 2.0, cy * 0.5), Vector3.DOWN, s * 0.55)
+				part(ig, "Dish", Vector3(cx, -d.y / 2.0, cy * 0.5), Vector3.DOWN, s * 0.55)
 			"boom":
-				part(root, "Boom", Vector3(-d.x / 2.0, d.y / 2.0, -d.z / 2.0), Vector3(-0.6, 0.5, -0.4), 1.4)
+				part(ig, "Boom", Vector3(-d.x / 2.0, d.y / 2.0, -d.z / 2.0), Vector3(-0.6, 0.5, -0.4), 1.4)
 
 	# ---------------- attitude control: star trackers on the top, angled away from the Sun and the Earth
 	if A.level >= 3:
+		var adcs_g := _grp(root, "adcs:" + m.adcs)
 		for sx in [-1, 1]:
-			part(root, "StarTracker", Vector3(sx * d.x * 0.3, d.y / 2.0, d.z * 0.3), Vector3(sx * 0.35, 1.0, 0.55), 0.16 * k)
+			part(adcs_g, "StarTracker", Vector3(sx * d.x * 0.3, d.y / 2.0, d.z * 0.3), Vector3(sx * 0.35, 1.0, 0.55), 0.16 * k)
 
 	# ---------------- propulsion at the back (-Z)
 	if m.propulsion != "none":
 		var nz := Node3D.new()
 		nz.name = "Thruster"
 		nz.position = Vector3(0, 0, -d.z / 2.0)
-		root.add_child(nz)
+		_grp(root, "propulsion:" + m.propulsion).add_child(nz)
 		var r: float = 0.08 * max(k, 0.5)
 		if PR.electric:
 			part(nz, "ThrusterIon", Vector3.ZERO, OUT_BACK, r * 2.6)
@@ -298,7 +304,22 @@ static func build(m) -> Node3D:
 
 	var radius: float = max(d.length() * 0.6, span + d.x / 2.0 + 0.2)
 	root.set_meta("radius", radius)
+	var keys: Array = []
+	for g in root.get_children():
+		if g.has_meta("part_key"):
+			keys.append(g.get_meta("part_key"))
+	root.set_meta("part_keys", keys)
 	return root
+
+
+## A holder for one chosen part of the craft, named by its key ("panels:dep_m", "instrument:ir_adv"...), so the
+## design screen can make a new part arrive and snap, and light the part a problem comes from (scripts/craft/craft_view.gd).
+static func _grp(root: Node3D, key: String) -> Node3D:
+	var g := Node3D.new()
+	g.name = key.replace(":", "_")
+	g.set_meta("part_key", key)
+	root.add_child(g)
+	return g
 
 
 ## CubeSats: the modeled 3U (rails, cells, wings, whips) at the game's size; a 6U is two side by side, a 12U four.
