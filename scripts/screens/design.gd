@@ -246,6 +246,19 @@ func _keeps_mass(field: String, id: String) -> bool:
 	return r2.mass_total <= GameData.BUSES[mission.bus].max
 
 
+## The cheapest body that holds instrument `id` and every instrument already chosen ("" if none does).
+func _body_for(id: String) -> String:
+	var need: int = GameData.INSTRUMENTS[id].size
+	for j in mission.instruments:
+		need = maxi(need, int(GameData.INSTRUMENTS[j].size))
+	var best := ""
+	for b in GameData.BUSES:
+		var B: Dictionary = GameData.BUSES[b]
+		if B.max_size >= need and B.slots >= mission.instruments.size() + 1 and (best == "" or B.cost < GameData.BUSES[best].cost):
+			best = b
+	return best
+
+
 ## A question seen for the first time starts on its best fit, so a player who only presses Continue never builds a
 ## craft that falls short without knowing it.
 func _start_on_best(id: String) -> void:
@@ -451,8 +464,13 @@ func _fill_question(id: String, r: Dictionary) -> void:
 					mark = tr("Needs a bigger body")
 				left_box.add_child(_tile("camera", I.name, [Kit.money(I.cost), Kit.kg(I.mass)], has, func():
 					if not has and not fits:
-						toast(tr("%s doesn't fit on %s") % [I.name, B.name], Kit.C_BAD)
-						return
+						# it does not fit this body: grow the craft to the cheapest body that holds it and everything chosen
+						var grown := _body_for(i)
+						if grown == "":
+							toast(tr("%s doesn't fit on %s") % [I.name, B.name], Kit.C_BAD)
+							return
+						mission.bus = grown
+						toast(tr("Your craft grew to %s so the %s fits.") % [GameData.BUSES[grown].name, I.name], Kit.C_ACCENT)
 					mission.toggle_instrument(i)
 					on_change(), I.desc + "\n" + tr("%s · %s · %s per day · %s · %s pointing") % [Kit.kg(I.mass), Kit.watts(I.power), Kit.gb(I.data), Kit.money(I.cost), [tr("free"), tr("coarse"), tr("fine"), tr("precise")][I.pointing]],
 					mark, Kit.C_OK if rel >= 0.95 and fits else (Kit.C_WARN if not fits else Kit.C_DIM), not fits))
@@ -632,6 +650,9 @@ func _fill_board(r: Dictionary) -> void:
 	var nf := 0
 	var nw := 0
 	for c in r.checks:
+		var at := _q_index(str(c.get("at", "")))
+		if at > _reached or (at < 0 and _reached < _q_index("review")):
+			continue   # a step not reached yet is not a fault yet
 		if c.level == "fatal":
 			nf += 1
 		elif c.level == "warn":
