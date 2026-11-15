@@ -187,6 +187,34 @@ func read(t: float, err_deg: float) -> String:
 	return "good"
 
 
+## A glint of dust caught instead of ice: no water, and the instruments pause.
+func dust(t: float) -> void:
+	busy_until = t + float(P.miss_cool_s) * 0.5
+	tries += 1
+
+
+## How well the flash was caught: 1 at its peak, 0 beyond the tolerance (s after the impact, real seconds).
+func flash_quality(press_s: float) -> float:
+	var S: Dictionary = D.stages
+	return clampf(1.0 - absf(press_s - float(S.flash_peak_s)) / float(S.flash_tol_s), 0.0, 1.0)
+
+
+## The data sent home, 0 to 100: the instruments on, the flash, the ice, the dive (weights in the data).
+func data(armed: int, flash_q: float, dive_q: float) -> float:
+	var S: Dictionary = D.stages
+	var w: Dictionary = S.weights
+	var ice := minf(float(readings) / float(S.ice_full), 1.0)
+	return float(w.instruments) * armed / float(S.instruments.size()) + float(w.flash) * flash_q + float(w.ice) * ice + float(w.dive) * clampf(dive_q, 0.0, 1.0)
+
+
+func stars_for(total: float) -> int:
+	var n := 0
+	for k in D.stages.stars:
+		if total >= float(k):
+			n += 1
+	return n
+
+
 func stars() -> int:
 	var s: Array = P.stars
 	var n := 0

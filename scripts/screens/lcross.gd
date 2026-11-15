@@ -42,6 +42,20 @@ var _jit: Array = []           ## Fixed offsets that fill out the drawn plume ar
 var _spawned := {}
 var result_shown := false
 var thump: AudioStreamPlayer
+# the five stages
+var armed: Array = []          ## Each instrument: "" waiting, "on", "missed".
+var arm_i := -1                ## The instrument lit now.
+var flash_q := -1.0            ## How well the flash was caught (-1: not yet).
+var dive_p := Vector2.ZERO     ## Our craft's miss from the Centaur's crater, sideways (km).
+var dive_v := Vector2.ZERO
+var dive_sum := 0.0
+var dive_n := 0
+var stage_rows: Array = []
+var stage_names: Array = []
+var arm_panel: PanelContainer
+var arm_tiles: Array = []
+var meter: Control
+var data_bar: Control
 # the world
 var cap: MeshInstance3D
 var plume: MultiMeshInstance3D
@@ -49,6 +63,7 @@ var flash_l: OmniLight3D
 var flash_ball: MeshInstance3D
 var ring: MeshInstance3D
 var glint_mat: ShaderMaterial
+var dust_mat: ShaderMaterial
 var burst: CPUParticles3D
 # interface
 var head_title: Label
@@ -63,6 +78,7 @@ var big: Label
 var big_sub: Label
 var shout_panel: PanelContainer
 var count_lbl: Label
+var count_panel: PanelContainer
 var now_lbl: Label
 var now_panel: PanelContainer
 var bubble: Label
@@ -244,6 +260,8 @@ void fragment() {
 	st.add_child(plume)
 	glint_mat = _soft("tint")
 	glint_mat.set_shader_parameter("tint", Color(0.6, 0.85, 1.0, 1.0))
+	dust_mat = _soft("tint")
+	dust_mat.set_shader_parameter("tint", Color(0.75, 0.6, 0.45, 0.9))
 	# the impact: a light, a white fireball and a shock ring along the ground
 	flash_l = OmniLight3D.new()
 	flash_l.light_color = Color(1.0, 0.9, 0.7)
@@ -392,9 +410,56 @@ void fragment() {
 	var credit := Kit.lbl(tr("The south pole from above: NASA/GSFC/Arizona State University, LRO"), Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R)
 	credit.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	mv.add_child(credit)
+	# the five stages, left: done, now, still to come
+	var stp := _card()
+	Kit.place(stp, 0, 0, 0, 0, Kit.MARGIN, 120, Kit.MARGIN + 10, 130)
+	add_child(stp)
+	var stv := Kit.vbox(4)
+	stp.add_child(stv)
+	stv.add_child(Kit.caps(tr("The mission")))
+	for nm in [tr("Aim the Centaur"), tr("Turn on the instruments"), tr("Catch the flash"), tr("Catch the ice"), tr("Dive onto the crater")]:
+		stage_names.append(nm)
+		var l := Kit.lbl(nm, Kit.T_BODY, Kit.C_DIM, Kit.FONT_B)
+		stv.add_child(l)
+		stage_rows.append(l)
+	# the instruments to turn on: six tiles, a number key each
+	arm_panel = _card()
+	Kit.place(arm_panel, 0.5, 1, 0.5, 1, -10, -320, 10, -310)
+	arm_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	add_child(arm_panel)
+	var av := Kit.vbox(6)
+	arm_panel.add_child(av)
+	var at := Kit.caps(tr("Turn on the instruments: press the number when it lights up"))
+	at.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	av.add_child(at)
+	var ah := Kit.hbox(8)
+	av.add_child(ah)
+	for i in I.D.stages.instruments.size():
+		armed.append("")
+		var tile := PanelContainer.new()
+		tile.custom_minimum_size = Vector2(150, 74)
+		tile.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var tv := Kit.vbox(0)
+		tile.add_child(tv)
+		var k := Kit.lbl(str(i + 1), Kit.T_CLOCK, Kit.C_TEXT, Kit.FONT_T)
+		k.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		tv.add_child(k)
+		var nl := Kit.lbl(tr(I.D.stages.instruments[i]), Kit.T_SMALL, Kit.C_TEXT, Kit.FONT_B, true)
+		nl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		nl.custom_minimum_size.x = 140
+		tv.add_child(nl)
+		ah.add_child(tile)
+		arm_tiles.append(tile)
+	arm_panel.visible = false
+	# the flash meter: the photometer's light, rising and falling
+	meter = FlashMeter.new()
+	meter.custom_minimum_size = Vector2(520, 70)
+	Kit.place(meter, 0.5, 1, 0.5, 1, -260, -290, 260, -220)
+	meter.visible = false
+	add_child(meter)
 	# the instruments: the spectrum, the readings and the combo
 	side_panel = Kit.panel_box(10)
-	Kit.place(side_panel, 1, 1, 1, 1, -Kit.MARGIN - 400, -Kit.MARGIN - 230, -Kit.MARGIN, -Kit.MARGIN)
+	Kit.place(side_panel, 1, 1, 1, 1, -Kit.MARGIN - 400, -Kit.MARGIN - 250, -Kit.MARGIN, -Kit.MARGIN)
 	add_child(side_panel)
 	var iv := Kit.vbox(6)
 	side_panel.add_child(iv)
@@ -402,7 +467,10 @@ void fragment() {
 	spectrum = Spectrum.new()
 	spectrum.custom_minimum_size = Vector2(380, 100)
 	iv.add_child(spectrum)
-	reads_lbl = Kit.lbl("", Kit.T_ACTION - 2, Kit.C_GOLD, Kit.FONT_B)
+	data_bar = DataBar.new()
+	data_bar.custom_minimum_size = Vector2(380, 34)
+	iv.add_child(data_bar)
+	reads_lbl = Kit.lbl("", Kit.T_BODY, Kit.C_GOLD, Kit.FONT_B)
 	iv.add_child(reads_lbl)
 	combo_lbl = Kit.lbl("", Kit.T_BODY, Kit.C_ACCENT, Kit.FONT_B)
 	iv.add_child(combo_lbl)
@@ -428,21 +496,20 @@ void fragment() {
 	big_sub = Kit.lbl("", Kit.T_ACTION, Kit.C_TEXT, Kit.FONT_B)
 	big_sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	sb.add_child(big_sub)
-	# the countdown, huge in the middle
-	count_lbl = Kit.lbl("", Kit.T_SHOUT * 3, Kit.C_GOLD, Kit.FONT_T)
+	# the countdown, on its own small card under the clock, clear of the crosshair
+	count_panel = _card()
+	Kit.place(count_panel, 0.5, 0, 0.5, 0, -10, Kit.MARGIN + 176, 10, Kit.MARGIN + 186)
+	count_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	add_child(count_panel)
+	count_lbl = Kit.lbl("", Kit.T_CLOCK, Kit.C_GOLD, Kit.FONT_T)
 	count_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	count_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	count_lbl.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	count_lbl.add_theme_constant_override("outline_size", 10)
-	count_lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
-	count_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(count_lbl)
+	count_panel.add_child(count_lbl)
 	# the call to act, above the hint
 	now_panel = _card()
 	Kit.place(now_panel, 0.5, 1, 0.5, 1, -10, -300, 10, -290)
 	now_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	add_child(now_panel)
-	now_lbl = Kit.lbl("", Kit.T_SHOUT, Kit.C_GOLD, Kit.FONT_T)
+	now_lbl = Kit.lbl("", Kit.T_CLOCK, Kit.C_GOLD, Kit.FONT_T)
 	now_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	now_panel.add_child(now_lbl)
 	# what a catch or a miss says, right of the crosshair
@@ -493,14 +560,17 @@ func _show_brief() -> void:
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	brief.add_child(shade)
 	var p := Kit.panel_box(Kit.PAD)
-	Kit.place(p, 0.5, 0.5, 0.5, 0.5, -430, -220, 430, 220)
+	Kit.place(p, 0.5, 0.5, 0.5, 0.5, -440, -320, 440, 320)
 	brief.add_child(p)
 	var v := Kit.vbox(Kit.GAP)
 	p.add_child(v)
 	v.add_child(Kit.caps(tr("How to play")))
 	v.add_child(Kit.lbl(tr("Two crashes, on purpose"), Kit.T_CLOCK, Kit.C_GOLD, Kit.FONT_T))
 	for row in [["1", tr("Aim the Centaur at Cabeus's dark floor"), tr("WASD or the arrows: small burns. Ice hides in the shadow.")],
-			["2", tr("Catch the ice in the plume"), tr("Glints of ice fly out of the plume. Chase each one with the crosshair (mouse or WASD) and press SPACE.")]]:
+			["2", tr("Turn on the instruments"), tr("Keys 1 to 6, each when it lights up, before the impact.")],
+			["3", tr("Catch the flash"), tr("SPACE at the peak of the impact's light.")],
+			["4", tr("Catch the ice in the plume"), tr("Chase the blue glints with the crosshair (mouse or WASD), SPACE. Grey ones are dust: leave them.")],
+			["5", tr("Dive onto the crater"), tr("Steer our craft onto the Centaur's fresh crater, 20 m wide.")]]:
 		var h := Kit.hbox(Kit.PAD)
 		v.add_child(h)
 		h.add_child(Kit.lbl(row[0], Kit.T_CLOCK, Kit.C_GOLD, Kit.FONT_T))
@@ -510,7 +580,7 @@ func _show_brief() -> void:
 		var d := Kit.lbl(row[2], Kit.T_BODY, Kit.C_DIM, Kit.FONT_R, true)
 		d.custom_minimum_size.x = 640
 		tv.add_child(d)
-	v.add_child(Kit.lbl(tr("At least %d readings before our craft hits too.") % int(I.P.need), Kit.T_SMALL + 1, Kit.C_DIM, Kit.FONT_R, true))
+	v.add_child(Kit.lbl(tr("Each stage sends data to Earth. At least %d%% before our craft hits too.") % int(I.D.stages.need), Kit.T_SMALL + 1, Kit.C_DIM, Kit.FONT_R, true))
 	var go_btn := Kit.btn(tr("Start  ·  Enter"), _start, Kit.T_BODY)
 	Kit.accent_btn(go_btn, Kit.C_GOLD)
 	v.add_child(go_btn)
@@ -568,17 +638,158 @@ func _impact() -> void:
 		return
 	plume.visible = true
 	side_panel.visible = true
+	arm_panel.visible = false
+	phase = "flash"
+	phase_t = 0.0
+	meter.visible = true
 	_shout(tr(T.hit), tr(T.hit_sub))
+	hint.text = tr(T.flash)
+	_say("Rumi", tr("Photometer: catch the peak of the flash!"))
+	aim_off = Vector2(0.6, -0.4)
+
+
+func _flash_level(s_: float) -> float:
+	var pk := float(I.D.stages.flash_peak_s)
+	var x := maxf(s_, 0.0) / pk
+	return clampf(x * exp(1.0 - x), 0.0, 1.0)
+
+
+## The photometer's reading of the flash: press_s seconds after the impact, or -1 for no press.
+func _flash_result(press_s: float) -> void:
+	var on: bool = armed[armed.size() - 1] == "on"
+	if not on:
+		flash_q = 0.0
+		_pop(tr("The photometer was off!"), Kit.C_BAD)
+		return
+	flash_q = I.flash_quality(press_s) if press_s >= 0.0 else 0.0
+	if flash_q > 0.8:
+		_pop(tr("Perfect flash!"), Kit.C_GOLD)
+		Kit.UiSound.play("success")
+	elif flash_q > 0.3:
+		_pop(tr("Good flash"), Kit.C_GOLD)
+		Kit.UiSound.play("snap")
+	else:
+		_pop(tr("Missed the flash"), Kit.C_BAD)
+		Kit.UiSound.play("error")
+
+
+func _start_plume() -> void:
+	phase = "four"
+	phase_t = 0.0
+	meter.visible = false
 	hint.text = tr(T.read)
 	_say("Killa", tr("Plume! Watch for the ice. I read, you catch."))
-	aim_off = Vector2(0.6, -0.4)
+
+
+# ===================================================================================== STAGE 2: THE INSTRUMENTS
+func _arming() -> void:
+	var S: Dictionary = I.D.stages
+	var k := int(floor((t - float(S.arm_start_s)) / float(S.arm_step_s)))
+	var in_win := t - float(S.arm_start_s) - k * float(S.arm_step_s) <= float(S.arm_window_s)
+	var now := k if k >= 0 and k < armed.size() and in_win else -1
+	if now != arm_i:
+		if arm_i >= 0 and armed[arm_i] == "":
+			armed[arm_i] = "missed"
+			Kit.UiSound.play("error")
+		arm_i = now
+		if arm_i >= 0:
+			Kit.UiSound.play("notify")
+			_say("Killa", tr("%s, now!") % tr(S.instruments[arm_i]))
+	for i in arm_tiles.size():
+		var col := Color(0.2, 0.22, 0.28, 0.9)
+		if armed[i] == "on":
+			col = Color(0.2, 0.55, 0.3, 0.95)
+		elif armed[i] == "missed":
+			col = Color(0.55, 0.18, 0.15, 0.95)
+		elif i == arm_i:
+			col = Color(0.85, 0.6, 0.15, 0.7 + 0.3 * sin(_t * 14.0))
+		(arm_tiles[i] as PanelContainer).add_theme_stylebox_override("panel", Kit.flat(col, Color(1, 1, 1, 0.25 if i == arm_i else 0.05), 10, 2, 6, 6))
+
+
+func _arm_key(n: int) -> void:
+	if arm_i == n and armed[n] == "":
+		armed[n] = "on"
+		Kit.UiSound.play("snap")
+		_pop(tr("%s on!") % tr(I.D.stages.instruments[n]), Kit.C_OK)
+	elif n >= 0 and n < armed.size() and armed[n] == "":
+		Kit.UiSound.play("error")
+		_pop(tr("Not that one yet!"), Kit.C_BAD)
+
+
+func _armed_n() -> int:
+	var n := 0
+	for a in armed:
+		if a == "on":
+			n += 1
+	return n
+
+
+# ===================================================================================== STAGE 5: THE DIVE
+func _start_dive() -> void:
+	phase = "dive"
+	phase_t = 0.0
+	for gl in glints:
+		(gl.node as Node3D).queue_free()
+	glints.clear()
+	now_lbl.text = ""
+	cross.visible = false
+	var r: Array = I.D.stages.dive_start_km
+	dive_p = Vector2.from_angle(randf() * TAU) * randf_range(float(r[0]), float(r[1]))
+	hint.text = tr(T.dive)
+	_say("Inti", tr("My turn! Steering us onto the Centaur's crater."))
+	Kit.UiSound.play("whoosh")
+
+
+func _dive(delta: float) -> void:
+	var S: Dictionary = I.D.stages
+	var push := Vector2.ZERO
+	if Input.is_physical_key_pressed(KEY_A) or Input.is_physical_key_pressed(KEY_LEFT):
+		push.x -= 1.0
+	if Input.is_physical_key_pressed(KEY_D) or Input.is_physical_key_pressed(KEY_RIGHT):
+		push.x += 1.0
+	if Input.is_physical_key_pressed(KEY_W) or Input.is_physical_key_pressed(KEY_UP):
+		push.y -= 1.0
+	if Input.is_physical_key_pressed(KEY_S) or Input.is_physical_key_pressed(KEY_DOWN):
+		push.y += 1.0
+	push += _mouse * 0.02
+	_mouse = Vector2.ZERO
+	# a slow sideways drift (our simplification), countered by the craft's small thrusters
+	dive_v += Vector2(randf_range(-1, 1), randf_range(-1, 1)) * float(S.dive_drift_kms) * delta
+	dive_v = dive_v.lerp(push.limit_length(1.0) * float(S.dive_push_kms), clampf(delta * 2.5, 0.0, 1.0)) if push != Vector2.ZERO else dive_v * (1.0 - delta * 0.3)
+	dive_p += dive_v * delta
+	var q := clampf(1.0 - dive_p.length() / float(S.dive_good_km), 0.0, 1.0)
+	dive_sum += q
+	dive_n += 1
+	now_lbl.text = tr("ON THE CRATER!") if q > 0.75 else tr("Steer to the crater!")
+	now_lbl.add_theme_color_override("font_color", Kit.C_OK if q > 0.75 else Kit.C_GOLD)
+	if t >= float(I.P.gap_s):
+		_end()
+
+
+func _dive_q() -> float:
+	return dive_sum / dive_n if dive_n > 0 else 0.0
+
+
+func _data() -> float:
+	return I.data(_armed_n(), maxf(flash_q, 0.0), _dive_q() if phase in ["dive", "end", "done", "lost"] else 0.0)
 
 
 func _spawn_glints() -> void:
 	var i := I.pulse_at(t)
-	if i < 0 or _spawned.has(i) or I.lit(t) < 0.12:
+	if i < 0:
+		# between two flashes of ice, a grain of dust flies too: a decoy
+		var gk := "d%d" % int(t / 7.0)
+		if not _spawned.has(gk) and I.lit(t) >= 0.12 and fmod(t, 7.0) > 2.0:
+			_spawned[gk] = true
+			_spawn_one(-1, false)
+		return
+	if _spawned.has(i) or I.lit(t) < 0.12:
 		return
 	_spawned[i] = true
+	_spawn_one(i, true)
+
+
+func _spawn_one(i: int, ice: bool) -> void:
 	# a clump of ejecta leaves the plume: from a high sunlit grain, outward and up (our simplification)
 	var best := 0
 	for k in 30:
@@ -593,19 +804,21 @@ func _spawn_glints() -> void:
 	var q := QuadMesh.new()
 	q.size = Vector2(4.5, 4.5)
 	node.mesh = q
-	node.material_override = glint_mat
+	node.material_override = glint_mat if ice else dust_mat
 	world.stage.add_child(node)
-	glints.append({"node": node, "pos": impact_at + g, "vel": vel, "pulse": i})
-	Kit.UiSound.play("notify")
+	glints.append({"node": node, "pos": impact_at + g, "vel": vel, "pulse": i, "ice": ice, "born": t})
+	if ice:
+		Kit.UiSound.play("notify")
 
 
 func _update_glints(dt_sim: float) -> void:
 	for gl in glints.duplicate():
 		var i: int = gl.pulse
-		if t > float(I.pulses[i][1]) or I.used_pulse.has(i):
+		var gone: bool = (t > float(I.pulses[i][1]) or I.used_pulse.has(i)) if gl.ice else (t - float(gl.born) > 5.0 or gl.has("caught"))
+		if gone:
 			(gl.node as Node3D).queue_free()
 			glints.erase(gl)
-			if not I.used_pulse.has(i):
+			if gl.ice and not I.used_pulse.has(i):
 				combo = 0
 			continue
 		gl.pos += gl.vel * dt_sim
@@ -623,6 +836,8 @@ func _nearest_glint() -> Array:
 		if world.cam.is_position_behind(gl.pos):
 			continue
 		var d := world.cam.unproject_position(gl.pos).distance_to(c)
+		if gl.ice:
+			d -= 25.0
 		if d < bd:
 			bd = d
 			best = gl
@@ -661,24 +876,34 @@ func _four(delta: float, dt_sim: float) -> void:
 	_update_glints(dt_sim)
 	var ng := _nearest_glint()
 	var near: bool = ng[0] != null and float(ng[1]) <= float(I.P.hit_px)
-	(cross as Crosshair).lock = near
+	(cross as Crosshair).lock = near and ng[0].ice
 	(spectrum as Spectrum).water = I.flash(t) * (1.0 if near else 0.25)
 	(spectrum as Spectrum).t = _t
-	if ng[0] != null:
+	if ng[0] != null and ng[0].ice:
 		now_lbl.text = tr("ICE! SPACE!") if near else tr("Ice glint! Chase it!")
 		now_lbl.add_theme_color_override("font_color", Kit.C_GOLD if near else Kit.C_ACCENT)
+	elif ng[0] != null and near:
+		now_lbl.text = tr("Dust: let it go")
+		now_lbl.add_theme_color_override("font_color", Kit.C_DIM)
 	else:
 		now_lbl.text = ""
-	reads_lbl.text = tr("Readings: %d of %d needed") % [I.readings, int(I.P.need)]
-	reads_lbl.add_theme_color_override("font_color", Kit.C_OK if I.readings >= int(I.P.need) else Kit.C_GOLD)
+	reads_lbl.text = tr("Ice caught: %d") % I.readings
 	combo_lbl.text = tr("Combo x%d · best x%d") % [combo, best_combo] if best_combo > 1 else ""
-	if t >= float(I.P.gap_s):
-		_end()
+	if I.shepherd_alt(t) <= float(I.D.stages.dive_km):
+		_start_dive()
 
 
 func _catch() -> void:
 	var ng := _nearest_glint()
 	var near: bool = ng[0] != null and float(ng[1]) <= float(I.P.hit_px)
+	if near and not ng[0].ice:
+		ng[0]["caught"] = true
+		I.dust(t)
+		combo = 0
+		_pop(tr(T.dust), Kit.C_BAD)
+		Kit.UiSound.play("error")
+		_say("Killa", tr("That was dust! Blue ones only."))
+		return
 	var r := I.read(t, 0.0 if near else 99.0)
 	match r:
 		"good":
@@ -718,13 +943,34 @@ func _end() -> void:
 	for gl in glints:
 		(gl.node as Node3D).queue_free()
 	glints.clear()
-	if I.readings < int(I.P.need):
-		_lose(tr(T.few), tr(T.few_sub))
+	if _data() < float(I.D.stages.need):
+		_lose(tr(T.few), tr(T.few_sub) + "\n" + tr("Data sent: %d%% of %d%% needed.") % [int(_data()), int(I.D.stages.need)])
 		return
 	_shout(tr(T.end), tr(T.end_sub))
 	hint.text = ""
 	_say("Wayra", tr("Signal lost at 11:35:36 UT. Just as planned. Data is home."))
 	Kit.UiSound.play("fanfare")
+
+
+func _stages_ui() -> void:
+	var cur := 0
+	match phase:
+		"brief", "aim":
+			cur = 0
+		"warp", "fall":
+			cur = 1
+		"flash":
+			cur = 2
+		"four":
+			cur = 3
+		"dive":
+			cur = 4
+		_:
+			cur = 5
+	for i in stage_rows.size():
+		var l: Label = stage_rows[i]
+		l.text = ("✓  " if i < cur else ("▶  " if i == cur else "·  ")) + stage_names[i]
+		l.add_theme_color_override("font_color", Kit.C_OK if i < cur else (Kit.C_GOLD if i == cur else Kit.C_DIM))
 
 
 # ===================================================================================== THE END
@@ -786,14 +1032,25 @@ func _show_result() -> void:
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(shade)
 	var p := Kit.panel_box(Kit.PAD)
-	Kit.place(p, 0.5, 0.5, 0.5, 0.5, -420, -220, 420, 220)
+	Kit.place(p, 0.5, 0.5, 0.5, 0.5, -440, -270, 440, 270)
 	add_child(p)
 	var v := Kit.vbox(Kit.GAP)
 	p.add_child(v)
 	v.add_child(Kit.caps(tr("Mission 4 · done")))
-	var stars := I.stars()
-	v.add_child(Kit.lbl("★".repeat(stars) + "☆".repeat(3 - stars), Kit.T_CLOCK, Kit.C_GOLD, Kit.FONT_T))
-	v.add_child(Kit.lbl(tr("Ice caught: %d · Best combo: x%d · Trim used: %.2f of %.0f m/s") % [I.readings, best_combo, I.used, float(I.A.budget_ms)], Kit.T_BODY, Kit.C_TEXT, Kit.FONT_B, true))
+	var total := _data()
+	var stars := I.stars_for(total)
+	var top := Kit.hbox(Kit.PAD)
+	v.add_child(top)
+	top.add_child(Kit.lbl("★".repeat(stars) + "☆".repeat(3 - stars), Kit.T_CLOCK, Kit.C_GOLD, Kit.FONT_T))
+	top.add_child(Kit.lbl(tr("%d%% of the data home") % int(total), Kit.T_CLOCK, Kit.C_TEXT, Kit.FONT_T))
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 24)
+	v.add_child(grid)
+	for row in [[tr("Instruments on"), "%d / %d" % [_armed_n(), armed.size()]], [tr("The flash"), "%d%%" % int(maxf(flash_q, 0.0) * 100.0)],
+			[tr("Ice caught"), tr("%d · best combo x%d") % [I.readings, best_combo]], [tr("The dive onto the crater"), "%d%%" % int(_dive_q() * 100.0)]]:
+		grid.add_child(Kit.lbl(row[0], Kit.T_BODY, Kit.C_DIM, Kit.FONT_R))
+		grid.add_child(Kit.lbl(row[1], Kit.T_BODY, Kit.C_TEXT, Kit.FONT_B))
 	v.add_child(Kit.rule())
 	for F in I.D.facts:
 		var fh := Kit.hbox(Kit.GAP)
@@ -836,15 +1093,27 @@ func process(delta: float) -> void:
 			if t >= float(I.P.warp_to_s):
 				phase = "fall"
 				phase_t = 0.0
-				hint.text = tr(T.watch)
+				hint.text = tr(T.arm)
 				cross.visible = true
-				_say("Inti", tr("There it goes, ahead of us. Three, two, one..."))
+				arm_panel.visible = true
+				_say("Killa", tr("Instruments! I call them, you switch them on."))
 		"fall":
 			t += delta
-			count_lbl.text = str(int(ceil(-t))) if t > -3.0 and t < 0.0 else ""
+			_arming()
+			count_lbl.text = tr("Impact in") + "  " + str(int(ceil(-t))) if t > -3.0 and t < 0.0 else ""
 			if t >= 0.0:
 				t = 0.0
 				_impact()
+		"flash":
+			t += delta * float(I.D.stages.flash_slow)
+			(meter as FlashMeter).level = _flash_level(phase_t)
+			if phase_t > float(I.D.stages.flash_wait_s):
+				if flash_q < 0.0:
+					_flash_result(-1.0)
+				_start_plume()
+		"dive":
+			t += delta
+			_dive(delta)
 		"four":
 			# the four minutes shown 4 times faster, slow motion just after the impact; the last 15 km in real time
 			sp = float(I.P.show_fast)
@@ -898,13 +1167,17 @@ func process(delta: float) -> void:
 	var eye := at + dir * alt
 	var look := at
 	var fov_goal := 42.0
-	if phase in ["fall", "four", "end", "lost", "done"] and verdict != "":
+	if phase in ["fall", "flash", "four", "dive", "end", "lost", "done"] and verdict != "":
 		var frame := float(I.P.frame_km)
 		fov_goal = clampf(rad_to_deg(2.0 * atan(frame * 0.5 / alt)), 3.0, 80.0)
-		if phase == "four":
+		if phase == "four" or phase == "flash":
 			look = at + I.plume_mid(t) * 0.6
 	world.cam.fov = lerpf(world.cam.fov, fov_goal, clampf(delta * (1.5 if phase == "warp" or phase == "aim" else 3.0), 0.0, 1.0))
 	shake = maxf(0.0, shake - delta)
+	if phase == "dive" or (phase in ["end", "done"] and dive_n > 0):
+		var off := Vector3(dive_p.x, 0, dive_p.y)
+		eye += off
+		look = at + off
 	world.cam.position = eye
 	world.cam.look_at(look, Vector3.UP)
 	if phase == "four":
@@ -915,7 +1188,7 @@ func process(delta: float) -> void:
 		world.cam.rotate_object_local(Vector3.RIGHT, deg_to_rad(randf_range(-1, 1) * shake * world.cam.fov * 0.03))
 	# the camera's look: grain while we watch through it, static when the signal goes
 	var fxm := fx.material as ShaderMaterial
-	var through := phase in ["fall", "four"]
+	var through := phase in ["fall", "flash", "four", "dive"]
 	fxm.set_shader_parameter("vig", 1.0 if through else 0.0)
 	fxm.set_shader_parameter("noise", clampf(1.0 - phase_t / 2.5, 0.0, 1.0) if phase == "end" else 0.0)
 	# labels on the world
@@ -929,21 +1202,30 @@ func process(delta: float) -> void:
 			tg.items.append([world.cam.unproject_position(c_pos), tr("Centaur  %d km up") % int(I.centaur_alt(t)), Kit.C_GOLD, world.cam.unproject_position(c_back)])
 		if not world.cam.is_position_behind(at):
 			tg.items.append([world.cam.unproject_position(at), tr("Cabeus crater"), Kit.C_ACCENT])
+	if phase == "dive" and not world.cam.is_position_behind(at):
+		tg.items.append([world.cam.unproject_position(at), tr("The Centaur's crater · 20 m"), Kit.C_GOLD])
+		(tags as Tags).ring = world.cam.unproject_position(at)
+	else:
+		(tags as Tags).ring = Vector2(-1, -1)
 	if phase == "four":
 		for gl in glints:
 			if not world.cam.is_position_behind(gl.pos):
-				tg.items.append([world.cam.unproject_position(gl.pos), tr("ICE"), Color(0.6, 0.85, 1.0)])
+				tg.items.append([world.cam.unproject_position(gl.pos), tr("ICE") if gl.ice else tr("dust"), Color(0.6, 0.85, 1.0) if gl.ice else Color(0.7, 0.6, 0.5)])
 	tg.queue_redraw()
+	_stages_ui()
+	(data_bar as DataBar).value = _data()
+	(data_bar as DataBar).need = float(I.D.stages.need)
 	map_panel.visible = phase == "aim" or phase == "brief"
 	hint_panel.visible = hint.text != ""
 	shout_panel.visible = big.text != ""
 	big_sub.visible = big_sub.text != ""
 	now_panel.visible = now_lbl.text != ""
+	count_panel.visible = count_lbl.text != ""
 
 
 func _unhandled_input(e: InputEvent) -> void:
 	if e is InputEventMouseMotion:
-		if phase == "four":
+		if phase == "four" or phase == "dive":
 			_mouse += Vector2(e.relative.x, -e.relative.y)
 		return
 	if not (e is InputEventKey) or not e.pressed:
@@ -982,6 +1264,11 @@ func _unhandled_input(e: InputEvent) -> void:
 				return
 	elif phase == "four" and not e.echo and k == KEY_SPACE:
 		_catch()
+	elif phase == "flash" and not e.echo and k == KEY_SPACE:
+		if flash_q < 0.0:
+			_flash_result(phase_t)
+	elif phase == "fall" and not e.echo and k >= KEY_1 and k <= KEY_6:
+		_arm_key(k - KEY_1)
 	elif k == KEY_ESCAPE:
 		go(back)
 	else:
@@ -1068,11 +1355,50 @@ class Spectrum extends Control:
 		draw_string(Kit.FONT_B, Vector2(8, size.y - 5), TranslationServer.translate("Spectrum (drawn for the game): the dips are the water mark"), HORIZONTAL_ALIGNMENT_LEFT, size.x - 16, Kit.T_SMALL - 2, Kit.C_DIM)
 
 
+## The photometer's light: a bar that rises to the flash's peak and falls; the peak's mark.
+class FlashMeter extends Control:
+	var level := 0.0
+
+	func _process(_d: float) -> void:
+		queue_redraw()
+
+	func _draw() -> void:
+		draw_rect(Rect2(Vector2.ZERO, size), Color(0.02, 0.03, 0.06, 0.85))
+		var w := (size.x - 20) * level
+		draw_rect(Rect2(10, 26, w, size.y - 36), Color(1.0, 0.85 - 0.3 * level, 0.4, 0.95))
+		draw_line(Vector2(size.x - 14, 20), Vector2(size.x - 14, size.y - 6), Kit.C_GOLD, 3.0)
+		draw_string(Kit.FONT_B, Vector2(10, 18), TranslationServer.translate("Photometer: the flash's light"), HORIZONTAL_ALIGNMENT_LEFT, -1, Kit.T_SMALL, Kit.C_TEXT)
+		draw_string(Kit.FONT_B, Vector2(size.x - 90, 18), TranslationServer.translate("peak"), HORIZONTAL_ALIGNMENT_RIGHT, 70, Kit.T_SMALL, Kit.C_GOLD)
+
+
+## The data sent to Earth, 0 to 100 %, with the mark of what is needed.
+class DataBar extends Control:
+	var value := 0.0
+	var need := 60.0
+
+	func _process(_d: float) -> void:
+		queue_redraw()
+
+	func _draw() -> void:
+		var top := 18.0
+		draw_rect(Rect2(0, top, size.x, size.y - top), Color(0.06, 0.08, 0.12, 0.95))
+		draw_rect(Rect2(0, top, size.x * clampf(value / 100.0, 0.0, 1.0), size.y - top), Kit.C_OK if value >= need else Kit.C_ACCENT)
+		var nx := size.x * need / 100.0
+		draw_line(Vector2(nx, top - 2), Vector2(nx, size.y), Kit.C_GOLD, 2.0)
+		draw_string(Kit.FONT_B, Vector2(0, 13), TranslationServer.translate("Data sent to Earth: %d%%") % int(value), HORIZONTAL_ALIGNMENT_LEFT, -1, Kit.T_SMALL, Kit.C_TEXT)
+
+
 ## Labels of constant size on the world: what is too small to see at its true size.
 class Tags extends Control:
 	var items: Array = []
+	var ring := Vector2(-1, -1)
 
 	func _draw() -> void:
+		if ring.x >= 0.0:
+			var c := size * 0.5
+			draw_arc(c, 60.0, 0, TAU, 48, Color(0.6, 1.0, 0.7, 0.8), 2.0)
+			draw_line(c, ring, Color(1.0, 0.82, 0.3, 0.6), 2.0)
+			draw_arc(ring, 22.0 + 4.0 * sin(Time.get_ticks_msec() * 0.01), 0, TAU, 32, Kit.C_GOLD, 3.0)
 		for it in items:
 			var p: Vector2 = it[0]
 			if it.size() > 3:

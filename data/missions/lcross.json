@@ -30,7 +30,7 @@
   ],
   "ejecta_side_kms": 0.06,
   "sunlit_km": 2.5,
-  "warp_to_s": -6.0,
+  "warp_to_s": -14.0,
   "need": 8,
   "stars": [
    8,
@@ -72,8 +72,8 @@
   "missed_sub": "That is not how it went: the real Centaur hit inside Cabeus, near the Moon's south pole. Try again.",
   "sunlit": "The Centaur hit Cabeus's sunlit floor.",
   "sunlit_sub": "Ice hides in the dark. That is not how it went: the target was the shadowed floor. Try again.",
-  "few": "Not enough readings.",
-  "few_sub": "The shepherding craft hit before the instruments saw enough. The real one sent four minutes of data home. Try again.",
+  "few": "Not enough data.",
+  "few_sub": "The shepherding craft hit before enough data reached Earth. The real one sent four minutes of data home. Try again.",
   "hit": "Centaur impact!",
   "hit_sub": "11:31:19.5 UT. Now the four minutes.",
   "end": "Signal lost. On purpose.",
@@ -84,7 +84,11 @@
   "early": "No glint yet! The instruments pause.",
   "wobble": "Wobble! Bring the crosshair back.",
   "fast": "Shown 4 times faster",
-  "final": "The last 15 km: real time."
+  "final": "The last 15 km: real time.",
+  "arm": "Killa calls each instrument: press its number (1 to 6) while it lights up.",
+  "flash": "The photometer watches the flash: SPACE at its peak!",
+  "dive": "The last 25 km, in real time: steer onto the Centaur's fresh crater (WASD or mouse).",
+  "dust": "Dust! No water in that one."
  },
  "facts": [
   {
@@ -95,5 +99,45 @@
    "text": "On November 13, 2009, NASA announced that the data showed the mission had found water near the Moon's south pole.",
    "source": "S-lcross-nasa"
   }
- ]
+ ],
+ "stages": {
+  "doc": "The mission in five stages, each sending its part of the data home (our scoring). The instruments are the shepherding craft's own (S-lcross-nasa): a visible camera, two near-infrared cameras, two mid-infrared cameras, a visible spectrometer, two near-infrared spectrometers and a photometer (the Total Luminescence Photometer, which watched the flash). The crater the Centaur made: about 20 m across (S-lcross-nasa).",
+  "instruments": [
+   "Visible camera",
+   "Near-infrared cameras",
+   "Mid-infrared cameras",
+   "Visible spectrometer",
+   "Near-infrared spectrometers",
+   "Photometer"
+  ],
+  "arm_start_s": -13.0,
+  "arm_step_s": 1.7,
+  "arm_window_s": 1.5,
+  "flash_peak_s": 0.7,
+  "flash_tol_s": 0.55,
+  "flash_wait_s": 2.4,
+  "flash_slow": 0.25,
+  "ice_full": 14,
+  "dive_km": 25.0,
+  "dive_start_km": [
+   4.0,
+   6.0
+  ],
+  "dive_drift_kms": 0.6,
+  "dive_push_kms": 2.2,
+  "dive_good_km": 6.0,
+  "crater_m": 20,
+  "weights": {
+   "instruments": 15,
+   "flash": 10,
+   "ice": 55,
+   "dive": 20
+  },
+  "need": 60,
+  "stars": [
+   60,
+   78,
+   92
+  ]
+ }
 }

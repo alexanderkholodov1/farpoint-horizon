@@ -69,11 +69,23 @@ func _ready() -> void:
 	await wait(2.0)
 	await shot("warp")
 	await until(func(): return s.phase == "fall", 30.0)
-	await wait(2.6)
-	await shot("fall")
-	await until(func(): return s.phase == "four", 30.0)
-	await wait(0.4)
+	# the instruments: a player presses each number when it lights up (misses the third on purpose)
+	var shot_arm := false
+	while s.phase == "fall":
+		if s.arm_i >= 0 and s.armed[s.arm_i] == "" and s.arm_i != 2:
+			await wait(0.4)
+			if not shot_arm:
+				shot_arm = true
+				await shot("arm")
+			key(KEY_1 + s.arm_i)
+		await get_tree().process_frame
+	await wait(0.2)
 	await shot("impact")
+	# the flash: SPACE near its peak
+	await until(func(): return s.phase_t >= 0.65, 5.0)
+	await shot("flash")
+	key(KEY_SPACE)
+	await until(func(): return s.phase == "four", 10.0)
 	# the four minutes (shown 4 times faster); the harness keeps the crosshair on the plume and reads in the flashes
 	var t0 := Time.get_ticks_msec()
 	var shots_at := [1.2, 6.0, 20.0, 40.0, 58.0]
@@ -93,10 +105,18 @@ func _ready() -> void:
 			shots_at.pop_front()
 			await shot("four_%d" % int(s.t))
 		await get_tree().process_frame
+	# the dive: steer the miss back to the crater
+	var dive_shot := false
+	while s.phase == "dive":
+		s._mouse = -s.dive_p * 30.0
+		if not dive_shot and s.phase_t > 3.0:
+			dive_shot = true
+			await shot("dive")
+		await get_tree().process_frame
 	await wait(1.0)
 	await shot("end")
 	await until(func(): return s.result_shown, 10.0)
 	await wait(0.8)
 	await shot("result")
-	print("readings ", s.I.readings)
+	print("readings ", s.I.readings, " data ", s._data(), " armed ", s._armed_n(), " flash ", s.flash_q, " dive ", s._dive_q())
 	get_tree().quit()

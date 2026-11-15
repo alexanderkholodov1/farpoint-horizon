@@ -86,3 +86,55 @@ ICE,HIELO
 Centaur  %d km up,Centaur  a %d km
 Cabeus crater,Cráter Cabeus
 "On November 13, 2009, NASA announced that the data showed the mission had found water near the Moon's south pole.","El 13 de noviembre de 2009, la NASA anunció que los datos mostraban que la misión había encontrado agua cerca del polo sur de la Luna."
+The mission,La misión
+Aim the Centaur,Apuntar el Centaur
+Turn on the instruments,Encender los instrumentos
+Catch the flash,Atrapar el destello
+Catch the ice,Atrapar el hielo
+Dive onto the crater,Caer sobre el cráter
+Turn on the instruments: press the number when it lights up,Enciende los instrumentos: pulsa el número cuando se ilumine
+"Keys 1 to 6, each when it lights up, before the impact.","Teclas 1 a 6, cada una cuando se ilumine, antes del impacto."
+SPACE at the peak of the impact's light.,ESPACIO en el pico de la luz del impacto.
+"Chase the blue glints with the crosshair (mouse or WASD), SPACE. Grey ones are dust: leave them.","Persigue los destellos azules con la mira (mouse o WASD), ESPACIO. Los grises son polvo: déjalos."
+"Steer our craft onto the Centaur's fresh crater, 20 m wide.","Lleva nuestra nave al cráter recién hecho por el Centaur, de 20 m."
+Each stage sends data to Earth. At least %d%% before our craft hits too.,Cada etapa envía datos a la Tierra. Al menos %d%% antes de que nuestra nave también choque.
+Photometer: catch the peak of the flash!,Fotómetro: ¡atrapa el pico del destello!
+The photometer was off!,¡El fotómetro estaba apagado!
+Perfect flash!,¡Destello perfecto!
+Good flash,Buen destello
+Missed the flash,Se escapó el destello
+"%s, now!","¡%s, ahora!"
+%s on!,¡%s encendido!
+Not that one yet!,¡Ese todavía no!
+My turn! Steering us onto the Centaur's crater.,¡Mi turno! Nos llevo al cráter del Centaur.
+ON THE CRATER!,¡SOBRE EL CRÁTER!
+Steer to the crater!,¡Ve hacia el cráter!
+Dust: let it go,Polvo: déjalo
+Ice caught: %d,Hielo atrapado: %d
+That was dust! Blue ones only.,¡Eso era polvo! Solo los azules.
+Data sent: %d%% of %d%% needed.,Datos enviados: %d%% de %d%% necesarios.
+%d%% of the data home,%d%% de los datos en casa
+Instruments on,Instrumentos encendidos
+The flash,El destello
+Ice caught,Hielo atrapado
+%d · best combo x%d,%d · mejor combo x%d
+The dive onto the crater,La caída sobre el cráter
+"Instruments! I call them, you switch them on.","¡Instrumentos! Yo los nombro, tú los enciendes."
+The Centaur's crater · 20 m,El cráter del Centaur · 20 m
+dust,polvo
+Photometer: the flash's light,Fotómetro: la luz del destello
+peak,pico
+Data sent to Earth: %d%%,Datos enviados a la Tierra: %d%%
+Not enough data.,No hay suficientes datos.
+The shepherding craft hit before enough data reached Earth. The real one sent four minutes of data home. Try again.,La nave pastora chocó antes de que llegaran suficientes datos a la Tierra. La real envió cuatro minutos de datos a casa. Inténtalo otra vez.
+Killa calls each instrument: press its number (1 to 6) while it lights up.,Killa nombra cada instrumento: pulsa su número (1 a 6) mientras se ilumina.
+The photometer watches the flash: SPACE at its peak!,El fotómetro mira el destello: ¡ESPACIO en su pico!
+"The last 25 km, in real time: steer onto the Centaur's fresh crater (WASD or mouse).","Los últimos 25 km, en tiempo real: lleva la nave al cráter recién hecho por el Centaur (WASD o mouse)."
+Dust! No water in that one.,¡Polvo! En ese no hay agua.
+Visible camera,Cámara visible
+Near-infrared cameras,Cámaras de infrarrojo cercano
+Mid-infrared cameras,Cámaras de infrarrojo medio
+Visible spectrometer,Espectrómetro visible
+Near-infrared spectrometers,Espectrómetros de infrarrojo cercano
+Photometer,Fotómetro
+Impact in,Impacto en

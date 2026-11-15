@@ -89,6 +89,17 @@ func _initialize() -> void:
 		t += 0.25
 	if M.readings >= J.readings:
 		fail("spamming saves %d readings, as many as reading in the flashes (%d)" % [M.readings, J.readings])
+	# the five stages: six real instruments, the flash caught at its peak, the data sent home
+	var Q = load("res://scripts/missions/lcross/impact.gd").new()
+	if Q.D.stages.instruments.size() != 6 or int(Q.D.stages.crater_m) != 20:
+		fail("instruments %d, crater %s m" % [Q.D.stages.instruments.size(), Q.D.stages.crater_m])
+	if absf(Q.flash_quality(float(Q.D.stages.flash_peak_s)) - 1.0) > 0.01 or Q.flash_quality(3.0) > 0.0:
+		fail("flash quality at the peak %.2f, late %.2f" % [Q.flash_quality(float(Q.D.stages.flash_peak_s)), Q.flash_quality(3.0)])
+	Q.readings = int(Q.D.stages.ice_full)
+	if absf(Q.data(6, 1.0, 1.0) - 100.0) > 0.01 or Q.stars_for(Q.data(6, 1.0, 1.0)) != 3:
+		fail("a perfect run sends %.1f%% of the data" % Q.data(6, 1.0, 1.0))
+	if Q.data(0, 0.0, 0.0) >= float(Q.D.stages.need):
+		fail("only the ice, and still enough data (%.1f%%)" % Q.data(0, 0.0, 0.0))
 	# sources and Spanish
 	var md := FileAccess.get_file_as_string("res://docs/sources.md")
 	for id in ["S-lcross-nasa", "S-lcross-nssdc", "S-cabeus-gazetteer", "S-lroc-wac", "S-nssdc-planets"]:
