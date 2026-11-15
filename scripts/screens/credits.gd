@@ -38,7 +38,10 @@ func enter(_args: Dictionary) -> void:
 	shade.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(shade)
 	var panel := Kit.panel_box(Kit.PAD)
-	Kit.place(panel, 0.5, 0, 0.5, 1, -560, Kit.MARGIN, 560, -Kit.MARGIN)
+	if Kit.compact:
+		Kit.place(panel, 0, 0, 1, 1, Kit.MARGIN, Kit.MARGIN, -Kit.MARGIN, -Kit.MARGIN)
+	else:
+		Kit.place(panel, 0.5, 0, 0.5, 1, -560, Kit.MARGIN, 560, -Kit.MARGIN)
 	add_child(panel)
 	var sc := ScrollContainer.new()
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -48,7 +51,10 @@ func enter(_args: Dictionary) -> void:
 	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sc.add_child(box)
 	var close := Kit.btn(tr("Close ×") + "  ·  Esc", queue_free, Kit.T_BODY)
-	Kit.place(close, 0.5, 0, 0.5, 0, 404, Kit.MARGIN + 14, 520, Kit.MARGIN + 14 + Kit.BTN_H)
+	if Kit.compact:
+		Kit.place(close, 1, 0, 1, 0, -150, Kit.MARGIN + 8, -Kit.MARGIN - 8, Kit.MARGIN + 8 + Kit.BTN_H)
+	else:
+		Kit.place(close, 0.5, 0, 0.5, 0, 404, Kit.MARGIN + 14, 520, Kit.MARGIN + 14 + Kit.BTN_H)
 	add_child(close)
 
 	_hero(box)

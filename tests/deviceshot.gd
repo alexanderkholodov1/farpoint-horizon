@@ -6,12 +6,11 @@ var tag := "dev"
 
 
 func _ready() -> void:
-	get_tree().create_timer(90.0).timeout.connect(func(): get_tree().quit())
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	get_tree().create_timer(150.0).timeout.connect(func(): get_tree().quit())
 	var a := OS.get_cmdline_user_args()
 	if a.size() > 0:
 		tag = a[0]
-	if a.size() > 1:
-		get_window().content_scale_factor = float(a[1])
 	g = load("res://scenes/main.tscn").instantiate()
 	add_child(g)
 	await _wait(1.5)
@@ -42,6 +41,29 @@ func _ready() -> void:
 	g.go("flight")
 	await _wait(6.0)
 	await _shot("trip")
+	g.go("landing")
+	await _wait(3.0)
+	await _shot("landing")
+	g.go("builder", {"back_step": 7})
+	await _wait(1.5)
+	await _shot("builder")
+	g.go("menu")
+	await _wait(0.8)
+	g.overlay("howto")
+	await _wait(0.6)
+	await _shot("howto")
+	g.go("menu", {"settings": true})
+	await _wait(0.8)
+	await _shot("settings")
+	g.overlay("credits")
+	await _wait(0.8)
+	await _shot("credits")
+	g.go("design", {"step": 0})
+	await _wait(0.8)
+	g.overlay("pause")
+	await _wait(0.5)
+	await _shot("pause")
+	get_tree().paused = false
 	print("deviceshot: done")
 	get_tree().quit()
 

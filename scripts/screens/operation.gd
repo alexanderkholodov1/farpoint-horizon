@@ -72,7 +72,7 @@ func exit() -> void:
 func _build_ui() -> void:
 	# the top bar: what this is, the month, time and science
 	var top := Kit.panel_box(Kit.PAD)
-	Kit.place(top, 0, 0, 1, 0, 480, Kit.MARGIN, -Kit.MARGIN, 0)
+	Kit.place(top, 0, 0, 1, 0, 330 if Kit.compact else 480, Kit.MARGIN, -Kit.MARGIN, 0)
 	add_child(top)
 	var tv := Kit.vbox(Kit.GAP)
 	top.add_child(tv)
@@ -108,7 +108,7 @@ func _build_ui() -> void:
 	sh.add_child(sci_lbl)
 	# the mission log
 	var log_p := Kit.panel_box(Kit.PAD)
-	Kit.place(log_p, 0, 0, 0, 1, Kit.MARGIN, Kit.MARGIN, 456, -Kit.MARGIN)
+	Kit.place(log_p, 0, 0, 0, 1, Kit.MARGIN, Kit.MARGIN, 320 if Kit.compact else 456, -Kit.MARGIN)
 	add_child(log_p)
 	var lv := Kit.vbox(Kit.GAP)
 	log_p.add_child(lv)
@@ -123,7 +123,11 @@ func _build_ui() -> void:
 	log_scroll.add_child(log_box)
 	# time: how fast it runs, in words, and the report
 	var tp := Kit.panel_box(Kit.PAD)
-	Kit.place(tp, 1, 1, 1, 1, -520, -236, -Kit.MARGIN, -Kit.MARGIN)
+	if Kit.compact:
+		Kit.place(tp, 1, 1, 1, 1, -400, -Kit.MARGIN, -Kit.MARGIN, -Kit.MARGIN)
+		tp.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	else:
+		Kit.place(tp, 1, 1, 1, 1, -520, -236, -Kit.MARGIN, -Kit.MARGIN)
 	add_child(tp)
 	var tb := Kit.vbox(Kit.GAP)
 	tp.add_child(tb)
