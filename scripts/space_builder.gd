@@ -17,7 +17,8 @@ const EARTH_REGION_DAY := preload("res://textures/earth_region_day.jpg")
 const EARTH_REGION_RELIEF := preload("res://textures/earth_region_relief.jpg")
 const EARTH_REGION_CLOUDS := preload("res://textures/earth_region_clouds.jpg")
 ## Where those cover the globe, in its UV (u0, v0, u1, v1): 92-68 W, 12 N-12 S (planet_textures.py REGION_LONLAT).
-const REGION_RECT := Vector4((180.0 - 92.0) / 360.0, (90.0 - 12.0) / 180.0, (180.0 - 68.0) / 360.0, (90.0 + 12.0) / 180.0)
+## The sharp region: 92 W to 44 W, 12 S to 12 N, east along the launch track (assets/source/planet_textures.py).
+const REGION_RECT := Vector4((180.0 - 92.0) / 360.0, (90.0 - 12.0) / 180.0, (180.0 - 44.0) / 360.0, (90.0 + 12.0) / 180.0)
 const MOON_COLOR := preload("res://textures/moon_color.jpg")
 const MOON_NORMAL := preload("res://textures/moon_normal.jpg")
 ## Materials in this group get the Sun's direction ("sun_dir") from World every frame, for the night side.
