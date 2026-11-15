@@ -97,22 +97,26 @@ project's bibliography. The main sources so far:
 
 ## Use of AI
 
-Super Intelligence (AI) tools helped build this project, as the challenge rules ask us to disclose. The game idea, the
+Artificial intelligence (AI) tools helped build this project, as the challenge rules ask us to disclose. The game idea, the
 design decisions and the balance are the team's.
 
 - **Claude Code** (Anthropic), models Claude Opus 5.5 and Claude Sonnet: code, documents and research notes.
 - **Cursor**, model Composer 2.5: a feasibility test of the web build (kept outside this repository).
 - **TODO (teammate):** add here the other AI agents and models you used.
 
-No watermarks are used. Instead, every source (information, formula, data) is cited where it is used and in
-`kb/data/reference.json`.
+No AI-generated images are used, so no watermark is needed: models come from our scripts and from the cited
+libraries, imagery from NASA. Every source (information, formula, data) is cited where it is used and in
+`docs/sources.md`.
 
 ## Credits
 
 - Engine: [Godot Engine](https://godotengine.org) (MIT).
 - Font: Inter by Rasmus Andersson, [SIL Open Font License 1.1](https://rsms.me/inter/) (see `fonts/FONTS_LICENSE.txt`).
 - Earth and Moon textures: NASA Blue Marble, Black Marble, VIIRS and the SVS CGI Moon Kit, made by `assets/source/planet_textures.py` (sources S-gibs-earth and S-moon-kit in `docs/sources.md`); the old `earth_albedo.jpg` of unknown source is gone.
-- Spacecraft and space scenes are built in code from Godot primitives and shaders (`scripts/`, `shaders/`); this was not independently checked for third-party assets.
+- 3D modeling: [Blender](https://www.blender.org) (GPL), driven by our scripts in `assets/source/`. The craft, the launchers, the tanks, fairings and interstages, the craft components and the launch site are our own models.
+- Outside 3D models: Merlin Engine by hoahluke, Merlin 1D Vacuum by MartianDays, Rocket Nozzle Part by Zachary (corncob_127), all Sketchfab, CC BY 4.0; the Space Shuttle Solid Rocket Booster of NASA 3D Resources (public domain). Sources S-merlin-model, S-mvac-model, S-nozzle-model and S-srb-model in `docs/sources.md`.
+- NASA data in the game: Earth and Moon imagery, the Andes relief under the launch site, the Moon's south pole ground, the photos each mission returns, positions and constants; every item in `docs/sources.md`.
+- Sounds: synthesized in code by the game (`scripts/ui/ui_sound.gd`, `scripts/flight/sound.gd`); no recorded or outside sounds.
 
 ## Team
 

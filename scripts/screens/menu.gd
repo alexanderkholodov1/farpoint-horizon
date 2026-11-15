@@ -74,8 +74,9 @@ func enter(_args: Dictionary) -> void:
 	box.add_child(rule())
 	var hh := Kit.hbox(8)
 	box.add_child(hh)
-	hh.add_child(Kit.btn(tr("How to play"), func(): main.overlay("howto"), 15, 180))
-	hh.add_child(Kit.btn("Ranking", func(): main.overlay("ranking"), 15, 180))
+	hh.add_child(Kit.btn(tr("How to play"), func(): main.overlay("howto"), 15, 150))
+	hh.add_child(Kit.btn("Ranking", func(): main.overlay("ranking"), 15, 150))
+	hh.add_child(Kit.btn(tr("Credits"), func(): main.overlay("credits"), 15, 150))
 	box.add_child(Kit.spacer(2))
 	box.add_child(Kit.lbl(tr("The Earth behind is NASA data: Blue Marble by day, Black Marble city lights at night, and the real clouds of 31 August 2024 from the VIIRS instrument."), 12, Kit.C_DIM, Kit.FONT_R, true))
 	# entrance: the panel slides in from the left as the arc draws itself

@@ -28,6 +28,14 @@ func _ready() -> void:
 	await wait(1.2)
 	if only == "" or "menu" in only:
 		await shot("menu")
+	if "credits" in only:
+		g.screen.main.overlay("credits") if false else g.overlay("credits")
+		await wait(0.8)
+		await shot("credits")
+		var sc: ScrollContainer = g.screen.find_children("*", "ScrollContainer", true, false)[0]
+		sc.scroll_vertical = 1400
+		await wait(0.4)
+		await shot("credits_sources")
 	GameState.start_solo()
 	GameState.start_mission("volcanes")
 	g.go("design", {"step": 0})
