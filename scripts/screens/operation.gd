@@ -10,18 +10,12 @@ extends "res://scripts/screens/screen.gd"
 ## The time panel says in words how fast time runs (the rule of AGENTS.md: real time, said on screen). At the end (or
 ## when the craft is lost) it fades to the report.
 
-const Space := preload("res://scripts/space_builder.gd")
 const FlightData := preload("res://scripts/flight/flight_data.gd")
-const Scene3D := preload("res://scripts/flight/flight_scene.gd")
-const Terrain := preload("res://scripts/flight/terrain.gd")
-const Descent := preload("res://scripts/flight/descent.gd")
+const Surface := preload("res://scripts/flight/surface.gd")
 
 const MONTH_S := 30.44 * 86400.0    ## A calendar month in seconds (the mission log counts calendar months).
-const LUNAR_DAY_S := 29.53 * 86400.0   ## From one sunrise to the next on the Moon, the synodic month [S-nssdc-planets].
 const MONTH_REAL_S := 0.7           ## Real seconds one month takes at the slowest speed.
 const SPEEDS := [1.0, 3.0, 10.0]
-const EARTH_DIST := 9000.0          ## Metres to the Earth's globe in the sky (a backdrop: true angular size, not distance).
-const EARTH_ANGLE_DEG := 1.9        ## The Earth's width in the Moon's sky [S-nssdc-planets].
 const BLUR_LAPS := 0.5              ## Laps a second above which an orbit is drawn as a ring instead of a moving craft.
 
 var months_total := 0
@@ -44,12 +38,8 @@ var speed_btns: Array = []
 
 var landed := false
 var land: Dictionary
-var terrain
+var surface                         ## scripts/flight/surface.gd, when the craft landed
 var lander: Node3D
-var sun_az0 := Vector2(-1, -1)
-var cam_ang := 0.6
-var old_far := 2000.0
-var old_ambient: Array = []
 var lost_shown := false
 
 
@@ -60,8 +50,10 @@ func enter(_args: Dictionary) -> void:
 	land = GameState.flight.get("landing", {})
 	landed = bool(land.get("landed", false)) and FlightData.has_landing(mission.scenario)
 	if landed:
-		_note_landing()
-		_stage_surface()
+		Surface.note_landing(mission, land)
+		surface = Surface.new()
+		surface.build(world, mission, land)
+		lander = surface.lander
 	else:
 		world.stage_orbit()
 	_build_ui()
@@ -69,74 +61,11 @@ func enter(_args: Dictionary) -> void:
 
 
 func exit() -> void:
-	if landed:
-		world.cam.far = old_far
-		var env: Environment = world.world_env.environment
-		env.ambient_light_source = old_ambient[0]
-		env.ambient_light_color = old_ambient[1]
+	if surface:
+		surface.restore()
 
 
 # ===================================================================================== THE LANDER ON THE GROUND
-func _stage_surface() -> void:
-	var fl: Dictionary = FlightData.scenario_flight(mission.scenario).landing
-	world.cam_free = false
-	world.clear_stage()
-	var env: Environment = world.world_env.environment
-	old_ambient = [env.ambient_light_source, env.ambient_light_color]
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color(0.62, 0.63, 0.66)
-	env.ambient_light_energy = 0.6
-	old_far = world.cam.far
-	world.cam.far = 14000.0
-	terrain = Terrain.new()
-	terrain.setup(fl, true)          # the light of a whole month: what stays dark is permanent shadow
-	world.stage.add_child(terrain.build_mesh())
-	var az: Array = fl.get("sun_azimuth", [-1.0, -1.0])
-	sun_az0 = Vector2(float(az[0]), float(az[1])).normalized()
-	world.sun.light_energy = 1.6
-	var earth := Space.make_earth(EARTH_DIST * tan(deg_to_rad(EARTH_ANGLE_DEG * 0.5)), false)
-	earth.position = terrain.earth_dir * EARTH_DIST
-	world.stage.add_child(earth)
-	lander = Scene3D.lander(mission, 3.2, Descent.LEG)
-	var x := float(land.get("x", 0.0))
-	var z := float(land.get("z", 0.0))
-	lander.position = Vector3(x, terrain.height(x, z) + Descent.LEG, z)
-	if land.get("grade", "") == "rough":
-		lander.rotate_object_local(Vector3(1, 0, 0.4).normalized(), deg_to_rad(9.0))
-	world.stage.add_child(lander)
-	_place_sun()
-	_surface_camera(1.0)
-
-
-## The mission log said "In orbit" for month 0, as for any mission; a craft that landed says where and how it landed
-## (the log and the report read the same events).
-func _note_landing() -> void:
-	var orbit_title := tr("In orbit at %s") % GameData.ORBITS[mission.orbit].short
-	for e in GameState.last_sim.get("events", []):
-		if e.month == 0 and e.title == orbit_title:
-			e.title = tr("Landed at Shackleton's rim")
-			e.text = tr("Touchdown at %.1f m/s, %d m from the target. The lander is working.") % [float(land.get("touchdown_mps", 0.0)), roundi(float(land.get("target_m", 0.0)))]
-
-
-## The Sun low on the horizon, its azimuth turning once a lunar day with the mission's time.
-func _place_sun() -> void:
-	var t := month_f * MONTH_S if month_f < 9000.0 else 0.0
-	var a := sun_az0.rotated(TAU * t / LUNAR_DAY_S)
-	var e := deg_to_rad(float(FlightData.scenario_flight(mission.scenario).landing.get("sun_elevation_deg", 1.5)))
-	var to_sun := Vector3(a.x * cos(e), sin(e), a.y * cos(e)).normalized()
-	world.sun.basis = Basis.looking_at(-to_sun, Vector3.UP)
-
-
-## A slow walk around the lander at eye height, the ground and the sky behind it changing as it turns.
-func _surface_camera(delta: float) -> void:
-	cam_ang += delta * 0.09
-	var p: Vector3 = lander.position
-	var want := p + Vector3(cos(cam_ang) * 15.0, 0.0, sin(cam_ang) * 15.0)
-	want.y = maxf(terrain.height(want.x, want.z) + 2.2, p.y + 1.2)
-	world.cam.position = want
-	world.cam.look_at(p + Vector3(0, 0.6, 0), Vector3.UP)
-
-
 # ===================================================================================== THE PANELS
 func _build_ui() -> void:
 	# the top bar: what this is, the month, time and science
@@ -236,9 +165,9 @@ func _set_speed(i: int) -> void:
 
 
 func process(delta: float) -> void:
-	if landed and lander and is_instance_valid(lander):
-		_place_sun()
-		_surface_camera(delta)
+	if surface and is_instance_valid(lander):
+		surface.place_sun(month_f * MONTH_S if month_f < 9000.0 else 0.0)
+		surface.camera(delta)
 	var sim: Dictionary = GameState.last_sim
 	if sim.is_empty() or leaving:
 		return
