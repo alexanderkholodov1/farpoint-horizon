@@ -23,6 +23,7 @@ const Transfer := preload("res://scripts/flight/transfer.gd")
 const EARTH_U := 10.0               ## The Earth's radius in the map's units.
 const FAR := 20000.0                ## Metres: bodies farther than this from the craft are drawn nearer and smaller in the
                                     ## same proportion, so their size in the sky stays true (the craft's view is in metres).
+const COAST_S := 5.0                ## Real seconds the days-long coast to the Moon takes (after the correction).
 const SEGMENT_S := 2.5              ## Real seconds time takes to run to the next moment, whatever the wait.
 const ORBIT_UTC := 13.0 * 3600.0    ## The craft reaches orbit at 13:00 UTC on 15 November 2026 (a game choice).
 const DV_DEFAULT := 3150.0          ## m/s: a trip of about three and a half days, close to Apollo 11's 76 h [S-apollo11].
@@ -432,15 +433,15 @@ func _computer() -> bool:
 ## Time by itself: each wait runs at one steady speed that takes SEGMENT_S real seconds to reach the next moment
 ## (`next_t`, mission time), unless the pilot picked a speed for this wait. Returns the mission seconds to advance this
 ## frame, never past next_t.
-func _time_to(next_t: float, delta: float, stop_name: String) -> float:
+func _time_to(next_t: float, delta: float, stop_name: String, seg := SEGMENT_S) -> float:
 	var left: float = next_t - m.t
 	if stop_name != cur_stop:
 		cur_stop = stop_name
 		held_for = ""
-		hud.set_warp(clampf(left / SEGMENT_S, 1.0, hud.warp_cap))
+		hud.set_warp(clampf(left / seg, 1.0, hud.warp_cap))
 		hud.auto_note = tr("Auto") if hud.warp > 1.0 else ""
 	elif held_for != stop_name and hud.warp < 1.5 and left > 5.0:
-		hud.set_warp(clampf(left / SEGMENT_S, 1.0, hud.warp_cap))
+		hud.set_warp(clampf(left / seg, 1.0, hud.warp_cap))
 		hud.auto_note = tr("Auto")
 	var dt: float = delta * hud.warp
 	if left > 0.0 and dt > left:
@@ -656,7 +657,7 @@ func _cut(by_computer: bool) -> void:
 func _coast_phase(_delta: float) -> void:
 	var t_cut: float = GameState.flight.tli.get("t_cut", m.t)
 	if view_auto:
-		view = "craft" if phase_t < 4.0 or m.about_moon().r < Transfer.SOI * 0.5 else "map"
+		view = "map"   # the coast is days of the path bending toward the Moon: only the map shows it (issue #79)
 	if correction_state == "":
 		var at := t_cut + CORRECT_AFTER
 		m.advance(_time_to(at, get_process_delta_time(), "correct"))
@@ -688,7 +689,8 @@ func _coast_phase(_delta: float) -> void:
 		return
 	var cap_s: float = m.capture_dv(pred) / Transfer.BURN_ACCEL if not pred.is_empty() else 100.0
 	capture_at = float(pred.get("t_closest", m.t + 1e9)) - cap_s * 0.5
-	m.advance(_time_to(capture_at - COUNTDOWN, get_process_delta_time(), "arrive"))
+	# the long coast gets a few seconds of its own: quick, but long enough to watch the Moon come to meet you
+	m.advance(_time_to(capture_at - COUNTDOWN, get_process_delta_time(), "arrive", COAST_S))
 	_refresh_pred(0.5)
 	if not told.has("soi") and m.about_moon().r < Transfer.SOI:
 		told["soi"] = true
@@ -720,8 +722,9 @@ func _correct(by_computer: bool) -> void:
 
 # ===================================================================================== 4. CAPTURE
 func _capture_phase(delta: float) -> void:
-	if view_auto and not braking:
-		view = "craft"
+	if view_auto and not braking:   # the arrival on the map, close on the Moon: the path that the brake will bend
+		view = "map"
+		map_view = "moon"
 	if not braking:
 		hud.cap_warp(1.0, tr("countdown"))
 		hud.auto_note = ""
@@ -1205,12 +1208,12 @@ func _camera(delta: float, snap := false) -> void:
 	want_d *= zoom
 	if map_view == "trip":
 		# the map sits in the free space between the panels and below the message line at the top
-		want_d *= 1.12
-		want_c += Vector3(-want_d * 0.12, 0.0, -want_d * 0.14)
+		want_d *= 1.25   # room for the panels on both sides: the far end of the trip never hides under the controls
+		want_c += Vector3(want_d * 0.05, 0.0, want_d * 0.06)
 	cam_center = cam_center.lerp(want_c, k)
 	cam_dist = lerpf(cam_dist, want_d, k)
 	# the trip seen nearly from above, as on the small map: the Earth, the path and the Moon read at once (issue #79)
-	var el: float = clampf(pitch + (1.35 if map_view == "trip" else 0.9), -1.5, 1.5)
+	var el: float = clampf(pitch + 0.9, -1.5, 1.5)
 	var dir2 := Vector3(sin(yaw) * cos(el), sin(el), cos(yaw) * cos(el)).normalized()
 	world.cam.position = cam_center + dir2 * cam_dist
 	world.cam.look_at(cam_center, Vector3.UP)
