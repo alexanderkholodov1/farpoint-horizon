@@ -60,6 +60,21 @@ func _ready() -> void:
 		await shot("craft_cube")
 		GameState.mission.from_dict({"bus": "small", "instruments": ["ir_adv", "gas_adv", "cam_ms"], "panels": "dep_m", "battery": "b1k", "comms": "xband", "adcs": "rw", "propulsion": "cold", "launcher": "medium", "orbit": "sso", "years": 3})
 		g.world.rebuild_ship()
+	if "assemble" in only:
+		# the craft as it is assembled: a part snapping on, then the part a problem comes from glowing (#6)
+		g.go("design", {"step": 4})
+		await wait(1.2)
+		await shot("assemble_before")
+		GameState.mission.comms = "ka"
+		g.world.rebuild_ship()
+		await wait(0.12)
+		await shot("assemble_snap")
+		await wait(0.8)
+		await shot("assemble_after")
+		GameState.mission.comms = "uhf"
+		g.world.rebuild_ship()
+		await wait(1.0)
+		await shot("assemble_alert")
 	if only == "" or "earth" in only:
 		GameState.last_sim = GameState.mission.simulate(3)
 		GameState.last_report = GameState.mission.compute()
