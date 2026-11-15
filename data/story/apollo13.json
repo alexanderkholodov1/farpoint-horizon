@@ -38,7 +38,7 @@
    {"who": "rumi", "mood": "determined", "act": "work", "shot": "close", "text": "Square peg, round hole. Classic."}
   ],
   "mission": [
-   {"set": "lm", "fx": "dim", "title": "Your turn", "sub": "Build the CO2 adapter before the air runs out, then fly them home", "shot": "window", "wait": 5.0}
+   {"set": "lm", "fx": "dim", "title": "Your turn", "sub": "Build the CO2 adapter before the air runs out, then fly them home", "shot": "window", "wait": 5.0, "play": "apollo13"}
   ],
   "fixed": [
    {"set": "lm", "title": "A few hours later", "sub": "The adapter is in place", "shot": "wide", "fx": "dim", "wait": 3.0},

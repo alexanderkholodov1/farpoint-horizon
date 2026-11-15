@@ -148,12 +148,42 @@ func _next_scene() -> void:
 	dialogue.live = false
 	dialogue.show_portrait = false
 	dialogue.line_started.connect(_on_line)
+	var play := ""
+	for L in dialogue.lines:
+		play = str(L.get("play", play))
 	dialogue.finished.connect(func(skipped: bool):
-		if skipped:
-			_leave()
+		if play != "":
+			_play(play)
+		elif skipped:
+			_skip()
 		else:
 			_next_scene())
 	main.add_child(dialogue)
+
+
+## Esc skips the film up to the next mission to play (a mission is never skipped), or to the end.
+func _skip() -> void:
+	for i in range(scene_at + 1, scenes.size()):
+		var ref: String = scenes[i]
+		var ch := chapter
+		if "/" in ref:
+			ch = ref.get_slice("/", 0)
+			ref = ref.get_slice("/", 1)
+		for L in Dialogue.load_scene(ch, ref):
+			if L.has("play"):
+				scene_at = i
+				_play(str(L.play))
+				return
+	_leave()
+
+
+## A scene with "play" hands over to that mission's screen; the scenes after it play when the mission is done.
+func _play(id: String) -> void:
+	if cast_root and is_instance_valid(cast_root):
+		cast_root.queue_free()
+	world.clear_stage()
+	_restore_world()
+	go(id, {"campaign": true, "then": scenes.slice(scene_at + 1), "back": back})
 
 
 func _leave() -> void:

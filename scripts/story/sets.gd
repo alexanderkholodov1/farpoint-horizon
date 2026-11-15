@@ -44,6 +44,34 @@ static func build(id: String, world) -> Dictionary:
 	return S
 
 
+## What the sets change in the shared world, to put back when the story or a mission leaves (save_world, then
+## restore_world with what it returned).
+static func save_world(world) -> Dictionary:
+	var out := {}
+	var env: Environment = world.world_env.environment
+	for k in ["background_mode", "background_color", "background_energy_multiplier", "ambient_light_source",
+			"ambient_light_color", "ambient_light_energy", "fog_enabled", "fog_density", "fog_light_color", "glow_enabled",
+			"tonemap_exposure", "sky"]:
+		out["env." + k] = env.get(k)
+	for k in ["light_energy", "light_color", "rotation_degrees", "shadow_enabled", "light_cull_mask"]:
+		out["sun." + k] = world.sun.get(k)
+	out["fov"] = world.cam.fov
+	out["far"] = world.cam.far
+	return out
+
+
+static func restore_world(world, saved: Dictionary) -> void:
+	world.clear_stage()
+	var env: Environment = world.world_env.environment
+	for k in saved:
+		if k.begins_with("env."):
+			env.set(k.substr(4), saved[k])
+		elif k.begins_with("sun."):
+			world.sun.set(k.substr(4), saved[k])
+	world.cam.fov = saved.get("fov", 50.0)
+	world.cam.far = saved.get("far", 2000.0)
+
+
 # ===================================================================================== HELPERS
 static func mat(c: Color, rough := 0.7, metal := 0.0, emit := 0.0) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()

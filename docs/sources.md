@@ -138,6 +138,12 @@ branches add entries at the same place (`.gitattributes`).
   cold (38 degrees Fahrenheit, condensation on the walls), noncritical systems off and power use cut to 1/5, the
   five-minute burn near the Moon to speed up the return, launch at 1:13 p.m. CST, and splashdown in the Pacific near
   Samoa with USS Iwo Jima as recovery ship.
+- **S-apollo13-mailbox** NASA. *Apollo 13 Crew Installing "Mail Box" for Purging Carbon Dioxide From Lunar Module,
+  April 14, 1970*, photograph AS13-62-9004 (public domain). https://images.nasa.gov/details/as13-62-9004, caption on
+  the Apollo Flight Journal page https://www.nasa.gov/history/afj/ap13fj/. The real adapter, shown when mission 1's
+  adapter game is won (assets/missions/apollo13/as13-62-9004.jpg). The same mission page [S-apollo13-nasa] gives the
+  game's other facts: the CO2 warning after a day and a half in the lunar module, and the lunar module made for two
+  men for two days, asked to keep three for about four.
 
 ## The look: Earth, Moon, the Andes and the launch site (issue 12; scripts in `assets/source/`)
 - **S-moon-kit** NASA Goddard Space Flight Center, Scientific Visualization Studio. *CGI Moon Kit* (2019).
