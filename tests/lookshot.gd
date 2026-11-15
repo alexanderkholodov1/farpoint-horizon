@@ -28,6 +28,31 @@ func _ready() -> void:
 	await wait(1.2)
 	if only == "" or "menu" in only:
 		await shot("menu")
+	if "film" in only:
+		g.go("credits_film")
+		for at in [3.5, 9.0, 18.5, 26.5, 37.5, 45.0, 56.0, 68.5, 80.0]:
+			while g.screen.t < at:
+				await wait(0.1)
+			await shot("film_%02d" % int(at))
+		g.screen._to_end()
+		await wait(2.5)
+		await shot("film_end")
+		g.go("menu")
+		await wait(0.5)
+	if "credits" in only:
+		g.screen.main.overlay("credits") if false else g.overlay("credits")
+		await wait(0.8)
+		await shot("credits")
+		var sc: ScrollContainer = g.screen.find_children("*", "ScrollContainer", true, false)[0]
+		sc.scroll_vertical = 700
+		await wait(0.4)
+		await shot("credits_mid")
+		for b in g.screen.find_children("*", "Button", true, false):
+			if (b as Button).text.begins_with("▸  NASA data"):
+				(b as Button).pressed.emit()
+		sc.scroll_vertical = 1500
+		await wait(0.4)
+		await shot("credits_sources")
 	GameState.start_solo()
 	GameState.start_mission("volcanes")
 	g.go("design", {"step": 0})
