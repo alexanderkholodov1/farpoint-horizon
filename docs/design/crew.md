@@ -46,3 +46,11 @@ is used, the README's "Use of AI" and `docs/sources.md` say so. About 40,000 fac
 mesh), measured on screenshots of the team's **Meshy** (AI) model from the front, the sides and the back (side by
 side with the reference: `crew_wayra_compare.png`). No helmet. If used, the README's "Use of AI" names Meshy as the
 reference.
+
+## Killa matched to the Meshy reference
+
+![Killa, four sides](crew_killa_meshy.png)
+
+`assets/models/crew/crew_killa_meshy.glb`, built entirely in Blender by `assets/source/crew_killa.py`, measured on
+screenshots of the team's **Meshy** (AI) model from the front, the sides and the back (side by side with the reference:
+`crew_killa_compare.png`). No helmet.
