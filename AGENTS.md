@@ -69,14 +69,18 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
 - **Plain explanations.** Every concept a player meets is explained in simple words inside the game (challenge E1-E4).
 
 ## The cycle of a version
-1. The version branch (now `v0.2.0`) collects finished pieces. Its pull request into `main` opens only when the
-   version is complete.
+1. The version branch collects finished pieces. Its pull request into `main` opens only when the version is complete.
+   Two lines run now (issue #72, `docs/state/versions.md`): **`v0.2.1`** takes every fix or adjustment to v0.2.0
+   (no new story or missions), and its pull request into `main` opens only once every issue in milestone v0.2.1 is
+   closed; **`v0.3.0`** takes the story campaign, minigames and the crew of friends. Pick the
+   branch by what your issue is (its milestone says it). `tools/pr-when-green.sh` and `tools/state.sh` default to
+   the newest version branch, so for a fix pass `v0.2.1` to them.
 2. Every piece of work is a GitHub issue, written with `.github/ISSUE_TEMPLATE/piece.md` (what the player gets, the
    files it owns, the real values to check, the done-when list). Claim it by assigning it to your person before starting.
 3. Build it on a branch of your own, made from the version branch and named after the issue:
-   `git fetch origin && git switch -c work/12-rockets origin/v0.2.0`. Commit small working steps in English, with no
+   `git fetch origin && git switch -c work/12-rockets origin/v0.2.1`. Commit small working steps in English, with no
    version numbers, and push often (CI runs on every push and must stay green; a red check is fixed first).
-4. Stay current by merging, never by rewriting: `git fetch origin && git merge origin/v0.2.0`. When your piece needs
+4. Stay current by merging, never by rewriting: `git fetch origin && git merge origin/v0.2.1`. When your piece needs
    another piece that is not integrated yet, merge that branch into yours (`git merge origin/work/6-builder`), or
    propose yours into it with a pull request. Never rebase or force-push a pushed branch: others may have merged it.
 5. When the piece works (CI green, played as a player, screenshots in the issue, every outside value cited), say so

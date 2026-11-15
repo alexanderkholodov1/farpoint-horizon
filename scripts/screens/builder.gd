@@ -220,40 +220,47 @@ func _build_ui() -> void:
 	clear()
 	# ---------- top: the steps
 	var sp := Kit.panel_box(8)
-	Kit.place(sp, 0.5, 0, 0.5, 0, 0, 14, 0, 14)
+	Kit.place(sp, 0.5, 0, 0.5, 0, 0, 6 if Kit.compact else 14, 0, 6 if Kit.compact else 14)
 	sp.grow_horizontal = Control.GROW_DIRECTION_BOTH   # as wide as its steps, centred
 	add_child(sp)
 	steps_row = Kit.hbox(6)
 	sp.add_child(steps_row)
 	# ---------- left: the step's question and its few parts
 	var lp := Kit.panel_box(Kit.PAD)
-	Kit.place(lp, 0, 0, 0, 1, Kit.MARGIN, 84, 476, -Kit.MARGIN)
+	Kit.place(lp, 0, 0, 0, 1, Kit.MARGIN, 54 if Kit.compact else 84, 392 if Kit.compact else 476, -Kit.MARGIN)
 	add_child(lp)
 	left_box = Kit.vbox(Kit.GAP)
 	lp.add_child(left_box)
 	# ---------- right: will it fly?
 	var rp := Kit.panel_box(Kit.PAD)
-	Kit.place(rp, 1, 0, 1, 0, -364, 84, -Kit.MARGIN, 84)   # grows to its content
+	Kit.place(rp, 1, 0, 1, 0, -306 if Kit.compact else -364, 54 if Kit.compact else 84, -Kit.MARGIN, 54 if Kit.compact else 84)   # grows to its content
 	add_child(rp)
 	right_box = Kit.vbox(Kit.GAP)
 	rp.add_child(right_box)
 	# ---------- bottom centre: what the pointed thing is, and the actions
 	var hb: Array = Kit.hint_box()
 	var ip: Control = hb[0]
-	Kit.place(ip, 0, 1, 1, 1, 496, -214, -388, -110)
+	if Kit.compact:
+		Kit.place(ip, 0, 1, 1, 1, 400, -70, -314, -70)
+		ip.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	else:
+		Kit.place(ip, 0, 1, 1, 1, 496, -214, -388, -110)
 	add_child(ip)
 	info_body = hb[1]
 	info_body.add_theme_font_size_override("font_size", Kit.T_BODY)
 	var bp := Kit.panel_box(10)
-	Kit.place(bp, 0, 1, 1, 1, 496, -96, -388, -Kit.MARGIN)
+	if Kit.compact:   # the middle column of a phone, between the question and the board
+		Kit.place(bp, 0, 1, 1, 1, 400, -62, -314, -Kit.MARGIN)
+	else:
+		Kit.place(bp, 0, 1, 1, 1, 496, -96, -388, -Kit.MARGIN)
 	add_child(bp)
 	var bar := Kit.hbox(10)
 	bar.alignment = BoxContainer.ALIGNMENT_CENTER
 	bp.add_child(bar)
-	var back := Kit.btn(tr("◀ Back"), func(): go("design", {"step": back_step}), Kit.T_BODY, 150)
+	var back := Kit.btn(tr("◀") if Kit.compact else tr("◀ Back"), func(): go("design", {"step": back_step}), Kit.T_BODY, 48 if Kit.compact else 150)
 	back.custom_minimum_size.y = Kit.BTN_H + 8
 	bar.add_child(back)
-	fly_btn = Kit.btn(tr("Use this rocket ▶"), _use, Kit.T_ACTION, 280)
+	fly_btn = Kit.btn(tr("Use this rocket ▶"), _use, Kit.T_ACTION, 200 if Kit.compact else 280)
 	fly_btn.custom_minimum_size.y = Kit.BTN_H + 8
 	bar.add_child(fly_btn)
 
@@ -311,7 +318,9 @@ func _fill_left() -> void:
 	left_box.add_child(gap)
 	left_box.add_child(Kit.rule())
 	left_box.add_child(Kit.caps(tr("Or take a ready rocket")))
-	var presets := Kit.hbox(6)
+	var presets := HFlowContainer.new()
+	presets.add_theme_constant_override("h_separation", 6)
+	presets.add_theme_constant_override("v_separation", 6)
 	left_box.add_child(presets)
 	for pid in ["light", "medium", "heavy"]:
 		var p: Dictionary = RocketDesign.data().presets[pid]

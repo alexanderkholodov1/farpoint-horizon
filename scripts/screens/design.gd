@@ -14,6 +14,7 @@ const Bots := preload("res://scripts/crew/bots.gd")
 const PartIcon := preload("res://scripts/ui/part_icon.gd")
 const Progress := preload("res://scripts/progress.gd")
 const Objectives := preload("res://scripts/flight/objectives.gd")
+const Glossary := preload("res://scripts/ui/glossary.gd")
 
 const STAGES := ["Mission", "Craft", "Power", "Systems", "Rocket", "Launch"]
 ## The questions in order: [id, the GameData.STEPS id it belongs to, stage, the question, what it is about].
@@ -105,7 +106,7 @@ func _show(i: int) -> void:
 	var room = GameState.room
 	# ---------- top: the stages
 	var sp := Kit.panel_box(8)
-	Kit.place(sp, 0.5, 0, 0.5, 0, 0, 14, 0, 14)
+	Kit.place(sp, 0.5, 0, 0.5, 0, 0, 6 if Kit.compact else 14, 0, 6 if Kit.compact else 14)
 	sp.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	add_child(sp)
 	stages_row = Kit.hbox(6)
@@ -119,7 +120,7 @@ func _show(i: int) -> void:
 		stages_row.add_child(b)
 	# ---------- left: the question and its options
 	var lp := Kit.panel_box(Kit.PAD)
-	Kit.place(lp, 0, 0, 0, 1, Kit.MARGIN, 84, 476, -Kit.MARGIN)
+	Kit.place(lp, 0, 0, 0, 1, Kit.MARGIN, 54 if Kit.compact else 84, 392 if Kit.compact else 476, -Kit.MARGIN)
 	add_child(lp)
 	var lv := Kit.vbox(Kit.GAP)
 	lp.add_child(lv)
@@ -141,7 +142,7 @@ func _show(i: int) -> void:
 	sc.add_child(left_box)
 	# ---------- right: the mission board
 	var rp := Kit.panel_box(Kit.PAD)
-	Kit.place(rp, 1, 0, 1, 0, -364, 84, -Kit.MARGIN, 84)   # grows to its content
+	Kit.place(rp, 1, 0, 1, 0, -306 if Kit.compact else -364, 54 if Kit.compact else 84, -Kit.MARGIN, 54 if Kit.compact else 84)   # grows to its content
 	rp.grow_horizontal = Control.GROW_DIRECTION_BEGIN     # to the left, never past the window's edge
 	add_child(rp)
 	board = Kit.vbox(6)
@@ -149,32 +150,39 @@ func _show(i: int) -> void:
 	# ---------- bottom centre: what the pointed thing is, and the actions
 	var hb: Array = Kit.hint_box()
 	var ip: Control = hb[0]
-	Kit.place(ip, 0, 1, 1, 1, 496, -214, -388, -110)
+	if Kit.compact:
+		Kit.place(ip, 0, 1, 1, 1, 400, -70, -314, -70)
+	else:
+		Kit.place(ip, 0, 1, 1, 1, 496, -110, -388, -110)
+	ip.grow_vertical = Control.GROW_DIRECTION_BEGIN   # grows up with what it says, never under the buttons
 	add_child(ip)
 	info_body = hb[1]
 	info_body.add_theme_font_size_override("font_size", Kit.T_BODY)
 	_say("", tr("Point at an option to know more. Keys: 1 to 9 choose, Enter goes on, Backspace goes back."))
 	var bp := Kit.panel_box(10)
-	Kit.place(bp, 0, 1, 1, 1, 496, -96, -388, -Kit.MARGIN)
+	if Kit.compact:   # the middle column of a phone, between the question and the board
+		Kit.place(bp, 0, 1, 1, 1, 400, -62, -314, -Kit.MARGIN)
+	else:
+		Kit.place(bp, 0, 1, 1, 1, 496, -96, -388, -Kit.MARGIN)
 	add_child(bp)
 	var bar := Kit.hbox(10)
 	bar.alignment = BoxContainer.ALIGNMENT_CENTER
 	bp.add_child(bar)
-	var menu := Kit.btn(tr("Menu"), func(): go("menu"), Kit.T_BODY, 100)
+	var menu := Kit.btn(tr("Menu"), func(): go("menu"), Kit.T_BODY, 0 if Kit.compact else 100)
 	menu.custom_minimum_size.y = Kit.BTN_H + 8
 	bar.add_child(menu)
-	var back := Kit.btn(tr("◀ Back"), func(): _show(q - 1), Kit.T_BODY, 130)
+	var back := Kit.btn(tr("◀") if Kit.compact else tr("◀ Back"), func(): _show(q - 1), Kit.T_BODY, 48 if Kit.compact else 130)
 	back.custom_minimum_size.y = Kit.BTN_H + 8
 	back.disabled = q <= _first_q()
 	back_btn = back
 	bar.add_child(back)
 	if Q[0] == "review":
-		main_btn = Kit.accent_btn(Kit.btn(tr("LAUNCH!"), func(): main.launch(), Kit.T_ACTION, 260), Kit.C_GOLD)
+		main_btn = Kit.accent_btn(Kit.btn(tr("LAUNCH!"), func(): main.launch(), Kit.T_ACTION, 150 if Kit.compact else 260), Kit.C_GOLD)
 		main_btn.disabled = not GameState.can_launch(r)
 		if main_btn.disabled:
 			main_btn.modulate.a = 0.45
 	else:
-		main_btn = Kit.accent_btn(Kit.btn(tr("Continue ▶"), func(): _show(q + 1), Kit.T_ACTION, 260), Kit.C_GOLD)
+		main_btn = Kit.accent_btn(Kit.btn(tr("Continue ▶"), func(): _show(q + 1), Kit.T_ACTION, 150 if Kit.compact else 260), Kit.C_GOLD)
 	main_btn.custom_minimum_size.y = Kit.BTN_H + 8
 	bar.add_child(main_btn)
 	_fill_question(Q[0], r)
@@ -425,9 +433,10 @@ func _tile(kind: String, title: String, facts: Array, chosen: bool, on_click: Ca
 		if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
 			Kit.UiSound.play("click")
 			on_click.call())
+	var words: String = Glossary.notes(title, 1)   # the word in its name a newcomer may not know (issue #69)
 	pc.mouse_entered.connect(func():
 		sb.border_color = Kit.C_GOLD
-		_say(title, more))
+		_say(title, more + ("\n" + words if words != "" else "")))
 	pc.mouse_exited.connect(func(): sb.border_color = Kit.C_GOLD if chosen else Kit.C_LINE)
 	return pc
 
@@ -495,7 +504,7 @@ func _fill_question(id: String, r: Dictionary) -> void:
 				left_box.add_child(_tile("orbit", OO.name, [view_word, reach_word], mission.orbit == o, func():
 					mission.orbit = o
 					world.stage_design()
-					on_change(false), OO.desc + "\n" + tr("Shadow %s per lap · Contact %s per day · Δv to get there %d m/s") % [Kit.mins(OO.eclipse_min), Kit.mins(OO.contact_min), int(OO.insert_dv)],
+					on_change(false), OO.desc + "\n" + (tr("Shadow up to %s a day, only near the equinoxes") % Kit.mins(OO.eclipse_min) if o == "geo" else tr("Shadow %s per lap") % Kit.mins(OO.eclipse_min)) + " · " + tr("Contact %s per day · speed change to get there %d m/s") % [Kit.mins(OO.contact_min), int(OO.insert_dv)],
 					"★ " + tr("Best fit") if m >= top and _guided() else "", Kit.C_OK))
 		"bus":
 			# once the craft has parts, each body says whether it can carry them (its mass and its instruments)
@@ -591,7 +600,7 @@ func _fill_question(id: String, r: Dictionary) -> void:
 				var PR: Dictionary = GameData.PROPULSION[p]
 				var f: Array = _fit(PR.dv >= r.dv_need, p == best, tr("Too little"), _keeps_mass("propulsion", p))
 				left_box.add_child(_tile("none" if PR.dv <= 0.0 else "thruster", PR.name, [tr("+%s mass") % Kit.pct(PR.mass_pct), "%d m/s" % int(PR.dv)], mission.propulsion == p, func(): mission.propulsion = p; on_change(true),
-					PR.desc + "\n" + tr("Δv %d m/s · fuel ≈ %s of the mass") % [int(PR.dv), Kit.pct(PR.mass_pct)], f[0], f[1]))
+					PR.desc + "\n" + tr("Can change its speed by %d m/s · fuel ≈ %s of the mass") % [int(PR.dv), Kit.pct(PR.mass_pct)], f[0], f[1]))
 		"launcher":
 			left_box.add_child(Kit.lbl(tr("Your craft weighs %s and goes to %s.") % [Kit.kg(r.mass_total), O.short], Kit.T_BODY, Kit.C_TEXT, Kit.FONT_B, true))
 			var own := _tile("rocket", tr("Build your own rocket"), [tr("Engines, tanks, stages: your design")], false, func(): go("builder", {"back_step": step_idx}),
@@ -705,7 +714,7 @@ func _fill_review(r: Dictionary) -> void:
 ## above says whether each is fine; this says how much is left). A bar past its end turns red.
 func _fill_resources(r: Dictionary) -> void:
 	var p := Kit.panel_box(16)
-	Kit.place(p, 1, 1, 1, 1, -364, -Kit.MARGIN, -Kit.MARGIN, -Kit.MARGIN)
+	Kit.place(p, 1, 1, 1, 1, -306 if Kit.compact else -364, -Kit.MARGIN, -Kit.MARGIN, -Kit.MARGIN)
 	p.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	p.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -806,6 +815,8 @@ func _row(label: String, value: String, frac: float, warn: float, explain: Strin
 	var pending: bool = (from_q >= 0 and _reached < from_q) or (more_is_better and mission.instruments.is_empty())
 	if more_is_better and state < 0:
 		state = 0   # little science is a cost, never a fault: amber, not red
+	if pending and Kit.compact:
+		return   # on a phone the board shows only what is decided: a row not chosen yet would push the resources off
 	var col: Color = Kit.C_OK if state > 0 else (Kit.C_WARN if state == 0 else Kit.C_BAD)
 	var why := explain
 	if pending:

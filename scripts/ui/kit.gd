@@ -44,22 +44,44 @@ const C_ON_DARK := Color(0.96, 0.97, 1.0)             ## Text drawn straight on 
 const FROST := preload("res://shaders/ui_frost.gdshader")
 
 ## The type scale, in pixels. Every text in the game uses one of these.
-const T_CAPS := 11       ## Section labels, in spaced capitals (caps()).
-const T_SMALL := 13      ## Notes under a value, key hints, captions.
-const T_BODY := 15       ## Labels, buttons, list text.
-const T_LEAD := 17       ## Hints and lead paragraphs.
-const T_VALUE := 19      ## A readout's value (with font_num()).
-const T_ACTION := 21     ## The one main action's button.
-const T_STAT := 26       ## The big number of a stat card.
-const T_CLOCK := 40      ## Clocks and the one key number of a screen.
-const T_SHOUT := 60      ## A big message straight on the scene.
-const T_CINEMA := 92     ## A title card of the credits film, alone on the screen.
+static var T_CAPS := 11       ## Section labels, in spaced capitals (caps()).
+static var T_SMALL := 13      ## Notes under a value, key hints, captions.
+static var T_BODY := 15       ## Labels, buttons, list text.
+static var T_LEAD := 17       ## Hints and lead paragraphs.
+static var T_VALUE := 19      ## A readout's value (with font_num()).
+static var T_ACTION := 21     ## The one main action's button.
+static var T_STAT := 26       ## The big number of a stat card.
+static var T_CLOCK := 40      ## Clocks and the one key number of a screen.
+static var T_SHOUT := 60      ## A big message straight on the scene.
+static var T_CINEMA := 92     ## A title card of the credits film, alone on the screen.
 ## Spacing, in pixels.
-const MARGIN := 24       ## From the window's edge to a panel.
-const PAD := 22          ## Inside a panel.
-const GAP := 10          ## Between rows inside a panel.
-const BTN_H := 44        ## A button's height (a main action: 56).
+static var MARGIN := 24       ## From the window's edge to a panel.
+static var PAD := 22          ## Inside a panel.
+static var GAP := 10          ## Between rows inside a panel.
+static var BTN_H := 44        ## A button's height (a main action: 56).
 const UiSound := preload("res://scripts/ui/ui_sound.gd")
+## A short screen (a phone in landscape): the interface is drawn bigger there (main.gd _fit_screen), so the layout has
+## about 1050 x 490 to work with instead of 1600 x 900. Compact keeps small text readable (captions and notes a little
+## bigger), shrinks the big numbers and the spacing, and screens lay themselves out for the room left (issue #89).
+static var compact := false
+
+
+static func set_compact(on: bool) -> void:
+	compact = on
+	T_CAPS = 13 if on else 11
+	T_SMALL = 14 if on else 13
+	T_BODY = 15
+	T_LEAD = 16 if on else 17
+	T_VALUE = 17 if on else 19
+	T_ACTION = 18 if on else 21
+	T_STAT = 22 if on else 26
+	T_CLOCK = 28 if on else 40
+	T_SHOUT = 38 if on else 60
+	T_CINEMA = 56 if on else 92
+	MARGIN = 10 if on else 24
+	PAD = 12 if on else 22
+	GAP = 6 if on else 10
+	BTN_H = 40 if on else 44
 
 static var _frost: ShaderMaterial
 static var _num_font: FontVariation
@@ -252,6 +274,21 @@ static func ink(c: Color) -> Color:
 	return out
 
 
+## Text drawn straight on the 3D scene (no panel behind it) made readable over anything, bright clouds and white
+## pads included: a dark outline and a soft shadow, both in proportion to its size. Returns the label.
+static func legible(l: Label, k := 1.0) -> Label:
+	var fs: int = l.get_theme_font_size("font_size")
+	if l.has_theme_font_size_override("font_size"):
+		fs = l.get_theme_font_size("font_size")
+	l.add_theme_constant_override("outline_size", maxi(4, int(fs * 0.16 * k)))
+	l.add_theme_color_override("font_outline_color", Color(0.0, 0.01, 0.04, 0.85))
+	l.add_theme_color_override("font_shadow_color", Color(0.0, 0.0, 0.0, 0.6))
+	l.add_theme_constant_override("shadow_offset_x", 0)
+	l.add_theme_constant_override("shadow_offset_y", maxi(2, int(fs * 0.05)))
+	l.add_theme_constant_override("shadow_outline_size", maxi(6, int(fs * 0.3 * k)))
+	return l
+
+
 static func lbl(text: String, size := 16, color := C_TEXT, font: Font = FONT_R, wrap := false) -> Label:
 	var l := Label.new()
 	l.text = text
@@ -381,14 +418,17 @@ static func overlay(parent: Control, title: String, w := 900.0, h := 640.0, on_c
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	shade.mouse_filter = Control.MOUSE_FILTER_STOP
 	parent.add_child(shade)
-	var p := panel_box(24)
+	var p := panel_box(14 if compact else 24)
+	var room: Vector2 = parent.get_viewport_rect().size - Vector2(2.0 * MARGIN, 2.0 * MARGIN)
+	w = minf(w, room.x)
+	h = minf(h, room.y)   # never taller or wider than the screen it is on (a phone in landscape)
 	place(p, 0.5, 0.5, 0.5, 0.5, -w / 2.0, -h / 2.0, w / 2.0, h / 2.0)
 	shade.add_child(p)
 	var v := vbox(10)
 	p.add_child(v)
 	var hh := hbox(8)
 	v.add_child(hh)
-	var t := lbl(title, 28, C_TEXT, FONT_T)
+	var t := lbl(title, 22 if compact else 28, C_TEXT, FONT_T)
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hh.add_child(t)
 	var close: Callable = on_close if on_close.is_valid() else shade.queue_free
@@ -428,7 +468,11 @@ static func gb(x: float) -> String:
 		return "%.0f GB" % x
 	if x >= 0.1:
 		return "%.1f GB" % x
-	return "%.3f GB" % x
+	if x <= 0.0:
+		return "0 GB"
+	if x >= 0.001:
+		return "%d MB" % roundi(x * 1000.0)   # small amounts in MB: "0.004 GB" reads as nothing at all
+	return "<1 MB"
 
 
 ## Minutes as "45 min", "1.5 h" or "24 h".
@@ -500,7 +544,7 @@ static func readout(grid: GridContainer, label: String) -> Label:
 
 ## A frosted box for a plain-words hint, with its label (set the label's text; hide the box when empty).
 static func hint_box() -> Array:
-	var p := panel_box(18)
+	var p := panel_box(10 if compact else 18)
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var l := lbl("", T_LEAD, C_TEXT, FONT_R, true)
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

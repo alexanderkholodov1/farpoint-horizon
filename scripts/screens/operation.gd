@@ -7,6 +7,9 @@ extends "res://scripts/screens/screen.gd"
 ##     hangs low over the near side;
 ##   - in orbit: the craft on its orbit, turning at its true period (data/orbits.json, period_min) at the speed time
 ##     runs; when that would be a blur, the orbit is drawn as a ring and the screen says how many laps a second it is.
+## Space weather (issue #90): when a storm on NOAA's scales reaches the craft [S-noaa-scales], time stops and an alert
+## card asks what to do (safe mode or keep working, each with its real cost and its chance of damage); the months from
+## the storm on are simulated again with the answer (mission.simulate is the same for the same seed and choices).
 ## The time panel says in words how fast time runs (the rule of AGENTS.md: real time, said on screen). At the end (or
 ## when the craft is lost) it fades to the report.
 
@@ -43,6 +46,9 @@ var surface                         ## scripts/flight/surface.gd, when the craft
 var lander: Node3D
 var lost_shown := false
 var sun_held := false               ## The Sun's circling would strobe at this speed: it is held still, and the screen says so.
+var choices := {}                   ## Month -> "safe" or "keep": the player's answers to the space weather alerts.
+var alert: Control                  ## The space weather alert card while it waits for an answer.
+var alert_month := 0
 
 
 func enter(_args: Dictionary) -> void:
@@ -72,7 +78,7 @@ func exit() -> void:
 func _build_ui() -> void:
 	# the top bar: what this is, the month, time and science
 	var top := Kit.panel_box(Kit.PAD)
-	Kit.place(top, 0, 0, 1, 0, 480, Kit.MARGIN, -Kit.MARGIN, 0)
+	Kit.place(top, 0, 0, 1, 0, 330 if Kit.compact else 480, Kit.MARGIN, -Kit.MARGIN, 0)
 	add_child(top)
 	var tv := Kit.vbox(Kit.GAP)
 	top.add_child(tv)
@@ -108,7 +114,7 @@ func _build_ui() -> void:
 	sh.add_child(sci_lbl)
 	# the mission log
 	var log_p := Kit.panel_box(Kit.PAD)
-	Kit.place(log_p, 0, 0, 0, 1, Kit.MARGIN, Kit.MARGIN, 456, -Kit.MARGIN)
+	Kit.place(log_p, 0, 0, 0, 1, Kit.MARGIN, Kit.MARGIN, 320 if Kit.compact else 456, -Kit.MARGIN)
 	add_child(log_p)
 	var lv := Kit.vbox(Kit.GAP)
 	log_p.add_child(lv)
@@ -123,7 +129,11 @@ func _build_ui() -> void:
 	log_scroll.add_child(log_box)
 	# time: how fast it runs, in words, and the report
 	var tp := Kit.panel_box(Kit.PAD)
-	Kit.place(tp, 1, 1, 1, 1, -520, -236, -Kit.MARGIN, -Kit.MARGIN)
+	if Kit.compact:
+		Kit.place(tp, 1, 1, 1, 1, -400, -Kit.MARGIN, -Kit.MARGIN, -Kit.MARGIN)
+		tp.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	else:
+		Kit.place(tp, 1, 1, 1, 1, -520, -236, -Kit.MARGIN, -Kit.MARGIN)
 	add_child(tp)
 	var tb := Kit.vbox(Kit.GAP)
 	tp.add_child(tb)
@@ -149,6 +159,11 @@ func _unhandled_input(e: InputEvent) -> void:
 	if not (e is InputEventKey) or not e.pressed or e.echo:
 		return
 	var k: int = e.physical_keycode
+	if is_instance_valid(alert):   # the alert card: 1 safe mode, 2 keep working
+		if k == KEY_1 or k == KEY_2:
+			_answer("safe" if k == KEY_1 else "keep")
+			get_viewport().set_input_as_handled()
+		return
 	if k >= KEY_1 and k <= KEY_3:
 		_set_speed(k - KEY_1)
 	elif k == KEY_ENTER or k == KEY_KP_ENTER:
@@ -178,8 +193,19 @@ func _set_speed(i: int) -> void:
 		else:
 			orbit_note.text = tr("At the pole the Sun circles the horizon once a lunar day (29.5 days), so its light sweeps round the ground; the crater's floor never sees it.")
 		return
+	if world.orbit_missed == "escape":
+		world.orbit_speed = 0.4
+		orbit_note.text = tr("Your craft could not brake at the Moon: it swung past it and sails on into space (amber). The faint ring is the orbit it was meant to reach.")
+		return
 	var period_s := float(GameData.ORBITS[mission.orbit].get("period_min", 90.0)) * 60.0
+	if world.orbit_missed == "transfer":
+		# the transfer ellipse from 200 km to GEO: a = 24,371 km, period 2 pi sqrt(a^3 / GM), GM 398,600 km3/s2 [S8]
+		period_s = TAU * sqrt(pow(24371.0, 3.0) / 398600.0)
 	var laps := warp / period_s
+	if world.orbit_missed == "transfer":
+		world.orbit_speed = TAU * minf(laps, 0.25)
+		orbit_note.text = tr("Without an engine your craft never climbed to GEO: it stays on the transfer orbit the rocket left it on (amber), from 200 km up to 35,786 km and back every %s, crossing the radiation belts. The faint ring is GEO.") % _span(period_s)
+		return
 	if laps > BLUR_LAPS:
 		world.orbit_speed = 0.0
 		orbit_note.text = tr("Your craft laps its orbit every %s. At this speed that is %s laps each second, a blur, so the orbit is drawn as a ring.") % [_span(period_s), _big(laps)]
@@ -193,13 +219,18 @@ func process(delta: float) -> void:
 		surface.place_sun(month_f * MONTH_S if month_f < 9000.0 and not sun_held else 0.0)
 		surface.camera(delta)
 	var sim: Dictionary = GameState.last_sim
-	if sim.is_empty() or leaving:
+	if sim.is_empty() or leaving or is_instance_valid(alert):
 		return
 	month_f += delta * speed / MONTH_REAL_S
 	var target := int(floor(month_f))
 	var months: int = sim.months
 	var events: Array = sim.events
 	while shown_month < min(target, months):
+		var st := _storm_at(sim, shown_month + 1)
+		if not st.is_empty() and not choices.has(st.month) and month_f < 9000.0:
+			month_f = float(st.month)
+			_ask(st)
+			return
 		shown_month += 1
 		while shown_events < events.size() and events[shown_events].month <= shown_month:
 			_log_event(events[shown_events])
@@ -222,6 +253,82 @@ func process(delta: float) -> void:
 		if end_t > (2.5 if month_f < 9000.0 else 0.3):
 			leaving = true
 			main.go_faded("report", 0.8, 0.6)
+
+
+# ===================================================================================== SPACE WEATHER
+func _storm_at(sim: Dictionary, m: int) -> Dictionary:
+	for st in sim.get("storms", []):
+		if st.month == m:
+			return st
+	return {}
+
+
+## The alert card: what is coming, what it does to this craft, how rare it is, and the two answers with their cost.
+func _ask(st: Dictionary) -> void:
+	alert_month = st.month
+	var v := Kit.overlay(self, tr("Space weather alert"), 780.0, 470.0, func(): _answer("safe"))
+	alert = v.get_parent().get_parent()
+	var O: Dictionary = GameData.ORBITS[mission.orbit]
+	var low: bool = float(O.drag_life) < 900.0
+	var beyond: bool = mission.orbit == "lunar" or mission.orbit == "l2"
+	v.add_child(Kit.lbl(tr("Forecast for month %d · %s") % [st.month, st.name], Kit.T_LEAD, Kit.C_WARN, Kit.FONT_B, true))
+	var what: String
+	var craft: String
+	if st.kind == "G":
+		what = tr("A cloud of solar gas thrown out by the Sun (a coronal mass ejection) is on its way to the Earth. The fastest arrive in 15 to 18 hours, slower ones take several days, so NOAA's forecasters give a warning.")
+		craft = tr("For your craft: electric charge builds up on its surface and it can lose its orientation.")
+		if st.drag:
+			craft += " " + tr("In a low orbit the heated upper air also drags it down.")
+	else:
+		what = tr("An eruption on the Sun is sending out protons so fast they cross to the Earth in tens of minutes. A radiation storm lasts from hours to days.")
+		craft = tr("For your craft: protons can flip bits in its memory, add noise to its images and wear its solar panels.")
+		if beyond:
+			craft += " " + tr("Out here the Earth's magnetic field does not shield it.")
+		elif low:
+			craft += " " + tr("In a low orbit the Earth's magnetic field shields it from most of them.")
+	var often := {4: tr("About 100 storms this strong come in an 11-year solar cycle."),
+		5: tr("Only about 4 storms this strong come in an 11-year solar cycle.")} if st.kind == "G" else 		{3: tr("About 10 storms this strong come in an 11-year solar cycle."),
+		4: tr("Only about 3 storms this strong come in an 11-year solar cycle.")}
+	v.add_child(Kit.lbl(what, Kit.T_BODY, Kit.C_TEXT, Kit.FONT_R, true))
+	v.add_child(Kit.lbl(craft, Kit.T_BODY, Kit.C_TEXT, Kit.FONT_R, true))
+	v.add_child(Kit.lbl(str(often[int(st.level)]) + " " + tr("Source: NOAA's space weather scales."), Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true))
+	var row := Kit.hbox(Kit.GAP * 2)
+	v.add_child(row)
+	var cost := tr("You lose half of this month's data.")
+	_option(row, tr("Safe mode · 1"), tr("Instruments off until it passes.") + " " + cost, st.p_safe, Kit.C_ACCENT, func(): _answer("safe"))
+	_option(row, tr("Keep working · 2"), tr("Every observation kept."), st.p_keep, Kit.C_GOLD, func(): _answer("keep"))
+	v.add_child(Kit.lbl(tr("If you close this card, mission control follows its flight rule: safe mode."), Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true))
+
+
+func _option(row: HBoxContainer, title: String, text: String, p: float, col: Color, cb: Callable) -> void:
+	var box := Kit.vbox(Kit.GAP)
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(box)
+	var b := Kit.accent_btn(Kit.btn(title, cb, Kit.T_ACTION), col)
+	b.custom_minimum_size.y = Kit.BTN_H + 8
+	box.add_child(b)
+	box.add_child(Kit.lbl(text, Kit.T_BODY, Kit.C_TEXT, Kit.FONT_R, true))
+	box.add_child(Kit.lbl(tr("Chance of damage: %s") % Kit.pct(p), Kit.T_BODY, Kit.C_WARN if p >= 0.2 else Kit.C_DIM, Kit.FONT_B, true))
+
+
+## The answer: the months from the storm on are simulated again with it; the log already shown stays as it is.
+func _answer(c: String) -> void:
+	if not is_instance_valid(alert):
+		return
+	choices[alert_month] = c
+	alert.queue_free()
+	alert = null
+	var old: Dictionary = GameState.last_sim
+	var s: Dictionary = mission.simulate(int(old.get("seed", 0)), choices)
+	var evs: Array = []
+	for e in old.events:
+		if e.month < alert_month:
+			evs.append(e)
+	for e in s.events:
+		if e.month >= alert_month:
+			evs.append(e)
+	s.events = evs
+	GameState.last_sim = s
 
 
 ## The craft stops working: in orbit it fades away; on the ground the lander goes dark where it stands.

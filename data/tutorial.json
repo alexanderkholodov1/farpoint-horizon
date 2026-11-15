@@ -62,7 +62,7 @@
    "text": "Sharp photos need precise pointing: reaction wheels and a star tracker. To brake into lunar orbit and land you need delta-v, a change of speed. Chemical propulsion gives 1,500 m/s.",
    "targets": [
     "Wheels and star tracker",
-    "Chemical (hydrazine)"
+    "Chemical (bipropellant)"
    ]
   },
   {
@@ -109,9 +109,9 @@
    "ctx": "flight",
    "who": "pilot",
    "title": "Toward the Moon",
-   "text": "In orbit around the Earth. To head for the Moon, burn about 3,200 m/s at the right moment, then coast for about three days, as Apollo 11 did. Press BURN, and CUT when the gauge reaches the mark.",
+   "text": "In orbit around the Earth. Mission control planned the departure: about 3,200 m/s burned at the right moment, then about three days of coasting, as Apollo 11 did. Look at the path, then give the GO: the flight computer fires the engine at the planned second.",
    "targets": [
-    "BURN"
+    "GO for the burn ▶"
    ],
    "sources": [
     "S-delta-v",

@@ -53,6 +53,9 @@ static func met(id: String, flight: Dictionary) -> bool:
 			return land.get("landed", false) and float(land.get("fuel_left", 0.0)) >= float(c.min)
 		"contact_kept":
 			return land.get("landed", false) and bool(land.get("contact_kept", false))
+		"correction_dv":
+			# the departure was planned so well that mission control's correction was tiny (or none)
+			return flight.has("tli") and float(flight.get("correction", {}).get("dv", 0.0)) <= float(c.max)
 		"tli_error":
 			# a burn the pilot cut by hand, not the flight computer
 			return flight.has("tli") and flight.tli.get("by", "") == "pilot" and absf(float(flight.tli.get("error", 1.0))) <= float(c.max)

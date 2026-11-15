@@ -22,19 +22,26 @@ const GREY := preload("res://shaders/ui_grey.gdshader")
 
 func enter(_args: Dictionary) -> void:
 	var head := Kit.vbox(4)
-	Kit.place(head, 0, 0, 1, 0, 50, 30, -50, 130)
+	if Kit.compact:
+		Kit.place(head, 0, 0, 1, 0, 24, 6, -24, 56)
+	else:
+		Kit.place(head, 0, 0, 1, 0, 50, 30, -50, 130)
 	add_child(head)
 	var over := Kit.caps(GameData.CML_NAMES[1] + "  ·  " + tr("Every mission starts with a science question"))
-	over.add_theme_color_override("font_color", Color(Kit.C_ON_DARK, 0.7))   # straight on the dark scene in both appearances
+	over.add_theme_color_override("font_color", Color(Kit.C_ON_DARK, 0.8))   # straight on the dark scene in both appearances
+	Kit.legible(over, 1.4)
 	head.add_child(over)
-	head.add_child(Kit.lbl(tr("Choose your mission"), 36, Kit.C_ON_DARK, Kit.FONT_T))
+	head.add_child(Kit.legible(Kit.lbl(tr("Choose your mission"), 26 if Kit.compact else 36, Kit.C_ON_DARK, Kit.FONT_T)))
 	var grid := GridContainer.new()
 	grid.columns = 3
 	grid.add_theme_constant_override("h_separation", 18)
 	grid.add_theme_constant_override("v_separation", 18)
 	var sc := ScrollContainer.new()
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	Kit.place(sc, 0, 0, 1, 1, 50, 130, -50, -76)
+	if Kit.compact:
+		Kit.place(sc, 0, 0, 1, 1, 24, 62, -24, -54)
+	else:
+		Kit.place(sc, 0, 0, 1, 1, 50, 130, -50, -76)
 	add_child(sc)
 	sc.add_child(grid)
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -47,7 +54,10 @@ func enter(_args: Dictionary) -> void:
 	for id in ids:
 		grid.add_child(_card(id, GameData.SCENARIOS[id], mult))
 	var back := Kit.btn(tr("◀ Menu"), func(): go("menu"))
-	Kit.place(back, 0, 1, 0, 1, 50, -62, 180, -20)
+	if Kit.compact:
+		Kit.place(back, 0, 1, 0, 1, 24, -48, 150, -8)
+	else:
+		Kit.place(back, 0, 1, 0, 1, 50, -62, 180, -20)
 	add_child(back)
 
 
@@ -68,7 +78,7 @@ func _card(id: String, S: Dictionary, mult: float) -> Control:
 		var reg := Rect2()
 		if not P[1].is_empty():
 			reg = Rect2(P[1][0], P[1][1], P[1][2], P[1][3])
-		pic = Kit.cover(load(P[0]), PHOTO_H, reg)
+		pic = Kit.cover(load(P[0]), 96.0 if Kit.compact else PHOTO_H, reg)
 		v.add_child(pic)
 		# the picture's credit, on a dark pill so it reads on any picture
 		var cap := PanelContainer.new()
@@ -105,12 +115,15 @@ func _card(id: String, S: Dictionary, mult: float) -> Control:
 	var kind := Kit.caps("%d  ·  %s" % [order.find(id) + 1, S.type])
 	kind.add_theme_color_override("font_color", Kit.C_GOLD)
 	t.add_child(kind)
-	t.add_child(Kit.lbl(S.name, 22, Kit.C_TEXT, Kit.FONT_T, true))
+	t.add_child(Kit.lbl(S.name, 18 if Kit.compact else 22, Kit.C_TEXT, Kit.FONT_T, true))
 	var line := Kit.lbl(_first_sentence(S.desc), Kit.T_SMALL + 1, Kit.C_DIM, Kit.FONT_R, true)
+	line.visible = not Kit.compact   # on a phone the picture and the name say it; the rest is in the design
 	line.max_lines_visible = 2
 	line.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	t.add_child(line)
-	var chips := Kit.hbox(8)
+	var chips := HFlowContainer.new()   # wraps instead of widening the card (a phone has three narrow columns)
+	chips.add_theme_constant_override("h_separation", 8)
+	chips.add_theme_constant_override("v_separation", 4)
 	chips.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	t.add_child(chips)
 	if lock != "":

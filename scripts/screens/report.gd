@@ -20,6 +20,8 @@ var intro_t := 0.0
 var counted := 0.0
 var total_pts := 0
 var pts_lbl: Label
+var photo_layer: Control       ## a photo shown large (Esc closes it before anything else)
+var first_btn: Button          ## the report's main action, focused once the celebration is over
 ## Where each problem of the design is fixed (scripts/mission.gd checks' "at"), as the design's stage names.
 const FIX_AT := {"instruments": "Craft", "bus": "Craft", "panels": "Power", "battery": "Power", "comms": "Systems",
 	"adcs": "Systems", "propulsion": "Systems", "launcher": "Rocket", "orbit": "Mission"}
@@ -49,7 +51,10 @@ func enter(_args: Dictionary) -> void:
 	var r: Dictionary = GameState.last_report
 	var S: Dictionary = GameData.SCENARIOS[mission.scenario]
 	var p := Kit.panel_box(Kit.PAD)
-	Kit.place(p, 0.5, 0, 0.5, 1, -660, Kit.MARGIN, 660, -Kit.MARGIN)
+	if Kit.compact:
+		Kit.place(p, 0, 0, 1, 1, Kit.MARGIN, Kit.MARGIN, -Kit.MARGIN, -Kit.MARGIN)
+	else:
+		Kit.place(p, 0.5, 0, 0.5, 1, -660, Kit.MARGIN, 660, -Kit.MARGIN)
 	add_child(p)
 	panel = p
 	p.modulate.a = 0.0
@@ -88,11 +93,34 @@ func process(delta: float) -> void:
 			_end_intro()
 
 
-## Any key or click ends the celebration early.
+## Any key or click ends the celebration early. Then (issue #58): Enter redesigns, R flies again, N picks a new mission,
+## Esc or Backspace go to the menu; Esc first closes a photo shown large.
 func _unhandled_input(e: InputEvent) -> void:
-	if intro and is_instance_valid(intro) and intro_t > 0.6 and e is InputEventKey and e.pressed:
-		_end_intro()
+	if not (e is InputEventKey) or not e.pressed or e.echo:
+		return
+	if intro and is_instance_valid(intro):
+		if intro_t > 0.6:
+			_end_intro()
 		get_viewport().set_input_as_handled()
+		return
+	var k: int = e.physical_keycode
+	if photo_layer and is_instance_valid(photo_layer):
+		if k in [KEY_ESCAPE, KEY_BACKSPACE, KEY_ENTER, KEY_KP_ENTER]:
+			photo_layer.queue_free()
+			get_viewport().set_input_as_handled()
+		return
+	match k:
+		KEY_ENTER, KEY_KP_ENTER:
+			_back_to_design()
+		KEY_R:
+			_fly_again()
+		KEY_N:
+			go("missions")
+		KEY_ESCAPE, KEY_BACKSPACE:
+			go("menu")
+		_:
+			return
+	get_viewport().set_input_as_handled()
 
 
 # ===================================================================================== THE CELEBRATION
@@ -160,20 +188,20 @@ func _celebrate(s: Dictionary, last_sim: Dictionary) -> void:
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	intro.add_child(v)
 	var title_txt: String = tr("MISSION OVER") if lost else (tr("MISSION COMPLETE!") if s.grade in ["S", "A"] else tr("MISSION DONE!"))
-	var t := Kit.lbl(title_txt, Kit.T_SHOUT + 8, Color(1.0, 0.78, 0.42), Kit.FONT_T)
+	var t := Kit.legible(Kit.lbl(title_txt, Kit.T_SHOUT + 8, Color(1.0, 0.78, 0.42), Kit.FONT_T))
 	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(t)
-	var sub := Kit.lbl(GameData.SCENARIOS[mission.scenario].name + "  ·  " + str(s.label), Kit.T_LEAD, Kit.C_ON_DARK, Kit.FONT_R)
+	var sub := Kit.legible(Kit.lbl(GameData.SCENARIOS[mission.scenario].name + "  ·  " + str(s.label), Kit.T_VALUE, Kit.C_ON_DARK, Kit.FONT_B), 1.3)
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(sub)
 	var gcol: Color = {"S": Color(1.0, 0.85, 0.3), "A": Kit.C_OK, "B": Kit.C_ACCENT, "C": Kit.C_WARN, "D": Kit.C_BAD}[s.grade]
-	var g := Kit.lbl(s.grade, 150, Kit.ink(gcol), Kit.FONT_T)
+	var g := Kit.legible(Kit.lbl(s.grade, 150, Kit.ink(gcol), Kit.FONT_T), 0.7)
 	g.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(g)
-	pts_lbl = Kit.lbl(tr("%d points") % 0, Kit.T_CLOCK, Color(0.62, 0.82, 1.0), Kit.font_num())
+	pts_lbl = Kit.legible(Kit.lbl(tr("%d points") % 0, Kit.T_CLOCK, Color(0.62, 0.82, 1.0), Kit.font_num()))
 	pts_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(pts_lbl)
-	var skip := Kit.lbl(tr("Click or press any key for your report"), Kit.T_SMALL, Kit.C_ON_DARK, Kit.FONT_R)
+	var skip := Kit.legible(Kit.lbl(tr("Click or press any key for your report"), Kit.T_BODY, Kit.C_ON_DARK, Kit.FONT_R), 1.3)
 	skip.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	skip.modulate.a = 0.0
 	v.add_child(skip)
@@ -234,6 +262,8 @@ func _end_intro() -> void:
 	tw.tween_property(it, "modulate:a", 0.0, 0.35)
 	tw.tween_property(panel, "modulate:a", 1.0, 0.45)
 	tw.chain().tween_callback(it.queue_free)
+	if first_btn and is_instance_valid(first_btn):
+		first_btn.grab_focus()   # Tab and the arrows move between the ways on
 
 
 # ===================================================================================== HEADER
@@ -270,7 +300,7 @@ func _header(outer: VBoxContainer, s: Dictionary, r: Dictionary, S: Dictionary, 
 # ===================================================================================== SCORE
 func _score_column(cols: HBoxContainer, s: Dictionary, r: Dictionary, S: Dictionary, last_sim: Dictionary) -> void:
 	var c1 := Kit.vbox(8)
-	c1.custom_minimum_size.x = 340
+	c1.custom_minimum_size.x = 250 if Kit.compact else 340
 	cols.add_child(c1)
 	c1.add_child(Kit.caps(tr("Score")))
 	_score_row(c1, tr("Goals met"), s.objectives, 400, "")
@@ -318,7 +348,7 @@ func _score_row(parent: VBoxContainer, nm: String, val: int, mx: int, sub: Strin
 func _photo_column(cols: HBoxContainer, flight: Dictionary, last_sim: Dictionary) -> void:
 	var sc := ScrollContainer.new()
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	sc.custom_minimum_size.x = 420
+	sc.custom_minimum_size.x = 300 if Kit.compact else 420
 	cols.add_child(sc)
 	var c := Kit.vbox(Kit.GAP)
 	c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -345,7 +375,7 @@ func _photo_column(cols: HBoxContainer, flight: Dictionary, last_sim: Dictionary
 ## A photo's tile: the picture (click to see it large) or, when it did not come home, what would bring it.
 func _photo_tile(ph: Dictionary, earned: bool) -> Control:
 	var tile := PanelContainer.new()
-	tile.custom_minimum_size = Vector2(200, 132)
+	tile.custom_minimum_size = Vector2(140, 92) if Kit.compact else Vector2(200, 132)
 	tile.add_theme_stylebox_override("panel", Kit.flat(Kit.C_CARD, Kit.C_LINE, 8, 1, 0, 0))
 	if earned:
 		var tr_ := TextureRect.new()
@@ -379,6 +409,7 @@ func _photo_tile(ph: Dictionary, earned: bool) -> Control:
 func _show_photo(ph: Dictionary) -> void:
 	Kit.UiSound.play("select")
 	var box := Kit.overlay(self, tr("A photo your mission sent home"), 980.0, 760.0)
+	photo_layer = box.get_parent().get_parent()   # the overlay's shade, which holds the panel
 	var tex := TextureRect.new()
 	tex.texture = load(ph.path)
 	tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -435,17 +466,18 @@ func _story_column(cols: HBoxContainer, last_sim: Dictionary) -> void:
 func _actions(outer: VBoxContainer, s: Dictionary) -> void:
 	var bh := Kit.hbox(10)
 	outer.add_child(bh)
-	var redo := Kit.accent_btn(Kit.btn(tr("Redesign mission"), func(): _back_to_design(), Kit.T_BODY), Kit.C_ACCENT)
+	var redo := Kit.accent_btn(Kit.btn(tr("Redesign mission") + "  ·  Enter", func(): _back_to_design(), Kit.T_BODY), Kit.C_ACCENT)
+	first_btn = redo
 	redo.custom_minimum_size.y = Kit.BTN_H
 	bh.add_child(redo)
-	for b in [Kit.btn(tr("↻ Fly again (new luck)"), func(): _fly_again(), Kit.T_BODY), Kit.btn(tr("New mission"), func(): go("missions"), Kit.T_BODY)]:
+	for b in [Kit.btn(tr("↻ Fly again (new luck)") + "  ·  R", func(): _fly_again(), Kit.T_BODY), Kit.btn(tr("New mission") + "  ·  N", func(): go("missions"), Kit.T_BODY)]:
 		b.custom_minimum_size.y = Kit.BTN_H
 		bh.add_child(b)
 	var sp := Control.new()
 	sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bh.add_child(sp)
 	# the ranking comes back with the crew of friends (v0.3.0, issue #52); the menu has none either
-	var menu := Kit.btn(tr("Menu"), func(): go("menu"), Kit.T_BODY)
+	var menu := Kit.btn(tr("Menu") + "  ·  Esc", func(): go("menu"), Kit.T_BODY)
 	menu.custom_minimum_size.y = Kit.BTN_H
 	bh.add_child(menu)
 

@@ -22,7 +22,7 @@ class Dial extends Control:
 	var _pulse := 0.0
 
 	func _init() -> void:
-		custom_minimum_size = Vector2(270, 180)
+		custom_minimum_size = Vector2(200, 128) if Kit.compact else Vector2(270, 180)
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	func _process(delta: float) -> void:
@@ -78,7 +78,7 @@ class Lever extends Control:
 	var _drag := false
 
 	func _init() -> void:
-		custom_minimum_size = Vector2(104, 262)
+		custom_minimum_size = Vector2(80, 196) if Kit.compact else Vector2(104, 262)
 		mouse_filter = Control.MOUSE_FILTER_STOP
 		mouse_default_cursor_shape = Control.CURSOR_VSIZE
 
@@ -143,7 +143,7 @@ class Gauge extends Control:
 	var _t := 0.0
 
 	func _init() -> void:
-		custom_minimum_size = Vector2(124, 150)
+		custom_minimum_size = Vector2(100, 146) if Kit.compact else Vector2(124, 150)
 		size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 
@@ -228,7 +228,7 @@ class BigButton extends Control:
 	var _down := 0.0
 
 	func _init() -> void:
-		custom_minimum_size = Vector2(136, 136)
+		custom_minimum_size = Vector2(104, 104) if Kit.compact else Vector2(136, 136)
 		mouse_filter = Control.MOUSE_FILTER_STOP
 		mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 
@@ -278,7 +278,7 @@ class HoldButton extends Button:
 	func _init(text_: String = "") -> void:
 		text = text_
 		focus_mode = Control.FOCUS_NONE
-		custom_minimum_size = Vector2(64, 50)
+		custom_minimum_size = Vector2(56, 44) if Kit.compact else Vector2(64, 50)
 		add_theme_font_size_override("font_size", 18)
 		button_down.connect(func(): held = true)
 		button_up.connect(func(): held = false)
@@ -310,7 +310,7 @@ class Switch extends Button:
 	func _init() -> void:
 		flat = true
 		focus_mode = Control.FOCUS_NONE
-		custom_minimum_size = Vector2(136, 46)
+		custom_minimum_size = Vector2(116, 40) if Kit.compact else Vector2(136, 46)
 		mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 
 	func _process(delta: float) -> void:

@@ -269,7 +269,7 @@ func _checks(r: Dictionary, S: Dictionary, B: Dictionary, O: Dictionary, L: Dict
 	if r.pointing_bad.size() > 0:
 		c.append(_ck("warn", tr("Pointing is too coarse"), tr("%s need(s) finer attitude control. Images will come out blurred.") % ", ".join(r.pointing_bad), "adcs"))
 	if not r.insertion_ok:
-		c.append(_ck("warn", tr("Not enough delta-v to reach the final orbit"), tr("You need %.0f m/s to enter %s and the propulsion gives %.0f m/s. The craft won't reach its destination.") % [r.dv_insert, O.short, r.dv_have], "propulsion"))
+		c.append(_ck("warn", tr("Not enough fuel to reach the final orbit"), tr("You need %.0f m/s to enter %s and the propulsion gives %.0f m/s. The craft won't reach its destination.") % [r.dv_insert, O.short, r.dv_have], "propulsion"))
 	elif r.life_years < years:
 		c.append(_ck("warn", tr("The craft won't last %d years") % years, tr("With this orbit and propulsion it lasts ~%.1f years (fuel or air drag).") % r.life_years, "propulsion"))
 	if years < S.min_years:
@@ -305,12 +305,14 @@ func role_goals(r: Dictionary) -> Dictionary:
 
 
 # ======================================================================= SIMULACIÓN
-func simulate(seed_value: int = -1) -> Dictionary:
+## choices: what the player answered to each space weather alert, month -> "safe" or "keep" (issue #90). A storm with
+## no answer follows mission control's flight rule, safe mode. The same seed and choices give the same months, so the
+## operation can ask at a storm and simulate again from there: the months before it come out the same.
+func simulate(seed_value: int = -1, choices := {}) -> Dictionary:
 	var rng := RandomNumberGenerator.new()
-	if seed_value >= 0:
-		rng.seed = seed_value
-	else:
-		rng.randomize()
+	if seed_value < 0:
+		seed_value = randi() & 0x7fffffff
+	rng.seed = seed_value
 	var r := compute()
 	var S: Dictionary = GameData.SCENARIOS[scenario]
 	var B: Dictionary = GameData.BUSES[bus]
@@ -323,7 +325,8 @@ func simulate(seed_value: int = -1) -> Dictionary:
 
 	var events: Array = []
 	var sim := {"events": events, "science": 0.0, "months": 0, "timeline": [], "status": "ok",
-		"end_reason": "", "extra_cost": 0.0, "launch_failed": false, "lost_instruments": []}
+		"end_reason": "", "extra_cost": 0.0, "launch_failed": false, "lost_instruments": [],
+		"seed": seed_value, "storms": []}
 	var months_total := years * 12
 
 	# --- retraso de lanzamiento
@@ -387,10 +390,13 @@ func simulate(seed_value: int = -1) -> Dictionary:
 	var power_mult := 1.0
 	var bonuses := 0
 	var aged := false
-	var is_cots: bool = B.cots
 	var rad: int = O.radiation
 	if orbit_penalty < 1.0:
 		rad = 3
+	# space weather (issue #90): the Sun is near the top of its 11-year cycle, so every mission meets at least one
+	# storm worth an alert, somewhere in its first third; more come by chance
+	var first_storm := rng.randi_range(2, maxi(2, months_total / 3))
+	var storms_seen := 0
 
 	for m in range(1, months_total + 1):
 		if m > life_months:
@@ -404,26 +410,49 @@ func simulate(seed_value: int = -1) -> Dictionary:
 			break
 		var month_sci := science_rate(working, point_level, power_mult) * orbit_penalty
 
-		# tormenta solar / radiación
-		if rng.randf() < 0.012 * rad * ev_mult:
-			var dmg: float = 0.35 * (1.6 if is_cots else 1.0) * (0.25 if shielding else 1.0) * (0.5 if redundancy else 1.0)
-			if rng.randf() < dmg and working.size() > 0:
-				if rng.randf() < 0.25 and not redundancy:
+		# space weather (issue #90): an alert from NOAA's forecasters, and the player's answer
+		var u_storm := rng.randf()
+		if (storms_seen == 0 and m == first_storm) or u_storm < 0.03 * ev_mult:
+			storms_seen += 1
+			var st := storm(rng.randf(), rng.randf(), rad, O.drag_life < 900.0)
+			var u_dmg := rng.randf()
+			var u_comp := rng.randf()
+			var u_pick := rng.randf()
+			st.month = m
+			var safe: bool = choices.get(m, "safe") != "keep"
+			st.choice = "safe" if safe else "keep"
+			sim.storms.append(st)
+			events.append(_ev(m, "info", tr("Space weather alert · %s") % st.name,
+				tr("You put the craft in safe mode: instruments off until the storm passed, half of this month's data lost.") if safe
+				else tr("You kept the craft working through the storm, every observation kept.")))
+			if safe:
+				month_sci *= 0.5
+			if st.drag:
+				if dv_left >= 8.0:
+					dv_left -= 8.0
+					events.append(_ev(m, "info", tr("The storm swelled the upper air"),
+						tr("The heated air dragged the orbit down, and the engine climbed back (8 m/s of fuel).")))
+				elif life_months <= months_total:
+					life_months = maxi(m + 1, life_months - 6)
+					events.append(_ev(m, "bad", tr("The storm swelled the upper air"),
+						tr("The heated air dragged the orbit down, and with no engine to climb back about 6 months of life were lost.")))
+			if u_dmg < (st.p_safe if safe else st.p_keep) and working.size() > 0:
+				if u_comp < 0.25 and not redundancy:
 					sim.status = "lost"
-					sim.end_reason = tr("Computer damaged by radiation")
-					events.append(_ev(m, "bad", tr("Solar storm fries the computer"),
-						tr("A high-energy particle damaged the onboard computer and there is no backup. The craft went silent. Shielding and redundancy reduce this risk.")))
+					sim.end_reason = tr("Computer damaged by the storm")
+					events.append(_ev(m, "bad", tr("The storm fried the computer"),
+						tr("The storm upset the onboard computer and there is no backup. The craft went silent. Shielding, redundancy and safe mode reduce this risk.")))
 					sim.timeline.append(sim.science)
 					sim.months = m
 					break
-				var lost: String = working[rng.randi_range(0, working.size() - 1)]
+				var lost: String = working[mini(int(u_pick * working.size()), working.size() - 1)]
 				working.erase(lost)
 				sim.lost_instruments.append(lost)
-				events.append(_ev(m, "bad", tr("Solar storm damages an instrument"),
-					tr("Radiation damaged the %s. %s") % [GameData.INSTRUMENTS[lost].name, tr("Without shielding the electronics are more vulnerable.") if not shielding else tr("Even the shielding wasn't enough this time.")]))
+				events.append(_ev(m, "bad", tr("The storm damaged an instrument"),
+					tr("The storm damaged the %s. %s") % [GameData.INSTRUMENTS[lost].name, tr("Without shielding the electronics are more vulnerable.") if not shielding else tr("Even the shielding wasn't enough this time.")]))
 			else:
-				events.append(_ev(m, "good", tr("Solar storm weathered"),
-					tr("A solar storm hit and the craft rode it out%s.") % (tr(" thanks to the shielding") if shielding else tr(", with a bit of luck"))))
+				events.append(_ev(m, "good", tr("Storm weathered"),
+					tr("The craft rode the storm out in safe mode.") if safe else tr("The craft rode the storm out%s.") % (tr(" thanks to the shielding") if shielding else tr(", with a bit of luck"))))
 
 		# falla de rueda de reacción
 		if point_level >= 2 and rng.randf() < 0.008 * ev_mult:
@@ -504,6 +533,36 @@ func _discovery(working: Array, idx: int) -> Array:
 			if working.size() > 0:
 				return [tr("Unexpected discovery"), tr("Your instruments recorded something nobody expected. That's how science moves forward!")]
 	return []
+
+
+## A space weather storm on NOAA's scales [S-noaa-scales] (issue #90), from two random numbers. Around the Earth (rad 1,
+## low and polar orbits; 3, GEO and an orbit stuck crossing the belts) most are geomagnetic storms, G, a cloud of
+## solar gas hitting the Earth's magnetic field: G4 comes 100 times a cycle and G5 4, so 4 % of them are G5. Beyond the
+## Earth's field (the Moon, L2) only radiation storms, S, matter: S3 10 a cycle and S4 3, so 23 % are S4. p_keep is
+## the chance of damage working through it, p_safe in safe mode (instruments off, a fifth of the risk); drag is true
+## when it heats the upper air of a low orbit.
+func storm(u_kind: float, u_level: float, rad: int, low_orbit: bool) -> Dictionary:
+	var beyond := orbit == "lunar" or orbit == "l2"
+	var geo_storm := not beyond and u_kind < 0.7
+	var st := {"kind": "G" if geo_storm else "S"}
+	var p := 0.0
+	if geo_storm:
+		var g5 := u_level < 0.04
+		st.level = 5 if g5 else 4
+		st.name = tr("G5, extreme geomagnetic storm") if g5 else tr("G4, severe geomagnetic storm")
+		# surface charging and lost orientation [S-noaa-scales]; worse high up, where charging is strongest
+		p = (0.4 if g5 else 0.2) * (1.4 if rad >= 3 else 1.0) * (0.5 if shielding else 1.0)
+	else:
+		var s4 := u_level < 0.23
+		st.level = 4 if s4 else 3
+		st.name = tr("S4, severe solar radiation storm") if s4 else tr("S3, strong solar radiation storm")
+		# upsets in memory, noise in images, worn panels [S-noaa-scales]; the Earth's field shields low orbits
+		p = (0.18 if s4 else 0.12) * rad * (0.25 if shielding else 1.0)
+	p *= (1.6 if GameData.BUSES[bus].cots else 1.0) * (0.5 if redundancy else 1.0)
+	st.p_keep = clampf(p, 0.02, 0.9)
+	st.p_safe = clampf(p * 0.2, 0.01, 0.9)
+	st.drag = geo_storm and low_orbit
+	return st
 
 
 func _ev(month: int, kind: String, title: String, text: String) -> Dictionary:

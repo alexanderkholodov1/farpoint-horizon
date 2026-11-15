@@ -20,6 +20,8 @@ var fade_rect: ColorRect
 var screen: Screen          ## The current screen.
 var screen_id := ""
 var launching := false      ## A launch is fading in: a second click on the launch button does nothing.
+## The screens of a mission where Esc opens the pause card (scripts/screens/pause.gd) and stops time (issue #65).
+const PAUSABLE := ["design", "builder", "launch", "flight", "landing", "operation"]
 
 
 func _ready() -> void:
@@ -31,6 +33,8 @@ func _ready() -> void:
 	world.setup()
 	GameState.trace("mundo listo")
 	_setup_ui()
+	_fit_screen()
+	get_window().size_changed.connect(_fit_screen)
 	GameState.trace("interfaz lista")
 	go("menu")
 	GameState.trace("menu listo")
@@ -52,6 +56,73 @@ func _setup_ui() -> void:
 	fade_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	fade_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	top.add_child(fade_rect)
+
+
+# ===================================================================================== SCREENS OF EVERY SIZE (issue #76)
+var turn_card: Control
+const MIN_SCALE := 0.8
+
+## The interface grows on small screens so its text stays readable (a phone in landscape is about 390 CSS pixels tall:
+## the 1600 x 900 layout shrunk to it makes 13 px text about 6 px), and a phone held upright is asked to turn: the
+## game's panels are laid out for a wide screen. Layouts were checked at 1.25 (shots/dev_phone125_*).
+func _fit_screen() -> void:
+	var px: Vector2 = Vector2(DisplayServer.window_get_size())
+	var css_h: float = px.y / maxf(DisplayServer.screen_get_scale(), 1.0)
+	if OS.has_feature("web"):
+		var h = JavaScriptBridge.eval("window.innerHeight", true)
+		if h != null and float(h) > 0.0:
+			css_h = float(h)
+	if OS.get_environment("FIT_CSS_H") != "":   # a test sets the CSS height of the screen it stands for
+		css_h = float(OS.get_environment("FIT_CSS_H"))
+	# text is never drawn below 80 % of its design size in CSS pixels: 1600 x 900 shrunk to a 390 px tall phone would
+	# be 43 %, so short screens get a bigger interface (the screens lay themselves out for the space left, Kit.compact)
+	var factor := maxf(1.0, MIN_SCALE * 900.0 / maxf(css_h, 200.0))
+	var upright: bool = px.x < px.y * 1.05
+	if upright:
+		factor = 3.0   # only the turn card is seen: big enough to read on a phone held upright
+	if absf(get_window().content_scale_factor - factor) > 0.01:
+		get_window().content_scale_factor = factor
+	# the room the layout has once scaled: short (a phone in landscape) means compact
+	var room: Vector2 = px / maxf(factor * minf(px.x / 1600.0, px.y / 900.0), 0.001)
+	var short: bool = not upright and room.y < 640.0
+	if short != Kit.compact:
+		Kit.set_compact(short)
+		if root_ui:
+			root_ui.theme = Kit.build_theme()
+		if screen_id in ["menu", "missions"]:
+			go.call_deferred(screen_id)   # drawn again for the room it has now
+	if upright and turn_card == null:
+		turn_card = _make_turn_card()
+	if turn_card:
+		turn_card.visible = upright
+
+
+func _make_turn_card() -> Control:
+	var layer := CanvasLayer.new()
+	layer.layer = 20
+	add_child(layer)
+	var shade := ColorRect.new()
+	shade.color = Color(0.0, 0.01, 0.04, 1.0)
+	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	shade.mouse_filter = Control.MOUSE_FILTER_STOP
+	shade.theme = Kit.build_theme()
+	layer.add_child(shade)
+	var v := Kit.vbox(16)
+	v.alignment = BoxContainer.ALIGNMENT_CENTER
+	v.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	shade.add_child(v)
+	for t in [["⟲", 120, Kit.C_GOLD], [tr("Turn your device sideways"), Kit.T_STAT + 10, Kit.C_ON_DARK], [tr("Farpoint HORIZON is made for a wide screen."), Kit.T_LEAD + 6, Color(Kit.C_ON_DARK, 0.75)]]:
+		var l := Kit.lbl(t[0], t[1], t[2], Kit.FONT_T, true)
+		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		v.add_child(l)
+	return shade
+
+
+## Esc pauses a mission (a screen that uses Esc itself handles it first and this never sees it).
+func _unhandled_input(e: InputEvent) -> void:
+	if e is InputEventKey and e.pressed and not e.echo and e.physical_keycode == KEY_ESCAPE 			and screen_id in PAUSABLE and not get_tree().paused and not launching:
+		get_viewport().set_input_as_handled()
+		overlay("pause")
 
 
 func _process(delta: float) -> void:

@@ -66,13 +66,13 @@ branches add entries at the same place (`.gitattributes`).
 - **S-webb-orbit** NASA. *Webb's orbit*. https://science.nasa.gov/mission/webb/orbit/. The Sun-Earth L2 point, 1.5 million
   km from Earth, and why a telescope sits there.
 ## Launchers
-- **S13** Rocket Lab. *Electron*. https://rocketlabcorp.com/launch/electron/; figures as given in Wikipedia, *Rocket Lab
+- **S13** Rocket Lab. *Electron*. https://rocketlabcorp.com/launch/electron/. Figures as given in Wikipedia, *Rocket Lab
   Electron* (infobox, checked 2026-11-14), https://en.wikipedia.org/wiki/Rocket_Lab_Electron. Height 18 m, diameter
   1.2 m, nine first-stage engines: the light launcher model.
-- **S14** SpaceX. *Falcon 9*. https://www.spacex.com/vehicles/falcon-9/; figures as given in Wikipedia, *Falcon 9*
+- **S14** SpaceX. *Falcon 9*. https://www.spacex.com/vehicles/falcon-9/. Figures as given in Wikipedia, *Falcon 9*
   (infobox and performance table, checked 2026-11-14), https://en.wikipedia.org/wiki/Falcon_9. Height about 70 m,
   diameter 3.7 m, fairing 5.2 m across and 13 m long, nine first-stage engines: the medium launcher model.
-- **S15** SpaceX. *Falcon Heavy*. https://www.spacex.com/vehicles/falcon-heavy/; figures as given in Wikipedia, *Falcon
+- **S15** SpaceX. *Falcon Heavy*. https://www.spacex.com/vehicles/falcon-heavy/. Figures as given in Wikipedia, *Falcon
   Heavy* (infobox, checked 2026-11-14), https://en.wikipedia.org/wiki/Falcon_Heavy. Height 70 m, width 12.2 m, three
   cores of 3.7 m: the heavy launcher model.
 
@@ -129,6 +129,54 @@ branches add entries at the same place (`.gitattributes`).
   1U CubeSat launched in 2013 (shown in the report of a CubeSat mission).
 - **S-capstone** Wikipedia. *CAPSTONE*. https://en.wikipedia.org/wiki/CAPSTONE. A 12U CubeSat in lunar orbit, 2022 (shown in
   the report of a lunar CubeSat mission).
+- **S-apollo13-nasa** NASA. *Apollo 13 Mission Details*. https://www.nasa.gov/missions/apollo/apollo-13-mission-details/.
+  Launched April 11, 1970; oxygen tank no. 2 exploded on April 13 (Houston time), 200,000 miles from Earth; the crew
+  used the lunar module as a lifeboat; the command module's square CO2 canisters did not fit the lunar module's round
+  openings, and Mission Control devised an adapter of plastic bags, cardboard and tape; splashdown April 17, 1970. The
+  facts the cuyes cite in chapter 1 (data/story/apollo13.json). Also from the page: the planned landing in the Fra
+  Mauro area, Swigert's words "Houston, we've had a problem here.", the circle around the Moon without landing, the
+  cold (38 degrees Fahrenheit, condensation on the walls), noncritical systems off and power use cut to 1/5, the
+  five-minute burn near the Moon to speed up the return, launch at 1:13 p.m. CST, and splashdown in the Pacific near
+  Samoa with USS Iwo Jima as recovery ship.
+- **S-apollo13-mailbox** NASA. *Apollo 13 Crew Installing "Mail Box" for Purging Carbon Dioxide From Lunar Module,
+  April 14, 1970*, photograph AS13-62-9004 (public domain). https://images.nasa.gov/details/as13-62-9004, caption on
+  the Apollo Flight Journal page https://www.nasa.gov/history/afj/ap13fj/. The real adapter, shown when mission 1's
+  adapter game is won (assets/missions/apollo13/as13-62-9004.jpg). The same mission page [S-apollo13-nasa] gives the
+  game's other facts: the CO2 warning after a day and a half in the lunar module, and the lunar module made for two
+  men for two days, asked to keep three for about four.
+- **S-hubble-sm1** NASA Science. *Hubble Servicing Mission 1*.
+  https://science.nasa.gov/mission/hubble/observatory/missions-to-hubble/servicing-mission-1/. Endeavour launched
+  Dec 2, 1993; the mirror's flaw (spherical aberration: many foci instead of one, fuzzy first images); five
+  back-to-back spacewalks totaling 35 hours and 28 minutes; the parts installed (solar arrays, their drive electronics,
+  magnetometers, co-processors, two Rate Sensor Units, two gyroscope control units, the GHRS redundancy kit, WFPC2,
+  COSTAR). Mission 2 (data/missions/sts61.json, data/story/sts61.json).
+- **S-sts61-nasa** NASA. *STS-61*. https://www.nasa.gov/mission/sts-61/. Launch Dec 2, 1993, landing Dec 13, 1993
+  (10 days, 19 hours, 58 minutes); Hubble grappled and stood upright in the bay on flight day three by Claude
+  Nicollier with the robot arm; each spacewalk's crew, work and length (7 h 54, 6 h 35, 6 h 48, 6 h 50, 7 h 21).
+- **S-m100-pia22913** NASA/JPL. *M100 Through 3 Cameras*, PIA22913 (public domain).
+  https://images.nasa.gov/details/PIA22913. M100 with WFPC1 in 1993, blurry from the mirror's flaw, and with WFPC2
+  after STS-61, "snapped into sharp focus". Cropped for mission 2's first image
+  (assets/missions/sts61/m100_wfpc1_1993.jpg, m100_wfpc2_1993.jpg).
+- **S-nasa-9408670** NASA Marshall Space Flight Center. *History of Hubble Space Telescope (HST)*, image 9408670.
+  https://images.nasa.gov/details/9408670. Hubble launched by Discovery (STS-31) in April 1990; two months later a
+  2-micron spherical aberration found in the primary mirror, one-fiftieth of the width of a human hair.
+- **S-mpf-nasa** NASA Science. *Mars Pathfinder*. https://science.nasa.gov/mission/mars-pathfinder/. Launched Dec 4,
+  1996; landed July 4, 1997 at Ares Vallis, an ancient flood plain; airbags inflated about 100 m up; bounced about 15
+  times, as high as 15 m, coming to rest 2.5 minutes later about 1 km away; Sojourner rolled down the rear ramp,
+  tilted 20 degrees, on sol 2; 30 cm tall, 10.6 kg; the last data on Sept 27, 1997. Mission 3.
+- **S-mpf-nssdc** NASA Space Science Data Coordinated Archive. *Mars Pathfinder*, 1996-068A.
+  https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=1996-068A. Entry at about 7300 m/s; the 12.5 m
+  parachute, about 70 m/s; the 20 m Kevlar bridle; the radar's ground at about 1.6 km; four airbags, a 5.2 m ball,
+  about 10 s before landing; the three solid rockets at 98 m; the bridle cut 21.5 m up; impact at 18 m/s; about 12 m
+  up, then at least 15 more bounces; Ares Vallis, 19.33 N 33.55 W. Mission 3's descent and bounces.
+- **S-mpf-jpl** NASA Jet Propulsion Laboratory. *Mars Pathfinder / Sojourner Rover*.
+  https://www.jpl.nasa.gov/missions/mars-pathfinder-sojourner-rover/. An airbag landing system; Sojourner spent 83
+  days of a planned seven-day mission, the first wheeled vehicle used on another planet.
+- **S-mpf-pia00621** NASA/JPL. *Color Mosaic of Rover & Terrain*, PIA00621 (public domain).
+  https://images.nasa.gov/details/PIA00621. Sojourner latched to its petal on sol 1, the airbags, Ares Vallis.
+  Shown at the end of mission 3 (cropped); its colours guide the set's sky and ground.
+- **S-mpf-pia00633** NASA/JPL. *Rover Tracks*, PIA00633 (public domain). https://images.nasa.gov/details/PIA00633.
+  Sojourner's tracks on sol 3, from its own camera. Shown at the end of mission 3.
 
 ## The look: Earth, Moon, the Andes and the launch site (issue 12; scripts in `assets/source/`)
 - **S-moon-kit** NASA Goddard Space Flight Center, Scientific Visualization Studio. *CGI Moon Kit* (2019).
@@ -179,8 +227,8 @@ All checked 2026-11-14. NASA media are used under the NASA Media Usage Guideline
 - **S-nasa-science** NASA Science (science.nasa.gov) resource and image pages, for the Moon: Shackleton crater rim,
   credit "NASA/GSFC/Arizona State University" (https://science.nasa.gov/resource/shackleton-craters-illuminated-rim-shadowed-interior/);
   Shackleton floor seen by ShadowCam, a NASA instrument on the Korean KPLO orbiter, credit as printed "NASA, ShadowCam,
-  Korea Aerospace Research Institute, Arizona State University" (https://science.nasa.gov/image-article/apod-2023-may-5-shackleton-from-shadowcam/;
-  the Korean partner is named in the credit; no separate terms found). In `assets/mission_photos/moon_south_pole/`.
+  Korea Aerospace Research Institute, Arizona State University" (https://science.nasa.gov/image-article/apod-2023-may-5-shackleton-from-shadowcam/);
+  the Korean partner is named in the credit; no separate terms found. In `assets/mission_photos/moon_south_pole/`.
 - **S-lroc-wac** NASA/GSFC/Arizona State University, Lunar Reconnaissance Orbiter Camera (LROC) Wide Angle Camera global
   mosaic (100 m), served by NASA Moon Trek, https://trek.nasa.gov/tiles/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd_v02/1.0.0/WMTSCapabilities.xml.
   Photos in `assets/mission_photos/moon_south_pole/`. Credit: "NASA/GSFC/Arizona State University, LRO". Our processing:
@@ -252,3 +300,15 @@ All checked 2026-11-14; the research behind them is `kb/research/in-flight-failu
   Voyager 2's carrier when it was too faint to carry data: the idea of "Find the carrier".
 - **S-soho-recovery** NASA/ESA. *SOHO Mission Interruption and Recovery*. https://soho.nascom.nasa.gov/about/Recovery/.
   SOHO's faint carrier found again on 3 August 1998, six weeks after the loss.
+- **S-afj-loi** O'Brien, F. *Lunar Orbit Insertion*, Apollo Flight Journal (NASA History Office, hosted at apollojournals.org, linked from https://www.nasa.gov/history/afj/). https://apollojournals.org/afj/loiessay.html. The crew had to "perform and monitor the burn on the far side of the Moon, without assistance from the ground": the trip's loss of signal when the braking burn happens behind the Moon.
+- **S-eo-orbits** Riebeek, H. *Catalog of Earth Satellite Orbits*, NASA Earth Observatory, 2009.
+  https://earthobservatory.nasa.gov/features/OrbitsCatalog. Low, Sun-synchronous and geostationary orbits in plain
+  words: the glossary of the game (issue #69) and the plain names of its orbits.
+- **S-noaa-scales** NOAA Space Weather Prediction Center. *NOAA Space Weather Scales*, and the pages *Coronal Mass
+  Ejections* and *Solar Radiation Storm*. https://www.swpc.noaa.gov/noaa-scales-explanation,
+  https://www.swpc.noaa.gov/phenomena/coronal-mass-ejections, https://www.swpc.noaa.gov/phenomena/solar-radiation-storm.
+  The space weather alerts of the operation (issue #90): G4 about 100 and G5 about 4 storms per 11-year cycle, S3
+  about 10 and S4 about 3; their effects on spacecraft (surface charging, orientation problems, drag on low orbits,
+  memory upsets, noise in images, worn solar panels); the fastest coronal mass ejections reach the Earth in 15 to 18
+  hours and slower ones take several days; protons cross from the Sun in tens of minutes, and a radiation storm lasts
+  hours to days.

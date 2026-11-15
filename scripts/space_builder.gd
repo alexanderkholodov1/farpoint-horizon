@@ -17,7 +17,8 @@ const EARTH_REGION_DAY := preload("res://textures/earth_region_day.jpg")
 const EARTH_REGION_RELIEF := preload("res://textures/earth_region_relief.jpg")
 const EARTH_REGION_CLOUDS := preload("res://textures/earth_region_clouds.jpg")
 ## Where those cover the globe, in its UV (u0, v0, u1, v1): 92-68 W, 12 N-12 S (planet_textures.py REGION_LONLAT).
-const REGION_RECT := Vector4((180.0 - 92.0) / 360.0, (90.0 - 12.0) / 180.0, (180.0 - 68.0) / 360.0, (90.0 + 12.0) / 180.0)
+## The sharp region: 92 W to 44 W, 12 S to 12 N, east along the launch track (assets/source/planet_textures.py).
+const REGION_RECT := Vector4((180.0 - 92.0) / 360.0, (90.0 - 12.0) / 180.0, (180.0 - 44.0) / 360.0, (90.0 + 12.0) / 180.0)
 const MOON_COLOR := preload("res://textures/moon_color.jpg")
 const MOON_NORMAL := preload("res://textures/moon_normal.jpg")
 ## Materials in this group get the Sun's direction ("sun_dir") from World every frame, for the night side.
@@ -157,12 +158,17 @@ static func make_moon(radius := 1.0) -> Node3D:
 	return root
 
 
-static func make_orbit_ring(radius: float, incl_deg: float, color: Color) -> Node3D:
+## A circular orbit of `radius` (in body radii) tilted `incl_deg` from the equator. `nodes_yaw` (radians) turns its line
+## of nodes, where it crosses the equator, about the body's axis: a ring seen along that line is a flat stroke.
+static func make_orbit_ring(radius: float, incl_deg: float, color: Color, nodes_yaw := 0.0) -> Node3D:
 	var pivot := Node3D.new()
-	pivot.rotation_degrees = Vector3(0, 0, incl_deg if incl_deg <= 90.0 else 180.0 - incl_deg)
+	# Godot applies Z (the tilt, about the line of nodes, which starts on +Z) before Y (where that line points)
+	pivot.rotation = Vector3(0, nodes_yaw, deg_to_rad(incl_deg if incl_deg <= 90.0 else 180.0 - incl_deg))
 	var t := TorusMesh.new()
-	t.inner_radius = radius - 0.004
-	t.outer_radius = radius + 0.004
+	# a wider orbit is seen from farther away, so its line grows with it to keep the same width on screen
+	var half := 0.004 * maxf(1.0, radius / 1.2)
+	t.inner_radius = radius - half
+	t.outer_radius = radius + half
 	t.rings = 128
 	t.ring_segments = 6
 	var m := StandardMaterial3D.new()
@@ -200,8 +206,8 @@ static func make_label(text: String, color: Color, depth_test := false) -> Label
 	l.text = text
 	l.font = FONT
 	l.font_size = 30
-	l.outline_size = 10
-	l.outline_modulate = Color(0, 0, 0, 0.8)
+	l.outline_size = 16
+	l.outline_modulate = Color(0.0, 0.01, 0.04, 0.95)   # readable over clouds, the Moon's bright ground and the pad
 	l.modulate = color
 	l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	l.fixed_size = true

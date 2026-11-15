@@ -15,7 +15,7 @@ dest_files=["res://.godot/imported/earth_relief.jpg-8cd5d29131c2c45d9e294b56ad52
 
 [params]
 
-compress/mode=0
+compress/mode=1
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -26,7 +26,7 @@
    "simplified": "The delta-v is the total the craft carries, simplified to one value per technology. Mass and cost are percentages of the dry craft, our own simplification."
   },
   "chem": {
-   "name": "Chemical (hydrazine)",
+   "name": "Chemical rocket engine (bipropellant)",
    "dv": 1500.0,
    "mass_pct": 0.6,
    "cost_pct": 0.15,
@@ -38,7 +38,7 @@
    "simplified": "The delta-v is the total the craft carries, simplified to one value per technology. Mass and cost are percentages of the dry craft, our own simplification."
   },
   "ion": {
-   "name": "Electric (ion)",
+   "name": "Electric engine (ion): gentle but thrifty",
    "dv": 4000.0,
    "mass_pct": 0.15,
    "cost_pct": 0.25,
