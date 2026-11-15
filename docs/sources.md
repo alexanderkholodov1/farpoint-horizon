@@ -227,3 +227,28 @@ All checked 2026-11-14.
 - **S-apollo-gear** Rogers, W. F. (NASA Johnson Space Center). *Apollo Lunar Module Landing Gear*, 1972. NASA Technical
   Reports Server 19730010151, https://ntrs.nasa.gov/citations/19730010151. A landing is decided mainly by the touchdown
   speed and the slope of the ground under the legs; the game's touchdown bands use those two (their values are ours).
+
+## Ground control: the Deep Space Network and the in-flight alarms (issue 9)
+All checked 2026-11-14; the research behind them is `kb/research/in-flight-failures.md`.
+- **S-dsn-facts** NASA Jet Propulsion Laboratory. *Eight Essential Facts about NASA's Deep Space Network*.
+  https://www.jpl.nasa.gov/news/eight-essential-facts-about-nasas-deep-space-network/. Three complexes, Goldstone
+  (California), near Madrid (Spain) and near Canberra (Australia), about 120 degrees apart, so as the Earth turns one
+  of them always sees a far craft; each has a 70 m dish.
+- **S-dsn-sites** Wikipedia. *NASA Deep Space Network* (coordinates of the complexes and the bands). 
+  https://en.wikipedia.org/wiki/NASA_Deep_Space_Network. Goldstone 35.42667 N 116.89 W, Madrid 40.43139 N 4.24806 W,
+  Canberra 35.40139 S 148.98167 E; S, X and Ka bands (2, 8 and 32 GHz). The stations ground control picks from.
+- **S-usno-gast** U.S. Naval Observatory. *Computing Greenwich Apparent Sidereal Time*. https://aa.usno.navy.mil/faq/GAST.
+  GMST = 18.697374558 + 24.06570982441908 D hours (D: days since 2000 January 1, 12h UT); the tilt of the Earth's axis,
+  about 23.44 degrees. Which way each dish faces at each moment of the flight.
+- **S-codata-c** NIST. *CODATA value: speed of light in vacuum*. https://physics.nist.gov/cgi-bin/cuu/Value?c.
+  299 792 458 m/s, exact. The light time to the craft and its Doppler shift.
+- **S-jpl-lighttime** NASA Jet Propulsion Laboratory. *Basics of Space Flight: Light Time*.
+  https://www2.jpl.nasa.gov/basics/soi/lighttime.html. The Moon is a little over a light-second away (about 1.3 s).
+- **S-descanso-bands** Taylor, J. (ed.), *Deep Space Communications*, DESCANSO series vol. 4, ch. 10, JPL.
+  https://descanso.jpl.nasa.gov/monograph/series4/Mono4_Ch10.pdf. S, X and Ka are the deep-space bands; the X-band
+  downlink near 8.4 GHz is the craft's tone in "Find the carrier".
+- **S-jpl-voyager2** NASA Jet Propulsion Laboratory. *NASA Mission Update: Voyager 2 Communications Pause*, 2023.
+  https://www.jpl.nasa.gov/news/nasa-mission-update-voyager-2-communications-pause/. The Deep Space Network heard
+  Voyager 2's carrier when it was too faint to carry data: the idea of "Find the carrier".
+- **S-soho-recovery** NASA/ESA. *SOHO Mission Interruption and Recovery*. https://soho.nascom.nasa.gov/about/Recovery/.
+  SOHO's faint carrier found again on 3 August 1998, six weeks after the loss.
