@@ -364,18 +364,45 @@ func stage_orbit() -> void:
 		cam_target = Vector3.ZERO
 		cam_dist_goal = 4.2
 	elif mission.orbit == "l2":
+		# at true scale, in Earth radii (6,371 km [S8]): L2 1.5 million km from the Earth on the side away from the Sun
+		# (235 radii), the halo orbit around it "similar in size to the Moon's orbit around the Earth" (60 radii), one lap
+		# in about 6 months [S-webb-orbit]; the Moon's own orbit drawn faint for comparison. The Earth is too small to see
+		# from here, so its label marks it (issue #88: L2 was drawn 5.5 radii out, its halo edge-on)
 		planet = Space.make_earth(1.0)
 		stage.add_child(planet)
 		var sun_dir := sun.global_transform.basis.z
-		var l2: Vector3 = -sun_dir * O.radius
-		setup_orbit_ship(mission, l2, 0.7, 90.0, 0.35)
-		cam_target = l2 * 0.5
-		cam_dist_goal = 11.0
+		sun_dir.y = 0.0
+		sun_dir = sun_dir.normalized()
+		var l2: Vector3 = -sun_dir * 235.4
+		var across := sun_dir.cross(Vector3.UP).normalized()
+		var halo_nodes := atan2(across.x, across.z)   # the halo stands across the Sun-Earth line
+		setup_orbit_ship(mission, l2, 60.3, 90.0, 0.9, halo_nodes)
+		var moon_ring := Space.make_orbit_ring(60.3, 0.0, Color(1, 1, 1, 0.14))
+		stage.add_child(moon_ring)
+		var el := Space.make_label(tr("Earth"), Color(0.55, 0.8, 1.0))
+		el.position = Vector3(0, 14, 0)
+		stage.add_child(el)
+		var ml := Space.make_label(tr("The Moon's orbit"), Color(1, 1, 1, 0.6))
+		ml.position = -sun_dir * 60.3 + Vector3(0, -6, 0)   # on the ring toward L2, clear of the Earth label and the log
+		stage.add_child(ml)
 		var l2l := Space.make_label(tr("L2 point · 1.5 million km"), Color(0.85, 0.75, 1.0))
-		l2l.position = l2 + Vector3(0, -0.95, 0)
+		l2l.position = l2 + Vector3(0, -8, 0)
 		stage.add_child(l2l)
-		var line := Space.make_orbit_ring(O.radius, 0.0, Color(1, 1, 1, 0.08))
-		stage.add_child(line)
+		var line := ImmediateMesh.new()
+		line.surface_begin(Mesh.PRIMITIVE_LINES)
+		line.surface_add_vertex(Vector3.ZERO)
+		line.surface_add_vertex(l2)
+		line.surface_end()
+		var lm := StandardMaterial3D.new()
+		lm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		lm.albedo_color = Color(1, 1, 1, 0.12)
+		lm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		var li := MeshInstance3D.new()
+		li.mesh = line
+		li.material_override = lm
+		stage.add_child(li)
+		cam_target = l2 * 0.55
+		cam_dist_goal = 430.0
 	else:
 		planet = Space.make_earth(1.0)
 		stage.add_child(planet)
@@ -392,8 +419,8 @@ func stage_orbit() -> void:
 	face_sun()
 	if mission.orbit == "l2":
 		cam_auto = false
-		cam_pitch = -0.15
-		face_sun(PI / 2.0)
+		cam_pitch = -0.45
+		face_sun(PI * 0.72)   # from the night side and above: the Earth, the line to L2 and the halo open as an ellipse
 
 
 ## The Earth alone (the report after a launch failure).

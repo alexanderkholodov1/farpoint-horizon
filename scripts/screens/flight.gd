@@ -305,7 +305,10 @@ func _build_steps() -> void:
 	steps_row = Kit.hbox(6)
 	steps_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	steps_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	Kit.place(steps_row, 0.5, 0, 0.5, 0, -330, 26, 330, 56)
+	if Kit.compact:
+		Kit.place(steps_row, 0.5, 0, 0.5, 0, -230, Kit.MARGIN, 230, Kit.MARGIN + 28)
+	else:
+		Kit.place(steps_row, 0.5, 0, 0.5, 0, -330, 26, 330, 56)
 	hud.add_child(steps_row)
 	_show_steps()
 
@@ -317,14 +320,15 @@ func _show_steps() -> void:
 	var at: int = STEP_OF.get(phase, 0)
 	for i in STEPS_TEXT.size():
 		var col: Color = Kit.C_GOLD if i == at else (Kit.C_OK if i < at else Color(Kit.C_ON_DARK, 0.55))
-		steps_row.add_child(Kit.chip(("✓ " if i < at else "%d  " % (i + 1)) + tr(STEPS_TEXT[i]), col))
+		var word: String = tr(STEPS_TEXT[i]) if (i == at or not Kit.compact) else ""   # on a phone only the step being flown is named
+		steps_row.add_child(Kit.chip((("✓" if i < at else "%d" % (i + 1)) + ("  " + word if word != "" else "")), col))
 
 
 ## What to do right now, in one line under the steps: the player is never left guessing.
 func _build_now() -> void:
 	var p := Kit.panel_box(8)
 	p.add_theme_stylebox_override("panel", Kit.flat(Kit.C_BG, Kit.C_GOLD, 10, 1, 14, 6))
-	Kit.place(p, 0.5, 0, 0.5, 0, 0, 64, 0, 64)
+	Kit.place(p, 0.5, 0, 0.5, 0, 0, 46 if Kit.compact else 64, 0, 46 if Kit.compact else 64)
 	p.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud.add_child(p)
@@ -358,7 +362,10 @@ func _now_text() -> String:
 ## A small map, always in view: the Earth, the Moon on its orbit, your craft and the path it will follow.
 func _build_minimap() -> void:
 	var p := Kit.panel_box(12)
-	Kit.place(p, 0, 1, 0, 1, Kit.MARGIN, -300, Kit.MARGIN + 272, -Kit.MARGIN)
+	if Kit.compact:
+		Kit.place(p, 0, 1, 0, 1, Kit.MARGIN, -Kit.MARGIN - 206, Kit.MARGIN + 206, -Kit.MARGIN)
+	else:
+		Kit.place(p, 0, 1, 0, 1, Kit.MARGIN, -300, Kit.MARGIN + 272, -Kit.MARGIN)
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud.add_child(p)
 	var v := Kit.vbox(4)
@@ -373,22 +380,28 @@ func _build_minimap() -> void:
 ## The plan's own controls: move the burn earlier or later, make it bigger or smaller, or take mission control's plan.
 func _build_plan_panel() -> void:
 	plan_panel = Kit.panel_box(Kit.PAD)
-	Kit.place(plan_panel, 1, 0, 1, 0, -380, 90, -Kit.MARGIN, 90)
+	if Kit.compact:
+		Kit.place(plan_panel, 1, 0, 1, 0, -300, 58, -Kit.MARGIN, 58)
+	else:
+		Kit.place(plan_panel, 1, 0, 1, 0, -380, 90, -Kit.MARGIN, 90)
 	hud.add_child(plan_panel)
 	var v := Kit.vbox(Kit.GAP)
 	plan_panel.add_child(v)
 	v.add_child(Kit.caps(tr("Your departure")))
-	v.add_child(Kit.lbl(tr("Try it: move the burn or change its size and watch where your path meets the Moon."), Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true))
+	var try_it := Kit.lbl(tr("Try it: move the burn or change its size and watch where your path meets the Moon."), Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true)
+	try_it.visible = not Kit.compact
+	v.add_child(try_it)
 	var row1 := Kit.segmented()
 	v.add_child(row1)
-	row1.add_child(Kit.choice(tr("◀ Earlier"), false, func(): _shift(-1.0), 160))
-	row1.add_child(Kit.choice(tr("Later ▶"), false, func(): _shift(1.0), 160))
+	var bw := 128 if Kit.compact else 160
+	row1.add_child(Kit.choice(tr("◀ Earlier"), false, func(): _shift(-1.0), bw))
+	row1.add_child(Kit.choice(tr("Later ▶"), false, func(): _shift(1.0), bw))
 	var row2 := Kit.segmented()
 	v.add_child(row2)
-	row2.add_child(Kit.choice(tr("Slower trip"), false, func(): _resize(-25.0), 160))
-	row2.add_child(Kit.choice(tr("Faster trip"), false, func(): _resize(25.0), 160))
-	v.add_child(Kit.choice(tr("Mission control's plan"), false, func(): _shift(0.0, true), 324))
-	var go_btn := Kit.accent_btn(Kit.btn(tr("GO for the burn ▶"), func(): _go_ahead(), Kit.T_BODY, 324), Kit.C_GOLD)
+	row2.add_child(Kit.choice(tr("Slower trip"), false, func(): _resize(-25.0), bw))
+	row2.add_child(Kit.choice(tr("Faster trip"), false, func(): _resize(25.0), bw))
+	v.add_child(Kit.choice(tr("Mission control's plan"), false, func(): _shift(0.0, true), 2 * bw + 4))
+	var go_btn := Kit.accent_btn(Kit.btn(tr("GO for the burn ▶"), func(): _go_ahead(), Kit.T_BODY, 2 * bw + 4), Kit.C_GOLD)
 	go_btn.custom_minimum_size.y = Kit.BTN_H
 	go_btn.focus_mode = Control.FOCUS_NONE
 	v.add_child(go_btn)
@@ -432,6 +445,8 @@ func process(delta: float) -> void:
 		"missed":
 			_missed_phase(delta)
 	plan_panel.visible = phase == "plan" and not plan.is_empty() and not plan_ok
+	if Kit.compact:   # on a phone the plan and the controls share the right side: only one at a time
+		hud.controls_panel.visible = not plan_panel.visible
 	# seen from beside the craft, fast time is the Earth flashing from day to night every few seconds: the map shows it
 	if view_auto and view == "craft" and hud.warp > 300.0:
 		view = "map"
@@ -1252,7 +1267,7 @@ class MiniMap:
 
 	func _init() -> void:
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
-		custom_minimum_size = Vector2(240, 220)
+		custom_minimum_size = Vector2(170, 150) if Kit.compact else Vector2(240, 220)
 
 	func _process(delta: float) -> void:
 		_t += delta

@@ -63,6 +63,8 @@ var extra_note := "":      ## Set by a screen to say what the speed changes in t
 var _top_right: HBoxContainer
 var ring: Instruments.TimingRing   ## The timing ring in the middle (ring_show, ring_grade).
 var _hint_tw: Tween
+var controls_panel: PanelContainer   ## The controls, bottom right (a screen may hide it while it has nothing to do).
+var gauges_panel: PanelContainer   ## On a phone the gauges' own panel, top right.
 
 
 func _init() -> void:
@@ -76,13 +78,14 @@ func _init() -> void:
 func build(heading: String, action_label: String, keys_text: String, four_way := false, with_dial := true) -> void:
 	# readouts, top left
 	var p := Kit.panel_box(Kit.PAD)
-	Kit.place(p, 0, 0, 0, 0, Kit.MARGIN, Kit.MARGIN, 480, Kit.MARGIN)
+	Kit.place(p, 0, 0, 0, 0, Kit.MARGIN, Kit.MARGIN, 300 if Kit.compact else 480, Kit.MARGIN)
 	add_child(p)
 	var v := Kit.vbox(Kit.GAP)
 	p.add_child(v)
 	_top = v
 	title = Kit.caps(heading)
 	v.add_child(title)
+	title.visible = not Kit.compact   # on a phone the clock and the steps say where you are
 	# the mission clock, as a lit display set into the console
 	var plate := PanelContainer.new()
 	plate.add_theme_stylebox_override("panel", Kit.flat(Color(0.0, 0.01, 0.03, 0.55), Color(Kit.C_GOLD, 0.35), 8, 1, 14, 4))
@@ -94,12 +97,28 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 	readouts.columns = 2
 	v.add_child(readouts)
 	gauges = Kit.hbox(8)
-	v.add_child(gauges)
+	if Kit.compact:
+		# on a phone the gauges sit top right under Skip, so the readouts panel stays short
+		var gp := Kit.panel_box(8)
+		_console(gp)
+		Kit.place(gp, 1, 0, 1, 0, -Kit.MARGIN, 64, -Kit.MARGIN, 64)
+		gp.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+		gp.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(gp)
+		gp.add_child(gauges)
+		gauges.visibility_changed.connect(func(): gp.visible = gauges.visible)
+		gauges_panel = gp
+	else:
+		v.add_child(gauges)
 	_console(p)
 	# the instrument, bottom left
 	instrument_box = Kit.panel_box(18)
 	_console(instrument_box)
-	Kit.place(instrument_box, 0, 1, 0, 1, 24, -262, 340, -24)
+	if Kit.compact:
+		Kit.place(instrument_box, 0, 1, 0, 1, Kit.MARGIN, -Kit.MARGIN, Kit.MARGIN, -Kit.MARGIN)
+		instrument_box.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	else:
+		Kit.place(instrument_box, 0, 1, 0, 1, 24, -262, 340, -24)
 	add_child(instrument_box)
 	if with_dial:
 		dial = Instruments.Dial.new()
@@ -108,11 +127,17 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 	else:
 		instrument_box.visible = false
 	# controls, bottom right
-	var cp := Kit.panel_box(20)
+	var cp := Kit.panel_box(12 if Kit.compact else 20)
 	_console(cp)
-	Kit.place(cp, 1, 1, 1, 1, -476, -330, -24, -24)
+	controls_panel = cp
+	if Kit.compact:
+		Kit.place(cp, 1, 1, 1, 1, -Kit.MARGIN, -Kit.MARGIN, -Kit.MARGIN, -Kit.MARGIN)
+		cp.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+		cp.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	else:
+		Kit.place(cp, 1, 1, 1, 1, -476, -330, -24, -24)
 	add_child(cp)
-	var ch := Kit.hbox(18)
+	var ch := Kit.hbox(10 if Kit.compact else 18)
 	cp.add_child(ch)
 	var steer := Kit.vbox(8)
 	steer.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -147,6 +172,7 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 	keys_lbl = Kit.lbl(keys_text, Kit.T_CAPS, Kit.C_DIM, Kit.FONT_R, true)
 	keys_lbl.modulate.a = 0.75
 	keys_lbl.custom_minimum_size.x = 132
+	keys_lbl.visible = not Kit.compact   # keyboard keys mean nothing to fingers
 	keys_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	av.add_child(keys_lbl)
 	# sound and skip, top right
@@ -156,7 +182,7 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 	add_child(tr_panel)
 	var tr_box := Kit.hbox(8)
 	tr_panel.add_child(tr_box)
-	var skip := Kit.btn(TranslationServer.translate("Skip ▶▶") + "  · K", func(): skip_pressed.emit(), Kit.T_BODY, 128)
+	var skip := Kit.btn(TranslationServer.translate("Skip ▶▶") + ("" if Kit.compact else "  · K"), func(): skip_pressed.emit(), Kit.T_BODY, 0 if Kit.compact else 128)
 	skip.focus_mode = Control.FOCUS_NONE
 	skip.custom_minimum_size.y = Kit.BTN_H
 	tr_box.add_child(skip)
@@ -165,13 +191,20 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 	big = Kit.lbl("", Kit.T_SHOUT, Kit.C_ON_DARK, Kit.FONT_T)
 	big.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	Kit.legible(big)   # straight on the scene: readable over the white pad, clouds and the Moon
-	Kit.place(big, 0, 0.2, 1, 0.2, 500, -50, -400, 32)
+	if Kit.compact:
+		Kit.place(big, 0, 0.27, 1, 0.27, 310, -40, -310, 24)
+	else:
+		Kit.place(big, 0, 0.2, 1, 0.2, 500, -50, -400, 32)
 	big.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(big)
 	sub = Kit.lbl("", Kit.T_ACTION, Kit.C_ON_DARK, Kit.FONT_B, true)
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	Kit.legible(sub, 1.3)
-	Kit.place(sub, 0, 0.2, 1, 0.2, 520, 38, -420, 110)   # the column between the readouts and the buttons, at any width
+	if Kit.compact:
+		sub.add_theme_font_size_override("font_size", Kit.T_LEAD)
+		Kit.place(sub, 0, 0.27, 1, 0.27, 310, 26, -310, 96)
+	else:
+		Kit.place(sub, 0, 0.2, 1, 0.2, 520, 38, -420, 110)   # the column between the readouts and the buttons, at any width
 	sub.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(sub)
 	ring = Instruments.TimingRing.new()
@@ -181,7 +214,14 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 	var hb: Array = Kit.hint_box()
 	hint_panel = hb[0]
 	hint_lbl = hb[1]
-	Kit.place(hint_panel, 0.5, 1, 0.5, 1, -400, -128, 330, -Kit.MARGIN)   # clear of the mini-map on narrower screens (#76)
+	if Kit.compact:
+		# between the bottom-left instrument (about 230 wide) and the controls (about 350): the middle of the screen
+		Kit.place(hint_panel, 0, 1, 1, 1, 256, -Kit.MARGIN, -364, -Kit.MARGIN)
+		hint_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
+		hint_lbl.add_theme_font_size_override("font_size", Kit.T_BODY)
+		hint_lbl.max_lines_visible = 4   # a long hint is cut on a phone rather than covering the scene
+	else:
+		Kit.place(hint_panel, 0.5, 1, 0.5, 1, -400, -128, 330, -Kit.MARGIN)   # clear of the mini-map on narrower screens (#76)
 	add_child(hint_panel)
 	hint_panel.visible = false
 
@@ -215,7 +255,7 @@ func _sound_text() -> String:
 func add_time_warp(cap := 1.0) -> void:
 	warp_box = Kit.segmented()
 	for w in WARPS:
-		var b := Kit.choice(_warp_label(w), false, func(): set_warp(w, true), 66)
+		var b := Kit.choice(_warp_label(w), false, func(): set_warp(w, true), 0 if Kit.compact else 66)
 		_warp_btns[w] = b
 		warp_box.add_child(b)
 	_top.add_child(warp_box)
