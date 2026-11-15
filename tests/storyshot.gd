@@ -1,7 +1,7 @@
 extends Node
-## A look at the story scenes (issue #66; development only, needs a window): a scene over the crew, over the design
-## and over the flight, a line with a NASA fact and a line still being written. Saves to shots/story_*.png.
-## Run: tools/godot.sh --path . --resolution 1600x900 res://tests/storyshot.tscn
+## A look at the story (issue #66; development only, needs a window): chapter 1 on the story stage (title card, the
+## bang, close-ups, the alarm) and a scene over the design and the flight with the live portrait.
+## Saves to shots/story_*.png. Run: tools/godot.sh --path . --resolution 1600x900 res://tests/storyshot.tscn
 const Dialogue := preload("res://scripts/story/dialogue.gd")
 var g
 
@@ -21,48 +21,73 @@ func enter(d) -> void:
 	e.physical_keycode = KEY_ENTER
 	d._input(e)
 
+## Finishes the line on screen and shows the next one.
+func step(d) -> void:
+	enter(d)
+	await wait(0.05)
+	enter(d)
+
 func _ready() -> void:
 	g = load("res://scenes/main.tscn").instantiate()
 	add_child(g)
 	await wait(1.0)
 	g.go("crew_gallery")
-	await wait(1.0)
-	var d = Dialogue.play(g, "apollo13", "briefing")
-	await wait(0.35)
-	await shot("1_crew_writing")
+	await wait(1.5)
+	await shot("0_crew")
+	g.go("story", {"chapter": "apollo13", "back": "crew_gallery"})
+	await wait(1.4)
+	await shot("1_title")
+	var s = g.screen
+	enter(s.dialogue)
+	await wait(0.7)
+	await shot("2_wayra_talks")
 	await wait(1.6)
-	await shot("2_crew_fact")
-	d._end(true)
+	await shot("3_wayra_fact")
+	await step(s.dialogue)
+	await wait(1.0)
+	await shot("4_inti_low")
+	await step(s.dialogue)
+	await wait(1.0)
+	await shot("5_killa")
+	await step(s.dialogue)
+	await wait(1.4)
+	await shot("6_rumi")
+	await step(s.dialogue)
+	await step(s.dialogue)           # to the next scene's title card
+	await wait(1.6)
+	s = g.screen
+	await shot("7_title2")
+	enter(s.dialogue)
+	await wait(0.25)
+	await shot("8_bang")
+	await wait(1.5)
+	await shot("9_bang_after")
+	await step(s.dialogue)
+	await wait(1.2)
+	await shot("10_alarm")
+	await step(s.dialogue)
+	await step(s.dialogue)
+	await wait(1.4)
+	await shot("11_dim_inti")
+	await step(s.dialogue)
+	await wait(1.2)
+	await shot("12_killa_worried")
+	s.dialogue._end(true)
+	await wait(0.8)
+	# a scene over the flight, with the live portrait
 	GameState.start_solo()
 	GameState.start_mission("volcanes")
 	GameState.mission.from_dict({"bus": "small", "instruments": ["ir_adv", "gas_adv", "cam_ms"], "panels": "dep_m", "battery": "b1k", "comms": "xband", "adcs": "rw", "propulsion": "cold", "launcher": "ride", "orbit": "sso", "years": 3})
 	g.world.rebuild_ship()
 	g.go("design", {"step": 0})
 	await wait(1.0)
-	d = Dialogue.play(g, "apollo13", "problem")
-	for i in 7:
-		enter(d)
-		await wait(0.05)
-	await wait(1.5)
-	await shot("3_design_problem")
-	for i in 4:
-		enter(d)
-		await wait(0.05)
-	await wait(1.5)
-	await shot("4_design_later")
+	var d = Dialogue.play(g, "apollo13", "problem")
+	await step(d)
+	await wait(1.2)
+	await shot("13_design_live")
+	await step(d)
+	await step(d)
+	await wait(0.6)
+	await shot("14_design_live2")
 	d._end(true)
-	g.go("design", {"step": 6})
-	await wait(0.5)
-	g.launch()
-	await wait(4.0)
-	g.go("flight")
-	await wait(5.0)
-	d = Dialogue.play(g, "apollo13", "home", Callable(), true)
-	await wait(2.0)
-	await shot("5_flight_home")
-	enter(d)
-	enter(d)
-	enter(d)
-	await wait(2.0)
-	await shot("6_flight_last")
 	get_tree().quit()

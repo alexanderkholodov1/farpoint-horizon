@@ -40,11 +40,13 @@ func _initialize() -> void:
 			if lines.is_empty():
 				fail("%s/%s has no lines" % [chapter, scene])
 			for L in lines:
-				if not Cast.has(L.who):
-					fail("%s/%s: %s is not in the cast" % [chapter, scene, L.who])
+				if not L.has("who") and L.has("title"):
+					pass
+				elif not Cast.has(str(L.get("who", ""))):
+					fail("%s/%s: %s is not in the cast" % [chapter, scene, L.get("who", "?")])
 				elif Cast.portrait(L.who) == null:
 					fail("no portrait for " + L.who)
-				for k in ["text", "fact"]:
+				for k in ["text", "fact", "title", "sub"]:
 					if L.has(k) and not es.has(L[k]):
 						fail("no Spanish for: " + L[k])
 				if L.has("fact") and ("- **%s**" % L.get("source", "?")) not in sources:

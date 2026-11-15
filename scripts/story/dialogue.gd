@@ -5,11 +5,19 @@ extends CanvasLayer
 ## while it plays (pause = true). Click the card or press Enter to go on (the first press completes a line still being
 ## written); Esc skips the scene. Scenes are data: data/story/<chapter>.json, {"scenes": {id: [line, ...]}}, a line
 ## being {"who": cast id, "text", "mood" (optional), "fact" (optional), "source" (optional, a docs/sources.md id),
-## "light" (optional, the visible text of a control to light)}.
+## "light" (optional, the visible text of a control to light), "shot" and "fx" (optional, for the cinematic stage,
+## scripts/screens/story.gd)}. A line with "title" (and "sub") and no "who" is a title card: the date and place, big
+## in the middle of the screen. The portrait is live: the speaker's 3D model in a small studio of its own, with the
+## mood's face, its mouth moving while the line is written (scripts/story/cuy_actor.gd); each cuy babbles in its own
+## voice as the letters appear.
 ##   const Dialogue := preload("res://scripts/story/dialogue.gd")
 ##   Dialogue.play(main, "apollo13", "problem", func(): ...)
 
 signal finished(skipped: bool)
+signal line_started(index: int, line: Dictionary)
+
+## Each cuy's babble: the pitch of their syllables (Hz) and how often they squeak (letters per syllable).
+const VOICE := {"rumi": [300.0, 4], "killa": [640.0, 2], "inti": [470.0, 3], "wayra": [380.0, 4]}
 
 const Kit := preload("res://scripts/ui/kit.gd")
 const Cast := preload("res://scripts/story/cast.gd")
@@ -29,6 +37,19 @@ var fact_lbl: Label
 var ring: Panel
 var lit: Control
 var _t := 0.0
+var live := true             ## The portrait is the speaker's 3D model (false: the rendered image).
+var show_portrait := true    ## The cinematic stage hides it: the camera is already on the speaker's face.
+var studio: SubViewport
+var studio_cam: Camera3D
+var actors := {}             ## Cast id -> CuyActor in the portrait's studio.
+var speaker := ""
+var title_box: Control
+var title_lbl: Label
+var sub_lbl: Label
+var voice: AudioStreamPlayer
+var _voices := {}
+var _said := 0
+var _title_t := 0.0
 
 
 ## Plays scene `scene` of chapter `chapter` over the game; on_done(skipped) is called at the end. Returns the player.
@@ -115,6 +136,30 @@ func _build() -> void:
 	var foot := Kit.lbl(tr("Click or Enter to go on  ·  Esc skips"), Kit.T_CAPS, Kit.C_DIM, Kit.FONT_R)
 	foot.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	v.add_child(foot)
+	# the title card: a date and a place, big in the middle
+	var tv := Kit.vbox(Kit.GAP)
+	tv.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	tv.offset_top = 150          # high, over the heads of a wide shot
+	tv.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	tv.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tv.visible = false
+	root.add_child(tv)
+	title_box = tv
+	title_lbl = Kit.lbl("", Kit.T_CLOCK + 14, Kit.C_ON_DARK, Kit.FONT_T)
+	title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title_lbl.add_theme_constant_override("outline_size", 10)
+	title_lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.6))
+	tv.add_child(title_lbl)
+	sub_lbl = Kit.lbl("", Kit.T_ACTION, Kit.C_GOLD, Kit.spaced(Kit.FONT_B, 3))
+	sub_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	sub_lbl.add_theme_constant_override("outline_size", 8)
+	sub_lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.6))
+	tv.add_child(sub_lbl)
+	voice = AudioStreamPlayer.new()
+	voice.volume_db = -21.0
+	add_child(voice)
+	if live:
+		_build_studio()
 	ring = Panel.new()
 	ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var sb := Kit.flat(Color(Kit.C_GOLD, 0.08), Kit.C_GOLD, 10, 3, 0, 0)
@@ -132,11 +177,22 @@ func next() -> void:
 		_end(false)
 		return
 	var L: Dictionary = lines[at]
+	line_started.emit(at, L)
+	if L.has("title") and not L.has("who"):
+		_show_title(L)
+		return
+	title_box.visible = false
+	card.visible = true
+	frame.visible = show_portrait
 	var who := str(L.get("who", ""))
+	speaker = who
+	_said = 0
 	var col: Color = Cast.colour(who)
 	name_lbl.text = (Cast.display_name(who) + "  ·  " + Cast.station(who)).to_upper()
 	name_lbl.add_theme_color_override("font_color", Kit.ink(col))
-	var tex := Cast.portrait(who)
+	var tex: Texture2D = _live_portrait(who, str(L.get("mood", ""))) if live else null
+	if tex == null:
+		tex = Cast.portrait(who)
 	portrait.texture = tex
 	initial.text = "" if tex else Cast.display_name(who).left(1)
 	# opaque: the round frame clips the portrait by its own alpha
@@ -159,7 +215,9 @@ func next() -> void:
 
 ## Click or Enter: finish writing the line, or go to the next one.
 func advance() -> void:
-	if text_lbl.visible_ratio < 1.0:
+	if title_box.visible:
+		next()
+	elif text_lbl.visible_ratio < 1.0:
 		text_lbl.visible_ratio = 1.0
 	else:
 		next()
@@ -170,6 +228,15 @@ func _process(delta: float) -> void:
 		_t += delta
 		var n := maxi(text_lbl.text.length(), 1)
 		text_lbl.visible_ratio = minf(1.0, _t * CHARS_PER_S / n)
+		_babble()
+	if actors.has(speaker):
+		actors[speaker].talking = writing()
+		studio_cam.look_at(actors[speaker].face_point(), Vector3.UP)
+	if title_box.visible:
+		_title_t += delta
+		title_box.modulate.a = clampf(_title_t * 2.0, 0.0, 1.0)
+		if _title_t > 3.2:
+			next()
 	if text_lbl and text_lbl.visible_ratio >= 1.0 and fact_lbl.text != "" and not fact_box.visible:
 		fact_box.visible = true
 	if lit and is_instance_valid(lit) and lit.is_visible_in_tree():
@@ -198,6 +265,100 @@ func _end(skipped: bool) -> void:
 		get_tree().paused = false
 	finished.emit(skipped)
 	queue_free()
+
+
+## True while the line is still being written (the speaker's mouth moves).
+func writing() -> bool:
+	return card.visible and text_lbl.visible_ratio < 1.0
+
+
+func _show_title(L: Dictionary) -> void:
+	card.visible = false
+	ring.visible = false
+	lit = null
+	speaker = ""
+	title_lbl.text = tr(str(L.title))
+	sub_lbl.text = tr(str(L.get("sub", ""))).to_upper()
+	sub_lbl.visible = sub_lbl.text != ""
+	title_box.visible = true
+	title_box.modulate.a = 0.0
+	_title_t = 0.0
+	Kit.UiSound.play("whoosh", 0.0)
+
+
+## A syllable of the speaker's babble every few letters written.
+func _babble() -> void:
+	if Kit.UiSound.is_muted() or not VOICE.has(speaker):
+		return
+	var shown := int(text_lbl.visible_ratio * text_lbl.text.length())
+	var every: int = VOICE[speaker][1]
+	if shown - _said < every:
+		return
+	_said = shown
+	var ch := text_lbl.text.substr(maxi(shown - 1, 0), 1)
+	if ch == " " or ch == "." or ch == ",":
+		return
+	if not _voices.has(speaker):
+		var f: float = VOICE[speaker][0]
+		var list := []
+		for k in 4:
+			var ff: float = f * [1.0, 1.12, 0.92, 1.25][k]
+			list.append(Kit.UiSound._wav(Kit.UiSound._tone([ff, ff * 2.0], 0.07, 0.004, 0.035)))
+		_voices[speaker] = list
+	voice.stream = _voices[speaker][randi() % 4]
+	voice.pitch_scale = randf_range(0.94, 1.06)
+	voice.play()
+
+
+## The portrait's studio: a small world of its own with a key light, where the speaker's model stands.
+func _build_studio() -> void:
+	studio = SubViewport.new()
+	studio.size = Vector2i(256, 256)
+	studio.transparent_bg = true
+	studio.own_world_3d = true
+	studio.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	add_child(studio)
+	var env := WorldEnvironment.new()
+	env.environment = Environment.new()
+	env.environment.background_mode = Environment.BG_CLEAR_COLOR
+	env.environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.environment.ambient_light_color = Color(0.75, 0.8, 0.9)
+	env.environment.ambient_light_energy = 0.7
+	studio.add_child(env)
+	var key := DirectionalLight3D.new()
+	key.rotation_degrees = Vector3(-35, -30, 0)
+	key.light_energy = 1.3
+	studio.add_child(key)
+	var rim := DirectionalLight3D.new()
+	rim.rotation_degrees = Vector3(-20, 160, 0)
+	rim.light_energy = 0.6
+	rim.light_color = Color(0.6, 0.78, 1.0)
+	studio.add_child(rim)
+	studio_cam = Camera3D.new()
+	studio_cam.fov = 30.0
+	studio.add_child(studio_cam)
+
+
+## The speaker in the studio, with the line's mood; the studio's picture is the portrait.
+func _live_portrait(who: String, m: String) -> Texture2D:
+	if studio == null or not Cast.has(who):
+		return null
+	if not actors.has(who):
+		var a = load("res://scripts/story/cuy_actor.gd").new()
+		a.id = who
+		studio.add_child(a)
+		if a.head == null:
+			a.queue_free()
+			return null
+		actors[who] = a
+	for k in actors:
+		actors[k].visible = k == who
+	var actor = actors[who]
+	actor.set_mood(m)
+	var f: Vector3 = actor.face_point()
+	studio_cam.position = f + Vector3(0.0, 0.02, 0.62)
+	studio_cam.look_at(f, Vector3.UP)
+	return studio.get_texture()
 
 
 ## The visible button whose text is `txt` (what a line lights).

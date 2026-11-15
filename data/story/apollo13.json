@@ -1,26 +1,33 @@
 {
- "doc": "Chapter 1, Apollo 13 (April 1970): the cuyes' scenes (issue #66; story: docs/design/story-v0.3.0.md). Every fact is from NASA's own pages, its source id in docs/sources.md. The cuyes never change history: they react; the outcome is NASA's.",
+ "doc": "Chapter 1, Apollo 13 (April 1970): the cuyes' scenes (issue #66; story: docs/design/story-v0.3.0.md). Every fact is from NASA's own pages, its source id in docs/sources.md. The cuyes never change history: they react; the outcome is NASA's. Lines: who, text, mood (scripts/story/cuy_actor.gd MOODS), fact + source, shot (wide, close, two, low), fx (shake, alarm, dim, calm), all (everyone's mood); a line with title (+ sub) and no who is a title card.",
+ "order": ["briefing", "problem", "home"],
  "scenes": {
   "briefing": [
+   {"title": "April 11, 1970", "sub": "Apollo 13 lifts off", "shot": "wide"},
    {"who": "wayra", "mood": "sleepy", "text": "Houston here. Well, a cuy in Houston. Apollo 13 is going to the Moon.", "fact": "Apollo 13 lifted off on April 11, 1970.", "source": "S-apollo13-nasa"},
-   {"who": "inti", "mood": "proud", "text": "Three astronauts, a command module, a lunar module. And us, who are not on any list."},
-   {"who": "killa", "mood": "curious", "text": "I packed a thermometer, a notebook and snacks. Mostly snacks."},
-   {"who": "rumi", "mood": "flat", "text": "Nothing will go wrong. I checked the tanks."}
+   {"who": "inti", "mood": "proud", "shot": "low", "text": "Three astronauts, a command module, a lunar module. And us, who are not on any list."},
+   {"who": "killa", "mood": "happy", "text": "I packed a thermometer, a notebook and snacks. Mostly snacks."},
+   {"who": "rumi", "mood": "flat", "text": "Nothing will go wrong. I checked the tanks."},
+   {"who": "inti", "mood": "curious", "shot": "two", "text": "You always say that."}
   ],
   "problem": [
-   {"who": "wayra", "mood": "alert", "text": "Rumi. About the tanks.", "fact": "On April 13, 1970 (Houston time), oxygen tank no. 2 exploded, about 200,000 miles from Earth.", "source": "S-apollo13-nasa"},
+   {"title": "April 13, 1970", "sub": "200,000 miles from Earth", "shot": "wide"},
+   {"who": "wayra", "mood": "scared", "all": "scared", "fx": "shake", "shot": "wide", "text": "What was that bang?!", "fact": "On April 13, 1970 (Houston time), oxygen tank no. 2 exploded, about 200,000 miles from Earth.", "source": "S-apollo13-nasa"},
+   {"who": "wayra", "mood": "alert", "fx": "alarm", "text": "Rumi. About the tanks."},
    {"who": "rumi", "mood": "flat", "text": "I checked them. I did not check them enough."},
-   {"who": "inti", "mood": "calm", "text": "Everyone into the lunar module. It is a lifeboat now."},
+   {"who": "inti", "mood": "determined", "fx": "dim", "shot": "low", "text": "Everyone into the lunar module. It is a lifeboat now.", "fact": "With the command module's power running out, the crew moved into the lunar module, their lifeboat.", "source": "S-apollo13-nasa"},
    {"who": "killa", "mood": "worried", "text": "The air is filling with carbon dioxide. We need the command module's filters in here.", "fact": "The command module's square CO2 canisters did not fit the lunar module's round openings.", "source": "S-apollo13-nasa"},
-   {"who": "rumi", "mood": "flat", "text": "Square peg, round hole. Classic."},
-   {"who": "wayra", "mood": "alert", "text": "Mission Control sent a recipe: plastic bags, cardboard and tape.", "fact": "Mission Control worked out an adapter from plastic bags, cardboard and tape.", "source": "S-apollo13-nasa"},
+   {"who": "rumi", "mood": "flat", "shot": "two", "text": "Square peg, round hole. Classic."},
+   {"who": "wayra", "mood": "alert", "fx": "calm", "text": "Mission Control sent a recipe: plastic bags, cardboard and tape.", "fact": "Mission Control worked out an adapter from plastic bags, cardboard and tape.", "source": "S-apollo13-nasa"},
    {"who": "rumi", "mood": "pleased", "text": "Finally. My kind of engineering."}
   ],
   "home": [
-   {"who": "wayra", "mood": "relieved", "text": "Splashdown. All three astronauts are home.", "fact": "Apollo 13 splashed down on April 17, 1970.", "source": "S-apollo13-nasa"},
+   {"title": "April 17, 1970", "sub": "The Pacific Ocean", "shot": "wide"},
+   {"who": "wayra", "mood": "relieved", "all": "relieved", "shot": "wide", "text": "Splashdown. All three astronauts are home.", "fact": "Apollo 13 splashed down on April 17, 1970.", "source": "S-apollo13-nasa"},
    {"who": "killa", "mood": "thoughtful", "text": "Nobody landed on the Moon. Everybody came back. That counts."},
    {"who": "inti", "mood": "tired", "text": "Next time, can we just land somewhere?"},
-   {"who": "rumi", "mood": "flat", "text": "Mars. On airbags. What could go wrong."}
+   {"who": "rumi", "mood": "flat", "shot": "close", "text": "Mars. On airbags. What could go wrong."},
+   {"who": "killa", "mood": "happy", "all": "happy", "shot": "wide", "text": "Everything. Let's go!"}
   ]
  }
 }

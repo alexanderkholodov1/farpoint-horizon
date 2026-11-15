@@ -5,7 +5,6 @@ extends "res://scripts/screens/screen.gd"
 ## Names and lines are proposals for the team to confirm (story: docs/design/story-v0.3.0.md).
 
 const Space := preload("res://scripts/space_builder.gd")
-const Dialogue := preload("res://scripts/story/dialogue.gd")
 
 ## [file id, name, station, one line]
 const CREW := [
@@ -15,6 +14,7 @@ const CREW := [
 	["wayra", "Wayra", "Ground control", "The voice on the radio. Half asleep, never misses a word."],
 ]
 const SPACING := 1.25
+const CuyActor := preload("res://scripts/story/cuy_actor.gd")
 
 var root: Node3D
 var focus := -1             ## The cuy brought to the front (-1: the whole crew).
@@ -51,10 +51,11 @@ func enter(_args: Dictionary) -> void:
 		holder.position = Vector3((i - 1.5) * SPACING, 0, 0)
 		root.add_child(holder)
 		if ResourceLoader.exists(path):
-			var m: Node3D = load(path).instantiate()
-			_use_vertex_colours(m)
-			# glTF's forward is +Z in Godot; the models face -Y in Blender, which arrives as +Z: they face the camera
-			holder.add_child(m)
+			# alive: they blink, breathe and keep their personality (scripts/story/cuy_actor.gd); glTF's forward is +Z
+			# in Godot, so they face the camera
+			var actor = CuyActor.new()
+			actor.id = CREW[i][0]
+			holder.add_child(actor)
 	world.cam_free = true
 	world.cam_auto = false
 	world.cam_target = Vector3(-0.75, 0.55, 0)
@@ -124,16 +125,9 @@ func _build_ui() -> void:
 	row.add_child(Kit.btn(tr("◀ Menu"), func(): go("menu"), Kit.T_BODY))
 
 
-## Chapter 1's scenes one after another, over the turntable (issue #66); Esc ends the run.
-func _play_story(k := 0) -> void:
-	const SCENES := ["briefing", "problem", "home"]
-	if k < SCENES.size():
-		Dialogue.play(main, "apollo13", SCENES[k], func(skipped: bool): _story_next(skipped, k + 1))
-
-
-func _story_next(skipped: bool, k: int) -> void:
-	if not skipped:
-		_play_story(k)
+## Chapter 1 as a short film on the story stage (issue #66).
+func _play_story() -> void:
+	go("story", {"chapter": "apollo13", "back": "crew_gallery"})
 
 
 func _focus(i: int) -> void:
