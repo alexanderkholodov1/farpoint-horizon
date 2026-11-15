@@ -95,6 +95,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN and event.pressed:
 			cam_dist_goal = min(300.0, cam_dist_goal * 1.1)
 	elif event is InputEventMouseMotion and dragging:
+		# a release over a button or a panel goes to the interface and never reaches here (issue #65): a motion with
+		# no button held means the drag is over
+		if event.button_mask & (MOUSE_BUTTON_MASK_LEFT | MOUSE_BUTTON_MASK_RIGHT) == 0:
+			dragging = false
+			return
 		cam_yaw -= event.relative.x * 0.006
 		cam_pitch = clamp(cam_pitch + event.relative.y * 0.005, -cam_pitch_max, cam_pitch_max)
 
