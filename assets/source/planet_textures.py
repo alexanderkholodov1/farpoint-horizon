@@ -32,10 +32,11 @@ GIBS = ("https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&R
 ## The region under the climb from Ecuador, 24 x 24 degrees around the launch site, at about 1.3 km per pixel (eight
 ## times the whole-globe maps): the globe's shader blends it in so the Earth stays sharp right after the rocket leaves
 ## the Andes terrain (look, issue #12). Keep REGION_LONLAT in step with REGION_RECT in scripts/space_builder.gd.
-REGION_LONLAT = (-92.0, -12.0, -68.0, 12.0)
-## 4096 pixels over 24 degrees: about 650 m a pixel, near the Blue Marble's own 500 m (issue #56: sharper under the climb)
+REGION_LONLAT = (-92.0, -12.0, -44.0, 12.0)
+## 48 x 24 degrees, east along the launch track so the Earth stays sharp where the craft separates (~2,000 km downrange),
+## 6144 pixels over 48 degrees: about 870 m a pixel, nearly the pixel count of the old 24-degree square (v0.2.2)
 REGION = ("https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1"
-          "&SRS=EPSG:4326&BBOX=-92,-12,-68,12&WIDTH=4096&HEIGHT=4096&FORMAT=image/jpeg&LAYERS={layer}&TIME={time}")
+          "&SRS=EPSG:4326&BBOX=-92,-12,-44,12&WIDTH=6144&HEIGHT=3072&FORMAT=image/jpeg&LAYERS={layer}&TIME={time}")
 FILES = {
     "bm.jpg": GIBS.format(layer="BlueMarble_NextGeneration", time="2004-08-01"),
     "relief.jpg": GIBS.format(layer="BlueMarble_ShadedRelief", time="2004-08-01"),
@@ -125,8 +126,8 @@ def region():
     plain = day.mean(axis=2)
     rel = np.where(plain < 0.03, 0.5, np.clip(shaded / np.maximum(plain, 0.03), 0.0, 2.0) * 0.5)
     save(day, "earth_region_day.jpg", quality=82)
-    save(rel, "earth_region_relief.jpg", size=(2048, 2048), quality=85)
-    save(clouds_from(rgb("reg_viirs.jpg")), "earth_region_clouds.jpg", size=(2048, 2048), quality=78)
+    save(rel, "earth_region_relief.jpg", size=(3072, 1536), quality=85)
+    save(clouds_from(rgb("reg_viirs.jpg")), "earth_region_clouds.jpg", size=(3072, 1536), quality=80)
 
 
 def moon():
