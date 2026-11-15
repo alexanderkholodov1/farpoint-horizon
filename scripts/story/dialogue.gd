@@ -139,22 +139,27 @@ func _build() -> void:
 	foot.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	v.add_child(foot)
 	# the title card: a date and a place, big in the middle
+	# on a soft dark card, so a busy set behind it (a lit screen, a drawn orbit) never crosses the words
+	var card := PanelContainer.new()
+	card.add_theme_stylebox_override("panel", Kit.flat(Color(0.02, 0.03, 0.06, 0.78), Color(0, 0, 0, 0), 16, 0, 32, 14))
+	card.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	card.offset_top = 150          # high, over the heads of a wide shot
+	card.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.visible = false
+	root.add_child(card)
 	var tv := Kit.vbox(Kit.GAP)
-	tv.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
-	tv.offset_top = 150          # high, over the heads of a wide shot
-	tv.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	tv.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	tv.visible = false
-	root.add_child(tv)
-	title_box = tv
+	card.add_child(tv)
+	title_box = card
 	title_lbl = Kit.lbl("", Kit.T_CLOCK + 14, Kit.C_ON_DARK, Kit.FONT_T)
 	title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title_lbl.add_theme_constant_override("outline_size", 10)
+	title_lbl.add_theme_constant_override("outline_size", 6)
 	title_lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.6))
 	tv.add_child(title_lbl)
 	sub_lbl = Kit.lbl("", Kit.T_ACTION, Kit.C_GOLD, Kit.spaced(Kit.FONT_B, 3))
 	sub_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	sub_lbl.add_theme_constant_override("outline_size", 8)
+	sub_lbl.add_theme_constant_override("outline_size", 4)
 	sub_lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.6))
 	tv.add_child(sub_lbl)
 	voice = AudioStreamPlayer.new()
