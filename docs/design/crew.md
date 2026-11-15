@@ -17,3 +17,13 @@ mouth, whiskers), fur in three colours as vertex colours, a short white suit in 
 helmet so the face reads. Stylized next to documentary-real craft, as `docs/design/criteria.md` allows for characters.
 
 Names and look to be confirmed by both team members before they go into the game.
+
+## Second look: full figures in T-pose (the team's reference)
+
+![T-pose](crew_tpose.png)
+
+Rumi with a work suit, tool belt, pouches, knee pads and a roll of tape; Wayra with a blue vest, a badge on a lanyard,
+a headset and an antenna; Killa with a long lab coat and a blue stripe. Built by `assets/source/crew_cuy_tpose.py`
+(Blender, from primitives) to match a reference sheet the team made with **Meshy (an AI 3D tool)**: if these are used,
+the README's "Use of AI" says so. The pilot (Inti) waits for its reference. Models:
+`assets/models/crew/crew_{rumi,wayra,killa}_tpose.glb`.
