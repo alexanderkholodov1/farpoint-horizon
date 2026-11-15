@@ -160,6 +160,23 @@ branches add entries at the same place (`.gitattributes`).
 - **S-nasa-9408670** NASA Marshall Space Flight Center. *History of Hubble Space Telescope (HST)*, image 9408670.
   https://images.nasa.gov/details/9408670. Hubble launched by Discovery (STS-31) in April 1990; two months later a
   2-micron spherical aberration found in the primary mirror, one-fiftieth of the width of a human hair.
+- **S-mpf-nasa** NASA Science. *Mars Pathfinder*. https://science.nasa.gov/mission/mars-pathfinder/. Launched Dec 4,
+  1996; landed July 4, 1997 at Ares Vallis, an ancient flood plain; airbags inflated about 100 m up; bounced about 15
+  times, as high as 15 m, coming to rest 2.5 minutes later about 1 km away; Sojourner rolled down the rear ramp,
+  tilted 20 degrees, on sol 2; 30 cm tall, 10.6 kg; the last data on Sept 27, 1997. Mission 3.
+- **S-mpf-nssdc** NASA Space Science Data Coordinated Archive. *Mars Pathfinder*, 1996-068A.
+  https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=1996-068A. Entry at about 7300 m/s; the 12.5 m
+  parachute, about 70 m/s; the 20 m Kevlar bridle; the radar's ground at about 1.6 km; four airbags, a 5.2 m ball,
+  about 10 s before landing; the three solid rockets at 98 m; the bridle cut 21.5 m up; impact at 18 m/s; about 12 m
+  up, then at least 15 more bounces; Ares Vallis, 19.33 N 33.55 W. Mission 3's descent and bounces.
+- **S-mpf-jpl** NASA Jet Propulsion Laboratory. *Mars Pathfinder / Sojourner Rover*.
+  https://www.jpl.nasa.gov/missions/mars-pathfinder-sojourner-rover/. An airbag landing system; Sojourner spent 83
+  days of a planned seven-day mission, the first wheeled vehicle used on another planet.
+- **S-mpf-pia00621** NASA/JPL. *Color Mosaic of Rover & Terrain*, PIA00621 (public domain).
+  https://images.nasa.gov/details/PIA00621. Sojourner latched to its petal on sol 1, the airbags, Ares Vallis.
+  Shown at the end of mission 3 (cropped); its colours guide the set's sky and ground.
+- **S-mpf-pia00633** NASA/JPL. *Rover Tracks*, PIA00633 (public domain). https://images.nasa.gov/details/PIA00633.
+  Sojourner's tracks on sol 3, from its own camera. Shown at the end of mission 3.
 
 ## The look: Earth, Moon, the Andes and the launch site (issue 12; scripts in `assets/source/`)
 - **S-moon-kit** NASA Goddard Space Flight Center, Scientific Visualization Studio. *CGI Moon Kit* (2019).

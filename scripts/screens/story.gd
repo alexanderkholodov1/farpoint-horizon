@@ -75,7 +75,7 @@ func enter(args: Dictionary) -> void:
 
 ## What the sets change in the shared world, put back when the film ends.
 ## The story so far, in order: the prologue, then each chapter (its intro, the mission, its outro), as scene refs.
-static func story(chapters := ["prologue", "apollo13", "sts61"]) -> Array:
+static func story(chapters := ["prologue", "apollo13", "sts61", "pathfinder"]) -> Array:
 	var out := []
 	for c in chapters:
 		var data = JSON.parse_string(FileAccess.get_file_as_string("res://data/story/%s.json" % c))
@@ -260,8 +260,17 @@ func _go_to_set(id: String) -> void:
 		else:
 			S.capsule.position.y = 90.0      # still high up, under its parachutes
 	var cast: Array = S.get("cast", CREW)
+	# a mission's own pieces stay out of the story's scenes; a landed lander shows
+	if S.has("craft"):
+		(S.craft as Node3D).visible = false
+	if S.has("base"):
+		(S.base as Node3D).visible = true
+		for p in S.get("petals", []):
+			(p as Node3D).rotation.x = 0.0
+	var sc: float = S.get("actor_scale", 1.0)
 	for k in actors:
 		var a = actors[k]
+		a.scale = Vector3.ONE * sc
 		a.visible = k in cast
 		var mk: Dictionary = S.marks.get(k, {"pos": Vector3.ZERO, "yaw": 0.0})
 		a.global_position = mk.pos
@@ -330,7 +339,8 @@ func _shot_goal() -> Array:
 		return [f + (c.to - f) * 0.12 * push, c.to]
 	var a = actors[who]
 	var face: Vector3 = a.face_point()
-	var fwd: Vector3 = a.global_transform.basis.z.normalized()
+	var sc: float = S.get("actor_scale", 1.0)
+	var fwd: Vector3 = a.global_transform.basis.z.normalized() * sc
 	var right := fwd.cross(Vector3.UP).normalized()
 	var push2 := 1.0 - exp(-(_t - shot.get("t0", 0.0)) * 0.25)
 	match kind:
@@ -338,11 +348,11 @@ func _shot_goal() -> Array:
 			var other: String = shot.get("other", "")
 			var b: Vector3 = actors[other].face_point() if actors.has(other) and other != who else face + right * 0.6
 			var mid := (face + b) * 0.5
-			return [mid + fwd * (2.2 - 0.2 * push2) + Vector3(0, 0.1, 0), mid - Vector3(0, 0.14, 0)]
+			return [mid + fwd * (2.2 - 0.2 * push2) + Vector3(0, 0.1, 0) * sc, mid - Vector3(0, 0.14, 0) * sc]
 		"low":
-			return [face + fwd * (1.6 - 0.2 * push2) + right * 0.2 * side + Vector3(0, -0.32, 0), face - Vector3(0, 0.08, 0)]
+			return [face + fwd * (1.6 - 0.2 * push2) + right * 0.2 * side * sc + Vector3(0, -0.32, 0) * sc, face - Vector3(0, 0.08, 0) * sc]
 		_:
-			return [face + fwd * (1.55 - 0.25 * push2) + right * 0.22 * side + Vector3(0, 0.02, 0), face - Vector3(0, 0.13, 0)]
+			return [face + fwd * (1.55 - 0.25 * push2) + right * 0.22 * side * sc + Vector3(0, 0.02, 0) * sc, face - Vector3(0, 0.13, 0) * sc]
 
 
 func process(delta: float) -> void:

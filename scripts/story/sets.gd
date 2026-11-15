@@ -40,6 +40,10 @@ static func build(id: String, world) -> Dictionary:
 			S = _ocean(world, env)
 		"hubble":
 			S = _hubble(world, env)
+		"mars":
+			S = _mars(world, env)
+		"mars_approach":
+			S = _mars_approach(world, env)
 		_:
 			S = _andes(world, env)
 	S["id"] = id
@@ -817,6 +821,306 @@ static func _wings(parent: Node3D, cell: Color) -> void:
 		box(parent, Vector3(0.12, 40.0, 8.0), Vector3(sx * 9.8, 24.0, 0), cm)
 		for k in 6:
 			box(parent, Vector3(0.16, 0.18, 8.1), Vector3(sx * 9.8, 6.0 + k * 7.2, 0), gold)
+
+
+# ===================================================================================== ARES VALLIS, MARS
+## July 4, 1997: Ares Vallis, an old flood plain, under a butterscotch sky (colours from NASA's PIA00621), rocks
+## everywhere, two low hills on the horizon. One unit is one metre here (the descent needs room); the lander's airbag
+## ball is 5.2 m across, the parachute 12.5 m, the bridle 20 m (S-mpf-nssdc), Sojourner 30 cm tall (S-mpf-nasa).
+static func _mars(world, env: Environment) -> Dictionary:
+	var st: Node3D = world.stage
+	var sky := Sky.new()
+	var p := ProceduralSkyMaterial.new()
+	p.sky_top_color = Color(0.5, 0.38, 0.3)
+	p.sky_horizon_color = Color(0.82, 0.64, 0.46)
+	p.sky_curve = 0.25
+	p.ground_bottom_color = Color(0.35, 0.22, 0.15)
+	p.ground_horizon_color = Color(0.82, 0.64, 0.46)
+	p.sun_angle_max = 8.0
+	sky.sky_material = p
+	env.sky = sky
+	env.background_mode = Environment.BG_SKY
+	env.glow_enabled = false
+	env.fog_enabled = true
+	env.fog_light_color = Color(0.78, 0.6, 0.45)
+	env.fog_density = 0.0009
+	env.fog_sky_affect = 0.0
+	env.ambient_light_color = Color(0.85, 0.66, 0.5)
+	env.ambient_light_energy = 0.5
+	world.sun.light_energy = 1.2
+	world.sun.light_color = Color(1.0, 0.9, 0.78)
+	world.sun.rotation_degrees = Vector3(-40, 30, 0)
+	world.cam.far = 6000.0
+	# the ground: a wide plain with soft swells, rust and ochre
+	var ground := MeshInstance3D.new()
+	var pm := PlaneMesh.new()
+	pm.size = Vector2(6000, 6000)
+	pm.subdivide_width = 200
+	pm.subdivide_depth = 200
+	ground.mesh = pm
+	ground.material_override = shader_mat("""
+shader_type spatial;
+varying vec3 wp;
+float h(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+float n(vec2 p) {
+	vec2 i = floor(p); vec2 f = fract(p); f = f * f * (3.0 - 2.0 * f);
+	return mix(mix(h(i), h(i + vec2(1, 0)), f.x), mix(h(i + vec2(0, 1)), h(i + vec2(1, 1)), f.x), f.y);
+}
+void vertex() {
+	vec3 w = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	float d = length(w.xz);
+	VERTEX.y += (n(w.xz * 0.004) - 0.5) * 18.0 * smoothstep(60.0, 400.0, d);
+	wp = w;
+}
+void fragment() {
+	float a = n(wp.xz * 0.05) * 0.6 + n(wp.xz * 0.6) * 0.3 + n(wp.xz * 4.0) * 0.1;
+	vec3 rust = vec3(0.56, 0.34, 0.2);
+	vec3 ochre = vec3(0.7, 0.5, 0.32);
+	vec3 dark = vec3(0.36, 0.22, 0.14);
+	ALBEDO = mix(mix(dark, rust, smoothstep(0.2, 0.6, a)), ochre, smoothstep(0.6, 0.95, a));
+	ROUGHNESS = 0.95;
+}
+""")
+	st.add_child(ground)
+	# the rocks of the flood plain: many small, some big (the ball steers around those)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 70497
+	var rock_m := mat(Color(0.42, 0.3, 0.24), 0.9)
+	var rock_d := mat(Color(0.3, 0.22, 0.18), 0.9)
+	var rocks := []
+	# many rocks in two batches of one low-poly shape each (a few draw calls, not hundreds)
+	var lump := SphereMesh.new()
+	lump.radius = 1.0
+	lump.height = 2.0
+	lump.radial_segments = 9
+	lump.rings = 5
+	var batches := []
+	for m in [rock_m, rock_d]:
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.mesh = lump
+		mm.instance_count = 260
+		var mi := MultiMeshInstance3D.new()
+		mi.multimesh = mm
+		mi.material_override = m
+		st.add_child(mi)
+		batches.append(mm)
+	for mm in batches:
+		for i in mm.instance_count:
+			var r := rng.randf_range(0.08, 0.5)
+			var pos := Vector3(rng.randf_range(-60, 260), r * 0.25, rng.randf_range(-70, 70))
+			var bs := Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(rng.randf_range(0.8, 1.5), rng.randf_range(0.5, 0.9), rng.randf_range(0.8, 1.4)) * r)
+			mm.set_instance_transform(i, Transform3D(bs, pos))
+	for i in 24:
+		var r := rng.randf_range(1.4, 2.6)
+		var pos := Vector3(rng.randf_range(20, 240), 0, rng.randf_range(-14, 14))
+		var big := MeshInstance3D.new()
+		big.mesh = lump
+		big.material_override = rock_d
+		big.position = pos + Vector3(0, r * 0.3, 0)
+		big.scale = Vector3(1.2, 0.7, 1.0) * r
+		st.add_child(big)
+		rocks.append({"pos": pos, "r": r})
+	# the two low hills on the horizon
+	for hp in [Vector3(1400, -60, -900), Vector3(1700, -70, -650)]:
+		ball(st, 260.0, hp, mat(Color(0.6, 0.44, 0.32), 1.0), Vector3(1.4, 0.45, 1.0))
+	# the descent: the backshell under its parachute, the bridle, the lander and its airbag ball
+	var craft := Node3D.new()
+	craft.name = "Craft"
+	st.add_child(craft)
+	var shell := Node3D.new()
+	shell.name = "Backshell"
+	craft.add_child(shell)
+	cyl(shell, 0.4, 1.3, 1.0, Vector3(0, 0.5, 0), mat(Color(0.85, 0.85, 0.82), 0.5, 0.3), 32)
+	var chute := MeshInstance3D.new()
+	var cm := SphereMesh.new()
+	cm.radius = 6.25
+	cm.height = 6.25
+	cm.is_hemisphere = true
+	chute.mesh = cm
+	chute.material_override = shader_mat("""
+shader_type spatial;
+render_mode cull_disabled;
+varying vec3 lp;
+void vertex() { lp = VERTEX; }
+void fragment() {
+	float a = atan(lp.z, lp.x);
+	float band = step(0.5, fract(a / 6.2831 * 10.0));
+	ALBEDO = mix(vec3(0.95, 0.93, 0.88), vec3(0.95, 0.55, 0.15), band);
+	ROUGHNESS = 0.9;
+}
+""")
+	chute.position = Vector3(0, 16, 0)
+	shell.add_child(chute)
+	var line_m := mat(Color(0.9, 0.88, 0.8), 0.8)
+	for i in 10:
+		var a := i * TAU / 10.0
+		rope(shell, Vector3(sin(a) * 6.0, 16, cos(a) * 6.0), Vector3(0, 1.0, 0), 0.03, line_m)
+	var rockets := Node3D.new()
+	rockets.name = "Rockets"
+	shell.add_child(rockets)
+	for i in 3:
+		var a := i * TAU / 3.0
+		var f := Space.make_flame(0.9)
+		f.position = Vector3(sin(a) * 0.9, -0.1, cos(a) * 0.9)
+		rockets.add_child(f)
+	var bridle := MeshInstance3D.new()
+	bridle.name = "Bridle"
+	var bm := CylinderMesh.new()
+	bm.top_radius = 0.04
+	bm.bottom_radius = 0.04
+	bm.height = 1.0
+	bridle.mesh = bm
+	bridle.material_override = mat(Color(0.95, 0.85, 0.3), 0.6)
+	craft.add_child(bridle)
+	var lander := Node3D.new()
+	lander.name = "Lander"
+	craft.add_child(lander)
+	cyl(lander, 0.0, 0.9, 1.0, Vector3.ZERO, mat(Color(0.75, 0.7, 0.6), 0.5, 0.4), 3)
+	var bag := MeshInstance3D.new()
+	bag.name = "Airbags"
+	var bs := SphereMesh.new()
+	bs.radius = 2.6
+	bs.height = 5.2
+	bag.mesh = bs
+	bag.material_override = shader_mat("""
+shader_type spatial;
+varying vec3 lp;
+void vertex() { lp = VERTEX; }
+void fragment() {
+	vec3 d = normalize(lp);
+	float lobes = smoothstep(0.75, 0.95, abs(sin(atan(d.z, d.x) * 2.0)) * (1.0 - abs(d.y)));
+	float seam = smoothstep(0.03, 0.0, abs(fract((d.y + 1.0) * 3.0) - 0.5) - 0.47);
+	ALBEDO = mix(vec3(0.93, 0.9, 0.82), vec3(0.75, 0.72, 0.65), lobes * 0.6 + seam * 0.4);
+	ROUGHNESS = 0.85;
+}
+""")
+	bag.visible = false
+	lander.add_child(bag)
+	# the landed lander: three petals open around the base, the airbags pulled in, the rear ramp, Sojourner
+	var base := Node3D.new()
+	base.name = "Base"
+	base.visible = false
+	st.add_child(base)
+	var petal_m := mat(Color(0.55, 0.3, 0.2), 0.6, 0.3)
+	var cell_m := mat(Color(0.12, 0.14, 0.2), 0.3, 0.5)
+	var petals := []
+	for i in 3:
+		var pv := Node3D.new()
+		pv.rotation.y = i * TAU / 3.0
+		base.add_child(pv)
+		var pet := Node3D.new()
+		pet.position = Vector3(0, 0.15, 0.55)
+		pv.add_child(pet)
+		var tri := cyl(pet, 0.0, 1.2, 0.06, Vector3(0, 0, 0.6), petal_m, 3)
+		tri.rotation.y = PI
+		cyl(pet, 0.0, 1.05, 0.065, Vector3(0, 0.01, 0.6), cell_m, 3).rotation.y = PI
+		pet.rotation.x = -1.2
+		petals.append(pet)
+	cyl(base, 0.55, 0.55, 0.3, Vector3(0, 0.15, 0), mat(Color(0.8, 0.78, 0.72), 0.5, 0.4), 3)
+	for i in 6:
+		var a := i * TAU / 6.0 + 0.3
+		var heap := ball(base, rng.randf_range(0.5, 0.8), Vector3(sin(a) * 1.7, 0.2, cos(a) * 1.7), mat(Color(0.88, 0.85, 0.76), 0.9), Vector3(1.4, 0.45, 1.0))
+		heap.name = "Heap%d" % i
+	var ramp := Node3D.new()
+	ramp.name = "Ramp"
+	ramp.position = Vector3(0, 0.25, 1.65)
+	base.add_child(ramp)
+	for sx in [-0.17, 0.17]:
+		var rail := box(ramp, Vector3(0.05, 0.03, 1.4), Vector3(sx, 0, 0.7), mat(Color(0.75, 0.75, 0.78), 0.4, 0.7))
+		rail.name = "Rail"
+	ramp.rotation.x = deg_to_rad(20.0)
+	var rover := Node3D.new()
+	rover.name = "Sojourner"
+	base.add_child(rover)
+	box(rover, Vector3(0.48, 0.12, 0.62), Vector3(0, 0.2, 0), mat(Color(0.85, 0.82, 0.7), 0.5, 0.4))
+	box(rover, Vector3(0.48, 0.02, 0.62), Vector3(0, 0.27, 0), cell_m)
+	for sx in [-0.28, 0.28]:
+		for wz in [-0.24, 0.0, 0.24]:
+			var wh := cyl(rover, 0.065, 0.065, 0.08, Vector3(sx, 0.07, wz), mat(Color(0.75, 0.75, 0.78), 0.35, 0.8), 14)
+			wh.rotation.z = PI / 2
+	rover.position = Vector3(0, 0.35, 1.0)
+	return {
+		"marks": marks({"inti": [-1.1, 0.0, 1.0, 40], "killa": [1.2, 0.0, 0.9, -40], "rumi": [-0.9, 0.0, -0.9, 30], "wayra": [1.1, 0.0, -0.8, -30]}),
+		"actor_scale": 0.3,
+		"cast": ["rumi", "killa", "inti"],
+		"cams": {
+			"wide": {"from": Vector3(1.4, 0.9, 3.6), "to": Vector3(0, 0.25, 0)},
+			"plain": {"from": Vector3(-6, 3, 14), "to": Vector3(60, 8, -40), "from2": Vector3(-3, 1.6, 6), "to2": Vector3(0, 0.3, 0), "time": 7.0},
+		},
+		"act": "idle",
+		"craft": craft,
+		"shell": shell,
+		"chute": chute,
+		"rockets": rockets,
+		"bridle": bridle,
+		"lander": lander,
+		"airbags": bag,
+		"base": base,
+		"petals": petals,
+		"ramp": ramp,
+		"rover": rover,
+		"rocks": rocks,
+	}
+
+
+# ===================================================================================== MARS AHEAD
+## Seven months out, Mars ahead: the cruise stage (solar cells on a ring) over the aeroshell that hides the lander,
+## the crew floating beside it at their true size (one unit is one metre; the cuyes are about 30 cm).
+static func _mars_approach(world, env: Environment) -> Dictionary:
+	var st: Node3D = world.stage
+	env.sky = Space.make_space_sky()
+	env.background_energy_multiplier = 1.0
+	env.glow_enabled = true
+	env.ambient_light_color = Color(0.6, 0.6, 0.7)
+	env.ambient_light_energy = 0.35
+	world.sun.light_energy = 1.5
+	world.sun.light_color = Color(1.0, 0.97, 0.92)
+	world.sun.rotation_degrees = Vector3(-20, 140, 0)
+	world.cam.far = 6000.0
+	var planet := MeshInstance3D.new()
+	var sm := SphereMesh.new()
+	sm.radius = 300.0
+	sm.height = 600.0
+	sm.radial_segments = 96
+	sm.rings = 48
+	planet.mesh = sm
+	planet.material_override = shader_mat("""
+shader_type spatial;
+varying vec3 lp;
+float h(vec3 p) { return fract(sin(dot(p, vec3(12.9898, 78.233, 37.719))) * 43758.5453); }
+float n(vec3 p) {
+	vec3 i = floor(p); vec3 f = fract(p); f = f * f * (3.0 - 2.0 * f);
+	return mix(mix(mix(h(i), h(i + vec3(1,0,0)), f.x), mix(h(i + vec3(0,1,0)), h(i + vec3(1,1,0)), f.x), f.y),
+		mix(mix(h(i + vec3(0,0,1)), h(i + vec3(1,0,1)), f.x), mix(h(i + vec3(0,1,1)), h(i + vec3(1,1,1)), f.x), f.y), f.z);
+}
+void vertex() { lp = VERTEX / 300.0; }
+void fragment() {
+	float a = n(lp * 3.0) * 0.55 + n(lp * 9.0) * 0.3 + n(lp * 27.0) * 0.15;
+	vec3 c = mix(vec3(0.42, 0.22, 0.13), vec3(0.78, 0.48, 0.3), smoothstep(0.3, 0.75, a));
+	c = mix(c, vec3(0.95, 0.93, 0.9), smoothstep(0.82, 0.9, abs(lp.y)));
+	ALBEDO = c;
+	ROUGHNESS = 0.95;
+}
+""")
+	planet.position = Vector3(-260, -60, -900)
+	st.add_child(planet)
+	var craft := Node3D.new()
+	st.add_child(craft)
+	cyl(craft, 1.3, 1.3, 0.25, Vector3(0, 0.4, 0), mat(Color(0.12, 0.14, 0.2), 0.3, 0.5), 32)
+	cyl(craft, 1.32, 1.32, 0.08, Vector3(0, 0.53, 0), mat(Color(0.75, 0.75, 0.78), 0.4, 0.7), 32)
+	cyl(craft, 0.4, 1.32, 0.9, Vector3(0, -0.2, 0), mat(Color(0.82, 0.8, 0.74), 0.5, 0.3), 32)
+	cyl(craft, 1.32, 1.1, 0.25, Vector3(0, -0.75, 0), mat(Color(0.45, 0.3, 0.2), 0.8), 32)
+	return {
+		"marks": marks({"inti": [-0.7, 0.75, 0.6, 20], "killa": [0.2, 0.9, 0.9, -5], "rumi": [0.9, 0.7, 0.5, -25], "wayra": [0, 0, 3, 0]}),
+		"cast": ["rumi", "killa", "inti"],
+		"actor_scale": 0.3,
+		"cams": {
+			"wide": {"from": Vector3(1.0, 1.4, 3.2), "to": Vector3(0, 0.7, 0)},
+			"approach": {"from": Vector3(2.5, 1.8, 4.5), "to": Vector3(0, 0.5, 0), "from2": Vector3(1.4, 1.2, 2.6), "to2": Vector3(-260, -60, -900), "time": 7.0},
+		},
+		"act": "float",
+	}
 
 
 # ===================================================================================== THE PACIFIC
