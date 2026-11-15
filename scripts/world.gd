@@ -36,6 +36,13 @@ var orbit_radius := 1.3
 var orbit_basis := Basis.IDENTITY
 var orbit_angle := 0.0
 var orbit_speed := 1.0
+## Where the craft really is when its engine could not finish the climb (issue #70): "" on its orbit, "transfer" on
+## the ellipse the rocket left it on (GEO), "escape" flying past the Moon. The shape: semi-latus rectum and eccentricity
+## of the conic around the body, in its radii (r = p / (1 + e cos angle)).
+var orbit_missed := ""
+var orbit_p := 1.0
+var orbit_e := 0.0
+var escape_end := 0.0
 var ship_lost := false
 var ship_label: Label3D
 var cloud_shift := 0.0     ## Drift of the Earth's cloud layer (U of its texture).
@@ -132,8 +139,18 @@ func _animate_world(delta: float) -> void:
 			var k := 1.0 + 0.6 * fmod(Time.get_ticks_msec() / 1000.0, 1.5)
 			pulse.scale = Vector3.ONE * k
 	if orbit_ship and is_instance_valid(orbit_ship) and not ship_lost:
-		orbit_angle += delta * orbit_speed
-		var p := orbit_basis * Vector3(cos(orbit_angle), 0, sin(orbit_angle)) * orbit_radius
+		var rr := orbit_radius
+		if orbit_missed != "":
+			# Kepler's second law: the craft sweeps the conic faster near the body, slower far out
+			var k := 1.0 + orbit_e * cos(orbit_angle)
+			if orbit_missed == "transfer":
+				orbit_angle += delta * orbit_speed * k * k / pow(1.0 - orbit_e * orbit_e, 1.5)
+			else:
+				orbit_angle = minf(orbit_angle + delta * maxf(orbit_speed, 0.3) * k * k * 0.6, escape_end)
+			rr = orbit_p / (1.0 + orbit_e * cos(orbit_angle))
+		else:
+			orbit_angle += delta * orbit_speed
+		var p := orbit_basis * Vector3(cos(orbit_angle), 0, sin(orbit_angle)) * rr
 		var tangent := orbit_basis * Vector3(-sin(orbit_angle), 0, cos(orbit_angle))
 		orbit_ship.position = orbit_center + p
 		orbit_ship.look_at(orbit_ship.position + tangent, (orbit_basis * Vector3.UP))
@@ -190,9 +207,10 @@ func stage_menu() -> void:
 func setup_orbit_ship(m, center: Vector3, radius: float, incl: float, ship_size: float, nodes_yaw := 0.0) -> void:
 	orbit_center = center
 	orbit_radius = radius
-	var ring := Space.make_orbit_ring(radius, incl, Color(0.4, 0.8, 1.0, 0.45), nodes_yaw)
+	var ring := Space.make_orbit_ring(maxf(radius, 0.01), incl, Color(0.4, 0.8, 1.0, 0.45), nodes_yaw)
 	ring.position = center
 	stage.add_child(ring)
+	ring.visible = radius > 0.0
 	orbit_basis = ring.basis
 	orbit_ship = Ship.build(m)
 	var r: float = orbit_ship.get_meta("radius")
@@ -201,6 +219,67 @@ func setup_orbit_ship(m, center: Vector3, radius: float, incl: float, ship_size:
 	ship_label = Space.make_label(tr("YOUR CRAFT"), Color(0.55, 0.9, 1.0))
 	stage.add_child(ship_label)
 	orbit_speed = 0.35
+
+
+## The craft where it really is when its engine could not finish the climb (issue #70), drawn as a conic around the
+## body at true scale: for GEO the transfer ellipse the rocket left it on, perigee at a 200 km parking orbit and apogee
+## at GEO (Earth's radius 6,371 km [S8]); for the Moon a fly-by that bends round it and leaves (an escape hyperbola,
+## eccentricity 1.4: our simplification of "too fast to be held").
+func _stage_missed(mission, O: Dictionary, nodes: float, ship_size: float) -> void:
+	var color := Color(1.0, 0.66, 0.26, 0.55)   # amber: not the orbit that was planned
+	if mission.orbit == "geo":
+		planet = Space.make_earth(1.0)
+		stage.add_child(planet)
+		var rp := 1.0 + 200.0 / 6371.0
+		var ra: float = O.radius
+		orbit_e = -(ra - rp) / (ra + rp)   # negative: the apogee lies toward the open side of the screen, away from the log
+		orbit_p = 2.0 * rp * ra / (rp + ra)
+		orbit_missed = "transfer"
+		ship_size = 0.2
+		cam_dist_goal = ra * 2.0
+	else:
+		planet = Space.make_moon(1.0)
+		stage.add_child(planet)
+		var earth := Space.make_earth(1.4, false)
+		earth.position = Vector3(-30, 6, -40)
+		stage.add_child(earth)
+		orbit_e = 1.4
+		orbit_p = float(O.radius) * (1.0 + orbit_e)
+		orbit_missed = "escape"
+		cam_dist_goal = 9.0
+	setup_orbit_ship(mission, Vector3.ZERO, 0.0, O.incl, ship_size, nodes)
+	# the planned orbit, faint; the real path, amber
+	var planned := Space.make_orbit_ring(O.radius, O.incl, Color(0.4, 0.8, 1.0, 0.18), nodes)
+	stage.add_child(planned)
+	var lim := PI if orbit_missed == "transfer" else acos(-1.0 / orbit_e) * 0.9   # the escape's e is positive
+	escape_end = lim
+	var path := ImmediateMesh.new()
+	path.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)
+	for i in 241:
+		var a := -lim + 2.0 * lim * i / 240.0
+		var r := orbit_p / (1.0 + orbit_e * cos(a))
+		path.surface_add_vertex(orbit_basis * Vector3(cos(a), 0, sin(a)) * r)
+	path.surface_end()
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.albedo_color = color
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	var mi := MeshInstance3D.new()
+	mi.mesh = path
+	mi.material_override = mat
+	stage.add_child(mi)
+	orbit_angle = -lim if orbit_missed == "escape" else 0.0
+	orbit_speed = 0.4
+	cam_target = Vector3.ZERO
+	if orbit_missed == "transfer":
+		# the view centres on the whole ellipse (its centre lies a*e from the Earth, toward the apogee), not on the Earth
+		var a_axis := orbit_p / (1.0 - orbit_e * orbit_e)
+		cam_target = orbit_basis * Vector3(-a_axis * orbit_e, 0, 0)
+		cam_dist_goal = a_axis * 3.3
+	cam_dist = cam_dist_goal
+	cam_auto = true
+	cam_pitch = -0.3
+	face_sun()
 
 
 ## The design: GameState's craft up close, above the Earth or the Moon.
@@ -249,6 +328,12 @@ func stage_orbit() -> void:
 	# Where the nodes lie in reality depends on the hour of launch; the game does not model it, so it picks the view.
 	face_sun()
 	var nodes := cam_yaw + PI / 2.0 - 0.6
+	orbit_missed = ""
+	orbit_e = 0.0
+	var missed: bool = not bool(GameState.last_report.get("insertion_ok", true))
+	if missed and mission.orbit in ["geo", "lunar"]:
+		_stage_missed(mission, O, nodes, ship_size)
+		return
 	if mission.orbit == "lunar":
 		planet = Space.make_moon(1.0)
 		stage.add_child(planet)
