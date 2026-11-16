@@ -401,6 +401,9 @@ func _photo_tile(ph: Dictionary, earned: bool) -> Control:
 		var all: Dictionary = Objectives.all()
 		var what: String = tr("Meet “%s” to bring this one home.") % str(all[ph.objective].name) if ph.objective != "" and all.has(ph.objective) \
 			else tr("It comes home when the mission works.")
+		if ph.objective != "" and all.has(ph.objective) and all[ph.objective].has("how"):
+			what += "
+" + tr("How: %s") % tr(str(all[ph.objective].how))   # #98
 		var l := Kit.lbl("🔒  " + what, Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true)
 		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		l.custom_minimum_size.x = 180

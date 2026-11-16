@@ -484,12 +484,17 @@ func _fill_question(id: String, r: Dictionary) -> void:
 				if E.is_empty():
 					continue
 				var has: bool = mission.extras.has(e)
-				left_box.add_child(_tile("star", E.name, [tr("+%d points") % int(E.points)], has, func():
+				var card := _tile("star", E.name, [tr("+%d points") % int(E.points)], has, func():
 					if has:
 						mission.extras.erase(e)
 					else:
 						mission.extras.append(e)
-					on_change(false), E.desc, tr("Going for it") if has else "", Kit.C_OK))
+					on_change(false), E.desc, tr("Going for it") if has else "", Kit.C_OK)
+				if E.has("how"):   # what to choose or do to reach it, on the card itself (#98)
+					var how := Kit.lbl(tr("How: %s") % tr(str(E.how)), Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true)
+					how.mouse_filter = Control.MOUSE_FILTER_IGNORE
+					card.get_child(0).get_child(1).add_child(how)
+				left_box.add_child(card)
 		"orbit":
 			var top := 0.0
 			for o in GameData.ORBITS:
