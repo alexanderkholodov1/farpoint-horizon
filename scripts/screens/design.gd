@@ -51,6 +51,12 @@ var later: Array = []             ## Notices to show once the screen is drawn ([
 var last_problems := {}           ## The problems shown last time, by title (to tell what a new choice broke).
 
 
+var left_panel: Control       ## On a phone the three columns are measured every frame (issue #93).
+var board_panel: Control
+var hint_panel: Control
+var bar_panel: Control
+var resources_panel: Control
+
 func enter(args: Dictionary) -> void:
 	GameState.room.changed.connect(_on_room_changed)
 	if mission.get_instance_id() != _mission_id:
@@ -120,8 +126,9 @@ func _show(i: int) -> void:
 		stages_row.add_child(b)
 	# ---------- left: the question and its options
 	var lp := Kit.panel_box(Kit.PAD)
-	Kit.place(lp, 0, 0, 0, 1, Kit.MARGIN, 54 if Kit.compact else 84, 392 if Kit.compact else 476, -Kit.MARGIN)
+	Kit.place(lp, 0, 0, 0, 1, Kit.MARGIN, 64 if Kit.compact else 84, 362 if Kit.compact else 476, -Kit.MARGIN)
 	add_child(lp)
+	left_panel = lp
 	var lv := Kit.vbox(Kit.GAP)
 	lp.add_child(lv)
 	lv.add_child(Kit.caps(GameData.SCENARIOS[mission.scenario].name + "  ·  " + Kit.kg(r.mass_total)))
@@ -142,9 +149,10 @@ func _show(i: int) -> void:
 	sc.add_child(left_box)
 	# ---------- right: the mission board
 	var rp := Kit.panel_box(Kit.PAD)
-	Kit.place(rp, 1, 0, 1, 0, -306 if Kit.compact else -364, 54 if Kit.compact else 84, -Kit.MARGIN, 54 if Kit.compact else 84)   # grows to its content
+	Kit.place(rp, 1, 0, 1, 0, -306 if Kit.compact else -364, 64 if Kit.compact else 84, -Kit.MARGIN, 64 if Kit.compact else 84)   # grows to its content
 	rp.grow_horizontal = Control.GROW_DIRECTION_BEGIN     # to the left, never past the window's edge
 	add_child(rp)
+	board_panel = rp
 	board = Kit.vbox(6)
 	rp.add_child(board)
 	# ---------- bottom centre: what the pointed thing is, and the actions
@@ -156,15 +164,17 @@ func _show(i: int) -> void:
 		Kit.place(ip, 0, 1, 1, 1, 496, -110, -388, -110)
 	ip.grow_vertical = Control.GROW_DIRECTION_BEGIN   # grows up with what it says, never under the buttons
 	add_child(ip)
+	hint_panel = ip
 	info_body = hb[1]
 	info_body.add_theme_font_size_override("font_size", Kit.T_BODY)
 	_say("", tr("Point at an option to know more. Keys: 1 to 9 choose, Enter goes on, Backspace goes back."))
-	var bp := Kit.panel_box(10)
+	var bp := Kit.panel_box(6 if Kit.compact else 10)
 	if Kit.compact:   # the middle column of a phone, between the question and the board
 		Kit.place(bp, 0, 1, 1, 1, 400, -62, -314, -Kit.MARGIN)
 	else:
 		Kit.place(bp, 0, 1, 1, 1, 496, -96, -388, -Kit.MARGIN)
 	add_child(bp)
+	bar_panel = bp
 	var bar := Kit.hbox(10)
 	bar.alignment = BoxContainer.ALIGNMENT_CENTER
 	bp.add_child(bar)
@@ -177,12 +187,12 @@ func _show(i: int) -> void:
 	back_btn = back
 	bar.add_child(back)
 	if Q[0] == "review":
-		main_btn = Kit.accent_btn(Kit.btn(tr("LAUNCH!"), func(): main.launch(), Kit.T_ACTION, 150 if Kit.compact else 260), Kit.C_GOLD)
+		main_btn = Kit.accent_btn(Kit.btn(tr("LAUNCH!"), func(): main.launch(), Kit.T_ACTION, 0 if Kit.compact else 260), Kit.C_GOLD)
 		main_btn.disabled = not GameState.can_launch(r)
 		if main_btn.disabled:
 			main_btn.modulate.a = 0.45
 	else:
-		main_btn = Kit.accent_btn(Kit.btn(tr("Continue ▶"), func(): _show(q + 1), Kit.T_ACTION, 150 if Kit.compact else 260), Kit.C_GOLD)
+		main_btn = Kit.accent_btn(Kit.btn(tr("Continue ▶"), func(): _show(q + 1), Kit.T_ACTION, 0 if Kit.compact else 260), Kit.C_GOLD)
 	main_btn.custom_minimum_size.y = Kit.BTN_H + 8
 	bar.add_child(main_btn)
 	_fill_question(Q[0], r)
@@ -724,6 +734,7 @@ func _fill_resources(r: Dictionary) -> void:
 	p.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(p)
+	resources_panel = p
 	var v := Kit.vbox(7)
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	p.add_child(v)
@@ -854,3 +865,19 @@ func _row(label: String, value: String, frac: float, warn: float, explain: Strin
 				Kit.UiSound.play("click")
 				_show(from_q))
 	board.add_child(pc)
+
+
+## On a phone nothing covers anything (issue #93): the hint and the bar take the real gap between the columns, and the
+## resource bars give way when the board above needs the room (the board says the same in words).
+func process(_delta: float) -> void:
+	if not Kit.compact or not is_instance_valid(bar_panel) or not is_instance_valid(board_panel):
+		return
+	if is_instance_valid(resources_panel):
+		var need: float = resources_panel.size.y
+		var room: float = get_viewport_rect().size.y - Kit.MARGIN - board_panel.get_global_rect().end.y - 8.0
+		resources_panel.visible = need <= room
+	# the middle column ends where the nearer of the right panels begins
+	var right: Control = board_panel
+	if is_instance_valid(resources_panel) and resources_panel.visible and resources_panel.get_global_rect().position.x < board_panel.get_global_rect().position.x:
+		right = resources_panel
+	Kit.fit_middle(left_panel, right, hint_panel, bar_panel)
