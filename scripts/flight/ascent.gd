@@ -102,11 +102,14 @@ func setup(launcher_id: String, payload_kg: float, target_orbit: String) -> void
 func guidance() -> float:
 	if h < 800.0:
 		return 0.0
-	var tgt := 90.0 * minf(1.0, sqrt((h - 800.0) / 120000.0))
+	# lying flat by 96 km and a flight computer that follows briskly: a hands-off climb reaches its orbit's height
+	# without overshooting it and falling back (it used to climb 50 km too high and come down for three minutes)
+	var tgt := 90.0 * minf(1.0, sqrt((h - 800.0) / 95000.0))
 	if h > 60000.0:
-		# higher up: aim to arrive at about 175 km with no vertical speed left
-		var want_vy := (175000.0 - h) / 60.0
-		var t2 := clampf(90.0 + (vy - want_vy) * 0.08, 60.0, 100.0)
+		# a gentle target: the vertical speed that would bring it to 190 km in a minute and a half, followed softly, so
+		# the climb levels off into its orbit (about 172 km) without nodding up and down or pointing at the Earth
+		var want_vy := (190000.0 - h) / 90.0
+		var t2 := clampf(90.0 + (vy - want_vy) * 0.06, 60.0, 100.0)
 		tgt = lerpf(tgt, t2, smoothstep(60000.0, 90000.0, h))
 	return clampf(tgt, 0.0, 100.0)
 
@@ -120,7 +123,7 @@ func step(dt: float, steer: float, warp := 1.0) -> void:
 	assisting = hands_off > ASSIST_AFTER and lifted
 	dt *= warp           # from here on, mission seconds
 	if assisting:
-		pitch += clampf((marker - pitch) * 0.075, -ASSIST_RATE, ASSIST_RATE) * dt
+		pitch += clampf((marker - pitch) * 0.3, -ASSIST_RATE, ASSIST_RATE) * dt
 	pitch = clampf(pitch + steer * STEER_RATE * dt, -30.0, 150.0)
 	var n := int(ceil(dt / 0.1))
 	var mdt := dt / n

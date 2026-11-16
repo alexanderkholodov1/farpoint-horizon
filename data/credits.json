@@ -183,6 +183,10 @@
     {
      "id": "S-delta-v",
      "text": "Wikipedia. Delta-v budget (checked 2026-11-14). https://en.wikipedia.org/wiki/Delta-v_budget. Earth to low orbit 9.3-10 km/s with losses; low orbit to the geostationary transfer orbit 2.3 km/s; translunar injection 3.20 km/s."
+    },
+    {
+     "id": "S-wiki-fairing",
+     "text": "Wikipedia. Payload fairing (checked 2026-11-15). https://en.wikipedia.org/wiki/Payload_fairing. \"Once outside the atmosphere the fairing is jettisoned, exposing the payload to outer space\"; it separates \"after the vehicle has transcended the densest part of the atmosphere\". The launch drops its fairing in two halves at 110 km (the height is our game value)."
     }
    ]
   },
@@ -480,5 +484,5 @@
    ]
   }
  ],
- "count": 98
+ "count": 99
 }

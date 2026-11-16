@@ -13,8 +13,14 @@ const Ship := preload("res://scripts/world/ship_builder.gd")
 static func horizon_earth(r: float) -> Node3D:
 	var e := Space.make_earth(r, false)
 	e.name = "HorizonEarth"
-	var below := Space.latlon_to_vec(-0.2, -78.5)    # Quito, the spaceport's latitude and longitude
-	e.set_meta("base", Basis(Quaternion(below.normalized(), Vector3.UP)))
+	# Quito, the spaceport, on top; east (where the rocket flies) along the scene's +X, north into the screen, so the
+	# ground and its clouds slide under the rocket the way it flies
+	var up := Space.latlon_to_vec(-0.2, -78.5).normalized()
+	var east := (Space.latlon_to_vec(-0.2, -78.4) - Space.latlon_to_vec(-0.2, -78.6)).normalized()
+	east = (east - up * east.dot(up)).normalized()
+	var south := east.cross(up)
+	var to_planet := Basis(east, up, south)          # scene X, Y, Z in the planet's own frame
+	e.set_meta("base", to_planet.transposed())
 	e.basis = e.get_meta("base")
 	return e
 
