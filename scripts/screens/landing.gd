@@ -122,6 +122,8 @@ func _build_hud() -> void:
 		hud.hint(tr("The bot pilot is landing. Touch the throttle or the arrows to take the controls."))
 	else:
 		hud.hint(tr("Fly down to the green ring. More throttle slows your fall; the arrows push you across the ground. Touch down slower than 3 m/s."))
+	# the descent from lunar orbit to here is flown by the computer and not shown: say so (#57, "cut without a word")
+	hud.message(tr("THE LAST STRETCH"), tr("The computer flew you down from orbit to here. The last few hundred metres are yours."), Kit.C_ACCENT, 3.2)
 
 
 ## A ring of light on the ground around the landing target, so the pilot can see where to go.

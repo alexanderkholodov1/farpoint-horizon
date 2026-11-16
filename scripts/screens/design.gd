@@ -254,7 +254,11 @@ func _best_for(id: String, r: Dictionary) -> String:
 		"adcs":
 			return _best("adcs", GameData.ADCS, func(A): return A.level >= r.pointing_need, "cost_pct")
 		"propulsion":
-			return _best("propulsion", GameData.PROPULSION, func(PR): return PR.dv >= r.dv_need, "mass_pct")
+			# to the Moon the trip brakes into orbit (and lands) with minutes of strong thrust: an electric engine pushes
+			# gently for months, so it is never the star there, however light it is (#57: the south pole's best fit was
+			# the ion engine, and the flight then flew a chemical burn the player never chose)
+			var strong: bool = mission.orbit == "lunar"
+			return _best("propulsion", GameData.PROPULSION, func(PR): return PR.dv >= r.dv_need and not (strong and bool(PR.electric)), "mass_pct")
 	return ""
 
 
