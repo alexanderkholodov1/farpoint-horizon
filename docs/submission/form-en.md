@@ -28,7 +28,7 @@ Farpoint HORIZON is a 3D space game that lets anyone, alone or with up to three 
 ## Project Demonstration  ("Link to Project Demo": 7 slides at most, or a video of 30 s at most)
 
 ```
-https://github.com/alexanderkholodov1/farpoint-horizon/blob/3a9f8bb3cbf18b5e13059fe544ef6be236c5b70f/docs/submission/deck/EN_17_SK-Horizons_v2.pdf
+https://github.com/alexanderkholodov1/farpoint-horizon/blob/dbdf0dd99e3b350a10f8b6909c6442c8ca29e7a9/docs/submission/deck/EN_17_SK-Horizons_v2.pdf
 ```
 
 Use the **7-slide English deck**, not the 30-second video. The demo is how the judges understand the problem, the
