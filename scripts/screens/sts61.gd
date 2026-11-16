@@ -10,6 +10,7 @@ extends "res://scripts/screens/screen.gd"
 ## Rules: scripts/missions/sts61/spacewalks.gd; data: data/missions/sts61.json. Inside the story it is reached from
 ## the "Your turn" card (args {"campaign": true, "then": [scene refs], "back": id}) and the outro follows.
 
+const Progress := preload("res://scripts/story/campaign_progress.gd")
 const Spacewalks := preload("res://scripts/missions/sts61/spacewalks.gd")
 const Sets := preload("res://scripts/story/sets.gd")
 const CuyActor := preload("res://scripts/story/cuy_actor.gd")
@@ -705,6 +706,7 @@ func _show_photo() -> void:
 	top.add_child(side)
 	side.add_child(Kit.caps(tr("Mission 2 · done")))
 	var stars := W.stars()
+	Progress.earn("sts61", stars)
 	side.add_child(Kit.lbl("★".repeat(stars) + "☆".repeat(3 - stars), Kit.T_CLOCK, Kit.C_GOLD, Kit.FONT_T))
 	side.add_child(Kit.lbl(tr("Wrong parts: %d · Retries: %d · Perfect fits: %d of %d") % [W.wrong, W.retries, W.perfect, W.presses], Kit.T_SMALL + 1, Kit.C_DIM, Kit.FONT_R, true))
 	side.add_child(Kit.rule())

@@ -43,24 +43,21 @@ func _ready() -> void:
 	key(KEY_SPACE)
 	await wait(1.2)
 	await shot("liftoff")
-	# Max Q: a hand on the throttle keeps the needle in the band
+	# the climb as in Missions: the game's own flight computer flies it; the stages drop when empty
+	if s.hud:
+		s.hud.set_autopilot(true)
 	var took_q := false
-	while s.phase == "ascent":
-		var air: float = exp(-pow((s.met - 70.0) / 22.0, 2.0)) * 1.3
-		if air > 0.05:
-			s.throttle = clampf(0.7 / air, 0.4, 1.0)
-		if not took_q and s.met > 72.0:
+	while is_instance_valid(s) and s.phase == "ascent":
+		if s.model and s.model.wants_stage():
+			s._on_stage()
+		if not took_q and s.model and s.model.h > 9000.0:
 			took_q = true
 			await shot("maxq")
-		if s.srb_q < 0.0 and s.met >= 131.8:
-			key(KEY_B)
-			await wait(0.6)
-			await shot("boosters")
-		if s.srb_q >= 0.0 and s.core_q < 0.0 and s.met >= 482.8:
-			key(KEY_C)
-			await wait(0.6)
-			await shot("core")
 		await get_tree().process_frame
+	await until(func(): return s.phase == "map", 20.0)
+	await wait(1.5)
+	await shot("map_to_moon")
+	s._map_go()
 	await until(func(): return s.phase == "flyby")
 	await wait(3.0)
 	await shot("flyby")
@@ -85,6 +82,10 @@ func _ready() -> void:
 	await until(func(): return s.phase == "far", 8.0)
 	await wait(1.5)
 	await shot("far")
+	await until(func(): return s.phase == "map", 20.0)
+	await wait(1.5)
+	await shot("map_home")
+	s._map_go()
 	await until(func(): return s.phase == "entry", 12.0)
 	await wait(4.0)
 	# the corridor: a hand that steers the angle back to the middle

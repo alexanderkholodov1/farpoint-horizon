@@ -329,15 +329,21 @@ func _artemis1() -> void:
 	key(KEY_SPACE)
 	await wait(1.0)
 	await shot("art_liftoff")
+	# the climb as in Missions: the game's own flight computer flies it; the stages drop when empty
+	if s.hud:
+		s.hud.set_autopilot(true)
+	var took_q := false
 	while is_instance_valid(s) and s.phase == "ascent":
-		var air: float = exp(-pow((s.met - 70.0) / 22.0, 2.0)) * 1.3
-		if air > 0.05:
-			s.throttle = clampf(0.7 / air, 0.4, 1.0)
-		if s.srb_q < 0.0 and s.met >= 131.8:
-			key(KEY_B)
-		if s.srb_q >= 0.0 and s.core_q < 0.0 and s.met >= 482.8:
-			key(KEY_C)
+		if s.model and s.model.wants_stage():
+			s._on_stage()
+		if not took_q and s.model and s.model.h > 9000.0:
+			took_q = true
+			await shot("art_maxq")
 		await get_tree().process_frame
+	await _until(func(): return s.phase == "map", 20.0)
+	await wait(1.5)
+	await shot("map_to_moon")
+	s._map_go()
 	await _until(func(): return s.phase == "flyby", 10.0)
 	await wait(3.0)
 	var e := InputEventKey.new()
@@ -355,6 +361,10 @@ func _artemis1() -> void:
 	await _until(func(): return s.phase == "far", 8.0)
 	await wait(1.5)
 	await shot("art_far")
+	await _until(func(): return s.phase == "map", 20.0)
+	await wait(1.5)
+	await shot("map_home")
+	s._map_go()
 	await _until(func(): return s.phase == "entry", 12.0)
 	var took := false
 	while is_instance_valid(s) and s.phase == "entry":

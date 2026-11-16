@@ -1,5 +1,5 @@
 extends "res://scripts/screens/screen.gd"
-## The crew (issue #44): the four cuy astronauts of the v0.3.0 story side by side on a turntable, each with their name,
+## The Campaign (issue #44; was "The crew"): the story and its six missions, the patches earned, and the four cuy astronauts of the v0.3.0 story side by side on a turntable, each with their name,
 ## station and one line about them. Drag to turn them, the wheel to come closer; 1-4 (or a click on a name) brings one
 ## to the front. The models are assets/models/crew/crew_<name>_meshy.glb (assets/source/crew_*.py; docs/design/crew/README.md).
 ## Names and lines are proposals for the team to confirm (story: docs/design/story-v0.3.0.md).
@@ -15,6 +15,7 @@ const CREW := [
 ]
 const SPACING := 1.25
 const Sets := preload("res://scripts/story/sets.gd")
+const Progress := preload("res://scripts/story/campaign_progress.gd")
 var saved := {}
 const CuyActor := preload("res://scripts/story/cuy_actor.gd")
 
@@ -91,7 +92,7 @@ func _build_ui() -> void:
 	add_child(p)
 	var v := Kit.vbox(Kit.GAP)
 	p.add_child(v)
-	v.add_child(Kit.caps(tr("The crew") + "  ·  v0.3.0"))
+	v.add_child(Kit.caps(tr("Campaign")))
 	v.add_child(Kit.lbl(tr("The cuyes who were there"), Kit.T_STAT, Kit.C_GOLD, Kit.FONT_T, true))
 	v.add_child(Kit.lbl(tr("Four cuy astronauts who slip into six real NASA missions. Drag to turn them; 1 to 4 brings one forward."), Kit.T_BODY, Kit.C_DIM, Kit.FONT_R, true))
 	for i in CREW.size():
@@ -106,8 +107,62 @@ func _build_ui() -> void:
 	var row := Kit.hbox(Kit.GAP)
 	v.add_child(row)
 	row.add_child(Kit.btn(tr("All four"), func(): _focus(-1), Kit.T_BODY))
-	v.add_child(Kit.btn(tr("Play the story"), func(): _play_story(), Kit.T_BODY))
+	var play := Kit.btn(tr("Play the campaign") if Progress.count() == 0 else tr("Play the campaign again"), func(): _play_story(), Kit.T_BODY)
+	Kit.accent_btn(play, Kit.C_GOLD)
+	v.add_child(play)
 	row.add_child(Kit.btn(tr("◀ Menu"), func(): go("menu"), Kit.T_BODY))
+	_build_patches()
+
+
+## The six mission patches, earned one by one, and the trophy when all six are home (our own designs: no NASA insignia).
+func _build_patches() -> void:
+	var p := Kit.panel_box(Kit.PAD)
+	Kit.place(p, 1, 1, 1, 1, -Kit.MARGIN - 620, -Kit.MARGIN - 250, -Kit.MARGIN, -Kit.MARGIN)
+	add_child(p)
+	var v := Kit.vbox(Kit.GAP)
+	p.add_child(v)
+	var done := Progress.count()
+	v.add_child(Kit.caps(tr("Mission patches · %d of 6") % done))
+	var row := Kit.hbox(8)
+	v.add_child(row)
+	for m in Progress.MISSIONS:
+		var patch := Patch.new()
+		patch.col = m[3]
+		patch.label = m[1]
+		patch.year = m[2]
+		patch.stars = Progress.stars(m[0])
+		patch.custom_minimum_size = Vector2(92, 120)
+		row.add_child(patch)
+	if Progress.all_done():
+		var t := Kit.hbox(Kit.GAP)
+		v.add_child(t)
+		t.add_child(Kit.lbl("★", Kit.T_CLOCK + 10, Kit.C_GOLD, Kit.FONT_T))
+		var tv := Kit.vbox(0)
+		t.add_child(tv)
+		tv.add_child(Kit.lbl(tr("Trophy: Campos's seat"), Kit.T_ACTION - 2, Kit.C_GOLD, Kit.FONT_B))
+		tv.add_child(Kit.lbl(tr("Six real NASA missions, 1970 to 2022, flown to the end."), Kit.T_SMALL + 1, Kit.C_DIM, Kit.FONT_R, true))
+	else:
+		v.add_child(Kit.lbl(tr("Finish a mission to earn its patch. All six earn the trophy."), Kit.T_SMALL + 1, Kit.C_DIM, Kit.FONT_R, true))
+
+
+## One mission's patch: a round badge in its colour with the mission's name and year, dim until earned, its stars.
+class Patch extends Control:
+	var col := Color.WHITE
+	var label := ""
+	var year := ""
+	var stars := -1
+
+	func _draw() -> void:
+		var c := Vector2(size.x * 0.5, 42)
+		var on := stars >= 0
+		var base := col if on else Color(0.25, 0.27, 0.32)
+		draw_circle(c, 40, base.darkened(0.45))
+		draw_circle(c, 34, base)
+		draw_arc(c, 40, 0, TAU, 48, Color(1, 1, 1, 0.8 if on else 0.15), 3.0)
+		draw_string(Kit.FONT_T, c + Vector2(-40, 8), year, HORIZONTAL_ALIGNMENT_CENTER, 80, Kit.T_BODY, Color(1, 1, 1, 0.95 if on else 0.35))
+		draw_string(Kit.FONT_B, Vector2(0, 98), label, HORIZONTAL_ALIGNMENT_CENTER, size.x, Kit.T_SMALL - 2, Kit.C_TEXT if on else Kit.C_DIM)
+		var st := ("★".repeat(stars) + "☆".repeat(3 - stars)) if on else "?"
+		draw_string(Kit.FONT_B, Vector2(0, 116), st, HORIZONTAL_ALIGNMENT_CENTER, size.x, Kit.T_SMALL, Kit.C_GOLD if on else Kit.C_DIM)
 
 
 ## The story from the start: the prologue, then mission 1 (issue #66).

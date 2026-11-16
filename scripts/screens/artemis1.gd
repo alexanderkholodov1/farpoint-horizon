@@ -9,10 +9,18 @@ extends "res://scripts/screens/screen.gd"
 ## plasma, then the drogues (1) and the mains (2) on their calls, and splashdown off San Diego.
 ## Out of the corridor: lose screen. Rules: scripts/missions/artemis1/flight.gd; data: data/missions/artemis1.json.
 
+const Progress := preload("res://scripts/story/campaign_progress.gd")
 const Flight := preload("res://scripts/missions/artemis1/flight.gd")
 const Sets := preload("res://scripts/story/sets.gd")
 const Space := preload("res://scripts/world/space_builder.gd")
 const Sound := preload("res://scripts/flight/sound.gd")
+## The same flight as the game's own launches (Missions): the climb's physics and the pilot's panel.
+const Ascent := preload("res://scripts/flight/ascent.gd")
+const FlightHud := preload("res://scripts/flight/flight_hud.gd")
+const Scene3D := preload("res://scripts/flight/flight_scene.gd")
+const VIS := 0.92              ## Scene units per metre near the pad (the SLS drawn here is about 98 m tall).
+const HORIZON_R := 6000.0
+const ORION_KG := 26520.0      ## Orion at launch, as the payload for the climb (ours: about 26.5 t).
 
 var Fl: Flight
 var T: Dictionary
@@ -33,8 +41,13 @@ var ignite_q := -1.0
 var throttle := 1.0
 var maxq_sum := 0.0
 var maxq_n := 0
-var srb_q := -1.0
-var core_q := -1.0
+var model                        ## The climb (scripts/flight/ascent.gd), as in the game's own launches.
+var hud                          ## The pilot's panel (scripts/flight/flight_hud.gd).
+var horizon: Node3D
+var stage_wait := 0.0
+var shown_pitch := 0.0
+var in_space := false
+var stages_dropped := 0
 var rocket: Node3D
 var boosters: Array = []
 var core: Node3D
@@ -159,11 +172,13 @@ func _clear() -> void:
 func _build_launch() -> void:
 	_clear()
 	var env: Environment = world.world_env.environment
-	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color(0.012, 0.018, 0.045)
+	# 1:47 a.m. in Florida: a starry night sky from the first second, the pad lit by its floodlights
+	env.background_mode = Environment.BG_SKY
+	env.sky = Space.make_space_sky()
+	env.background_energy_multiplier = 0.7
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color(0.5, 0.55, 0.7)
-	env.ambient_light_energy = 0.5
+	env.ambient_light_color = Color(0.45, 0.5, 0.65)
+	env.ambient_light_energy = 0.6
 	env.fog_enabled = false
 	env.glow_enabled = true
 	world.sun.light_energy = 0.4
@@ -175,16 +190,36 @@ func _build_launch() -> void:
 	var st: Node3D = world.stage
 	ground = Node3D.new()
 	st.add_child(ground)
-	Sets.box(ground, Vector3(4000, 0.2, 4000), Vector3(0, -0.1, 0), Sets.mat(Color(0.08, 0.1, 0.08), 1.0))
-	Sets.box(ground, Vector3(30, 1.0, 30), Vector3(0, 0.5, 0), Sets.mat(Color(0.35, 0.35, 0.36), 0.9))
+	# the Florida coast: scrubland around the pad, the Atlantic to the east (+x), the pad's concrete and flame trench
+	Sets.box(ground, Vector3(1600, 0.2, 4000), Vector3(-500, -0.1, 0), Sets.mat(Color(0.12, 0.15, 0.11), 1.0))
+	Sets.box(ground, Vector3(2600, 0.2, 4000), Vector3(1600, -0.3, 0), Sets.mat(Color(0.03, 0.07, 0.13), 0.15, 0.3))
+	Sets.box(ground, Vector3(60, 0.2, 60), Vector3(0, 0.0, 0), Sets.mat(Color(0.42, 0.42, 0.43), 0.9))
+	Sets.box(ground, Vector3(30, 1.0, 30), Vector3(0, 0.5, 0), Sets.mat(Color(0.5, 0.5, 0.51), 0.9))
+	Sets.box(ground, Vector3(10, 1.2, 40), Vector3(0, 0.3, 0), Sets.mat(Color(0.15, 0.15, 0.16), 0.9))
+	# lightning masts and a water tower around the pad, as at a real pad (shapes only)
+	for q in [Vector3(-40, 0, -35), Vector3(40, 0, -35), Vector3(0, 0, 45)]:
+		Sets.cyl(ground, 0.5, 0.9, 90, q + Vector3(0, 45, 0), Sets.mat(Color(0.7, 0.7, 0.72), 0.6, 0.4), 8)
+		_glow(ground, 3.0, q + Vector3(0, 91, 0), Color(1, 0.2, 0.15, 0.9))
+	Sets.cyl(ground, 6, 6, 8, Vector3(-60, 26, 30), Sets.mat(Color(0.85, 0.85, 0.85), 0.6), 24)
+	Sets.cyl(ground, 0.8, 0.8, 22, Vector3(-60, 11, 30), Sets.mat(Color(0.6, 0.6, 0.62), 0.6, 0.4), 8)
 	# the tower and the lights of the pad at night (1:47 a.m.)
 	var steel := Sets.mat(Color(0.55, 0.3, 0.2), 0.6, 0.5)
 	Sets.box(ground, Vector3(3, 70, 3), Vector3(-8, 36, 0), steel)
 	for h in [20.0, 40.0, 58.0]:
 		Sets.box(ground, Vector3(6, 0.6, 1.2), Vector3(-5.5, h, 0), steel)
 	for p in [Vector3(25, 2, 25), Vector3(-25, 2, 25), Vector3(25, 2, -25), Vector3(-25, 2, -25)]:
-		Sets.omni(ground, p + Vector3(0, 20, 0), Color(1.0, 0.85, 0.6), 4.0, 90.0)
-		_glow(ground, 6.0, p + Vector3(0, 20, 0), Color(1, 0.9, 0.7, 0.9))
+		Sets.omni(ground, p + Vector3(0, 20, 0), Color(1.0, 0.88, 0.7), 9.0, 140.0)
+		_glow(ground, 8.0, p + Vector3(0, 20, 0), Color(1, 0.9, 0.7, 0.9))
+	# floodlights pointed at the rocket, as at a real night launch
+	for a in [0.6, 2.4, 4.2]:
+		var sp := SpotLight3D.new()
+		sp.position = Vector3(cos(a) * 70.0, 6.0, sin(a) * 70.0)
+		sp.light_color = Color(0.95, 0.95, 1.0)
+		sp.light_energy = 14.0
+		sp.spot_range = 220.0
+		sp.spot_angle = 18.0
+		ground.add_child(sp)
+		sp.look_at_from_position(sp.position, Vector3(0, 45, 0), Vector3.UP)
 	# SLS: the orange core stage, two white boosters, Orion and its launch abort tower on top
 	rocket = Node3D.new()
 	rocket.position = Vector3(0, 1.0, 0)
@@ -298,7 +333,7 @@ func _build_entry() -> void:
 	em.albedo_color = Color(1.5, 1.55, 1.65)
 	e.material_override = em
 	e.position = Vector3(0, -6371.0 - 120.0, 0)
-	e.rotation = Vector3(0.4, 2.1, 0.0)
+	e.rotation = Vector3(0.25, -1.9, 0.0)
 	e.name = "Earth"
 	st.add_child(e)
 	capsule = Node3D.new()
@@ -491,7 +526,7 @@ func _show_brief() -> void:
 	p.add_child(v)
 	v.add_child(Kit.caps(tr("How to play")))
 	v.add_child(Kit.lbl(tr("Everything we learned"), Kit.T_CLOCK, Kit.C_GOLD, Kit.FONT_T))
-	for row in [["1", tr("Launch"), tr("SPACE on the zero. Max Q: hold the throttle in the band (W/S). B and C to separate the stages on their calls.")],
+	for row in [["1", tr("Launch"), tr("SPACE on the zero. Then fly it as in Missions: lean with ← → onto the green marker, W/S throttle, SPACE drops the boosters and the core stage.")],
 			["2", tr("Around the Moon"), tr("Hold SPACE to burn, let go in the gold band. Then SPACE when the Earth is in the frame.")],
 			["3", tr("Home at Mach 32"), tr("Keep the angle in the corridor (W/S). Then 1 for the drogues and 2 for the mains.")]]:
 		var h := Kit.hbox(Kit.PAD)
@@ -532,6 +567,7 @@ func _ignite() -> void:
 	phase = "ascent"
 	phase_t = 0.0
 	shake = 1.0
+	_start_climb()
 	flash.color = Color(1, 0.8, 0.5, 0.5)
 	roar.play()
 	thump.play()
@@ -540,119 +576,176 @@ func _ignite() -> void:
 	hint.text = ""
 
 
-func _ascent(delta: float) -> void:
-	var L: Dictionary = Fl.L
-	var mq: Array = L.maxq_s
-	var sp := float(L.fast) if met < float(mq[1]) + 10.0 else 40.0
-	if met > float(L.srb_sep_s) - 8.0 and srb_q < 0.0:
-		sp = 6.0
-	if met > float(L.core_sep_s) - 8.0 and core_q < 0.0:
-		sp = 6.0
-	met += delta * sp
-	speed_lbl.text = tr("Shown %d times faster") % int(sp)
-	# Max Q: the air's push rises and falls; the throttle keeps the needle in the band
-	var in_q := met >= float(mq[0]) and met <= float(mq[1])
-	if Input.is_physical_key_pressed(KEY_W) or Input.is_physical_key_pressed(KEY_UP):
-		throttle = minf(1.0, throttle + delta * 0.9)
-	if Input.is_physical_key_pressed(KEY_S) or Input.is_physical_key_pressed(KEY_DOWN):
-		throttle = maxf(0.4, throttle - delta * 0.9)
-	var air := exp(-pow((met - 70.0) / 22.0, 2.0)) * (1.25 + 0.15 * sin(met * 0.7))
-	var press := air * throttle
-	(gauge as Gauge).mode = "maxq"
-	(gauge as Gauge).value = press
-	gauge_panel.visible = met > float(mq[0]) - 15.0 and met < float(mq[1]) + 10.0
-	gauge_cap.text = tr("Max Q: the air's push")
-	if in_q:
-		var ok := press > 0.55 and press < 0.85
-		maxq_sum += 1.0 if ok else 0.0
-		maxq_n += 1
-		hint.text = tr(T.maxq)
-		now_lbl.text = tr("THROTTLE DOWN! (S)") if press >= 0.85 else (tr("THROTTLE UP! (W)") if press <= 0.55 else tr("HOLD IT..."))
-		now_lbl.add_theme_color_override("font_color", Kit.C_OK if ok else Kit.C_BAD)
-		if not ok:
-			shake = maxf(shake, 0.35)
-	elif met > float(mq[1]) and met < float(mq[1]) + 2.0:
-		now_lbl.text = ""
-		hint.text = ""
-		throttle = 1.0
-		_say("Rumi", tr("Through Max Q. Throttle up. Boosters next."))
-	# the calls
-	if srb_q < 0.0 and met > float(L.srb_sep_s) - 4.0:
-		now_lbl.text = tr("BOOSTERS: B!")
+## The climb, flown as in the game's own launches: the physics of scripts/flight/ascent.gd (a heavy launcher with its
+## boosters, Orion on top), the pilot's panel of scripts/flight/flight_hud.gd: lean with the arrows to keep the needle
+## on the green marker, W and S on the throttle, SPACE drops the boosters and then the core stage when they are empty;
+## the flight computer helps a hands-off pilot. Steering hard across the air at Max Q tears the rocket apart.
+func _start_climb() -> void:
+	model = Ascent.new()
+	model.setup("heavy", ORION_KG, "leo")
+	hud = FlightHud.new()
+	add_child(hud)
+	move_child(hud, flash.get_index())
+	hud.build(tr("LAUNCH") + " · SLS · Artemis I", tr("STAGE"), tr("← → lean · W S throttle · Space stage"))
+	hud.add_time_warp(1.0)
+	hud.add_readout("alt", tr("Height"))
+	hud.add_readout("speed", tr("Speed"))
+	hud.add_gauge("orbit", tr("Speed toward orbit"), 2.0, 2.0, Kit.C_ACCENT)
+	hud.add_gauge("fuel", tr("Fuel in this stage"), 2.0, 2.0, Kit.C_GOLD)
+	hud.add_gauge("stress", tr("Stress on the structure"), 0.45, 0.85, Kit.C_OK)
+	hud.lever.value = 1.0
+	hud.throttle_changed.connect(func(v): throttle = v)
+	hud.action_pressed.connect(_on_stage)
+	hud.set_autopilot(false)
+	hud.hint(tr("Lean with ← → to keep the needle on the green marker, W and S move the throttle, Space drops what is empty."))
+	horizon = Scene3D.horizon_earth(HORIZON_R)
+	horizon.visible = false
+	world.stage.add_child(horizon)
+	# the story's own panels step aside for the pilot's
+	gauge_panel.visible = false
+	hint.text = ""
+
+
+func _climb(delta: float) -> void:
+	var steer := 0.0
+	if hud.autopilot:
+		if hud.pilot_input():
+			hud.set_autopilot(false)
+		else:
+			steer = clampf((model.marker - model.pitch) * 0.5, -1.0, 1.0)
+	if not hud.autopilot:
+		steer = hud.steer().x
+		throttle = hud.throttle_keys(throttle, delta)
+	model.throttle = throttle
+	model.autopilot = hud.autopilot
+	hud.cap_warp(10.0, tr("engine on"))
+	# time runs by itself: liftoff and Max Q in real time, then ten times faster, real time again for each staging
+	var calm: bool = model.t > 75.0 and model.fuel() > 0.07 and model.stress < Ascent.STRESS_WARN and model.orbit_progress() < 0.97 and not model.wants_stage()
+	var want_w := 10.0 if calm else 1.0
+	if hud.warp != want_w:
+		hud.set_warp(want_w)
+	model.step(delta, steer, hud.warp)
+	met = model.t
+	if model.wants_stage():
+		stage_wait += delta
+		hud.action.lit = true
+		now_lbl.text = tr("BOOSTERS EMPTY: SPACE!") if model.boosters_attached else tr("CORE STAGE EMPTY: SPACE!")
 		now_lbl.add_theme_color_override("font_color", Kit.C_GOLD)
-		hint.text = tr(T.srb)
-		if met > float(L.srb_sep_s) + float(L.call_window_s):
-			_sep_boosters(0.0)
-	if srb_q >= 0.0 and core_q < 0.0 and met > float(L.core_sep_s) - 4.0:
-		now_lbl.text = tr("CORE STAGE: C!")
-		now_lbl.add_theme_color_override("font_color", Kit.C_GOLD)
-		hint.text = tr(T.core)
-		if met > float(L.core_sep_s) + float(L.call_window_s):
-			_sep_core(0.0)
-	# the climb (drawn: height from the mission time, ours), the fire, the night sky turning black
-	var h := 0.5 * 22.0 * pow(minf(met, 600.0), 1.6) * 0.02
-	rocket.position.y = 1.0 + h
-	rocket.rotation.z = -clampf((met - 20.0) / 300.0, 0.0, 1.0) * 1.1
-	var env: Environment = world.world_env.environment
-	env.background_color = Color(0.012, 0.018, 0.045).lerp(Color(0, 0, 0.005), clampf(met / 150.0, 0.0, 1.0))
+		if stage_wait > 4.0:
+			_on_stage()
+			hud.message(tr("STAGE SEPARATION"), tr("The flight computer staged for you."), Kit.C_ACCENT, 2.0)
+	else:
+		hud.action.lit = false
+		if now_lbl.text.ends_with(": SPACE!"):
+			now_lbl.text = ""
+	if model.h > 7000.0 and model.h < 20000.0 and not _told.has("maxq"):
+		_told["maxq"] = true
+		hud.hint(tr("Max Q: the air pushes hardest. Stay on the green marker or the stress climbs."))
+		_say("Rumi", tr("Max Q. Keep her straight. Straight!"))
+	if model.stress > Ascent.STRESS_WARN:
+		shake = maxf(shake, 0.4)
+	# telemetry, as in the game's launches
+	hud.clock.text = FlightHud.met_text(model.t)
+	hud.value("alt", ("%.1f km" % (model.h / 1000.0)) if model.h >= 1000.0 else ("%d m" % int(model.h)))
+	var v: float = sqrt(model.vx * model.vx + model.vy * model.vy)
+	hud.value("speed", ("%.2f km/s" % (v / 1000.0)) if v >= 1000.0 else ("%d m/s" % int(v)))
+	hud.gauge("orbit", model.orbit_progress(), "%d %%" % roundi(model.orbit_progress() * 100.0))
+	hud.gauge("fuel", model.fuel(), "%d %%" % roundi(model.fuel() * 100.0))
+	var sf: float = model.stress / Ascent.STRESS_BREAK
+	hud.gauge("stress", sf, tr("high") if sf >= 0.85 else (tr("rising") if sf >= 0.45 else tr("calm")))
+	hud.dial.pitch = model.pitch
+	hud.dial.marker = model.marker
+	_place_rocket(delta)
+	if model.broken or model.crashed:
+		_lose(tr("The rocket came apart."), tr("Steered hard across the air at Max Q. That is not how it went: SLS flew straight and true. Try again."))
+		return
+	if model.orbit:
+		_reach_orbit()
+
+
+var _told := {}
+
+
+static func _squash(m: float, knee: float, slope: float) -> float:
+	return m if m < knee else knee + (m - knee) * slope
+
+
+func _place_rocket(delta: float) -> void:
+	rocket.position = Vector3(_squash(model.x, 1000.0, 0.08) * VIS, 1.0 + _squash(model.h, 1500.0, 0.1) * VIS, 0)
+	shown_pitch = lerpf(shown_pitch, model.pitch, clampf(delta * 3.5, 0.0, 1.0))
+	rocket.rotation = Vector3(0, 0, -deg_to_rad(shown_pitch))
 	for i in flames.size():
 		var f: MeshInstance3D = flames[i]
-		if not is_instance_valid(f):
-			continue
-		var on := f.get_parent() == rocket or f.get_parent().get_parent() == rocket
-		(f.material_override as StandardMaterial3D).albedo_color.a = (0.85 + 0.15 * sin(_t * 40.0 + i)) if on else 0.0
-		f.scale.y = (1.8 if i % 2 == 1 else 1.0) * (1.0 + 0.5 * clampf(met / 120.0, 0.0, 1.0))
-	(rocket.get_node("FireLight") as OmniLight3D).light_energy = 6.0
+		if is_instance_valid(f) and f.visible:
+			var on: bool = model.lifted and not model.flameout and throttle > 0.02
+			(f.material_override as StandardMaterial3D).albedo_color.a = (0.85 + 0.15 * sin(_t * 40.0 + i)) * throttle if on else 0.0
+			f.scale.y = (1.8 if i % 2 == 1 else 1.0) * (1.0 + 0.8 * clampf(model.h / 40000.0, 0.0, 1.0))
+	if model.h > 15000.0:
+		ground.visible = false
+		horizon.visible = true
+		Scene3D.horizon_place(horizon, rocket.position, HORIZON_R, model.h * 6.0, model.R, model.x)
+	if model.h > 55000.0 and not in_space:
+		in_space = true
 	for b in boosters:
 		if b.get_parent() != rocket:
-			b.position += Vector3(signf(b.position.x) * 8.0, -12.0, 0) * delta
-			b.rotation.z += signf(b.position.x) * delta * 0.6
+			b.position += Vector3(signf(b.position.x - rocket.position.x) * 8.0, -25.0, 0) * delta
+			b.rotation.z += 0.6 * delta
 	if core and core.get_parent() != rocket:
-		core.position += Vector3(0, -15.0, 0) * delta
-	shake = maxf(shake, 0.15 if met < 130.0 else 0.0)
+		core.position += Vector3(0, -30.0, 0) * delta
+		core.rotation.z += 0.3 * delta
 
 
-func _sep_boosters(q: float) -> void:
-	srb_q = q
-	_grade(q)
+func _on_stage() -> void:
+	if phase != "ascent" or model == null:
+		return
+	var what: String = model.stage()
+	if what == "":
+		return
+	stage_wait = 0.0
+	hud.action.lit = false
 	now_lbl.text = ""
-	hint.text = ""
-	flash.color = Color(1, 0.9, 0.7, 0.3)
 	Kit.UiSound.play("whoosh")
-	for b in boosters:
-		var g := (b as Node3D).global_transform
-		rocket.remove_child(b)
-		world.stage.add_child(b)
-		(b as Node3D).global_transform = g
-	flames[0].visible = false
-	flames[1].visible = false
-	flames[4].visible = false
-	flames[5].visible = false
-	_say("Killa", tr("Boosters away! Two minutes and twelve seconds, right on time."))
+	flash.color = Color(1, 0.9, 0.7, 0.3)
+	shake = 0.6
+	stages_dropped += 1
+	if what == "boosters":
+		for b in boosters:
+			var g := (b as Node3D).global_transform
+			rocket.remove_child(b)
+			world.stage.add_child(b)
+			(b as Node3D).global_transform = g
+		for i in [0, 1, 4, 5]:
+			flames[i].visible = false
+		hud.message(tr("BOOSTERS AWAY"), tr("Two minutes and twelve seconds, on the real flight."), Kit.C_ACCENT, 2.0)
+		_say("Killa", tr("Boosters away! The real ones went at two minutes and twelve seconds."))
+	elif core and core.get_parent() == rocket:
+		var g2 := core.global_transform
+		rocket.remove_child(core)
+		world.stage.add_child(core)
+		core.global_transform = g2
+		hud.message(tr("CORE STAGE AWAY"), tr("Eight minutes and three seconds, on the real flight."), Kit.C_ACCENT, 2.0)
+		_say("Rumi", tr("Core stage away. The upper stage takes us on."))
 
 
-func _sep_core(q: float) -> void:
-	core_q = q
-	_grade(q)
-	now_lbl.text = ""
-	hint.text = ""
-	flash.color = Color(1, 0.9, 0.7, 0.3)
-	Kit.UiSound.play("whoosh")
-	roar.stop()
-	var g := core.global_transform
-	rocket.remove_child(core)
-	world.stage.add_child(core)
-	core.global_transform = g
+func _reach_orbit() -> void:
+	var sm: Dictionary = model.summary()
+	launch_aim = clampf(1.0 - float(sm.get("mean_error_deg", 10.0)) / 10.0, 0.0, 1.0)
+	hud.message(tr("ORBIT!"), tr("Now the upper stage pushes us toward the Moon."), Kit.C_OK, 3.0)
+	_shout(tr("Orbit!"), tr("Next: the push toward the Moon."))
+	_say("Inti", tr("We are in orbit! Campos did not even blink."))
+	Kit.UiSound.play("success")
 	for f in flames:
 		f.visible = false
-	_say("Rumi", tr("Core stage away. Next stop: the Moon."))
 	phase = "to_moon"
 	phase_t = 0.0
 
 
+var launch_aim := 0.0
+
+
 func _launch_q() -> float:
-	var mq := maxq_sum / maxq_n if maxq_n > 0 else 0.0
-	return (maxf(ignite_q, 0.0) + mq + maxf(srb_q, 0.0) + maxf(core_q, 0.0)) / 4.0
+	# the ignition on the zero, how close the needle stayed to the marker, and the staging done by the pilot
+	return (maxf(ignite_q, 0.0) + launch_aim * 2.0 + clampf(stages_dropped / 2.0, 0.0, 1.0)) / 4.0
 
 
 # ===================================================================================== STAGE 2: AROUND THE MOON
@@ -788,6 +881,67 @@ func _start_far() -> void:
 	_say("Rumi", tr("Campos's seat has never been this far from home. Nobody's has."))
 
 
+func _far_to_home() -> void:
+	if phase != "far":
+		return
+	if photo_layer and is_instance_valid(photo_layer):
+		photo_layer.queue_free()
+	phase = "map"
+	phase_t = 0.0
+	_show_map(2, tr("Next: home"), tr("A second flyby of the Moon on December 5 turns Orion for home. Six days later it meets the Earth's air at 24,581 mph, Mach 32, over the Pacific Ocean, and has to come down off the coast of San Diego, in California."), _start_entry)
+
+
+# ===================================================================================== THE JOURNEY MAP
+var map_layer: Control
+var map_next: Callable
+
+
+## Where we are in the whole trip: the Earth, the Moon, the path out around the far side and back, Orion on it.
+func _show_map(step: int, title: String, text: String, next: Callable) -> void:
+	map_next = next
+	map_layer = Control.new()
+	map_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(map_layer)
+	move_child(map_layer, flash.get_index())
+	var shade := ColorRect.new()
+	shade.color = Color(0.01, 0.015, 0.03, 0.94)
+	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	map_layer.add_child(shade)
+	var p := Kit.panel_box(Kit.PAD)
+	Kit.place(p, 0.5, 0.5, 0.5, 0.5, -560, -300, 560, 300)
+	map_layer.add_child(p)
+	var v := Kit.vbox(Kit.GAP)
+	p.add_child(v)
+	v.add_child(Kit.caps(tr("The journey · %d of 3") % (step + 1)))
+	v.add_child(Kit.lbl(title, Kit.T_CLOCK, Kit.C_GOLD, Kit.FONT_T))
+	var m := JourneyMap.new()
+	m.step = step
+	m.custom_minimum_size = Vector2(1080, 300)
+	v.add_child(m)
+	var t := Kit.lbl(text, Kit.T_BODY + 1, Kit.C_TEXT, Kit.FONT_R, true)
+	t.custom_minimum_size.x = 1060
+	v.add_child(t)
+	var go_btn := Kit.btn(tr("Continue  ·  Enter"), _map_go, Kit.T_BODY)
+	Kit.accent_btn(go_btn, Kit.C_GOLD)
+	v.add_child(go_btn)
+	go_btn.grab_focus()
+	map_layer.modulate.a = 0.0
+	map_layer.create_tween().tween_property(map_layer, "modulate:a", 1.0, 0.5)
+	hint.text = ""
+	now_lbl.text = ""
+	big.text = ""
+	big_sub.text = ""
+
+
+func _map_go() -> void:
+	if phase != "map":
+		return
+	if map_layer and is_instance_valid(map_layer):
+		map_layer.queue_free()
+	phase = "between"
+	map_next.call()
+
+
 func _flyby_q() -> float:
 	return (maxf(burn_q, 0.0) + maxf(earth_q, 0.0)) / 2.0
 
@@ -796,6 +950,8 @@ func _flyby_q() -> float:
 func _start_entry() -> void:
 	if photo_layer and is_instance_valid(photo_layer):
 		photo_layer.queue_free()
+	if map_layer and is_instance_valid(map_layer):
+		map_layer.queue_free()
 	_build_entry()
 	phase = "entry"
 	phase_t = 0.0
@@ -843,7 +999,8 @@ func _entry(delta: float) -> void:
 	(gauge as Gauge).value = angle
 	mach = lerpf(32.0, 1.2, k)
 	alt_km = lerpf(120.0, 12.0, k)
-	clock_sub.text = tr("Mach %d · %d km up") % [int(mach), int(alt_km)]
+	clock_sub.text = tr("Mach %d · %d km up · over the Pacific") % [int(mach), int(alt_km)]
+	_home_tag()
 	speed_lbl.text = tr("Shown 40 times faster")
 	(plasma.material_override as StandardMaterial3D).albedo_color.a = clampf(1.0 - absf(k - 0.45) * 1.8, 0.0, 1.0) * (0.85 + 0.15 * sin(_t * 30.0))
 	plasma.scale = Vector3.ONE * (1.0 + 0.1 * sin(_t * 23.0))
@@ -856,7 +1013,27 @@ func _entry(delta: float) -> void:
 		_start_chutes()
 
 
+## Where Orion is going: San Diego's coast, ahead on the curve of the Earth, with a marker of constant size.
+var home_lbl: Label
+
+
+func _home_tag() -> void:
+	if home_lbl == null:
+		home_lbl = Kit.lbl(tr("▼ San Diego · Pacific Ocean"), Kit.T_BODY, Kit.C_GOLD, Kit.FONT_B)
+		home_lbl.add_theme_constant_override("outline_size", 6)
+		home_lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+		add_child(home_lbl)
+		move_child(home_lbl, hint_panel.get_index())
+	var c := Vector3(0, -6371.0 - 120.0, 0)
+	var ahead := c + (capsule.position + Vector3(900, -120, -500) - c).normalized() * 6371.0
+	home_lbl.visible = phase == "entry" and not world.cam.is_position_behind(ahead)
+	if home_lbl.visible:
+		home_lbl.position = world.cam.unproject_position(ahead) - Vector2(home_lbl.size.x * 0.5, home_lbl.size.y)
+
+
 func _start_chutes() -> void:
+	if home_lbl:
+		home_lbl.visible = false
 	phase = "chutes"
 	phase_t = 0.0
 	now_lbl.text = ""
@@ -933,6 +1110,12 @@ func _splash() -> void:
 	world.sun.rotation_degrees = Vector3(-70, 30, 0)
 	var sea := Sets.box(world.stage, Vector3(3000, 0.2, 3000), capsule.position + Vector3(0, -0.5, 0), Sets.mat(Color(0.1, 0.25, 0.4), 0.25, 0.2))
 	sea.name = "Sea"
+	var ship := Node3D.new()
+	ship.position = capsule.position + Vector3(260, 0, -420)
+	world.stage.add_child(ship)
+	Sets.box(ship, Vector3(60, 6, 12), Vector3(0, 3, 0), Sets.mat(Color(0.45, 0.47, 0.5), 0.7, 0.3))
+	Sets.box(ship, Vector3(14, 10, 9), Vector3(-8, 11, 0), Sets.mat(Color(0.5, 0.52, 0.55), 0.7, 0.3))
+	Sets.box(ship, Vector3(3, 14, 3), Vector3(-8, 23, 0), Sets.mat(Color(0.4, 0.42, 0.45), 0.7, 0.3))
 	_shout(tr("Splashdown!"), tr("12:40 p.m. EST, December 11, 2022, off San Diego."))
 	_say("Wayra", tr("Twenty-five days, ten hours, fifty-three minutes. Welcome home, all of you."))
 
@@ -948,6 +1131,9 @@ func _score() -> float:
 
 # ===================================================================================== THE END
 func _lose(a: String, b: String) -> void:
+	if hud and is_instance_valid(hud):
+		hud.queue_free()
+		hud = null
 	phase = "lost"
 	phase_t = 0.0
 	roar.stop()
@@ -1016,6 +1202,7 @@ func _show_result() -> void:
 	p.add_child(v)
 	v.add_child(Kit.caps(tr("Mission 6 · done · the crew is home")))
 	var stars := Fl.stars_for(total)
+	var new_patch := Progress.earn("artemis1", stars)
 	var sh := Kit.hbox(Kit.PAD)
 	v.add_child(sh)
 	sh.add_child(Kit.lbl("★".repeat(stars) + "☆".repeat(3 - stars), Kit.T_CLOCK, Kit.C_GOLD, Kit.FONT_T))
@@ -1028,6 +1215,20 @@ func _show_result() -> void:
 			[tr("Home at Mach 32"), "%d%%" % int(_entry_q() * 100.0)]]:
 		grid.add_child(Kit.lbl(row[0], Kit.T_BODY, Kit.C_DIM, Kit.FONT_R))
 		grid.add_child(Kit.lbl(row[1], Kit.T_BODY, Kit.C_TEXT, Kit.FONT_B))
+	# the collectibles: this mission's patch, and the campaign's trophy once all six are home
+	var award := Kit.hbox(Kit.GAP)
+	v.add_child(award)
+	award.add_child(Kit.lbl("★", Kit.T_CLOCK + 6, Kit.C_GOLD, Kit.FONT_T))
+	var av := Kit.vbox(0)
+	award.add_child(av)
+	if Progress.all_done():
+		av.add_child(Kit.lbl(tr("Trophy earned: Campos's seat!"), Kit.T_ACTION, Kit.C_GOLD, Kit.FONT_B))
+		av.add_child(Kit.lbl(tr("All six mission patches: the whole campaign, 1970 to 2022. See them in Campaign."), Kit.T_SMALL + 1, Kit.C_DIM, Kit.FONT_R, true))
+	else:
+		av.add_child(Kit.lbl(tr("Patch earned: Artemis I") if new_patch else tr("Artemis I patch: your best kept"), Kit.T_ACTION, Kit.C_GOLD, Kit.FONT_B))
+		av.add_child(Kit.lbl(tr("%d of 6 patches. Earn all six for the trophy: see them in Campaign.") % Progress.count(), Kit.T_SMALL + 1, Kit.C_DIM, Kit.FONT_R, true))
+	if Progress.all_done():
+		Kit.UiSound.play("fanfare")
 	v.add_child(Kit.rule())
 	for F in Fl.D.facts:
 		var fh := Kit.hbox(Kit.GAP)
@@ -1078,23 +1279,36 @@ func process(delta: float) -> void:
 			world.cam.position = Vector3(40, 18, 60)
 			world.cam.look_at(Vector3(0, 40, 0), Vector3.UP)
 		"ascent":
-			_ascent(delta)
+			_climb(delta)
 			clock_lbl.text = Fl.met(met)
 			clock_sub.text = tr("Space Launch System, from Pad 39B")
 			var rp := rocket.global_position
-			var back_off := Vector3(40, 10, 70) * (1.0 + clampf(met / 200.0, 0.0, 3.0))
-			world.cam.position = rp + Vector3(0, 30, 0) + back_off * (1.4 if met < 15.0 else 1.0)
-			world.cam.look_at(rp + Vector3(0, 40, 0), Vector3.UP)
+			var up := rocket.global_transform.basis.y
+			var hk: float = clampf(model.h / 40000.0, 0.0, 1.0) if model else 0.0
+			var want := Vector3(110, 25, 190).lerp(Vector3(90, 70, 130), hk)
+			if phase_t < 5.0:
+				# liftoff seen from the ground, the whole pad and the rocket in view, then the camera follows
+				want = want.lerp(Vector3(150, 20 - rp.y + 30.0, 260), 1.0 - smoothstep(1.0, 5.0, phase_t))
+			world.cam.position = world.cam.position.lerp(rp + want, clampf(delta * 3.0, 0.0, 1.0))
+			world.cam.look_at(rp + up * 45.0, Vector3.UP)
+			world.cam.fov = 50.0
 		"to_moon":
-			if phase_t > 2.5:
-				_start_flyby()
+			if phase_t > 3.0:
+				if hud and is_instance_valid(hud):
+					hud.queue_free()
+					hud = null
+				phase = "map"
+				phase_t = 0.0
+				_show_map(1, tr("Next: to the Moon"), tr("From orbit, the upper stage fires once more and sends Orion toward the Moon: the trans-lunar injection, 1 hour and 29 minutes after liftoff. Five days later Orion passes 81 miles above the far side of the Moon, and fires its own engine to swing out past it."), _start_flyby)
+		"map":
+			pass
 		"flyby":
 			_flyby(delta)
 		"earth":
 			_earth(delta)
 		"far":
 			if phase_t > 6.0:
-				_start_entry()
+				_far_to_home()
 		"entry":
 			_entry(delta)
 		"chutes":
@@ -1154,14 +1368,12 @@ func _unhandled_input(e: InputEvent) -> void:
 		_start()
 	elif phase == "count" and k == KEY_SPACE:
 		_ignite()
-	elif phase == "ascent" and k == KEY_B and srb_q < 0.0 and met > float(Fl.L.srb_sep_s) - float(Fl.L.call_window_s):
-		_sep_boosters(Fl.call_quality(met, float(Fl.L.srb_sep_s)))
-	elif phase == "ascent" and k == KEY_C and srb_q >= 0.0 and core_q < 0.0 and met > float(Fl.L.core_sep_s) - float(Fl.L.call_window_s):
-		_sep_core(Fl.call_quality(met, float(Fl.L.core_sep_s)))
 	elif phase == "earth" and k == KEY_SPACE:
 		_snap_earth()
 	elif phase == "far" and (k == KEY_ENTER or k == KEY_SPACE) and phase_t > 1.5:
-		_start_entry()
+		_far_to_home()
+	elif phase == "map" and (k == KEY_ENTER or k == KEY_SPACE) and phase_t > 0.8:
+		_map_go()
 	elif phase == "chutes" and k == KEY_1 and drogue_q < 0.0:
 		_drogue()
 	elif phase == "chutes" and k == KEY_2 and drogue_q >= 0.0 and main_q < 0.0:
@@ -1254,3 +1466,52 @@ class Gauge extends Control:
 		if mode == "corridor":
 			draw_string(Kit.FONT_B, Vector2(x1 + 6, _y(-2.0, lo, hi)), TranslationServer.translate("skips off"), HORIZONTAL_ALIGNMENT_LEFT, -1, Kit.T_SMALL, Kit.C_BAD)
 			draw_string(Kit.FONT_B, Vector2(x1 + 6, _y(-11.0, lo, hi)), TranslationServer.translate("too hot"), HORIZONTAL_ALIGNMENT_LEFT, -1, Kit.T_SMALL, Kit.C_BAD)
+
+
+## The whole trip on one line: the Earth on the left, the Moon on the right, the path out and around the far side
+## and back (drawn for the game, not to scale: the Moon is 239,000 miles away), Orion's place on it.
+class JourneyMap extends Control:
+	var step := 0
+	var t := 0.0
+
+	func _process(d: float) -> void:
+		t += d
+		queue_redraw()
+
+	func _p(a: float) -> Vector2:
+		var e := Vector2(size.x * 0.14, size.y * 0.55)
+		var m := Vector2(size.x * 0.8, size.y * 0.5)
+		if a < 0.45:
+			var k := a / 0.45
+			return e.lerp(m + Vector2(-60, -70), k) + Vector2(0, -sin(k * PI) * 55.0)
+		if a < 0.6:
+			var k2 := (a - 0.45) / 0.15
+			var ang := lerpf(PI * 0.6, -PI * 0.6, k2)
+			return m + Vector2(cos(ang) * 95.0, -sin(ang) * 85.0)
+		var k3 := (a - 0.6) / 0.4
+		return (m + Vector2(-60, 70)).lerp(e + Vector2(0, 20), k3) + Vector2(0, sin(k3 * PI) * 55.0)
+
+	func _draw() -> void:
+		draw_rect(Rect2(Vector2.ZERO, size), Color(0.02, 0.03, 0.06, 0.9))
+		var e := Vector2(size.x * 0.14, size.y * 0.55)
+		var m := Vector2(size.x * 0.8, size.y * 0.5)
+		draw_circle(e, 34.0, Color(0.25, 0.5, 0.9))
+		draw_arc(e, 37.0, 0, TAU, 48, Color(0.6, 0.8, 1.0, 0.5), 2.0)
+		draw_circle(m, 14.0, Color(0.75, 0.75, 0.75))
+		draw_string(Kit.FONT_B, e + Vector2(-20, 58), TranslationServer.translate("Earth"), HORIZONTAL_ALIGNMENT_LEFT, -1, Kit.T_SMALL, Kit.C_TEXT)
+		draw_string(Kit.FONT_B, m + Vector2(-18, 36), TranslationServer.translate("Moon"), HORIZONTAL_ALIGNMENT_LEFT, -1, Kit.T_SMALL, Kit.C_TEXT)
+		var done_to: float = [0.03, 0.5, 0.97][clampi(step, 0, 2)]
+		var prev := _p(0.0)
+		for i in range(1, 121):
+			var a := i / 120.0
+			var q := _p(a)
+			draw_line(prev, q, Kit.C_GOLD if a <= done_to else Color(1, 1, 1, 0.25), 3.0 if a <= done_to else 2.0)
+			prev = q
+		draw_string(Kit.FONT_B, e + Vector2(-40, -48), TranslationServer.translate("Launch · Nov 16"), HORIZONTAL_ALIGNMENT_LEFT, -1, Kit.T_SMALL, Kit.C_DIM)
+		draw_string(Kit.FONT_B, m + Vector2(-60, -100), TranslationServer.translate("Far side · Nov 21"), HORIZONTAL_ALIGNMENT_LEFT, -1, Kit.T_SMALL, Kit.C_DIM)
+		draw_string(Kit.FONT_B, e + Vector2(40, 84), TranslationServer.translate("Splashdown · Dec 11"), HORIZONTAL_ALIGNMENT_LEFT, -1, Kit.T_SMALL, Kit.C_DIM)
+		draw_string(Kit.FONT_B, Vector2(size.x * 0.5 - 120, size.y - 10), TranslationServer.translate("Drawn for the game, not to scale"), HORIZONTAL_ALIGNMENT_LEFT, -1, Kit.T_SMALL - 2, Kit.C_DIM)
+		var start: float = [0.0, 0.03, 0.5][clampi(step, 0, 2)]
+		var o := _p(lerpf(start, done_to, fmod(t * 0.25, 1.0)))
+		draw_circle(o, 7.0, Color(1, 1, 1))
+		draw_arc(o, 12.0 + 3.0 * sin(t * 6.0), 0, TAU, 24, Kit.C_GOLD, 2.0)
