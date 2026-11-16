@@ -12,6 +12,7 @@ extends "res://scripts/screens/screen.gd"
 ## scripts/missions/lcross/impact.gd; data: data/missions/lcross.json. The world is in km: the south pole at the
 ## origin, the map's x as x and its y as z.
 
+const Progress := preload("res://scripts/story/campaign_progress.gd")
 const Impact := preload("res://scripts/missions/lcross/impact.gd")
 const Sets := preload("res://scripts/story/sets.gd")
 const Space := preload("res://scripts/world/space_builder.gd")
@@ -1039,6 +1040,7 @@ func _show_result() -> void:
 	v.add_child(Kit.caps(tr("Mission 4 · done")))
 	var total := _data()
 	var stars := I.stars_for(total)
+	Progress.earn("lcross", stars)
 	var top := Kit.hbox(Kit.PAD)
 	v.add_child(top)
 	top.add_child(Kit.lbl("★".repeat(stars) + "☆".repeat(3 - stars), Kit.T_CLOCK, Kit.C_GOLD, Kit.FONT_T))

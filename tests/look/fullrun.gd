@@ -75,6 +75,12 @@ func _ready() -> void:
 				await _sts61()
 			"pathfinder":
 				await _pathfinder()
+			"lcross":
+				await _lcross()
+			"dart":
+				await _dart()
+			"artemis1":
+				await _artemis1()
 			_:
 				await wait(0.5)
 	await shot("end")
@@ -206,5 +212,175 @@ func _pathfinder() -> void:
 	while is_instance_valid(s) and not s.photo_shown and secs() - t < 10.0:
 		await get_tree().process_frame
 	await shot("mpf_photo")
+	key(KEY_ENTER)
+	await wait(1.0)
+
+
+func _until(cond: Callable, limit := 30.0) -> void:
+	var t := secs()
+	while not cond.call() and secs() - t < limit:
+		await get_tree().process_frame
+
+
+func _lcross() -> void:
+	var s = g.screen
+	await wait(1.5)
+	await shot("lc_brief")
+	key(KEY_ENTER)
+	await wait(0.5)
+	# aim at the dark floor, let it go
+	var goal: Vector2 = s.I.cabeus + Vector2(-28, 0)
+	for i in 80:
+		var d: Vector2 = goal - s.I.point
+		if d.length() < 5.0:
+			break
+		key(KEY_D if absf(d.x) > absf(d.y) and d.x > 0 else (KEY_A if absf(d.x) > absf(d.y) else (KEY_S if d.y > 0 else KEY_W)))
+		await get_tree().process_frame
+	await shot("lc_aim")
+	key(KEY_ENTER)
+	await _until(func(): return s.phase == "fall", 30.0)
+	while is_instance_valid(s) and s.phase == "fall":
+		if s.arm_i >= 0 and s.armed[s.arm_i] == "":
+			await wait(0.3)
+			key(KEY_1 + s.arm_i)
+		await get_tree().process_frame
+	await _until(func(): return s.phase_t >= 0.65, 5.0)
+	key(KEY_SPACE)
+	await shot("lc_flash")
+	var took := false
+	if is_instance_valid(s) and s.phase == "four":
+		await wait(4.0)
+		await shot("lc_plume")
+	while is_instance_valid(s) and s.phase == "four":
+		took = true
+		var ng = s._nearest_glint()
+		if ng[0] != null and ng[0].ice:
+			var c: Vector2 = get_viewport().get_visible_rect().size * 0.5
+			var p: Vector2 = s.world.cam.unproject_position(ng[0].pos) - c
+			# a quick hand: turn most of the way to the glint each frame, press once it is well inside
+			s.aim_off += Vector2(p.x, -p.y) * s.world.cam.fov / get_viewport().get_visible_rect().size.y * 0.6
+			if float(ng[1]) < float(s.I.P.hit_px) * 0.6:
+				key(KEY_SPACE)
+				if not took:
+					took = true
+					await shot("lc_ice")
+		await get_tree().process_frame
+	# the ice is skipped here (the automatic hand is too slow for it; a person plays it): its readings are given
+	s.I.readings = maxi(s.I.readings, int(s.I.D.stages.ice_full))
+	while is_instance_valid(s) and s.phase == "dive":
+		s._mouse = -s.dive_p * 30.0
+		await get_tree().process_frame
+	await _until(func(): return s.result_shown, 15.0)
+	await wait(0.6)
+	await shot("lc_result")
+	key(KEY_ENTER)
+	await wait(1.0)
+
+
+func _dart() -> void:
+	var s = g.screen
+	await wait(1.5)
+	await shot("dart_brief")
+	key(KEY_ENTER)
+	await _until(func(): return s.A.resolved(s.t), 60.0)
+	await wait(1.0)
+	await shot("dart_two_dots")
+	key(KEY_D)
+	await wait(0.3)
+	key(KEY_ENTER)
+	var cool := 0.0
+	var took := false
+	while is_instance_valid(s) and s.phase == "steer":
+		cool -= get_process_delta_time()
+		if cool <= 0.0 and s.A.miss(s.t).length() > 20.0:
+			s.A.pulse(-s.A.miss(s.t), s.t)
+			cool = 0.15
+		if not took and s.t >= -4.0:
+			took = true
+			await shot("dart_close")
+		if s.t >= -2.4 and s.photo_cm < 0.0:
+			key(KEY_SPACE)
+		await get_tree().process_frame
+	await _until(func(): return s.phase == "measure", 15.0)
+	for r in 2:
+		await _until(func(): return s.round_i == r and not s.round_done, 10.0)
+		while is_instance_valid(s) and not s.round_done:
+			for dh in s.A.dips(r == 1):
+				if absf(dh - s.cursor_h) < 0.08 and (s.marks.is_empty() or absf(s.marks[s.marks.size() - 1] - s.cursor_h) > 2.0):
+					key(KEY_SPACE)
+			await get_tree().process_frame
+		if r == 1:
+			await wait(0.6)
+			await shot("dart_32_minutes")
+		await wait(1.6)
+	await _until(func(): return s.result_shown, 15.0)
+	await wait(0.6)
+	await shot("dart_result")
+	key(KEY_ENTER)
+	await wait(1.0)
+
+
+func _artemis1() -> void:
+	var s = g.screen
+	await wait(1.5)
+	await shot("art_brief")
+	s._start()
+	await _until(func(): return s.met >= -0.05, 10.0)
+	key(KEY_SPACE)
+	await wait(1.0)
+	await shot("art_liftoff")
+	# the climb as in Missions: the game's own flight computer flies it; the stages drop when empty
+	if s.hud:
+		s.hud.set_autopilot(true)
+	var took_q := false
+	while is_instance_valid(s) and s.phase == "ascent":
+		if s.model and s.model.wants_stage():
+			s._on_stage()
+		if not took_q and s.model and s.model.h > 9000.0:
+			took_q = true
+			await shot("art_maxq")
+		await get_tree().process_frame
+	await _until(func(): return s.phase == "map", 20.0)
+	await wait(1.5)
+	await shot("map_to_moon")
+	s._map_go()
+	await _until(func(): return s.phase == "flyby", 10.0)
+	await wait(3.0)
+	var e := InputEventKey.new()
+	e.physical_keycode = KEY_SPACE
+	e.keycode = KEY_SPACE
+	e.pressed = true
+	Input.parse_input_event(e)
+	await _until(func(): return s.speed >= 5095.0, 10.0)
+	var e2 := e.duplicate()
+	e2.pressed = false
+	Input.parse_input_event(e2)
+	await shot("art_flyby")
+	await _until(func(): return s.phase == "earth" and s.frame_box.hot, 12.0)
+	key(KEY_SPACE)
+	await _until(func(): return s.phase == "far", 8.0)
+	await wait(1.5)
+	await shot("art_far")
+	await _until(func(): return s.phase == "map", 20.0)
+	await wait(1.5)
+	await shot("map_home")
+	s._map_go()
+	await _until(func(): return s.phase == "entry", 12.0)
+	var took := false
+	while is_instance_valid(s) and s.phase == "entry":
+		s.angle = lerpf(s.angle, -6.0, 0.08)
+		if not took and s.phase_t > 8.0:
+			took = true
+			await shot("art_entry")
+		await get_tree().process_frame
+	await _until(func(): return absf(s.alt_km - 7.6) < 0.05, 30.0)
+	key(KEY_1)
+	await _until(func(): return absf(s.alt_km - 2.9) < 0.05, 30.0)
+	key(KEY_2)
+	await wait(2.0)
+	await shot("art_chutes")
+	await _until(func(): return s.result_shown, 40.0)
+	await wait(0.6)
+	await shot("art_result")
 	key(KEY_ENTER)
 	await wait(1.0)
