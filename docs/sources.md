@@ -227,6 +227,11 @@ branches add entries at the same place (`.gitattributes`).
   and Video Library, https://images.nasa.gov/details/art001e000672 (public domain). Orion at its farthest, 268,563 miles
   from Earth. Our processing: cropped to the Moon and the Earth (the spacecraft and its markings left out). In
   `assets/photos/artemis1/`.
+- **S-dart-pia25329** NASA/Johns Hopkins APL. *NASA's DART at the Didymos System*, PIA25329 (illustration, Sept. 22,
+  2022), NASA Image and Video Library, https://images.nasa.gov/details/PIA25329 (checked 2026-11-15 through the
+  library's API: "This illustration depicts NASA's Double Asteroid Redirection Test (DART) spacecraft prior to impact at
+  the Didymos binary asteroid system"). An illustration, said so on screen. The picture of chapter 5's card in the
+  chapter select (`assets/photos/dart/PIA25329.jpg`).
 
 ## The look: Earth, Moon, the Andes and the launch site (issue 12; scripts in `assets/source/`)
 - **S-moon-kit** NASA Goddard Space Flight Center, Scientific Visualization Studio. *CGI Moon Kit* (2019).

@@ -38,7 +38,7 @@ func _initialize() -> void:
 	r.changed.connect(func(_by): m.from_dict(r.state.mission))
 	r.submit({"k": "set_stations", "s": {"pilot": {"kind": "human", "pid": r.me, "name": "Ana"}}})
 	r.start_design(m.to_dict())
-	check(r.holder_name("pilot") == "Ana" and r.holder_name("engineer") == "Rivet", "holders")
+	check(r.holder_name("pilot") == "Ana" and r.holder_name("engineer") == "Rumi", "holders")
 	m.orbit = "lunar"   # the pilot is the person: the orbit is theirs to choose
 	r.design_edited("orbita")
 	for st in GD.STEPS:

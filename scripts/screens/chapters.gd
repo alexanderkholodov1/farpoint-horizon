@@ -74,9 +74,9 @@ func _card(i: int, C: Dictionary) -> Control:
 		var cap := PanelContainer.new()
 		cap.add_theme_stylebox_override("panel", Kit.flat(Color(0.0, 0.02, 0.06, 0.62), Color(0, 0, 0, 0), 9, 0, 9, 3))
 		cap.add_child(Kit.lbl("NASA · " + tr(C.caption), Kit.T_CAPS, Kit.C_ON_DARK, Kit.FONT_B))
-		cap.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-		cap.position = Vector2(10, h - 30)
+		cap.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		pic.add_child(cap)
+		cap.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT, Control.PRESET_MODE_MINSIZE, 10)
 		cap.visible = not Kit.compact
 	else:   # no NASA picture of this one in the game yet: the space of the others, dark
 		var blank := ColorRect.new()
