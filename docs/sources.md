@@ -364,7 +364,8 @@ All checked 2026-11-14; the research behind them is `kb/research/in-flight-failu
 - **S-dsn-sites** Wikipedia. *NASA Deep Space Network* (coordinates of the complexes and the bands). 
   https://en.wikipedia.org/wiki/NASA_Deep_Space_Network. Goldstone 35.42667 N 116.89 W, Madrid 40.43139 N 4.24806 W,
   Canberra 35.40139 S 148.98167 E; S, X and Ka bands (2, 8 and 32 GHz). The stations ground control picks from.
-- **S-usno-gast** U.S. Naval Observatory. *Computing Greenwich Apparent Sidereal Time*. https://aa.usno.navy.mil/faq/GAST.
+- **S-usno-gast** U.S. Naval Observatory. *Computing Greenwich Apparent Sidereal Time*. https://aa.usno.navy.mil/faq/GAST
+  (not reachable on 2026-11-16 from either checking network: the connection was reset; open it in a browser to confirm the formula).
   GMST = 18.697374558 + 24.06570982441908 D hours (D: days since 2000 January 1, 12h UT); the tilt of the Earth's axis,
   about 23.44 degrees. Which way each dish faces at each moment of the flight.
 - **S-codata-c** NIST. *CODATA value: speed of light in vacuum*. https://physics.nist.gov/cgi-bin/cuu/Value?c.

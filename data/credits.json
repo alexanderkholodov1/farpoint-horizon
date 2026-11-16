@@ -450,7 +450,7 @@
     },
     {
      "id": "S-usno-gast",
-     "text": "U.S. Naval Observatory. Computing Greenwich Apparent Sidereal Time. https://aa.usno.navy.mil/faq/GAST. GMST = 18.697374558 + 24.06570982441908 D hours (D: days since 2000 January 1, 12h UT); the tilt of the Earth's axis, about 23.44 degrees. Which way each dish faces at each moment of the flight."
+     "text": "U.S. Naval Observatory. Computing Greenwich Apparent Sidereal Time. https://aa.usno.navy.mil/faq/GAST (not reachable on 2026-11-16 from either checking network: the connection was reset; open it in a browser to confirm the formula). GMST = 18.697374558 + 24.06570982441908 D hours (D: days since 2000 January 1, 12h UT); the tilt of the Earth's axis, about 23.44 degrees. Which way each dish faces at each moment of the flight."
     },
     {
      "id": "S-codata-c",
