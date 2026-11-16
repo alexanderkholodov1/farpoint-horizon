@@ -103,7 +103,7 @@ when the team agrees. Crew bots take any empty station.
 - **JPL Horizons**: where the Moon and the planets really are on the day you fly.
 - **NASA GIBS and Worldview** (Blue Marble, VIIRS): the Earth you see from space.
 - **NASA's Moon Kit, from the Lunar Reconnaissance Orbiter**: the Moon's colors and relief.
-- **SRTM**: the Andes and the Cotopaxi volcano under the launch site.
+- **SRTM** (NASA's radar elevation, through Mapzen Terrain Tiles): the Andes and the Cotopaxi volcano under the launch site.
 - **NASA Earth Observatory, Landsat and ASTER**: the pictures of Ecuador's volcanoes a mission sends home.
 - **NASA's Deep Space Network**: the antennas that keep in touch with your spacecraft.
 - **NASA's mission pages and the Apollo Flight Journal**: every date, fact and figure of the six story missions, and
