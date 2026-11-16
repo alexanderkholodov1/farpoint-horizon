@@ -2,7 +2,7 @@ extends Node
 ## A look at mission 6 (issue #50; development only, needs a window): the countdown, liftoff, Max Q, the boosters and
 ## the core stage, the lunar flyby burn, the Earth's picture, NASA's far-point picture, re-entry, the parachutes,
 ## splashdown and the result. Saves to shots/art_*.png and always quits.
-## Run: tools/godot.sh --path . --resolution 1600x900 res://tests/artemis1shot.tscn
+## Run: tools/dev/godot.sh --path . --resolution 1600x900 res://tests/artemis1shot.tscn
 var g
 var n := 0
 

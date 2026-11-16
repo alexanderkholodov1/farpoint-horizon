@@ -11,7 +11,7 @@ with who holds each: an agent that starts work reads it to know where the projec
 |---|---|
 | `pilot-flight.md`, `earth-time.md` | The flight to the Moon: what is real and checked; the Earth at every speed of time |
 | `builder.md` | The rocket builder and the craft assembled part by part |
-| `apollo13.md`, `sts61.md`, `pathfinder.md`, `lcross.md`, `dart.md` | Each story mission: what it plays and what it checks |
+| `apollo13.md`, `sts61.md`, `pathfinder.md`, `lcross.md`, `dart.md`, `artemis1.md` | Each story mission: what it plays and what it checks |
 | `story-scenes.md` | The story's scenes and the cuyes' faces |
 | `first-mission.md`, `credits.md` | The guided first mission; the credits film and list |
 | `identity.md`, `look-textures.md`, `music.md` | The palette, the Earth's textures, the music |

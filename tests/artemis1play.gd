@@ -1,6 +1,6 @@
 extends Node
 ## Plays chapter 6 alone, intro, mission and outro, for a person to try it (issue #50; needs a window).
-## Run: tools/godot.sh --path . --resolution 1600x900 res://tests/artemis1play.tscn
+## Run: tools/dev/godot.sh --path . --resolution 1600x900 res://tests/artemis1play.tscn
 
 
 func _ready() -> void:

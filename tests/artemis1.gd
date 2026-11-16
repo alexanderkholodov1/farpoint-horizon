@@ -3,7 +3,7 @@ extends SceneTree
 ## 03 s; the flyby burn from 2,128 to 5,102 mph about 81 miles up; re-entry at 24,581 mph, Mach 32 [S-artemis-timeline];
 ## 268,563 miles from Earth [S-artemis-nasa]; perfect play scores 100 and 3 stars; the far point's picture exists; the
 ## facts' sources are in docs/sources.md and every text has its Spanish.
-## Run: tools/godot.sh --headless --path . -s res://tests/artemis1.gd
+## Run: tools/dev/godot.sh --headless --path . -s res://tests/artemis1.gd
 ## check: ^ok artemis1
 
 var bad := 0
