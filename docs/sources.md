@@ -369,9 +369,11 @@ All checked 2026-11-14; the research behind them is `kb/research/in-flight-failu
   about 23.44 degrees. Which way each dish faces at each moment of the flight.
 - **S-codata-c** NIST. *CODATA value: speed of light in vacuum*. https://physics.nist.gov/cgi-bin/cuu/Value?c.
   299 792 458 m/s, exact. The light time to the craft and its Doppler shift.
-- **S-jpl-lighttime** NASA Science. *Basics of Space Flight, Chapter 1-1: The Realm of the Sun* (light time table;
-  formerly at www2.jpl.nasa.gov/basics, now moved). https://science.nasa.gov/learn/basics-of-space-flight/chapter1-1/.
-  Checked 2026-11-15: "3 seconds, 900,000 km, ~ Earth-Moon round trip"; the Moon is a little over a light-second away.
+- **S-jpl-lighttime** NASA Science. *Basics of Space Flight, Chapter 1-1: The Realm of the Sun*.
+  https://science.nasa.gov/learn/basics-of-space-flight/chapter1-1/. Checked 2026-11-16: this page is the course's
+  solar-system chapter and does not print a light-time table (the older JPL table at www2.jpl.nasa.gov/basics no longer
+  opens). The light time to the Moon in the game is our computation: 384,400 km (its mean distance, S-nssdc-planets' Moon
+  data) divided by the speed of light [S-codata-c], about 1.28 s.
 - **S-descanso-bands** Taylor, J. (ed.), *Deep Space Communications*, DESCANSO series vol. 4, ch. 10, JPL.
   https://descanso.jpl.nasa.gov/monograph/series4/Mono4_Ch10.pdf. S, X and Ka are the deep-space bands (this chapter). The
   8.4 GHz tone of the X-band downlink in "Find the carrier" is our own figure; this chapter does not print it.
