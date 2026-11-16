@@ -136,11 +136,9 @@ def moon():
         photo("moon_south_pole", name, url, None, source, desc, credit)
 
 
-# ------------------------------------------------ 3. Grand Tour (NASA Image and Video Library, Voyager)
-VOYAGER = [("PIA00022", "jupiter_voyager1_1979.jpg", "Jupiter's Great Red Spot, Voyager 1, March 1979"),
-           ("PIA01374", "saturn_voyager1_1980.jpg", "Saturn's limb and ring shadow, Voyager 1, 9 Nov 1980"),
-           ("PIA18182", "uranus_voyager2_1986.jpg", "Uranus, Voyager 2, 1986"),
-           ("PIA00049", "neptune_voyager2_1989.jpg", "Neptune and its Great Dark Spot, Voyager 2, 1989")]
+# ------------------------------------------------ 3. Eye on the Universe's card (NASA Image and Video Library, Voyager)
+# The Grand Tour mission was dropped (team decision 2026-11-15, issue #10); Neptune stays as the telescope's picture.
+VOYAGER = [("PIA00049", "neptune_voyager2_1989.jpg", "Neptune and its Great Dark Spot, Voyager 2, 1989")]
 
 
 def voyager():
@@ -150,8 +148,8 @@ def voyager():
         hrefs = [i["href"].replace("http://", "https://") for i in json.loads(http("https://images-api.nasa.gov/asset/" + pia))["collection"]["items"]]
         url = next(h for suf in ("~large.jpg", "~medium.jpg", "~orig.jpg") for h in hrefs if h.endswith(suf))
         img = Image.open(io.BytesIO(http(url)))
-        save_jpeg(img, PHOTOS / "grand_tour" / fname, "S-nasa-images", url,
-                  f"resized to at most {MAXSIDE} px; {desc}; library record {pia}, credit {meta.get('secondary_creator')}", "grand_tour")
+        save_jpeg(img, PHOTOS / "telescope" / fname, "S-nasa-images", url,
+                  f"resized to at most {MAXSIDE} px; {desc}; library record {pia}, credit {meta.get('secondary_creator')}", "telescopio")
 
 
 # ------------------------------------------------ 4. Numbers: JPL Horizons and NSSDC fact sheets
@@ -190,26 +188,15 @@ def take(store, cells):
 
 def numbers():
     NUMBERS.mkdir(parents=True, exist_ok=True)
-    # a) orbital elements around the Sun at EPOCH (ecliptic J2000). Columns: JDTDB, Calendar, EC, QR, IN, OM, W, Tp, N, MA, TA, A, AD, PR
-    planets, urls = {}, {}
-    nxt = (datetime.date.fromisoformat(EPOCH) + datetime.timedelta(days=1)).isoformat()
-    for n, code in BODIES.items():
-        url, rows = horizons(code, "500@10", "ELEMENTS", EPOCH, nxt, "1d")
-        r = rows[0]
-        planets[n] = {"horizons_id": code, "jd_tdb": float(r[0]), "eccentricity": float(r[2]), "perihelion_km": float(r[3]),
-                      "inclination_deg": float(r[4]), "ascending_node_deg": float(r[5]), "arg_perihelion_deg": float(r[6]),
-                      "mean_anomaly_deg": float(r[9]), "semi_major_axis_km": float(r[11]), "period_s": float(r[13])}
-        urls[n] = url
     # b) the Moon around the Earth: one lunar month of position vectors, one a day
     murl, rows = horizons(301, "500@399", "VECTORS", "2026-11-15", "2026-12-15", "1d")
     moon = [{"date": r[1].replace("A.D. ", ""), "x_km": float(r[2]), "y_km": float(r[3]), "z_km": float(r[4]),
              "vx_km_s": float(r[5]), "vy_km_s": float(r[6]), "vz_km_s": float(r[7])} for r in rows]
     meta = {"source_id": "S-horizons", "date_checked": CHECKED, "frame": "ICRF axes, ecliptic plane J2000",
             "epoch": EPOCH + " 00:00 TDB", "units": "km, km/s, degrees, seconds"}
-    (NUMBERS / "horizons_planets.json").write_text(json.dumps({"meta": {**meta, "centre": "Sun (500@10)", "queries": urls}, "planets": planets}, indent=1))
     (NUMBERS / "horizons_moon.json").write_text(json.dumps({"meta": {**meta, "centre": "Earth (500@399)", "query": murl}, "moon": moon}, indent=1))
-    for f, q in (("horizons_planets.json", "; ".join(urls.values())), ("horizons_moon.json", murl)):
-        manifest.append({"file": f"data/nasa/{f}", "mission": "grand_tour", "source_id": "S-horizons", "query": q,
+    for f, q in (("horizons_moon.json", murl),):
+        manifest.append({"file": f"data/nasa/{f}", "mission": "moon_south_pole", "source_id": "S-horizons", "query": q,
                          "date_checked": CHECKED, "processing": "CSV rows parsed to JSON", "bytes": (NUMBERS / f).stat().st_size})
     # c) NSSDC planetary fact sheets
     facts, furls = {}, {}

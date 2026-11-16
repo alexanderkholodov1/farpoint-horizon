@@ -293,14 +293,14 @@ All checked 2026-11-14. NASA media are used under the NASA Media Usage Guideline
   tiles joined and re-projected to a view from above the south pole.
 - **S-nasa-images** NASA Image and Video Library, https://images.nasa.gov (API https://images-api.nasa.gov), records
   PIA00022 (Jupiter, Voyager 1), PIA01374 (Saturn, Voyager 1), PIA18182 (Uranus, Voyager 2), PIA00049 (Neptune,
-  Voyager 2); catalogued by NASA/JPL Photojournal. Photos in `assets/photos/grand_tour/`. Credit: "NASA/JPL-Caltech".
+  Voyager 2); catalogued by NASA/JPL Photojournal. Of these, the game keeps Neptune, the picture of Eye on the Universe (`assets/photos/telescope/`); the Grand Tour mission was dropped (issue #10). Credit: "NASA/JPL-Caltech".
   Our processing: resized. Also the ASTER pictures in `assets/photos/volcano_watch/`: PIA23914 (Sangay, night
   thermal infrared, 11 Jun 2020, credit "NASA/METI/AIST/Japan Space Systems, and U.S./Japan ASTER Science Team") and
   PIA15151 (Cotopaxi, false colour, 22 Aug 2015, credit "NASA/GSFC/METI/ERSDAC/JAROS, and U.S./Japan ASTER Science
   Team"); ASTER is a joint Japanese (METI) and NASA instrument on Terra, hence the credit.
 - **S-horizons** NASA/JPL Solar System Dynamics. *Horizons System API*. https://ssd-api.jpl.nasa.gov/doc/horizons.html
-  (endpoint https://ssd.jpl.nasa.gov/api/horizons.api). Orbital elements of the eight planets at 2026-11-15 and the Moon
-  around the Earth for a month, in `data/nasa/horizons_*.json`. Credit: "NASA/JPL Horizons".
+  (endpoint https://ssd.jpl.nasa.gov/api/horizons.api). The Moon around the Earth for a month from 2026-11-15, in
+  `data/nasa/horizons_moon.json` (the planets' orbits, fetched for the dropped Grand Tour, were removed). Credit: "NASA/JPL Horizons".
 - **S-nssdc-planets** NASA Space Science Data Coordinated Archive. *Planetary Fact Sheets*.
   https://nssdc.gsfc.nasa.gov/planetary/factsheet/ . Mass, radius, gravity, escape velocity, orbit radius and day length
   of the planets and the Moon, in `data/nasa/nssdc_factsheets.json`. Credit: "NASA NSSDC Planetary Fact Sheets".

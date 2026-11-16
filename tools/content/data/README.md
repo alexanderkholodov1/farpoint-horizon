@@ -34,16 +34,15 @@ so we dropped them. Now:
 3. Two close views of Shackleton crater come straight from NASA Science pages: its sunlit rim (LRO) and its floor, which
    never sees the Sun, taken by ShadowCam (shows a track left by a rolling boulder).
 
-### 3. Grand Tour photos (`assets/photos/grand_tour/`, source S-nasa-images)
-1. For Jupiter, Saturn, Uranus and Neptune we picked one Voyager image each (record numbers in the script) from the
-   NASA Image and Video Library.
+### 3. Eye on the Universe's picture (`assets/photos/telescope/`, source S-nasa-images)
+1. Neptune by Voyager 2 (record PIA00049) from the NASA Image and Video Library. (The Grand Tour mission, which also
+   had Jupiter, Saturn and Uranus, was dropped on 15 November 2026, issue #10.)
 2. Ask the library which sizes exist and download the biggest; shrink to at most 1024 px; save as JPEG.
 
 ### 4. Numbers (`data/nasa/`, sources S-horizons and S-nssdc-planets)
-1. Ask JPL Horizons, NASA's own solar-system position service, for the orbit of each planet around the Sun at
-   2026-11-15: size, shape and tilt of the orbit and where the planet is on it (six Kepler elements, ecliptic J2000). The
-   game can move a planet along its orbit from these. Ask again for the Moon's position and speed around the Earth, one
-   per day for a month. Horizons answers a table of text; the script reads the table into JSON.
+1. Ask JPL Horizons, NASA's own solar-system position service, for the Moon's position and speed around the Earth, one
+   per day for a month from 2026-11-15 (the trip to the Moon meets it there). Horizons answers a table of text; the
+   script reads the table into JSON. (The planets' orbits, fetched for the dropped Grand Tour, are no longer asked.)
 2. Read NASA's planetary fact sheets (web tables) for mass, radius, surface gravity, escape velocity, distance from the Sun
    and length of day of each planet and the Moon, keeping the name of the fact sheet row next to every value.
 
