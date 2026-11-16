@@ -1,7 +1,6 @@
 # The event's deliverables (Space Apps 2026, 14-15 November)
 
-- Upload closed Sunday 2026-11-15 at 09:00; the live pitch in Spanish was 11:00-13:30 (`kb/challenge/local-event.md`).
-- Built in the repository: the deck in English and Spanish (`docs/pitch/build/`, from `docs/pitch/{en,es}.md` with
-  `python tools/pitch.py`), the 30-second video (`docs/demo/farpoint_horizon_30s.mp4`), the README with its AI use.
-- On the version branch the deck's text still has 7 `TODO`s per language (`python tools/pitch.py --final` fails); if
-  the final deck was made elsewhere, commit it here so the repository shows what was presented.
+- Everything we hand in is in `docs/submission/` (its README says which file goes in which field). The global form
+  closes Sunday 2026-11-15 at 23:59 local time.
+- The demo field takes the 7-slide English deck v2 (`docs/submission/deck/`), not the 30-second video.
+- The link lists of the form come from `docs/sources.md` through `python tools/submission_links.py`, each link opened.
