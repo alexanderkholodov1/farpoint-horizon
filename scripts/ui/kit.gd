@@ -7,9 +7,9 @@ extends RefCounted
 ##   const Kit := preload("res://scripts/ui/kit.gd")   (screens already have it from scripts/screens/screen.gd)
 ##   add_child(Kit.lbl("Hola", 16, Kit.C_ACCENT, Kit.FONT_B))
 
-const FONT_R := preload("res://fonts/Inter-Regular.otf")
-const FONT_B := preload("res://fonts/Inter-SemiBold.otf")
-const FONT_T := preload("res://fonts/InterDisplay-Bold.otf")
+const FONT_R := preload("res://assets/fonts/Inter-Regular.otf")
+const FONT_B := preload("res://assets/fonts/Inter-SemiBold.otf")
+const FONT_T := preload("res://assets/fonts/InterDisplay-Bold.otf")
 
 ## Two appearances the player chooses on the menu, remembered between sessions (user://settings.cfg, [ui] mode):
 ## - "dark" (the default): deep navy frosted glass over the scene, light text, bright status colours.
@@ -41,7 +41,7 @@ static var C_TEXT := Color(0.94, 0.96, 1.0)
 static var C_LINE := Color(0.6, 0.75, 1.0, 0.16)      ## Hairlines: borders, dividers, empty bars.
 static var C_SHADE := Color(0.0, 0.01, 0.03, 0.55)    ## Behind an overlay.
 const C_ON_DARK := Color(0.96, 0.97, 1.0)             ## Text drawn straight on the 3D scene (space, sky).
-const FROST := preload("res://shaders/ui_frost.gdshader")
+const FROST := preload("res://assets/shaders/ui_frost.gdshader")
 
 ## The type scale, in pixels. Every text in the game uses one of these.
 static var T_CAPS := 11       ## Section labels, in spaced capitals (caps()).
@@ -241,6 +241,35 @@ static func build_theme() -> Theme:
 
 # ===================================================================================== WIDGETS
 ## Sets anchors (al, at, ar, ab: 0..1 of the parent) and offsets in pixels; returns the control.
+## On a short screen (a phone in landscape, under its browser bar) a panel anchored to the bottom may reach up into
+## one above it. This scales it down, from its bottom corner, just enough that its top stays below top_limit (in the
+## screen's units), never below min_s. Returns the scale used. Measured every frame by the screens that need it, so it
+## follows the panel's own content and the screen's size.
+static func fit_under(lower: Control, top_limit: float, right_corner: bool, min_s := 0.55) -> float:
+	var bottom: float = lower.get_viewport_rect().size.y - MARGIN
+	var s := clampf((bottom - top_limit) / maxf(lower.size.y, 1.0), min_s, 1.0)
+	lower.pivot_offset = Vector2(lower.size.x if right_corner else 0.0, lower.size.y)
+	lower.scale = Vector2(s, s)
+	return s
+
+
+## The middle column of a phone's three-column screen (design, builder): the hint and the action bar span exactly the
+## gap between the left panel and the right one, the bar on the bottom edge and the hint just above it, so neither
+## covers a panel whatever the panels' content or the screen's size.
+static func fit_middle(left: Control, right: Control, hint: Control, bar: Control) -> void:
+	var view: Vector2 = bar.get_viewport_rect().size
+	var l: float = left.get_global_rect().end.x + 8.0
+	var r: float = right.get_global_rect().position.x - 8.0 if right.visible else view.x - MARGIN
+	for c in [hint, bar]:
+		c.offset_left = l
+		c.offset_right = r - view.x
+	bar.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	bar.offset_top = -MARGIN
+	bar.offset_bottom = -MARGIN
+	hint.offset_top = -MARGIN - bar.size.y - 6.0
+	hint.offset_bottom = hint.offset_top
+
+
 static func place(c: Control, al: float, at: float, ar: float, ab: float, ol: float, ot: float, orr: float, ob: float) -> Control:
 	c.anchor_left = al
 	c.anchor_top = at

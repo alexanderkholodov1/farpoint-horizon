@@ -1,14 +1,14 @@
 extends RefCounted
 ## The Deep Space Network as numbers, for ground control (issue #9): which of its three complexes sees the craft now,
 ## how high, how long the light takes, and how far the craft's motion shifts its tone (Doppler). No screen, so
-## tests/ground.gd checks the same numbers the mini-game shows.
+## tests/ci/ground.gd checks the same numbers the mini-game shows.
 ##   const Dsn := preload("res://scripts/minigames/dsn.gd")
 ##   var best: Dictionary = Dsn.best_station(unix_time, craft_x, craft_y)
 ## Our simplifications: the craft's direction is taken from the Earth's centre (no parallax, fine beyond a few Earth
 ## radii), and the trip lies in the ecliptic like scripts/flight/transfer.gd.
 
 const C := 299792458.0                 ## m/s, the speed of light (exact by definition) [S-codata-c].
-const X_BAND_HZ := 8.4e9               ## Deep-space X-band downlink, about 8.4 GHz [S-descanso-bands].
+const X_BAND_HZ := 8.4e9               ## Deep-space X-band downlink: our figure of about 8.4 GHz; the bands are in [S-descanso-bands].
 const OBLIQUITY_DEG := 23.44           ## Tilt of the Earth's axis to the ecliptic [S-usno-gast].
 const MIN_ELEV_DEG := 6.0              ## A dish tracks above about this height; lower, the ground and air get in the way (our simplification).
 

@@ -9,8 +9,8 @@ extends "res://scripts/screens/screen.gd"
 ## lands there, or to the operation; after a loss, to the report. The rocket the player built (Space.make_custom_rocket)
 ## sheds its boosters and stages as it climbs.
 
-const Space := preload("res://scripts/space_builder.gd")
-const Ship := preload("res://scripts/ship_builder.gd")
+const Space := preload("res://scripts/world/space_builder.gd")
+const Ship := preload("res://scripts/world/ship_builder.gd")
 const RocketDesign := preload("res://scripts/craft/rocket_design.gd")
 const Ascent := preload("res://scripts/flight/ascent.gd")
 const FlightHud := preload("res://scripts/flight/flight_hud.gd")
@@ -40,6 +40,24 @@ var rumble: AudioStreamPlayer
 var sfx := {}
 var told := {}                   ## Hints already given.
 var craft: Node3D
+var fairing_off := false         ## The fairing has split in two and drifted away (in orbit, engine off).
+var released := false            ## The springs have pushed the craft off the stage.
+## The fairing is dropped "once outside the atmosphere"; some rockets drop it after the upper stage's engine cuts off
+## [S-wiki-fairing]. Here it opens in orbit, engine off, so the player sees it split and the craft come out.
+var drifting: Array = []         ## The fairing's halves drifting away in orbit: [node, velocity, spin axis, spin, age].
+var shell_center := Vector3.INF  ## Where the fairing was, in the scene: the craft rides there.
+const HALF_SHELL := """shader_type spatial;
+render_mode cull_disabled;
+uniform float side = 1.0;
+uniform vec4 colour : source_color = vec4(0.93, 0.94, 0.96, 1.0);
+varying float lx;
+void vertex() { lx = VERTEX.x; }
+void fragment() {
+	if (lx * side < 0.0) { discard; }
+	ALBEDO = colour.rgb;
+	ROUGHNESS = 0.55;
+}
+"""
 var rocket_h := 6.0
 var old_far := 2000.0
 var cam_off := Vector3(6.5, 1.5, 11.0)
@@ -89,6 +107,7 @@ func enter(_args: Dictionary) -> void:
 	_build_hud()
 	for id in ["beep", "clunk", "boom", "alarm", "chime"]:
 		sfx[id] = Sound.player(self, id)
+	sfx.boom.volume_db = 0.0   # the explosion at full voice (QUIET_DB suits the beeps, not a rocket blowing up)
 	rumble = Sound.player(self, "rumble", -40.0)
 	GameState.flight["launcher"] = mission.launcher
 
@@ -257,6 +276,12 @@ func _telemetry() -> void:
 	hud.dial.marker = model.marker
 
 
+## The globe below is drawn as a planet six times smaller seen from the true height: its height AND the ground flown
+## over are both multiplied by SCALE_DOWN, so more of the globe shows and its curve reads, while the ground slides by
+## at its true rate as seen from the craft (v / h, about 2.5 degrees a second in a 167 km orbit). Our simplification.
+const SCALE_DOWN := 6.0
+
+
 ## The rocket's place in the scene: true scale near the pad, compressed higher up (the camera follows it there).
 func _place_rocket() -> void:
 	var vx: float = _squash(model.x, 1000.0, 0.08) * VIS
@@ -269,7 +294,7 @@ func _place_rocket() -> void:
 		pad.visible = false
 		horizon.visible = true
 		# the height is drawn six times higher than it is, so the globe below shows more than a blurry patch
-		Scene3D.horizon_place(horizon, rocket.position, HORIZON_R, model.h * 6.0, model.R, model.x)
+		Scene3D.horizon_place(horizon, rocket.position, HORIZON_R, model.h * SCALE_DOWN, model.R, model.x * SCALE_DOWN)
 	# the sky darkens on the way up, and the stars come out in space
 	var k: float = clampf(model.h / 45000.0, 0.0, 1.0)
 	var env: Environment = world.world_env.environment
@@ -309,9 +334,12 @@ func _camera(delta: float) -> void:
 	var rp := rocket.position
 	var s := maxf(rocket_h / 6.0, 0.6)
 	var hk: float = clampf((model.h - 12000.0) / 40000.0, 0.0, 1.0)
-	var want: Vector3 = Vector3(6.5, 1.5, 11.0).lerp(Vector3(7.0, 6.0, 9.5), hk) * s
+	# higher up the camera moves to the side of the flight's plane (+Z), a little above: the rocket turns in that plane,
+	# so from the side its attitude against the horizon reads as it is (from ahead it looked nose-down)
+	var want: Vector3 = Vector3(6.5, 1.5, 11.0).lerp(Vector3(1.5, 5.5, 11.5), hk) * s
 	if phase == "orbit":
-		want = Vector3(5.0, 3.5, 8.0) * s
+		# in orbit the camera comes near the top of the stage to watch the fairing open and the craft unfold
+		want = Vector3(1.2, 6.0, 10.0).lerp(Vector3(0.8, 2.2, 4.2), smoothstep(0.3, 2.0, phase_t)) * s
 	if phase == "climb" and phase_t < 4.0:
 		# liftoff seen from the pad: the camera stays put a moment, then eases up after the rocket from the same side
 		var k: float = smoothstep(0.6, 4.0, phase_t)
@@ -346,6 +374,8 @@ func _camera(delta: float) -> void:
 	# the aim is smoothed relative to the rocket, never in the world: at orbital speed a world-space lag left the
 	# rocket behind the frame (it moves tens of units a second while the aim caught up)
 	var aim_off := rocket.global_transform.basis.y * rocket_h * 0.5
+	if phase == "orbit" and craft and is_instance_valid(craft):
+		aim_off = aim_off.lerp(craft.global_position - rp, smoothstep(0.3, 2.0, phase_t))
 	cam_aim = aim_off if cam_aim == Vector3.INF else cam_aim.lerp(aim_off, clampf(delta * 5.0, 0.0, 1.0))
 	cam.look_at(rp + cam_aim + jitter, Vector3.UP)
 	# the sense of speed: the view widens a little as the rocket gains speed
@@ -424,6 +454,87 @@ func _visual_stage(what: String) -> void:
 			flames.position.y = rocket.get_meta("stage1_y", 0.0)
 
 
+## The fairing splits along its seam and its two halves fall away, one to each side, and the craft that rode inside
+## shows on top of the last stage. Its solar wings stay folded until the craft is on its own.
+func _drop_fairing() -> void:
+	fairing_off = true
+	var meshes: Array = []
+	for n in rocket.find_children("*", "Node3D", true, false):
+		var nm := String(n.name).to_lower()
+		if nm.contains("fairing") or nm.contains("seam"):
+			if n is MeshInstance3D:
+				meshes.append(n)
+			for m in n.find_children("*", "MeshInstance3D", true, false):
+				if not meshes.has(m):
+					meshes.append(m)
+	var shader := Shader.new()
+	shader.code = HALF_SHELL
+	var right: Vector3 = rocket.global_transform.basis.x
+	var up: Vector3 = rocket.global_transform.basis.y
+	for m in meshes:
+		var mi := m as MeshInstance3D
+		if not mi.visible:
+			continue
+		for side in [-1.0, 1.0]:
+			var half := MeshInstance3D.new()
+			half.mesh = mi.mesh
+			var mat := ShaderMaterial.new()
+			mat.shader = shader
+			mat.set_shader_parameter("side", side)
+			half.material_override = mat
+			# the half turns about its own middle, not about the mesh's origin at the foot of the rocket (that swung it
+			# in a wide arc up across the screen)
+			var pivot := Node3D.new()
+			world.stage.add_child(pivot)
+			pivot.global_position = mi.global_transform * mi.mesh.get_aabb().get_center()
+			pivot.add_child(half)
+			half.global_transform = mi.global_transform
+			# the halves swing open around their base and drift off sideways, slowly: nothing pulls them down here
+			var axis: Vector3 = rocket.global_transform.basis.z.normalized()
+			# each half moves a little out to its side and back along the stage, so neither crosses the craft or the text
+			drifting.append([pivot, right * side * rocket_h * 0.006 - up * rocket_h * 0.03, axis, -side * 0.12, 0.0])
+		if String(mi.name).to_lower().contains("fairing") and not String(mi.name).to_lower().contains("seam"):
+			shell_center = mi.global_transform * mi.mesh.get_aabb().get_center()
+		mi.visible = false
+	_ride_craft()
+	sfx.clunk.play()
+	hud.message(tr("FAIRING OPEN"), tr("Out of the air, the shell that protected your craft through the climb splits in two and drifts away."), Color.WHITE, 2.4)
+
+
+## The craft on top of the last stage, where the fairing was, with its wings folded.
+func _ride_craft() -> void:
+	if craft != null:
+		return
+	craft = Ship.build(mission)
+	var r: float = craft.get_meta("radius")
+	craft.scale = Vector3.ONE * (rocket_h * 0.12 / r)
+	rocket.add_child(craft)
+	craft.rotation = Vector3(PI / 2.0, 0.0, 0.0)   # its wings' faces toward the camera's side, so the unfolding shows
+	if shell_center != Vector3.INF:
+		craft.global_position = shell_center
+	else:
+		craft.position = Vector3(0, rocket_h * 0.96, 0)
+	for w in craft.find_children("Wing*", "Node3D", true, false):
+		(w as Node3D).scale.x = 0.04
+	for ap in craft.find_children("*", "AnimationPlayer", true, false):
+		var a := ap as AnimationPlayer
+		if a.has_animation("deploy"):
+			a.play("deploy")
+			a.seek(0.0, true)
+			a.pause()
+
+
+## The craft on its own: its wings unfold as on a real deployment, and a CubeSat plays its own deploy.
+func _unfold_wings() -> void:
+	for w in craft.find_children("Wing*", "Node3D", true, false):
+		var n := w as Node3D
+		n.create_tween().tween_property(n, "scale:x", 1.0, 2.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	for ap in craft.find_children("*", "AnimationPlayer", true, false):
+		var a := ap as AnimationPlayer
+		if a.has_animation("deploy"):
+			a.play("deploy")
+
+
 func _drop(n: Node3D, vel: Vector3) -> void:
 	var xf := n.global_transform
 	n.get_parent().remove_child(n)
@@ -466,16 +577,38 @@ func _orbit(delta: float) -> void:
 	# in orbit nothing stops: the stage and the craft keep crossing the sky at orbital speed (7.8 km/s), so the Earth
 	# keeps turning beneath them at the speed time runs
 	var dt: float = delta * hud.warp
+	model.t += dt   # the mission clock keeps running in orbit, and the screen shows it
+	hud.clock.text = FlightHud.met_text(model.t)
 	model.x += (model.vx - model.spin) * dt
-	Scene3D.horizon_place(horizon, rocket.position, HORIZON_R, model.h * 6.0, model.R, model.x)
+	Scene3D.horizon_place(horizon, rocket.position, HORIZON_R, model.h * SCALE_DOWN, model.R, model.x * SCALE_DOWN)
 	# the craft separates: springs push it off the stage at about half a metre a second; the stage turns slowly away
-	if craft == null and phase_t > 1.6:
-		craft = Ship.build(mission)
-		var r: float = craft.get_meta("radius")
-		craft.scale = Vector3.ONE * (rocket_h * 0.12 / r)
-		craft.position = rocket.position + rocket.global_transform.basis.y * rocket_h * 1.02
+	# engine off, the stage turns to point along its motion (prograde, level in a round orbit) before it lets the craft
+	# go, as stages do before a deployment; until the springs fire it carries the craft round with it
+	if not released:
+		rocket.rotation.z = lerp_angle(rocket.rotation.z, -PI / 2.0, clampf(delta * 1.4, 0.0, 1.0))
+	for d in drifting.duplicate():
+		var n: Node3D = d[0]
+		if not is_instance_valid(n):
+			drifting.erase(d)
+			continue
+		d[4] += delta
+		n.global_position += d[1] * delta
+		if d[4] < 3.0:   # each half swings open on its own side, then just drifts off
+			n.rotate(d[2], d[3] * delta)
+		if d[4] > 6.5:
+			n.queue_free()
+			drifting.erase(d)
+	if not fairing_off and phase_t > 0.6:
+		_drop_fairing()
+	if not released and phase_t > 2.6:
+		released = true
+		var xf := craft.global_transform
+		rocket.remove_child(craft)
 		world.stage.add_child(craft)
+		craft.global_transform = xf
+		craft.position += rocket.global_transform.basis.y * rocket_h * 0.04   # the springs' first push
 		world.stage.add_child(Scene3D.puff(craft.position, rocket_h * 0.05))
+		get_tree().create_timer(1.2).timeout.connect(func(): if is_instance_valid(craft): _unfold_wings())
 		sfx.clunk.play()
 		var O: Dictionary = GameData.ORBITS.get(mission.orbit, {})
 		var up: String = ""
@@ -483,13 +616,13 @@ func _orbit(delta: float) -> void:
 			# real launches stop in a low parking orbit first; the last stage or the craft climbs to the final one later
 			up = "  " + tr("From this low parking orbit it climbs on to its own: %s.") % tr(str(O.get("name", "")))
 		hud.message(tr("CRAFT AWAY"), tr("Springs push your craft off the rocket's last stage. It is on its own now.") + up, Color.WHITE, 3.5)
-	if craft:
+	if craft and released:
 		var push := rocket.global_transform.basis.y * 0.5 * VIS * dt      # 0.5 m/s, in scene units
 		craft.position += push
 		rocket.position -= push * 0.3                                    # the heavier stage recoils a little
 		craft.rotate_object_local(Vector3.UP, 0.04 * dt)
 		rocket.rotate_object_local(Vector3.FORWARD, -0.02 * dt)          # the stage turns away from the craft
-	if phase_t > 7.0 and not leaving:
+	if phase_t > 9.0 and not leaving:
 		leaving = true
 		var next := "operation"
 		if FlightData.has_landing(mission.scenario) and main.SCREENS.has("flight"):

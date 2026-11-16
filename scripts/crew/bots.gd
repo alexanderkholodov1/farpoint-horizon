@@ -12,12 +12,15 @@ extends RefCounted
 ## languages works); their arguments are numbers or "kind:id" references that each reader resolves in its own catalogs.
 ## All numbers and rules come from the game's data (data/*.json), which cite their sources.
 
-const GD := preload("res://scripts/game_data.gd")
+const GD := preload("res://scripts/core/game_data.gd")
 ## Loaded when first used: a script started with -s is compiled before the autoloads Mission refers to exist.
 static var _mission_script: GDScript
 
-## Display names of the bots, one per station: ours, not a real crew.
-const NAMES := {"engineer": "Rivet", "scientist": "Quark", "pilot": "Skip", "ground": "Echo"}
+## The cuyes of the story hold the stations nobody takes (docs/design/crew/README.md): each one the station it has in
+## the story, with its portrait (assets/story/portraits/).
+const NAMES := {"engineer": "Rumi", "scientist": "Killa", "pilot": "Inti", "ground": "Wayra"}
+const PORTRAITS := {"engineer": "res://assets/story/portraits/rumi.png", "scientist": "res://assets/story/portraits/killa.png",
+	"pilot": "res://assets/story/portraits/inti.png", "ground": "res://assets/story/portraits/wayra.png"}
 ## The order of the steps in the game (data/steps.json); each entry is a step id of data/steps.json.
 const CHAIN := ["orbita", "plataforma", "instrumentos", "energia", "comunicaciones", "control", "lanzador"]
 ## A step id the bots know how to decide is in CHAIN; a bot that meets any other step (the steps change as parts move
@@ -80,7 +83,7 @@ static func _resolve(a) -> Variant:
 # ===================================================================================== PLAN
 static func _copy(m):
 	if _mission_script == null:
-		_mission_script = load("res://scripts/mission.gd")
+		_mission_script = load("res://scripts/core/mission.gd")
 	var c = _mission_script.new()
 	c.from_dict(m.to_dict())
 	return c

@@ -237,7 +237,7 @@ func build_mesh() -> Node3D:
 	root.name = "LunarGround"
 	# the regolith: LOLA's shape and the baked sunlight from the mesh, small craters and grain from the shader
 	var m := ShaderMaterial.new()
-	m.shader = preload("res://shaders/regolith.gdshader")
+	m.shader = preload("res://assets/shaders/regolith.gdshader")
 	var near := MeshInstance3D.new()
 	near.mesh = _grid(-HALF, HALF, -HALF, HALF, SUB, false)
 	near.material_override = m

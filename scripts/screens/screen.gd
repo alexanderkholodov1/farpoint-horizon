@@ -9,10 +9,10 @@ extends Control
 ## Do not `await` in a screen after a call that may change screen: the screen is freed at the end of that frame.
 
 const Kit := preload("res://scripts/ui/kit.gd")
-const World := preload("res://scripts/world.gd")
+const World := preload("res://scripts/world/world.gd")
 
-var main            ## The flow controller (scripts/main.gd): go(), go_faded(), overlay(), launch(), fade().
-var world: World    ## The 3D world (scripts/world.gd): camera, stage, the craft.
+var main            ## The flow controller (scripts/core/main.gd): go(), go_faded(), overlay(), launch(), fade().
+var world: World    ## The 3D world (scripts/world/world.gd): camera, stage, the craft.
 
 ## The mission being designed (shortcut for GameState.mission).
 var mission:

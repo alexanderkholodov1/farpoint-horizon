@@ -13,8 +13,8 @@ extends "res://scripts/screens/screen.gd"
 ## Generous: if the pilot does not act, the flight computer does after a few seconds; a cut too early is refused
 ## while the path does not reach the Moon; Skip lets the computer fly the current step. Never a failure screen.
 
-const Space := preload("res://scripts/space_builder.gd")
-const Ship := preload("res://scripts/ship_builder.gd")
+const Space := preload("res://scripts/world/space_builder.gd")
+const Ship := preload("res://scripts/world/ship_builder.gd")
 const FlightHud := preload("res://scripts/flight/flight_hud.gd")
 const FlightData := preload("res://scripts/flight/flight_data.gd")
 const Sound := preload("res://scripts/flight/sound.gd")
@@ -300,6 +300,34 @@ func _on_autopilot(on: bool) -> void:
 		hud.hint(tr("Autopilot on: the flight computer flies every step."))
 
 
+## On a phone nothing covers anything (issue #93): the plan starts under Skip, and the line of what to do now wraps in
+## the gap between the readouts and the panels on the right.
+func _fit_compact() -> void:
+	var view: Vector2 = hud.get_viewport_rect().size
+	var top_right: Rect2 = hud._top_right.get_parent().get_global_rect()
+	plan_panel.offset_top = top_right.end.y + 6.0
+	plan_panel.offset_bottom = plan_panel.offset_top
+	var l: float = hud.readouts_panel.get_global_rect().end.x + 8.0
+	var r: float = (plan_panel.get_global_rect().position.x if plan_panel.visible else top_right.position.x) - 8.0
+	var p: Control = now_lbl.get_parent()
+	p.anchor_left = 0.0
+	p.anchor_right = 0.0
+	p.grow_horizontal = Control.GROW_DIRECTION_END
+	p.offset_left = l
+	p.offset_right = r
+	now_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	now_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	now_lbl.custom_minimum_size.x = maxf(80.0, r - l - 30.0)
+	# the big message starts under that line, never behind it
+	var top: float = p.get_global_rect().end.y + 6.0 if p.visible else 60.0
+	for pair in [[hud.big, 0.0, 56.0], [hud.sub, 58.0, 140.0]]:
+		var lb: Control = pair[0]
+		lb.anchor_top = 0.0
+		lb.anchor_bottom = 0.0
+		lb.offset_top = top + pair[1]
+		lb.offset_bottom = top + pair[2]
+
+
 ## The trip's steps across the top, the one being flown lit: the player always knows where they are and what comes.
 func _build_steps() -> void:
 	steps_row = Kit.hbox(6)
@@ -368,6 +396,7 @@ func _build_minimap() -> void:
 		Kit.place(p, 0, 1, 0, 1, Kit.MARGIN, -300, Kit.MARGIN + 272, -Kit.MARGIN)
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud.add_child(p)
+	hud.left_panel = p   # on a phone it shrinks under the readouts and the hint starts after it
 	var v := Kit.vbox(4)
 	p.add_child(v)
 	v.add_child(Kit.caps(tr("Map · M for the big one")))
@@ -382,6 +411,7 @@ func _build_plan_panel() -> void:
 	plan_panel = Kit.panel_box(Kit.PAD)
 	if Kit.compact:
 		Kit.place(plan_panel, 1, 0, 1, 0, -300, 58, -Kit.MARGIN, 58)
+		hud.right_panel = plan_panel
 	else:
 		Kit.place(plan_panel, 1, 0, 1, 0, -380, 90, -Kit.MARGIN, 90)
 	hud.add_child(plan_panel)
@@ -447,6 +477,7 @@ func process(delta: float) -> void:
 	plan_panel.visible = phase == "plan" and not plan.is_empty() and not plan_ok
 	if Kit.compact:   # on a phone the plan and the controls share the right side: only one at a time
 		hud.controls_panel.visible = not plan_panel.visible
+		_fit_compact()
 	# seen from beside the craft, fast time is the Earth flashing from day to night every few seconds: the map shows it
 	if view_auto and view == "craft" and hud.warp > 300.0:
 		view = "map"
@@ -493,7 +524,7 @@ func _on_warp_picked(_w: float) -> void:
 # ===================================================================================== 1. PLAN, AND THE COUNTDOWN
 func _replan() -> void:
 	var a_now := atan2(m.y, m.x)
-	job = m.plan_start(r_park, a_now, m.t, dv_plan, 3.0, dv_plan / Transfer.BURN_ACCEL * 0.5 + COUNTDOWN + 240.0)
+	job = m.plan_start(r_park, a_now, m.t, dv_plan, 3.0, m.burn_time(dv_plan) * 0.5 + COUNTDOWN + 240.0)
 	plan = {}
 	shown = {}
 	shift_deg = 0.0
@@ -568,13 +599,13 @@ func _go_ahead() -> void:
 
 func _show_plan() -> void:
 	var a: float = plan.angle + deg_to_rad(shift_deg)
-	var dep: Array = m.departure(r_park, atan2(m.y, m.x), a, m.t, dv_plan, dv_plan / Transfer.BURN_ACCEL * 0.5 + COUNTDOWN + 60.0)
+	var dep: Array = m.departure(r_park, atan2(m.y, m.x), a, m.t, dv_plan, m.burn_time(dv_plan) * 0.5 + COUNTDOWN + 60.0)
 	if shift_deg == 0.0:
 		shown = plan.pass
 		dep[1] = plan.time
 	else:
 		shown = m.predict(dep[0], dep[1])
-	burn_start = float(dep[1]) - dv_plan / Transfer.BURN_ACCEL * 0.5
+	burn_start = float(dep[1]) - m.burn_time(dv_plan) * 0.5
 	mark.position = _v3([r_park * cos(a), r_park * sin(a)])
 	_draw_path(plan_line, shown)
 
@@ -656,7 +687,7 @@ func _burn_phase(delta: float) -> void:
 	# the flight computer holds the engine to the plan and eases off near the end, as a guidance system does
 	throttle = clampf((dv_plan - m.dv_used) / 40.0, 0.15, 1.0)
 	hud.lever.value = throttle
-	var step := minf(dt, maxf((dv_plan - m.dv_used) / (Transfer.BURN_ACCEL * throttle), 0.0))
+	var step := minf(dt, maxf((dv_plan - m.dv_used) / m.accel(throttle), 0.0))
 	m.advance(step, throttle, 1.0)
 	_refresh_pred(0.25)
 	hud.gauge("burn", m.dv_used / dv_plan / 1.1, "%d / %d m/s" % [roundi(m.dv_used), roundi(dv_plan)])
@@ -671,6 +702,7 @@ func _cut(by_computer: bool) -> void:
 	var error: float = (float(m.dv_used) - dv_plan) / dv_plan
 	GameState.flight["tli"] = {"dv": roundi(m.dv_used), "target": roundi(dv_plan), "error": snappedf(error, 0.0001),
 		"by": "computer" if by_computer else "pilot", "shift_deg": shift_deg, "burn_s": roundi(m.t - burn_t0), "t_cut": m.t}
+	m.use_engine("craft")   # the departure stage is left behind; from here the craft's own engine burns
 	GameState.flight_moment("tli", GameState.flight.tli)
 	phase = "coast"
 	phase_t = 0.0
@@ -723,7 +755,7 @@ func _coast_phase(_delta: float) -> void:
 	if not pred.is_empty() and (float(pred.closest) > Transfer.SOI or pred.impact):
 		_missed(tr("Your path hits the Moon.") if pred.impact else tr("Your path does not reach the Moon."))
 		return
-	var cap_s: float = m.capture_dv(pred) / Transfer.BURN_ACCEL if not pred.is_empty() else 100.0
+	var cap_s: float = m.burn_time(m.capture_dv(pred)) if not pred.is_empty() else 100.0
 	capture_at = float(pred.get("t_closest", m.t + 1e9)) - cap_s * 0.5
 	# the long coast gets a few seconds of its own: quick, but long enough to watch the Moon come to meet you
 	m.advance(_time_to(capture_at - COUNTDOWN, get_process_delta_time(), "arrive", COAST_S))

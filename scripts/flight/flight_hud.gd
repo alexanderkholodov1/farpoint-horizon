@@ -65,6 +65,9 @@ var ring: Instruments.TimingRing   ## The timing ring in the middle (ring_show, 
 var _hint_tw: Tween
 var controls_panel: PanelContainer   ## The controls, bottom right (a screen may hide it while it has nothing to do).
 var gauges_panel: PanelContainer   ## On a phone the gauges' own panel, top right.
+var readouts_panel: PanelContainer   ## The readouts, top left.
+var left_panel: Control   ## A screen's own panel bottom left instead of the instrument (the trip's mini-map): the hint starts after it.
+var right_panel: Control   ## A screen's own panel top right (the trip's plan): the big message stays left of it.
 
 
 func _init() -> void:
@@ -80,6 +83,7 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 	var p := Kit.panel_box(Kit.PAD)
 	Kit.place(p, 0, 0, 0, 0, Kit.MARGIN, Kit.MARGIN, 300 if Kit.compact else 480, Kit.MARGIN)
 	add_child(p)
+	readouts_panel = p
 	var v := Kit.vbox(Kit.GAP)
 	p.add_child(v)
 	_top = v
@@ -222,8 +226,53 @@ func build(heading: String, action_label: String, keys_text: String, four_way :=
 		hint_lbl.max_lines_visible = 4   # a long hint is cut on a phone rather than covering the scene
 	else:
 		Kit.place(hint_panel, 0.5, 1, 0.5, 1, -400, -128, 330, -Kit.MARGIN)   # clear of the mini-map on narrower screens (#76)
+		hint_panel.offset_top = -Kit.MARGIN
+		hint_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN   # a long hint grows up, never past the bottom edge
 	add_child(hint_panel)
 	hint_panel.visible = false
+
+
+## On a phone nothing may cover anything (issue #93), whatever the screen's height: every frame the controls shrink
+## from their corner just enough to sit under the gauges, the instrument under the readouts, and the hint and the big
+## message take the gap that is really left between the panels.
+func _process(_delta: float) -> void:
+	if not Kit.compact or controls_panel == null:
+		return
+	var view: Vector2 = get_viewport_rect().size
+	var gap := 6.0
+	var s := 1.0
+	if controls_panel.visible:
+		var limit: float = Kit.MARGIN
+		if gauges_panel and gauges_panel.visible:
+			limit = gauges_panel.get_global_rect().end.y + gap
+		elif _top_right:
+			limit = _top_right.get_parent().get_global_rect().end.y + gap
+		s = Kit.fit_under(controls_panel, limit, true)
+	if instrument_box and instrument_box.visible and readouts_panel:
+		Kit.fit_under(instrument_box, readouts_panel.get_global_rect().end.y + gap, false)
+	var left: float = Kit.MARGIN
+	if instrument_box and instrument_box.visible:
+		left = instrument_box.get_global_rect().end.x + gap
+	if left_panel and left_panel.visible:
+		Kit.fit_under(left_panel, readouts_panel.get_global_rect().end.y + gap, false)
+		left = maxf(left, left_panel.get_global_rect().end.x + gap)
+	var right: float = view.x - Kit.MARGIN
+	if controls_panel.visible:
+		right = controls_panel.get_global_rect().position.x - gap
+	if hint_panel:
+		hint_panel.offset_left = left
+		hint_panel.offset_right = minf(right, view.x - Kit.MARGIN) - view.x
+	# the big message: between the readouts and the gauges (or the top-right buttons)
+	var mid_l: float = (readouts_panel.get_global_rect().end.x if readouts_panel and readouts_panel.visible else 0.0) + gap
+	var mid_r: float = view.x - gap
+	if gauges_panel and gauges_panel.visible:
+		mid_r = gauges_panel.get_global_rect().position.x - gap
+	if right_panel and right_panel.visible:
+		mid_r = minf(mid_r, right_panel.get_global_rect().position.x - gap)
+	for l in [big, sub]:
+		if l:
+			l.offset_left = mid_l
+			l.offset_right = mid_r - view.x
 
 
 ## Makes a panel read as a piece of the craft's console: a rivet in each corner and a warm bar at its top edge.
@@ -294,11 +343,12 @@ func cap_warp(cap: float, why := "") -> void:
 func _show_warp() -> void:
 	if warp_box == null:
 		return
-	# the chosen speed lit in the accent colour (the largest button not above it), the ones not allowed now faded
-	var lit_w := 1.0
+	# the speed lit in the accent colour only when time runs exactly at it; at a speed the flight set itself (a burn
+	# at x50, a wait at x8,640) no button is lit and the line below says the real one (#57: x10 was lit at x50)
+	var lit_w := -1.0
 	for w in _warp_btns:
-		if w <= warp + 0.001:
-			lit_w = maxf(lit_w, w)
+		if absf(w - warp) <= 0.001 * maxf(w, 1.0):
+			lit_w = w
 	for w in _warp_btns:
 		var b: Button = _warp_btns[w]
 		for st in ["normal", "hover", "pressed", "disabled"]:

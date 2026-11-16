@@ -1,7 +1,7 @@
 """Earth and Moon textures from NASA data, downloaded and processed for the game (issue #12).
 
 Run:  python assets/source/planet_textures.py  [download folder, default ./build/planet_src]
-Needs Pillow and numpy. Writes textures/earth_day.jpg, earth_night.jpg, earth_clouds.jpg, earth_relief.jpg,
+Needs Pillow and numpy. Writes assets/textures/earth_day.jpg, earth_night.jpg, earth_clouds.jpg, earth_relief.jpg,
 moon_color.jpg and moon_normal.jpg.
 
 Sources (docs/sources.md):
@@ -24,14 +24,14 @@ import numpy as np
 from PIL import Image
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-OUT = os.path.join(ROOT, "textures")
+OUT = os.path.join(ROOT, "assets", "textures")
 SRC = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.path.join(ROOT, "build", "planet_src")
 
 GIBS = ("https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1"
         "&SRS=EPSG:4326&BBOX=-180,-90,180,90&WIDTH=4096&HEIGHT=2048&FORMAT=image/jpeg&LAYERS={layer}&TIME={time}")
 ## The region under the climb from Ecuador, 24 x 24 degrees around the launch site, at about 1.3 km per pixel (eight
 ## times the whole-globe maps): the globe's shader blends it in so the Earth stays sharp right after the rocket leaves
-## the Andes terrain (look, issue #12). Keep REGION_LONLAT in step with REGION_RECT in scripts/space_builder.gd.
+## the Andes terrain (look, issue #12). Keep REGION_LONLAT in step with REGION_RECT in scripts/world/space_builder.gd.
 REGION_LONLAT = (-92.0, -12.0, -44.0, 12.0)
 ## 48 x 24 degrees, east along the launch track so the Earth stays sharp where the craft separates (~2,000 km downrange),
 ## 6144 pixels over 48 degrees: about 870 m a pixel, nearly the pixel count of the old 24-degree square (v0.2.2)

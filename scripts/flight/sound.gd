@@ -62,7 +62,7 @@ static func _make(id: String) -> AudioStreamWAV:
 		"thud":
 			s = _hit(rng, 0.9, 55.0, 0.8)
 		"boom":
-			s = _hit(rng, 2.6, 40.0, 1.0)
+			s = _blast(rng, 2.8)
 		_:
 			s = _tone([440.0], 0.1, 0.005, 0.05)
 	return _wav(s, loop)
@@ -116,6 +116,27 @@ static func _hit(rng: RandomNumberGenerator, seconds: float, freq: float, noise:
 		y = y * 0.9 + rng.randf_range(-1.0, 1.0) * 0.1
 		var env := exp(-t * 6.0 / seconds)
 		out[i] = (sin(ph) * 0.7 + y * noise * 3.0) * env * 0.8
+	return out
+
+
+## An explosion any speaker can play: a bright crack (white noise, gone in a tenth of a second), the blast's body
+## (noise smoothed only a little, so its energy sits in the middle frequencies a laptop speaker reproduces) and a
+## falling thump at 80 Hz underneath. A low tone alone (40 Hz) is felt in a cinema but not heard on a laptop.
+static func _blast(rng: RandomNumberGenerator, seconds: float) -> PackedFloat32Array:
+	var n := int(RATE * seconds)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var body := 0.0
+	var ph := 0.0
+	for i in n:
+		var t := float(i) / RATE
+		var white := rng.randf_range(-1.0, 1.0)
+		body = body * 0.55 + white * 0.45
+		ph += TAU * 80.0 * (1.0 - 0.5 * t / seconds) / RATE
+		var crack := white * exp(-t * 40.0)
+		var roar := body * exp(-t * 2.2) * (1.0 - exp(-t * 60.0))
+		var thump := sin(ph) * exp(-t * 3.0)
+		out[i] = clampf(crack * 0.9 + roar * 0.85 + thump * 0.6, -1.0, 1.0)
 	return out
 
 

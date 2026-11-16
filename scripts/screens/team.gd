@@ -53,10 +53,10 @@ func _steps_of(st: String) -> String:
 
 # ===================================================================================== HOME
 func _show_home() -> void:
-	var v := _frame(700, 520, tr("Your crew"), tr("A mission is a team effort. You have four stations: engineer, scientist, pilot and ground control. Friends take the stations they like, and bots take the rest, so you never fly alone."))
+	var v := _frame(700, 620, tr("Your crew"), tr("A mission is a team effort. You have four stations, each with its cuy: Rumi the engineer, Killa the scientist, Inti the pilot and Wayra at ground control. Friends take the stations they like, and the cuyes take the rest, so you never fly alone."))
 	var opts := [
-		[tr("Solo"), tr("You take one station. Three bots take the others and work with you."), "solo", Kit.C_GOLD],
-		[tr("Same screen"), tr("Two to four people on one computer, passing the screen. Free stations get a bot."), "same", null],
+		[tr("Solo"), tr("You take one station. Three cuyes take the others and work with you."), "solo", Kit.C_GOLD],
+		[tr("Same screen"), tr("Two to four people on one computer, passing the screen. Free stations get their cuy."), "same", null],
 		[tr("Online"), tr("Create a room, share its code, and up to four friends join from their own browsers."), "online", null]]
 	for o in opts:
 		var b := Kit.btn(o[0], func(): go("team", {"view": o[2]}), 22, 640)
@@ -64,13 +64,17 @@ func _show_home() -> void:
 			Kit.accent_btn(b, o[3])
 		v.add_child(b)
 		v.add_child(Kit.lbl(o[1], 14, Kit.C_DIM, Kit.FONT_R, true))
+	# the first mission, guided by the crew, is a way in too: it lives here with the other ways to play
+	var guided := Kit.btn(tr("Guided first mission"), func(): preload("res://scripts/tutorial/coach.gd").start(main), 22, 640)
+	v.add_child(guided)
+	v.add_child(Kit.lbl(tr("New to space missions? The crew walks you through your first one, station by station."), 14, Kit.C_DIM, Kit.FONT_R, true))
 	v.add_child(Kit.spacer(6))
 	v.add_child(Kit.btn(tr("◀ Back"), func(): go("menu")))
 
 
 # ===================================================================================== SOLO
 func _show_solo() -> void:
-	var v := _frame(1000, 600, tr("Pick your station"), tr("You run one station. The bots take the other three, and you can open any station and change what a bot chose."))
+	var v := _frame(1000, 600, tr("Pick your station"), tr("You run one station. The cuyes take the other three, and you can open any station and change what a cuy chose."))
 	var grid := GridContainer.new()
 	grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 12)
@@ -90,7 +94,10 @@ func _station_card(st: String, pick: Callable, button_text: String, holder_text 
 	pc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var cv := Kit.vbox(3)
 	pc.add_child(cv)
-	cv.add_child(Kit.lbl(R.name, 20, R.color, Kit.FONT_T))
+	var top := Kit.hbox(10)
+	top.add_child(_portrait(st, 52))
+	top.add_child(Kit.lbl(R.name + "  ·  " + Bots.NAMES[st], 20, R.color, Kit.FONT_T))
+	cv.add_child(top)
 	cv.add_child(Kit.lbl(tr("Decides") + " · " + _steps_of(st), 13, Kit.C_TEXT, Kit.FONT_B, true))
 	cv.add_child(Kit.lbl(tr("Goal") + " · " + R.goal, 13, Kit.C_DIM, Kit.FONT_R, true))
 	if holder_text != "":
@@ -102,7 +109,7 @@ func _station_card(st: String, pick: Callable, button_text: String, holder_text 
 
 # ===================================================================================== SAME SCREEN
 func _show_same(n: int) -> void:
-	var v := _frame(1000, 640, tr("Same screen"), tr("Type your names and choose who takes each station. Pass the screen when it is your station's turn. Stations nobody takes are held by a bot."))
+	var v := _frame(1000, 640, tr("Same screen"), tr("Type your names and choose who takes each station. Pass the screen when it is your station's turn. Stations nobody takes stay with their cuy."))
 	var count := Kit.hbox(8)
 	v.add_child(count)
 	count.add_child(Kit.lbl(tr("How many players?"), 15, Kit.C_TEXT, Kit.FONT_B))
@@ -126,13 +133,14 @@ func _show_same(n: int) -> void:
 	for st in GameData.ROLE_ORDER:
 		var R: Dictionary = GameData.ROLES[st]
 		var row := Kit.hbox(10)
+		row.add_child(_portrait(st, 34))
 		var l := Kit.lbl(R.name, 17, R.color, Kit.FONT_B)
-		l.custom_minimum_size.x = 170
+		l.custom_minimum_size.x = 150
 		row.add_child(l)
 		var ob := OptionButton.new()
 		for i in n:
 			ob.add_item(tr("Player %d") % (i + 1))
-		ob.add_item(tr("Bot") + " · " + Bots.NAMES[st])
+		ob.add_item(tr("%s, the cuy") % Bots.NAMES[st])
 		ob.select(GameData.ROLE_ORDER.find(st) if GameData.ROLE_ORDER.find(st) < n else n)
 		ob.custom_minimum_size.x = 260
 		row.add_child(ob)
@@ -164,7 +172,7 @@ func _show_same(n: int) -> void:
 
 # ===================================================================================== ONLINE
 func _show_online() -> void:
-	var v := _frame(760, 520, tr("Online room"), tr("One of you creates a room and shares its code. The others type it and join. Everybody picks a station; bots take the free ones."))
+	var v := _frame(760, 520, tr("Online room"), tr("One of you creates a room and shares its code. The others type it and join. Everybody picks a station; the cuyes take the free ones."))
 	if not GameState.TransportWeb.available():
 		v.add_child(Kit.lbl(tr("Online rooms work in the web version of the game. This build can play solo or on one screen."), 16, Kit.C_WARN, Kit.FONT_B, true))
 		v.add_child(Kit.btn(tr("◀ Back"), func(): go("team")))
@@ -226,7 +234,7 @@ func _on_room_changed(_by_me: bool) -> void:
 ## The room view: the code, the people, and the four stations with their holders.
 func _show_room() -> void:
 	var room = GameState.room
-	var v := _frame(1000, 660, tr("Room") + " " + room.code, tr("Share this code with your friends. Each one takes a station; the free ones stay with their bot."))
+	var v := _frame(1000, 660, tr("Room") + " " + room.code, tr("Share this code with your friends. Each one takes a station; the free ones stay with their cuy."))
 	var people: Array = []
 	for pid in room.state.members:
 		people.append(room.state.members[pid])
@@ -242,12 +250,12 @@ func _show_room() -> void:
 		var label := ""
 		var cb: Callable
 		if h.kind == "bot":
-			who = tr("Bot") + " · " + Bots.NAMES[st]
+			who = tr("%s, the cuy") % Bots.NAMES[st]
 			label = tr("Take this station")
 			cb = func(): room.take(st)
 		elif room.mine(st):
 			who = tr("You") + " · " + h.name
-			label = tr("Give it to the bot")
+			label = tr("Give it to its cuy")
 			cb = func(): room.release(st)
 		else:
 			who = h.name
@@ -263,3 +271,15 @@ func _show_room() -> void:
 		hb.add_child(Kit.accent_btn(Kit.btn(tr("Pick the mission ▶"), func(): go("missions"), 18), Kit.C_ACCENT))
 	else:
 		hb.add_child(Kit.lbl(tr("Waiting for the host to pick the mission..."), 15, Kit.C_WARN, Kit.FONT_B))
+
+
+## The cuy of a station: its round portrait from the story, size px.
+func _portrait(st: String, size: float) -> Control:
+	var t := TextureRect.new()
+	t.custom_minimum_size = Vector2(size, size)
+	t.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	t.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	var path: String = Bots.PORTRAITS.get(st, "")
+	if path != "" and ResourceLoader.exists(path):
+		t.texture = load(path)
+	return t

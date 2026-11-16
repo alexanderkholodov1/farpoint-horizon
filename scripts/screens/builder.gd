@@ -10,7 +10,7 @@ extends "res://scripts/screens/screen.gd"
 ## "Use this rocket" makes it the mission's launcher (RocketDesign.CUSTOM) and goes back to the launcher step.
 ## args: {"back_step": index of GameData.STEPS to return to}.
 
-const Space := preload("res://scripts/space_builder.gd")
+const Space := preload("res://scripts/world/space_builder.gd")
 const RocketDesign := preload("res://scripts/craft/rocket_design.gd")
 const PartIcon := preload("res://scripts/ui/part_icon.gd")
 
@@ -41,6 +41,11 @@ var info_body: Label
 var fly_btn: Button
 var picks: Array = []          ## What each tile on screen does, in order (the number keys choose them).
 
+
+var left_panel: Control       ## On a phone the three columns are measured every frame (issue #93).
+var right_panel: Control
+var hint_panel: Control
+var bar_panel: Control
 
 func enter(args: Dictionary) -> void:
 	back_step = args.get("back_step", 0)
@@ -227,14 +232,23 @@ func _build_ui() -> void:
 	sp.add_child(steps_row)
 	# ---------- left: the step's question and its few parts
 	var lp := Kit.panel_box(Kit.PAD)
-	Kit.place(lp, 0, 0, 0, 1, Kit.MARGIN, 54 if Kit.compact else 84, 392 if Kit.compact else 476, -Kit.MARGIN)
+	Kit.place(lp, 0, 0, 0, 1, Kit.MARGIN, 64 if Kit.compact else 84, 362 if Kit.compact else 476, -Kit.MARGIN)
 	add_child(lp)
+	left_panel = lp
 	left_box = Kit.vbox(Kit.GAP)
-	lp.add_child(left_box)
+	if Kit.compact:   # on a phone the step's parts scroll inside their panel instead of running off the screen
+		var lsc := ScrollContainer.new()
+		lsc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		left_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		lsc.add_child(left_box)
+		lp.add_child(lsc)
+	else:
+		lp.add_child(left_box)
 	# ---------- right: will it fly?
 	var rp := Kit.panel_box(Kit.PAD)
-	Kit.place(rp, 1, 0, 1, 0, -306 if Kit.compact else -364, 54 if Kit.compact else 84, -Kit.MARGIN, 54 if Kit.compact else 84)   # grows to its content
+	Kit.place(rp, 1, 0, 1, 0, -306 if Kit.compact else -364, 64 if Kit.compact else 84, -Kit.MARGIN, 64 if Kit.compact else 84)   # grows to its content
 	add_child(rp)
+	right_panel = rp
 	right_box = Kit.vbox(Kit.GAP)
 	rp.add_child(right_box)
 	# ---------- bottom centre: what the pointed thing is, and the actions
@@ -246,14 +260,16 @@ func _build_ui() -> void:
 	else:
 		Kit.place(ip, 0, 1, 1, 1, 496, -214, -388, -110)
 	add_child(ip)
+	hint_panel = ip
 	info_body = hb[1]
 	info_body.add_theme_font_size_override("font_size", Kit.T_BODY)
-	var bp := Kit.panel_box(10)
+	var bp := Kit.panel_box(6 if Kit.compact else 10)
 	if Kit.compact:   # the middle column of a phone, between the question and the board
 		Kit.place(bp, 0, 1, 1, 1, 400, -62, -314, -Kit.MARGIN)
 	else:
 		Kit.place(bp, 0, 1, 1, 1, 496, -96, -388, -Kit.MARGIN)
 	add_child(bp)
+	bar_panel = bp
 	var bar := Kit.hbox(10)
 	bar.alignment = BoxContainer.ALIGNMENT_CENTER
 	bp.add_child(bar)
@@ -508,6 +524,8 @@ func _rebuild(snap: bool, reread := true) -> void:
 
 
 func process(delta: float) -> void:
+	if Kit.compact and is_instance_valid(bar_panel):   # on a phone the middle column is measured (issue #93)
+		Kit.fit_middle(left_panel, right_panel, hint_panel, bar_panel)
 	if snap_node and is_instance_valid(snap_node) and snap_t < 1.0:
 		# the new part drops from above and settles with a small spring (about 0.45 s)
 		snap_t = minf(1.0, snap_t + delta / 0.45)

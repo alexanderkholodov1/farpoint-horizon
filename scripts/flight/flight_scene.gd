@@ -1,11 +1,11 @@
 extends RefCounted
 ## 3D pieces of the pilot's flight that the shared builders do not have: the Earth seen from the climb, a puff of
 ## gas at staging, flying debris, dust. Everything static; each returns a node for the screen to add to world.stage.
-## The look of the places themselves (pad, Earth, Moon) stays in scripts/space_builder.gd.
+## The look of the places themselves (pad, Earth, Moon) stays in scripts/world/space_builder.gd.
 ##   const Scene3D := preload("res://scripts/flight/flight_scene.gd")
 
-const Space := preload("res://scripts/space_builder.gd")
-const Ship := preload("res://scripts/ship_builder.gd")
+const Space := preload("res://scripts/world/space_builder.gd")
+const Ship := preload("res://scripts/world/ship_builder.gd")
 
 
 ## The Earth under a rocket in the climb: a globe of radius r (scene units), turned so that Ecuador is straight below.
@@ -13,8 +13,14 @@ const Ship := preload("res://scripts/ship_builder.gd")
 static func horizon_earth(r: float) -> Node3D:
 	var e := Space.make_earth(r, false)
 	e.name = "HorizonEarth"
-	var below := Space.latlon_to_vec(-0.2, -78.5)    # Quito, the spaceport's latitude and longitude
-	e.set_meta("base", Basis(Quaternion(below.normalized(), Vector3.UP)))
+	# Quito, the spaceport, on top; east (where the rocket flies) along the scene's +X, north into the screen, so the
+	# ground and its clouds slide under the rocket the way it flies
+	var up := Space.latlon_to_vec(-0.2, -78.5).normalized()
+	var east := (Space.latlon_to_vec(-0.2, -78.4) - Space.latlon_to_vec(-0.2, -78.6)).normalized()
+	east = (east - up * east.dot(up)).normalized()
+	var south := east.cross(up)
+	var to_planet := Basis(east, up, south)          # scene X, Y, Z in the planet's own frame
+	e.set_meta("base", to_planet.transposed())
 	e.basis = e.get_meta("base")
 	return e
 

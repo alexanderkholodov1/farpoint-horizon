@@ -22,7 +22,7 @@ var total_pts := 0
 var pts_lbl: Label
 var photo_layer: Control       ## a photo shown large (Esc closes it before anything else)
 var first_btn: Button          ## the report's main action, focused once the celebration is over
-## Where each problem of the design is fixed (scripts/mission.gd checks' "at"), as the design's stage names.
+## Where each problem of the design is fixed (scripts/core/mission.gd checks' "at"), as the design's stage names.
 const FIX_AT := {"instruments": "Craft", "bus": "Craft", "panels": "Power", "battery": "Power", "comms": "Systems",
 	"adcs": "Systems", "propulsion": "Systems", "launcher": "Rocket", "orbit": "Mission"}
 
@@ -32,7 +32,7 @@ func enter(_args: Dictionary) -> void:
 	var flight: Dictionary = GameState.flight
 	var landing: Dictionary = flight.get("landing", {})
 	if not last_sim.launch_failed:
-		preload("res://scripts/progress.gd").done(mission.scenario)   # a mission flown opens the next one
+		preload("res://scripts/core/progress.gd").done(mission.scenario)   # a mission flown opens the next one
 	if last_sim.launch_failed:
 		world.stage_earth()
 	elif bool(landing.get("landed", false)) and FlightData.has_landing(mission.scenario):
@@ -48,6 +48,9 @@ func enter(_args: Dictionary) -> void:
 		last_sim = GameState.last_sim
 	bonus = int(flight.get("bonus", 0))
 	var s: Dictionary = last_sim.score
+	if not flight.get("ranked", false):   # each flight enters the ranking once (issue #52), whatever happens after
+		flight["ranked"] = true
+		GameState.add_ranking(_crew_name(), int(s.total) + bonus, str(s.grade))
 	var r: Dictionary = GameState.last_report
 	var S: Dictionary = GameData.SCENARIOS[mission.scenario]
 	var p := Kit.panel_box(Kit.PAD)
@@ -398,6 +401,9 @@ func _photo_tile(ph: Dictionary, earned: bool) -> Control:
 		var all: Dictionary = Objectives.all()
 		var what: String = tr("Meet “%s” to bring this one home.") % str(all[ph.objective].name) if ph.objective != "" and all.has(ph.objective) \
 			else tr("It comes home when the mission works.")
+		if ph.objective != "" and all.has(ph.objective) and all[ph.objective].has("how"):
+			what += "
+" + tr("How: %s") % tr(str(all[ph.objective].how))   # #98
 		var l := Kit.lbl("🔒  " + what, Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true)
 		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		l.custom_minimum_size.x = 180
@@ -476,7 +482,9 @@ func _actions(outer: VBoxContainer, s: Dictionary) -> void:
 	var sp := Control.new()
 	sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bh.add_child(sp)
-	# the ranking comes back with the crew of friends (v0.3.0, issue #52); the menu has none either
+	var rank := Kit.btn(tr("Ranking"), func(): main.overlay("ranking"), Kit.T_BODY)
+	rank.custom_minimum_size.y = Kit.BTN_H
+	bh.add_child(rank)
 	var menu := Kit.btn(tr("Menu") + "  ·  Esc", func(): go("menu"), Kit.T_BODY)
 	menu.custom_minimum_size.y = Kit.BTN_H
 	bh.add_child(menu)
@@ -493,3 +501,12 @@ func _back_to_design() -> void:
 func _fly_again() -> void:
 	GameState.approve_all()
 	main.launch()
+
+
+## Who flew it, for the ranking: the players' names, or the station the player held with its cuy crewmates.
+func _crew_name() -> String:
+	var names: Array = []
+	for P in GameState.players:
+		names.append(str(P.get("name", "")))
+	names = names.filter(func(n): return n.strip_edges() != "")
+	return " · ".join(names) if not names.is_empty() else tr("You and the cuyes")

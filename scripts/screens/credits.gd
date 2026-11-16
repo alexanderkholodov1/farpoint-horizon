@@ -2,7 +2,7 @@ extends "res://scripts/screens/screen.gd"
 ## Overlay: the credits (issue #14), told like the end of a film rather than a bibliography. The title and the arc, the
 ## two people who made the game with their links, a nod to the four bots, what it is built with, the AI that helped,
 ## and the sources behind every number, folded by section so they open on a click. Everything comes from
-## data/credits.json (tools/credits.py, from docs/sources.md and the README; tests/credits.gd keeps it in step).
+## data/credits.json (tools/content/credits.py, from docs/sources.md and the README; tests/ci/credits.gd keeps it in step).
 ## Opened with main.overlay("credits").
 
 const CREDITS_PATH := "res://data/credits.json"
@@ -128,7 +128,7 @@ func _people(box: VBoxContainer, people: Array) -> void:
 		nv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		hb.add_child(nv)
 		nv.add_child(Kit.lbl(P.name, Kit.T_STAT + 8, Kit.C_TEXT, Kit.FONT_T, true))
-		nv.add_child(Kit.lbl("SK Horizon · Quito", Kit.T_BODY, col, Kit.FONT_B))
+		nv.add_child(Kit.lbl("SK-Horizons · Quito", Kit.T_BODY, col, Kit.FONT_B))
 		tv.add_child(Kit.lbl(_cap(P.role), Kit.T_LEAD + 1, Kit.C_TEXT, Kit.FONT_R, true))
 		var links := Kit.hbox(6)
 		tv.add_child(links)

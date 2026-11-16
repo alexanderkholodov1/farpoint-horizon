@@ -3,7 +3,7 @@
 Run (Blender 4.2 or newer, background):
     blender -b --factory-startup --python assets/source/craft_kit.py -- [--render <dir>]
 
-Writes assets/models/craft_kit.glb. scripts/ship_builder.gd instances its top-level nodes by name and scales them to
+Writes assets/models/craft_kit.glb. scripts/world/ship_builder.gd instances its top-level nodes by name and scales them to
 the craft. Every component is modeled at unit size, standing on its mount at the origin and pointing out along
 Blender +Z (Godot +Y after export): the code only has to place it on a face and scale it.
 
@@ -24,7 +24,7 @@ The shapes follow real hardware, simplified (no single product is copied, there 
 - Sada, Yoke: the solar array drive and the arm that holds a wing off the body.
 - SunSensor: a small coarse sun sensor head.
 
-Units: each part is about 1 unit across; its real size comes from the game data (scripts/ship_builder.gd).
+Units: each part is about 1 unit across; its real size comes from the game data (scripts/world/ship_builder.gd).
 """
 import bpy, bmesh, math, os, sys
 from mathutils import Vector, Matrix

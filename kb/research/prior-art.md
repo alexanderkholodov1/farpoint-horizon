@@ -1,6 +1,6 @@
 # Prior art for a space-mission design game
 
-Researched 2026-11-14. Every fact has a source URL. **(inference)** = our deduction. "Not found" = searched without result. Companion file: kb/challenge/event-and-judging.md (judging criteria: Impact, Creativity, Validity, Relevance, Presentation).
+Researched 2026-11-14. Every fact has a source URL. **(inference)** = our deduction. "Not found" = searched without result. Companion file: spaceapps/rules/event-and-judging.md (judging criteria: Impact, Creativity, Validity, Relevance, Presentation).
 
 ## A. Resources listed in the challenge
 
@@ -24,13 +24,13 @@ Repository and tutorials: https://nasa.github.io/mission-viz ; software catalog 
 Reusable idea: trajectory export from GMAT to JSON for pre-baked orbit/transfer visuals.
 
 ### A3. NASA Mission Design Lab (MDL) and Concept Maturity Levels
-Challenge-provided descriptions (docs/challenge/mission_resources.txt): MDL study types Office Hours, Concept Development, Trade Studies, Point Design; CML 1-4 from idea to point design. Official page: https://etd.gsfc.nasa.gov/capabilities/integrated-design-center/mission-design-lab/ . (inference) The four MDL study depths and CMLs map naturally to game difficulty levels or campaign stages (idea, feasibility, trade study, point design).
+Challenge-provided descriptions (spaceapps/challenge/resources.txt): MDL study types Office Hours, Concept Development, Trade Studies, Point Design; CML 1-4 from idea to point design. Official page: https://etd.gsfc.nasa.gov/capabilities/integrated-design-center/mission-design-lab/ . (inference) The four MDL study depths and CMLs map naturally to game difficulty levels or campaign stages (idea, feasibility, trade study, point design).
 
 ### A4. CSA digital games
 Page: https://www.asc-csa.gc.ca/eng/youth-educators/digital-games-and-activities.asp . Per search results: **Mission: Astronaut** (grades 3-6, dozens of short activities across eight missions: astronaut training, living in space, robotics, the Moon; includes a Lunar Rover easy coding minigame) and **Tomatosphere Adventure** (Minecraft Education game about growing tomatoes on Mars). Sources: https://www.asc-csa.gc.ca/eng/youth-educators/activities/game-mission-astronaut.asp , https://asc-csa.gc.ca/eng/youth-educators/activities/tomatosphere-adventure-minecraft-education-game-featuring-extraterrestrial-agriculture.asp . Pattern: many short, themed minigames with teacher resources; they teach one topic each, not a whole mission (inference). Whether a full system-design game exists in the CSA collection: not found.
 
 ### A5. 2023 Space Apps "Visualize a Space Mission Using Virtual Reality"
-Challenge page: https://www.spaceappschallenge.org/2023/challenges/visualize-a-space-mission-using-virtual-reality/ (summary in docs/challenge/mission_resources.txt: VR app showing mission concept, orbital trajectories, mission timeline, 3D visualization). Projects found (not verified as winners):
+Challenge page: https://www.spaceappschallenge.org/2023/challenges/visualize-a-space-mission-using-virtual-reality/ (summary in spaceapps/challenge/resources.txt: VR app showing mission concept, orbital trajectories, mission timeline, 3D visualization). Projects found (not verified as winners):
 - Team Robust: VR experience following Hubble Servicing Mission 1; page labelled "Global Nominee" (also shows "Global Finalist Honorable Mention" text, so status ambiguous). https://www.spaceappschallenge.org/2023/find-a-team/team-robust/
 - PocketSpaceShip (team ThunderBees, Guanajuato local event): https://github.com/FuanitoMH/PocketSpaceShip
 - Tycho Station: https://github.com/dilansolart/tychoStation_AppsChallenge2023
@@ -41,8 +41,8 @@ Global winner for this challenge: not found (official winners page https://www.s
 ### B1. Kerbal Space Program 1 (KSP)
 - Modes: Science mode (no economy), Career mode adds Funds, Reputation, Contracts; contracts reward science/funds/reputation, missed deadlines penalize; reputation gates contract quality (https://wiki.kerbalspaceprogram.com/wiki/Career , https://wiki.kerbalspaceprogram.com/wiki/Science_mode ). Science mode was designed to ease new players in and not overwhelm them (https://wiki.kerbalspaceprogram.com/wiki/0.24 ; First Contract update July 2014, https://www.pcgamer.com/kerbal-space-program-devs-hope-to-add-budgets-reputation-in-2014 ).
 - Engaging: build, fail, iterate loop with real physics; funds/contracts turn it into mission goals.
-- Weaknesses: steep learning curve; player complaints that contracts are repetitive/cannot be customized and funds only from contracts (anecdotal, https://forum.kerbalspaceprogram.com/topic/167147-ocd-alert-i-want-to-get-around-the-contracts-system ). Focuses on flight/orbital mechanics, not instrument/data/comms trade-offs (inference).
-- Education: KerbalEdu (simplified interface, pre-made lessons, launched 2014 by TeacherGaming/Squad; https://www.engadget.com/2014/01/24/kerbal-space-program-plots-course-for-the-classroom/ ). Controlled learning-outcome studies: not found; a physics-course abstract describes using KSP for orbital dynamics without measured outcomes (https://archive.aps.org/aaptsm/2025/a02/1 ).
+- Weaknesses: steep learning curve; player complaints that contracts are repetitive/cannot be customized and funds only from contracts (anecdotal, https://forum.kerbalspaceprogram.com/topic/167147-ocd-alert-i-want-to-get-around-the-contracts-system (blocks automated checks; open in a browser) ). Focuses on flight/orbital mechanics, not instrument/data/comms trade-offs (inference).
+- Education: KerbalEdu (simplified interface, pre-made lessons, launched 2014 by TeacherGaming/Squad; https://www.engadget.com/2014/01/24/kerbal-space-program-plots-course-for-the-classroom/ ). Controlled learning-outcome studies: not found; a physics-course abstract describes using KSP for orbital dynamics without measured outcomes (https://archive.aps.org/aaptsm/2025/a02/1 (404 on 2026-11-16) ).
 
 ### B2. Kerbal Space Program 2
 Early Access launched Feb 2023 with bugs, performance problems and missing features; developer Intercept Games reportedly closed mid-2024 (Take-Two did not confirm; Bloomberg-reported) and no content updates since Dec 2023 per Windows Central (https://www.windowscentral.com/gaming/kerbal-space-program-2-hasnt-had-an-ounce-of-content-for-over-a-year ; https://www.pcgamer.com/games/sim/kerbal-space-program-2-developer-intercept-games-may-be-closing-as-part-of-take-twos-big-layoff-plan ). Lesson (inference): ambition outran delivery; a small complete vertical slice beats a broad unfinished sandbox, which matters for a one-day hackathon.

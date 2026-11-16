@@ -43,10 +43,10 @@ jobs:
           dest="$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
           mkdir -p "$dest" && cp ~/godot/templates/* "$dest/"
 
-      - name: Run every check (tools/check.sh)
+      - name: Run every check (tools/dev/check.sh)
         env:
           GODOT: /home/runner/godot/godot
-        run: bash tools/check.sh
+        run: bash tools/dev/check.sh
 
       - name: Keep the web build
         uses: actions/upload-artifact@v4

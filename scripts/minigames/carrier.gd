@@ -17,7 +17,7 @@ const LOCK_S := 1.5                          ## Seconds tuned inside the narrowe
 const BONUS_MAX := 120
 const BONUS_MIN := 60
 const SLOW_S := 60.0                         ## After this, the bonus is the minimum.
-const GIVE_UP_S := 90.0                      ## Echo locks it after this, so the panel never waits forever.
+const GIVE_UP_S := 90.0                      ## Wayra (the ground control cuy) locks it after this, so the panel never waits forever.
 
 var station := {}
 var f_of := Callable()       ## Returns the craft's tone, Hz from the X-band frequency (the desk fixes it when the pass begins).
@@ -71,7 +71,7 @@ func setup(st: Dictionary, f_callable: Callable, light_s: float, speed_mps: floa
 	bands_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	acts.add_child(bands_row)
 	_bands()
-	acts.add_child(Kit.btn(tr("Echo, take it"), func(): _finish("bot"), Kit.T_SMALL))
+	acts.add_child(Kit.btn(tr("Wayra, take it"), func(): _finish("bot"), Kit.T_SMALL))
 	status = Kit.lbl(tr("Click the faint line to tune to it, then narrow the filter."), Kit.T_BODY, Kit.C_ACCENT, Kit.FONT_R, true)
 	add_child(status)
 	rng.randomize()
