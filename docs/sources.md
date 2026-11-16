@@ -227,13 +227,16 @@ branches add entries at the same place (`.gitattributes`).
   and Video Library, https://images.nasa.gov/details/art001e000672 (public domain). Orion at its farthest, 268,563 miles
   from Earth. Our processing: cropped to the Moon and the Earth (the spacecraft and its markings left out). In
   `assets/photos/artemis1/`.
+- **S-dart-penultimate** NASA/Johns Hopkins APL. *DART's Penultimate View*, 2022.
+  https://www.nasa.gov/image-article/darts-penultimate-view/ (checked 2026-11-16): "the last complete image of the
+  asteroid Dimorphos, as seen by our Double Asteroid Redirection Test (DART) two seconds before impact", a 100-foot-wide
+  patch taken by DRACO; image credit NASA/Johns Hopkins APL. Downscaled to 1024 px for the web build. The picture of
+  chapter 5's card in the chapter select (issue 68).
 - **S-dart-pia25329** NASA/Johns Hopkins APL. *NASA's DART at the Didymos System*, PIA25329 (illustration, Sept. 22,
   2022), NASA Image and Video Library, https://images.nasa.gov/details/PIA25329 (checked 2026-11-15 through the
   library's API: "This illustration depicts NASA's Double Asteroid Redirection Test (DART) spacecraft prior to impact at
-  the Didymos binary asteroid system"). An illustration, said so on screen. The picture of chapter 5's card in the
-  chapter select (`assets/photos/dart/PIA25329.jpg`).
-
-## The look: Earth, Moon, the Andes and the launch site (issue 12; scripts in `assets/source/`)
+  the Didymos binary asteroid system"). An illustration. It was the picture of chapter 5's card until DART's own camera image replaced it
+  (S-dart-penultimate, issue 68).
 - **S-moon-kit** NASA Goddard Space Flight Center, Scientific Visualization Studio. *CGI Moon Kit* (2019).
   https://svs.gsfc.nasa.gov/4720. LRO LROC WAC colour map (`lroc_color_poles_4k.tif`, colour enhanced from LROC and Kaguya) and
   LOLA elevation (`ldem_16.tif`, 16 pixels per degree); the game's Moon colour and relief (`assets/textures/moon_color.jpg`, `moon_normal.jpg`, made by
@@ -370,6 +373,30 @@ All checked 2026-11-14; the research behind them is `kb/research/in-flight-failu
   Voyager 2's carrier when it was too faint to carry data: the idea of "Find the carrier".
 - **S-soho-recovery** NASA/ESA. *SOHO Mission Interruption and Recovery*. https://soho.nascom.nasa.gov/about/Recovery/.
   SOHO's faint carrier found again on 3 August 1998, six weeks after the loss.
+- **S-usno-sun** U.S. Naval Observatory. *Approximate Solar Coordinates*. https://aa.usno.navy.mil/faq/sun_approx
+  (read through the Internet Archive on 2026-11-15; the site did not answer). g = 357.529 + 0.98560028 D,
+  L = q + 1.915 sin g + 0.020 sin 2g, about 1 arcminute within two centuries of 2000. Where the Sun is, so where L2 is
+  (opposite it) for "Hand it over" (issue 63).
+- **S-afj12-launch** Apollo Flight Journal. *Apollo 12: Launch and Reaching Earth Orbit*.
+  https://apollojournals.org/afj/ap12fj/01launch_to_earth_orbit.html. Checked 2026-11-15: lightning at 36.5 s knocked out
+  the Signal Conditioning Electronics' power supply, so Mission Control received garbled data; John Aaron recognised
+  the pattern from a pad test and CapCom Carr called "Try SCE to Auxiliary" at 000:01:36. A case of "Read the squiggles".
+- **S-jpl-voyager1-fds** NASA Jet Propulsion Laboratory. *NASA's Voyager 1 Resumes Sending Engineering Updates to Earth*,
+  2024. https://www.jpl.nasa.gov/news/nasas-voyager-1-resumes-sending-engineering-updates-to-earth/. Checked 2026-11-15:
+  unreadable data from 14 November 2023; one failed chip of the flight data subsystem's memory; the code split and
+  moved elsewhere, sent 18 April 2024, health data back 20 April. A case of "Read the squiggles".
+- **S-kepler-k2** NASA. *Kepler's Second Light: How K2 Will Work*.
+  https://www.nasa.gov/image-article/keplers-second-light-how-k2-will-work. Checked 2026-11-15: Kepler lost the second of
+  four reaction wheels in May 2013; sunlight's pressure balanced with the two left as a "third wheel". A case of
+  "Read the squiggles".
+- **S-afj13-return** Apollo Flight Journal. *Apollo 13, Day 6, part 8: The Blackout, Splashdown and Recovery*.
+  https://apollojournals.org/afj/ap13fj/29day6-returnhome.html. Checked 2026-11-16: velocity at Entry Interface
+  (400,000 ft) 36,211 ft/s; the communications blackout from 0:19 to 3:38 after Entry Interface. The speed and the
+  blackout of "Coming home" (issue 67).
+- **S-apollo13-return** NASA History. *Apollo 13 Crew Returns Safely to Earth*.
+  https://www.nasa.gov/history/apollo-13-crew-returns-safely-to-earth/. Checked 2026-11-16: two drogue parachutes at
+  24,000 feet, three mains at 10,000 feet; the recovery ship USS Iwo Jima about four miles away. The parachute marks of
+  "Coming home" (issue 67).
 - **S-afj-loi** O'Brien, F. *Lunar Orbit Insertion*, Apollo Flight Journal (NASA History Office, hosted at apollojournals.org). https://apollojournals.org/afj/loiessay.html. The crew had to "perform and monitor the burn on the far side of the Moon, without assistance from the ground": the trip's loss of signal when the braking burn happens behind the Moon.
 - **S-eo-orbits** Riebeek, H. *Catalog of Earth Satellite Orbits*, NASA Earth Observatory, 2009.
   https://earthobservatory.nasa.gov/features/OrbitsCatalog. Low, Sun-synchronous and geostationary orbits in plain

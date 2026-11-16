@@ -66,6 +66,38 @@ func _initialize():
 					dmg[pair[1]] += 1
 	print("missions flown past their first third: ", flown, ", storms: ", storms, ", kinds: ", kinds)
 	print("first storm answered both ways: ", asked, ", damaged in safe mode: ", dmg.safe, ", working through: ", dmg.keep)
+	# #99: a storm is never drawn twice in one month, and answering every one of them (as the operation does, in
+	# order) never brings an earlier month back; the count per mission stays near 1 + 0.03 a month
+	var Op := load("res://scripts/screens/operation.gd")
+	var most := 0
+	for i in 60:
+		var mm = M.new()
+		mm.scenario = "volcanes"
+		mm.orbit = "geo"
+		mm.years = 15
+		mm.difficulty = "dificil"
+		var ch := {}
+		var sim: Dictionary = mm.simulate(500 + i, ch)
+		var asked_months := []
+		for guard in 40:
+			var next := {}
+			for stx in sim.storms:
+				if not ch.has(stx.month):
+					next = stx
+					break
+			if next.is_empty():
+				break
+			if asked_months.has(next.month):
+				fails += 1
+				print("FAIL month ", next.month, " asked twice, seed ", 500 + i)
+				break
+			asked_months.append(next.month)
+			ch[next.month] = "keep" if asked_months.size() % 2 == 0 else "safe"
+			sim = mm.simulate(500 + i, ch)
+		most = maxi(most, asked_months.size())
+	print("most storms in one 15-year mission: ", most, " (the player is asked ", Op.MAX_ASKS, ")")
+	if Op.MAX_ASKS != 1:
+		fails += 1
 	if dmg.safe > dmg.keep:
 		fails += 1
 		print("FAIL safe mode damaged more often")
