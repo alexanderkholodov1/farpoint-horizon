@@ -83,7 +83,7 @@ YOUR OWN MISSION
 Players pick a question worth answering (watch Ecuador's volcanoes, follow El Niño, map the Moon, look at distant galaxies, find ice at the Moon's south pole). Then they design the spacecraft, build the rocket, fly the launch from the equator, travel to the Moon, land on the real ground of its south pole and handle alarms and solar storms from the ground. At the end they see the real pictures their mission would send home, with a report that explains what went well and what to try next.
 
 PLAYING TOGETHER
-Up to four players share a mission, on one screen or online. Each holds a station (engineer, scientist, pilot, ground control) with its own decisions, and the mission flies only when the team agrees. Crew bots fill any empty station.
+Up to four players share a mission, on one screen or online. Each holds a station (engineer, scientist, pilot, ground control) with its own decisions, and the mission flies only when the team agrees. The cuyes of the story hold any empty station: Rumi the engineer, Killa the scientist, Inti the pilot and Wayra at ground control.
 
 WHAT MAKES IT SPECIAL
 - The whole mission, not one piece of it: every decision connects to the next.
@@ -171,6 +171,11 @@ the first two columns.
 | DART (NASA Science) | https://science.nasa.gov/mission/dart/ | S-dart-nasa | 200 |
 | NASA Confirms DART Mission Impact Changed Asteroid's Motion in Space (NASA) | https://www.nasa.gov/news-release/nasa-confirms-dart-mission-impact-changed-asteroids-motion-in-space/ | S-dart-nasa-period | 200 |
 | DART (NASA Space Science Data Coordinated Archive) | https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2021-110A | S-dart-nssdc | 200 |
+| Artemis I (NASA) | https://www.nasa.gov/mission/artemis-i/ | S-artemis-nasa | 200 |
+| Artemis I Mission Timeline (NASA) | https://www.nasa.gov/reference/artemis-i-mission-timeline/ | S-artemis-timeline | 200 |
+| Public Names Moonikin Flying Around Moon on NASA's Artemis I Mission (NASA) | https://www.nasa.gov/news-release/public-names-moonikin-flying-around-moon-on-nasas-artemis-i-mission/ | S-artemis-campos | 200 |
+| Artemis I Flight Day 13: Orion, Earth, and Moon (NASA) | https://images.nasa.gov/details/art001e000672 | S-artemis-art672 | 200 |
+| NASA's DART at the Didymos System (NASA/Johns Hopkins APL) | https://images.nasa.gov/details/PIA25329 | S-dart-pia25329 | 200 |
 | CGI Moon Kit (NASA Goddard Space Flight Center, Scientific Visualization Studio) | https://svs.gsfc.nasa.gov/4720 | S-moon-kit | 200 |
 | NASA ESDIS, Global Imagery Browse Services (GIBS), NASA Worl | https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi | S-gibs | 200 |
 | NASA Earth Observatory (science.nasa.gov/earth/earth-observa | https://science.nasa.gov/earth/earth-observatory/a-line-of-ash-from-sangay-150650/ | S-eo | 200 |

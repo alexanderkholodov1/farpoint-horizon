@@ -2,7 +2,7 @@ extends CanvasLayer
 ## The ground-control desk (issue #9): what the ground-control station does during the flight, over the flight's own
 ## screens. When a person holds the station it opens its mini-games at the real moments: "Find the carrier" when the
 ## craft leaves for the Moon (scripts/minigames/carrier.gd) and the 1202 during the descent (scripts/minigames/triage.gd,
-## as GameState.ground_answer). When a bot holds it, Echo does the same work and says so. Solving adds a bonus to the
+## as GameState.ground_answer). When a bot holds it, Wayra does the same work and says so. Solving adds a bonus to the
 ## flight (GameState.flight.ground, counted by settle_extras); missing it costs nothing.
 ##   preload("res://scripts/minigames/desk.gd").install(main)   # main.gd, when a flight begins
 
@@ -71,7 +71,7 @@ func _process(_delta: float) -> void:
 		return
 	var fl = _flight()
 	if fl == null and panel and is_instance_valid(panel) and panel.get_child_count() > 0 and panel.get_child(0) is Carrier:
-		panel.get_child(0)._finish("bot")      # the trip is over: Echo locks it
+		panel.get_child(0)._finish("bot")      # the trip is over: Wayra locks it
 	if fl and tli_t >= 0.0 and not carrier_done and fl.phase == "coast" and fl.m.t - tli_t >= CARRIER_AFTER_S:
 		carrier_done = true
 		_open_carrier(fl)
