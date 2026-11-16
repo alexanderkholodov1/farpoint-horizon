@@ -89,6 +89,7 @@ func enter(_args: Dictionary) -> void:
 	_build_hud()
 	for id in ["beep", "clunk", "boom", "alarm", "chime"]:
 		sfx[id] = Sound.player(self, id)
+	sfx.boom.volume_db = 0.0   # the explosion at full voice (QUIET_DB suits the beeps, not a rocket blowing up)
 	rumble = Sound.player(self, "rumble", -40.0)
 	GameState.flight["launcher"] = mission.launcher
 
