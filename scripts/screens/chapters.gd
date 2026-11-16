@@ -130,7 +130,7 @@ func _play_chapter(id: String) -> void:
 
 func _play_mission(id: String) -> void:
 	Kit.UiSound.play("click")
-	go(id)
+	go(id, {"back": "chapters"})   # Esc and the end of the game come back here, not to the main menu (#97)
 
 
 func _unhandled_input(e: InputEvent) -> void:
