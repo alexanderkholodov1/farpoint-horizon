@@ -401,6 +401,13 @@ All checked 2026-11-14; the research behind them is `kb/research/in-flight-failu
   https://www.nasa.gov/history/apollo-13-crew-returns-safely-to-earth/. Checked 2026-11-16: two drogue parachutes at
   24,000 feet, three mains at 10,000 feet; the recovery ship USS Iwo Jima about four miles away. The parachute marks of
   "Coming home" (issue 67).
+- **S-nasa-crew10** NASA. *NASA's SpaceX Crew-10 Launch Day Milestones*, Commercial Crew blog, 12 March 2025.
+  https://www.nasa.gov/blogs/commercialcrew/2025/03/12/nasas-spacex-crew-10-launch-day-milestones. Falcon 9 liftoff
+  7:48 p.m., Max Q 7:49 p.m., second stage engine cutoff (SECO-1) 7:57 p.m.: a climb to orbit of about nine minutes,
+  the bound of the flow audit's climb (`tests/ci/flowaudit.gd`).
+- **S-afj-a11-loi** NASA History Office. *Apollo 11 Flight Journal, Day 4: Lunar Orbit Insertion*.
+  https://www.nasa.gov/history/afj/ap11fj/12day4-loi1.html. The LOI-1 burn ran from 075:49:51 to 075:55:49 ground
+  elapsed time, about six minutes: the real length of the capture burn the flow audit compares with the game's.
 - **S-afj-loi** O'Brien, F. *Lunar Orbit Insertion*, Apollo Flight Journal (NASA History Office, hosted at apollojournals.org). https://apollojournals.org/afj/loiessay.html. The crew had to "perform and monitor the burn on the far side of the Moon, without assistance from the ground": the trip's loss of signal when the braking burn happens behind the Moon.
 - **S-eo-orbits** Riebeek, H. *Catalog of Earth Satellite Orbits*, NASA Earth Observatory, 2009.
   https://earthobservatory.nasa.gov/features/OrbitsCatalog. Low, Sun-synchronous and geostationary orbits in plain
