@@ -192,7 +192,7 @@ func _show(i: int) -> void:
 		if main_btn.disabled:
 			main_btn.modulate.a = 0.45
 	else:
-		main_btn = Kit.accent_btn(Kit.btn(tr("Continue ▶"), func(): _show(q + 1), Kit.T_ACTION, 0 if Kit.compact else 260), Kit.C_GOLD)
+		main_btn = Kit.accent_btn(Kit.btn(tr("Continue ▶"), _next, Kit.T_ACTION, 0 if Kit.compact else 260), Kit.C_GOLD)
 	main_btn.custom_minimum_size.y = Kit.BTN_H + 8
 	bar.add_child(main_btn)
 	_fill_question(Q[0], r)
@@ -374,6 +374,16 @@ func _later(text: String, col: Color) -> void:
 func _say(title: String, text: String) -> void:
 	if info_body and is_instance_valid(info_body):
 		info_body.text = (title + "\n" if title != "" else "") + text
+
+
+## Continue: the next question, except past "What will it carry?" with nothing on board, which is never what a player
+## means (#57, #97: a beginner pressing Continue reached the launch with no science and a blocked craft).
+func _next() -> void:
+	if QUESTIONS[q][0] == "instruments" and mission.instruments.is_empty() and GameState.room.can_edit(_step_of(QUESTIONS[q][1]).role):
+		Kit.UiSound.play("error")
+		Kit.toast(self, tr("Pick at least one instrument: it is what does the science. The ones marked Key fit the goals."), Kit.C_WARN, 3.0)
+		return
+	_show(q + 1)
 
 
 ## After a choice: approvals are void, the craft is rebuilt (unless rebuild_3d is false), and the screen goes on to
