@@ -389,6 +389,14 @@ All checked 2026-11-14; the research behind them is `kb/research/in-flight-failu
   https://www.nasa.gov/image-article/keplers-second-light-how-k2-will-work. Checked 2026-11-15: Kepler lost the second of
   four reaction wheels in May 2013; sunlight's pressure balanced with the two left as a "third wheel". A case of
   "Read the squiggles".
+- **S-afj13-return** Apollo Flight Journal. *Apollo 13, Day 6, part 8: The Blackout, Splashdown and Recovery*.
+  https://apollojournals.org/afj/ap13fj/29day6-returnhome.html. Checked 2026-11-16: velocity at Entry Interface
+  (400,000 ft) 36,211 ft/s; the communications blackout from 0:19 to 3:38 after Entry Interface. The speed and the
+  blackout of "Coming home" (issue 67).
+- **S-apollo13-return** NASA History. *Apollo 13 Crew Returns Safely to Earth*.
+  https://www.nasa.gov/history/apollo-13-crew-returns-safely-to-earth/. Checked 2026-11-16: two drogue parachutes at
+  24,000 feet, three mains at 10,000 feet; the recovery ship USS Iwo Jima about four miles away. The parachute marks of
+  "Coming home" (issue 67).
 - **S-afj-loi** O'Brien, F. *Lunar Orbit Insertion*, Apollo Flight Journal (NASA History Office, hosted at apollojournals.org). https://apollojournals.org/afj/loiessay.html. The crew had to "perform and monitor the burn on the far side of the Moon, without assistance from the ground": the trip's loss of signal when the braking burn happens behind the Moon.
 - **S-eo-orbits** Riebeek, H. *Catalog of Earth Satellite Orbits*, NASA Earth Observatory, 2009.
   https://earthobservatory.nasa.gov/features/OrbitsCatalog. Low, Sun-synchronous and geostationary orbits in plain
