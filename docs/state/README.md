@@ -13,6 +13,7 @@ with who holds each: an agent that starts work reads it to know where the projec
 | `builder.md` | The rocket builder and the craft assembled part by part |
 | `apollo13.md`, `sts61.md`, `pathfinder.md`, `lcross.md`, `dart.md`, `artemis1.md` | Each story mission: what it plays and what it checks |
 | `story-scenes.md` | The story's scenes and the cuyes' faces |
+| `flow-audit.md` | The whole flow timed against real values (#57), with its screenshots |
 | `reentry.md` | Coming home: Apollo 13's re-entry and splashdown, played (#67) |
 | `ground.md` | Ground control's games in the months of operation (#63) |
 | `first-mission.md`, `credits.md` | The guided first mission; the credits film and list |
