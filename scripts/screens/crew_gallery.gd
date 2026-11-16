@@ -1,10 +1,10 @@
 extends "res://scripts/screens/screen.gd"
 ## The crew (issue #44): the four cuy astronauts of the v0.3.0 story side by side on a turntable, each with their name,
 ## station and one line about them. Drag to turn them, the wheel to come closer; 1-4 (or a click on a name) brings one
-## to the front. The models are assets/models/crew/crew_<name>_meshy.glb (assets/source/crew_*.py; docs/design/crew.md).
+## to the front. The models are assets/models/crew/crew_<name>_meshy.glb (assets/source/crew_*.py; docs/design/crew/README.md).
 ## Names and lines are proposals for the team to confirm (story: docs/design/story-v0.3.0.md).
 
-const Space := preload("res://scripts/space_builder.gd")
+const Space := preload("res://scripts/world/space_builder.gd")
 
 ## [file id, name, station, one line]
 const CREW := [

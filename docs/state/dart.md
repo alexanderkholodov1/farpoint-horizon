@@ -9,5 +9,5 @@
   pixel (the real last images: about 3 cm, NSSDC). Missing Dimorphos: lose screen.
 - Weeks later, a rhythm game: the pair's light scrolls by (3 hours each second, said on screen); SPACE on each deep
   dip, before and after the impact; the orbit comes out about 11 h 55 and 11 h 23: 32 minutes shorter (NASA).
-- Rules: `scripts/missions/dart/approach.gd`, tested by `tests/dart.gd`; look: `tests/dartshot.tscn`. Set
+- Rules: `scripts/missions/dart/approach.gd`, tested by `tests/ci/dart.gd`; look: `tests/look/dartshot.tscn`. Set
   "dart_space" (DART, LICIACube, the rubble-pile pair; the impact's flash and ejecta).

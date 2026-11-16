@@ -1,11 +1,11 @@
 extends RefCounted
 ## 3D pieces of the pilot's flight that the shared builders do not have: the Earth seen from the climb, a puff of
 ## gas at staging, flying debris, dust. Everything static; each returns a node for the screen to add to world.stage.
-## The look of the places themselves (pad, Earth, Moon) stays in scripts/space_builder.gd.
+## The look of the places themselves (pad, Earth, Moon) stays in scripts/world/space_builder.gd.
 ##   const Scene3D := preload("res://scripts/flight/flight_scene.gd")
 
-const Space := preload("res://scripts/space_builder.gd")
-const Ship := preload("res://scripts/ship_builder.gd")
+const Space := preload("res://scripts/world/space_builder.gd")
+const Ship := preload("res://scripts/world/ship_builder.gd")
 
 
 ## The Earth under a rocket in the climb: a globe of radius r (scene units), turned so that Ecuador is straight below.

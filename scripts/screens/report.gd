@@ -22,7 +22,7 @@ var total_pts := 0
 var pts_lbl: Label
 var photo_layer: Control       ## a photo shown large (Esc closes it before anything else)
 var first_btn: Button          ## the report's main action, focused once the celebration is over
-## Where each problem of the design is fixed (scripts/mission.gd checks' "at"), as the design's stage names.
+## Where each problem of the design is fixed (scripts/core/mission.gd checks' "at"), as the design's stage names.
 const FIX_AT := {"instruments": "Craft", "bus": "Craft", "panels": "Power", "battery": "Power", "comms": "Systems",
 	"adcs": "Systems", "propulsion": "Systems", "launcher": "Rocket", "orbit": "Mission"}
 
@@ -32,7 +32,7 @@ func enter(_args: Dictionary) -> void:
 	var flight: Dictionary = GameState.flight
 	var landing: Dictionary = flight.get("landing", {})
 	if not last_sim.launch_failed:
-		preload("res://scripts/progress.gd").done(mission.scenario)   # a mission flown opens the next one
+		preload("res://scripts/core/progress.gd").done(mission.scenario)   # a mission flown opens the next one
 	if last_sim.launch_failed:
 		world.stage_earth()
 	elif bool(landing.get("landed", false)) and FlightData.has_landing(mission.scenario):

@@ -5,9 +5,10 @@ extends "res://scripts/screens/screen.gd"
 
 const Horizon := preload("res://scripts/ui/horizon.gd")
 const Music := preload("res://scripts/ui/music.gd")
-const VERSION := "v0.2.2"
+## The version the menu shows: application/config/version in project.godot, set when a version branch opens.
+var VERSION: String = "v" + str(ProjectSettings.get_setting("application/config/version", "?"))
 const Coach := preload("res://scripts/tutorial/coach.gd")
-const Progress := preload("res://scripts/progress.gd")
+const Progress := preload("res://scripts/core/progress.gd")
 const QUITO := "0.18° S · 78.47° W"   ## Quito, the team's city (the Ecuador marker on the globe).
 
 var clock: Label
@@ -67,7 +68,7 @@ func enter(args: Dictionary) -> void:
 	tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	tele.add_child(tag)
 	_tick()
-	var foot := Kit.lbl("NASA Space Apps Challenge 2026  ·  " + tr("Team SK Horizon · Quito, Ecuador") + "  ·  " + VERSION, 12, Color(Kit.C_ON_DARK, 0.5))
+	var foot := Kit.lbl("NASA Space Apps Challenge 2026  ·  " + tr("Team SK-Horizons · Quito, Ecuador") + "  ·  " + VERSION, 12, Color(Kit.C_ON_DARK, 0.5))
 	Kit.place(foot, 0, 1, 0, 1, 84, -38, 900, -14)
 	add_child(foot)
 	foot.visible = not Kit.compact   # on a phone the list needs the bottom; the team is in the Credits

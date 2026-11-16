@@ -1,6 +1,6 @@
 extends RefCounted
 ## A pretend network in memory, with the same interface as TransportWeb: two rooms in one process talk through it.
-## Used by tests/room.gd to prove the online room's protocol without a browser; never used in the game.
+## Used by tests/ci/room.gd to prove the online room's protocol without a browser; never used in the game.
 
 static var rooms := {}   ## code -> {"state": String, "host": pid, "members": {pid: name}, "clients": {pid: TransportMemory}}
 

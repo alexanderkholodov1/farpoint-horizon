@@ -2,7 +2,7 @@
 
 ## CHECKPOINT (2026-11-14)
 Done: mission photos for the three missions, Horizons elements and Moon vectors, NSSDC fact sheets, pipeline
-`tools/data/fetch_nasa_data.py` with README, manifest, `docs/sources.md` entries, texture recommendation (below).
+`tools/content/data/fetch_nasa_data.py` with README, manifest, `docs/sources.md` entries, texture recommendation (below).
 Not done: nothing replaces any texture (recommendation only); the Moon texture file was not downloaded; the
 Blue Marble source site (eoimages.gsfc.nasa.gov) timed out from this machine, so the GIBS copy was tested instead.
 
@@ -27,7 +27,7 @@ The first volcano set (GIBS VIIRS, 250 m, 2024-08-31) was cloudy and soft, so it
   clean NASA pages: Shackleton's rim (credit NASA/GSFC/Arizona State University) and Shackleton's floor by ShadowCam (credit NASA,
   ShadowCam, Korea Aerospace Research Institute, Arizona State University; the arrow is part of the published image). The SVS Moon
   Kit (4720) has only global maps, no south-pole still.
-- Files now: `volcano_watch/` 6, `moon_south_pole/` 3, `grand_tour/` 4; `assets/mission_photos/` about 1.6 MB.
+- Files now: `volcano_watch/` 6, `moon_south_pole/` 3, `grand_tour/` 4; `assets/photos/` about 1.6 MB.
   The section below describes the first pass; where they disagree, this update wins.
 
 ## 1. Photos each mission returns (first pass)
@@ -70,7 +70,7 @@ Findings and honest limits:
 - License: NASA data, cite as "NASA/JPL Horizons" and "NASA NSSDC Planetary Fact Sheets".
 
 ## 3. Textures: recommendation only
-Today `textures/earth_albedo.jpg` (2048x1024, 214 KB) has no known source or license.
+On 14 November the Earth texture (earth_albedo.jpg, 2048x1024, 214 KB, since replaced) had no known source or license.
 - Earth option A, reproducible and tested: GIBS layer `BlueMarble_NextGeneration`, one request
   `.../wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&LAYERS=BlueMarble_NextGeneration&SRS=EPSG:4326&BBOX=-180,-90,180,90&WIDTH=2048&HEIGHT=1024&FORMAT=image/jpeg&TIME=2004-08-01`
   returned a 2048x1024 world map, 209 KB, seamless, no clouds, no logos. Origin: Blue Marble Next Generation (NASA Earth

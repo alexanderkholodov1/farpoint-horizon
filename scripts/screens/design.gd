@@ -12,7 +12,7 @@ extends "res://scripts/screens/screen.gd"
 const RocketDesign := preload("res://scripts/craft/rocket_design.gd")
 const Bots := preload("res://scripts/crew/bots.gd")
 const PartIcon := preload("res://scripts/ui/part_icon.gd")
-const Progress := preload("res://scripts/progress.gd")
+const Progress := preload("res://scripts/core/progress.gd")
 const Objectives := preload("res://scripts/flight/objectives.gd")
 const Glossary := preload("res://scripts/ui/glossary.gd")
 

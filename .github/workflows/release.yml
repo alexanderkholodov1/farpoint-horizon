@@ -64,7 +64,7 @@ jobs:
         run: |
           dest="$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
           mkdir -p "$dest" && cp ~/godot/templates/* "$dest/"
-          bash tools/check.sh
+          bash tools/dev/check.sh
           (cd build/web && zip -qr "../../web-build-${{ steps.version.outputs.version }}.zip" .)
 
       - name: Tag and publish the release

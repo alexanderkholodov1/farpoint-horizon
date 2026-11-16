@@ -11,5 +11,5 @@
   no markings).
 - Home at Mach 32: keep the angle in the corridor through the plasma (W/S; out too long: lose screen), then 1 for the
   drogues and 2 for the mains on their marks (heights ours), splashdown off San Diego, 12:40 p.m. EST, Dec 11, 2022.
-- Rules: `scripts/missions/artemis1/flight.gd`, tested by `tests/artemis1.gd`; look: `tests/artemis1shot.tscn`; to
-  play the chapter alone: `tests/artemis1play.tscn`.
+- Rules: `scripts/missions/artemis1/flight.gd`, tested by `tests/ci/artemis1.gd`; look: `tests/look/artemis1shot.tscn`; to
+  play the chapter alone: `tests/look/artemis1play.tscn`.

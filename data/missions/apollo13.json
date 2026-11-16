@@ -74,7 +74,7 @@
  "win": "The CO2 reading turns around!",
  "win_sub": "The square canister cleans the air of the round-hole spacecraft.",
  "photo": {
-  "file": "res://assets/missions/apollo13/as13-62-9004.jpg",
+  "file": "res://assets/photos/apollo13/as13-62-9004.jpg",
   "caption": "The real one: the crew installing the \"Mail Box\" to purge carbon dioxide from the lunar module, April 14, 1970.",
   "credit": "NASA, AS13-62-9004",
   "source": "S-apollo13-mailbox"

@@ -1,5 +1,5 @@
 extends Node
-## The game's music (issue #12): "Horizon", our own piece composed by tools/audio/compose_music.py, in two layers of
+## The game's music (issue #12): "Horizon", our own piece composed by tools/content/audio/compose_music.py, in two layers of
 ## the same length that always play together:
 ##   - the piece itself (pads, bells, a slow bass): the calm of the menus, the design and the coast through space;
 ##   - the drive (a pulse, a thump on each beat, a run of the chord's notes): it comes in under the piece when the
@@ -9,8 +9,8 @@ extends Node
 ## silences it with everything else, and it pauses while the game's window is not in front.
 ##   const Music := preload("res://scripts/ui/music.gd")
 
-const TRACK := preload("res://audio/music_horizon.ogg")
-const DRIVE := preload("res://audio/music_horizon_drive.ogg")
+const TRACK := preload("res://assets/audio/music_horizon.ogg")
+const DRIVE := preload("res://assets/audio/music_horizon_drive.ogg")
 const OFF := -60.0
 ## The piece's level on each screen (dB); DEFAULT_DB elsewhere.
 const LEVEL := {"credits_film": -9.0, "launch": -30.0, "flight": -20.0, "landing": -30.0, "report": -13.0}

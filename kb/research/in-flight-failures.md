@@ -1,6 +1,6 @@
 # In-flight failures and deep-space communication: material for the ground-control station
 
-Research for the ground-control station of SK Horizon (vision: `docs/design/vision.md`, steps 9 and "Stations").
+Research for the ground-control station of SK-Horizons (vision: `docs/design/vision.md`, steps 9 and "Stations").
 Written 2026-11-14. Tone target for every seed below: warm, funny, never a punishment; solving is a bonus, missing it
 costs nothing (the real failures below are told as stories of clever people, not as verdicts).
 

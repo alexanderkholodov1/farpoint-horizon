@@ -1,155 +1,187 @@
 # Farpoint HORIZON
 
-Entry of team **SK Horizon** (Quito, Ecuador) to the NASA Space Apps Challenge 2026, challenge
-[Space Mission Design Game](https://www.spaceappschallenge.org/2026/challenges/space-mission-design-game/).
+**Six real NASA missions. Four guinea pigs who were there. And one mission that is all yours.**
 
-**Play it in the browser: https://farpoint-horizon.web.app**. It works on a computer, a tablet or a phone held
-sideways, in English or Spanish.
+Farpoint HORIZON is a 3D space game made in Quito, Ecuador, by team SK-Horizons for the NASA Space Apps Challenge
+2026 ([Space Mission Design Game](https://www.spaceappschallenge.org/2026/challenges/space-mission-design-game/)).
+It lets anyone, alone or with up to three friends, live a space mission from the first idea to the moment the data
+comes home: build the spacecraft, launch it, fly it, land it and keep it working. On the way, a small crew of Andean
+guinea pigs, the *cuyes*, takes you through some of the most dramatic moments in NASA's history.
 
-## Resumen (español)
+**▶ Play it in your browser: https://farpoint-horizon.web.app**: nothing to install, in English or Spanish.
+**▶ See it in 30 seconds: https://youtu.be/3xZdPJr71bg**
 
-Farpoint HORIZON es un juego 3D en el que una persona, o un equipo de hasta cuatro, diseña, lanza y opera una
-misión científica real.
-- Se elige una necesidad: los volcanes del Ecuador, El Niño, cartografiar la Luna, un telescopio en L2 o el hielo del
-  polo sur lunar.
-- Luego se elige la órbita, la plataforma, los instrumentos, la energía, la radio, el control de actitud, la
-  propulsión y el cohete, cada uno con su costo en masa, energía, datos, delta-v, presupuesto y tiempo.
-- Después se vuela la misión: el ascenso con física real, el viaje a la Luna, el alunizaje en el polo sur con el
-  relieve LOLA de la NASA, el control de tierra con la Red de Espacio Profundo, y los meses de operación con
-  tormentas solares según las escalas de NOAA.
-- Un informe califica el resultado.
+---
 
-Todos los valores reales están citados en [`docs/sources.md`](docs/sources.md).
+## Why we made it
 
-## What the game is
+A space mission is a chain of decisions where everything depends on everything else. A better camera weighs more. A
+heavier spacecraft needs a bigger rocket. A bigger rocket costs more, and a mission that sends more pictures needs
+more power to send them. This balancing act is the heart of how NASA builds missions, and it is what makes them
+fascinating.
 
-A 3D game built in Godot 4.7 where one player, or a team of up to four, designs, launches and operates a complete
-space mission. Every choice trades off mass, power, data, delta-v, budget and time: the orbit, the spacecraft
-platform, the instruments, power, communications, attitude control, propulsion, the launch vehicle and the lifetime.
-The player learns that there is no perfect design.
+Most students never get to feel it. They learn about orbits one day and rockets another, and the pieces never come
+together. Farpoint HORIZON puts the whole chain in the player's hands, so you learn it the way mission teams do: by
+deciding, trying, sometimes falling short, and understanding why.
 
-**Current state.** Version v0.2.2 (release candidate). It is playable from the menu to the final report, in English
-and Spanish, on the web and on a desktop.
+## What you play
 
-## How to play
+### The story: the cuyes who were there
 
-- **Web link:** https://farpoint-horizon.web.app
-- **Run it locally:**
-  1. Install Godot 4.7 (the Steam build or the official build from [godotengine.org](https://godotengine.org)).
-  2. In the Project Manager choose Import, select `project.godot`, then Import and Edit.
-  3. Press F5. The project uses the Compatibility renderer (`gl_compatibility`), which also suits integrated GPUs.
+NASA learned by failing, bouncing and crashing, and it always came back stronger. Four cuy astronauts were "there" at
+six real missions, played in the order they happened. History stays exactly as NASA tells it: the cuyes help, panic,
+joke and celebrate, while the real events decide the outcome.
 
-## How a mission flows
+- **Rumi**, the engineer, fixes anything with whatever is at hand.
+- **Killa**, the scientist, wants the data, even if it means crashing.
+- **Inti**, the pilot, stays calm until the airbags.
+- **Wayra**, ground control, is the voice on the radio.
 
-Stages follow the Concept Maturity Levels (CML) of NASA's Jet Propulsion Laboratory.
-
-| Stage | What the player does | Maturity level |
+| | Mission | What you live |
 |---|---|---|
-| Objective | Picks the need: Ecuador's volcanoes, El Niño, the Moon's map, a space telescope at L2, ice at the Moon's south pole, or free mode | CML 1, idea |
-| Design | A guided design: orbit, platform (from a 3U CubeSat to a large observatory), instruments, power, communications, attitude control, propulsion, rocket and lifetime. The player can also build their own rocket stage by stage | CML 2 to 3 |
-| Review | Mass against the rocket, budget, power, data, delta-v; in a team, every role signs off | CML 4, point design |
-| Flight | A 3D ascent with real physics (gravity, thrust, drag, staging), the trip to the Moon planned by the player and flown by the flight computer, and a landing at the south pole on NASA LOLA ground. Ground control solves failures in flight, such as finding the carrier through the Deep Space Network or the Apollo 11 "1202" alarm | none |
-| Operation | The mission runs month by month: space weather alerts the player answers, debris, failures and discoveries | none |
-| Report | Score out of 1000, why the mission succeeded or failed, the photos it sent home and similar real missions | none |
+| 1 | **Apollo 13** (1970) | An oxygen tank explodes on the way to the Moon. Build an air filter from bags, cardboard and tape before the air runs out, just as the real crew and Mission Control did. |
+| 2 | **Hubble's first repair, STS-61** (1993) | The new space telescope sees blurry. Five spacewalks against the clock to give it "glasses", and then the first sharp picture. |
+| 3 | **Mars Pathfinder** (1997) | Land on Mars by bouncing on giant airbags, then roll the little Sojourner rover onto the red ground. |
+| 4 | **LCROSS** (2009) | "The plan is to crash?" "Yes." Crash into the Moon's darkest crater on purpose, and catch the water ice in the cloud it throws up. |
+| 5 | **DART** (2022) | Hit an asteroid to push it off its path, the first test of how to defend the Earth. |
+| 6 | **Artemis I** (2022) | The final mission: everything you learned comes together in the flight around the Moon and the fiery return home. |
+
+Every mission also stands on its own, so it can be played without the story.
+
+### Your own mission
+
+Then it is your turn. Pick a question worth answering: watch Ecuador's volcanoes, follow El Niño, map the Moon, look
+at distant galaxies or find ice at the Moon's south pole. Then:
+
+1. **Design your spacecraft.** Choose its size, its instruments, its solar panels, its radio and the orbit it will
+   fly. Every choice shows its price in weight, energy, data, money and time.
+2. **Build your rocket.** Stack engines and fuel tanks, and find out if it can carry your spacecraft to space.
+3. **Launch it.** Fly the climb from the equator, over the Andes and the Cotopaxi volcano.
+4. **Fly to the Moon and land.** Leave Earth at the right moment to meet the Moon, brake into orbit and touch down
+   on the real ground of the lunar south pole.
+5. **Keep it alive.** From the ground, find your spacecraft's faint signal, handle alarms and ride out solar storms.
+6. **See what you achieved.** Real pictures of what your mission would see, and a report that explains what went
+   well and what you could try next.
+
+### Together
+
+Play alone, or with up to three friends on one screen or online. Each player holds a station of a real mission team:
+engineer, scientist, pilot or ground control. Every station makes its own decisions, and the mission succeeds only
+when the team agrees. Crew bots take any empty station.
+
+## What makes it special
+
+- **It is the whole mission, not one piece of it.** From the idea to the data coming home, every decision connects
+  to the next.
+- **It behaves like the real thing.** Rockets, orbits and landings follow real physics, in real time and at true
+  size, and you can speed time up whenever you like. What you learn by playing is true.
+- **It is built on NASA data.** The Earth, the Moon, the ground you land on, where the Moon is on the day you fly,
+  and the pictures your mission sends home all come from NASA.
+- **Failing teaches instead of punishing.** There is no "game over" screen. You see why something happened, change
+  one thing and fly again, and doing more is always rewarded.
+- **Anyone can play.** A guided first mission, simple explanations, English and Spanish, and it runs in a web
+  browser on school computers, tablets and phones.
+- **It is fun.** Humor, original music, and the pride of watching your own rocket lift off and your own lander touch
+  down.
+- **It is from the equator.** Made in Quito, it launches over the Andes and starts by watching our own volcanoes.
 
 ## How it answers the challenge
 
-- **Design, manage and simulate a full mission:** the stages above, from the objective to the report.
-- **Constraints of budget, mass, power, communications, data and lifetime:** live bars updated at every choice.
-  The review blocks a launch that cannot work and says where each problem is fixed.
-- **Up to four players with roles:** solo, or a team with four roles (director, scientist, engineer, operations).
-  The team plays together on one shared screen, and bots take the empty roles. Online play is planned for v0.3.0.
-- **Scenarios and difficulty:** 6 scenarios, including a sandbox, and 3 difficulties.
-- **Plain-language learning:** every option says why it matters, a cited glossary explains the words, and the
-  report explains the outcome.
-- **NASA data:** the Earth, the Moon, the landing ground, the planets' positions and the photos each mission returns
-  are NASA data (see below).
+| The challenge asks for | Farpoint HORIZON |
+|---|---|
+| Design, manage and simulate a complete mission | From the mission's goal to the final report, every step is played |
+| Trade-offs of budget, mass, power, communications, data and lifetime | Every choice shows its effect on all of them, live |
+| Spacecraft parts, instruments, orbits and launch vehicles | Many real options for each one, explained in simple words, and a rocket you build yourself |
+| One player or a team of up to four, with roles | Four stations with their own decisions, alone or with friends |
+| Feedback and scoring, and the chance to try again | A score, a grade, extra goals and a report that explains why; redesign and fly again in one click |
+| Difficulty levels and different missions | Three difficulties, free missions with a sandbox, and the six-mission story |
+| Accessible to people with different knowledge | A guided first mission, a glossary and plain explanations in two languages |
 
-## The simplified model
+## NASA data we use
 
-Orders of magnitude are realistic, values are simplified. All values live in `data/*.json`, each with its source
-note, and the formulas are in `scripts/mission.gd`.
+- **LRO's LOLA laser altimeter** (NASA PDS): the real ground at the Moon's south pole where you land.
+- **JPL Horizons**: where the Moon and the planets really are on the day you fly.
+- **NASA GIBS and Worldview** (Blue Marble, VIIRS): the Earth you see from space.
+- **NASA's Moon Kit, from the Lunar Reconnaissance Orbiter**: the Moon's colors and relief.
+- **SRTM** (NASA's radar elevation, through Mapzen Terrain Tiles): the Andes and the Cotopaxi volcano under the launch site.
+- **NASA Earth Observatory, Landsat and ASTER**: the pictures of Ecuador's volcanoes a mission sends home.
+- **NASA's Deep Space Network**: the antennas that keep in touch with your spacecraft.
+- **NASA's mission pages and the Apollo Flight Journal**: every date, fact and figure of the six story missions, and
+  the real photographs that close each one.
+- **NASA mission design guides** (Design and Develop Science Missions, JPL's Concept Maturity Levels, CubeSat 101):
+  the steps of designing your own mission.
+- **Partner data, NOAA's Space Weather Prediction Center**: the solar storms your mission must survive.
 
-- **Power.** Average generation = panel power x (1 - fraction of time in eclipse). If the load exceeds generation, instruments take turns and science drops.
-- **Battery.** It must cover the load during the eclipse using only 60 % of its capacity (needed Wh = load x eclipse minutes / 60 / 0.6).
-- **Data.** Downlink per day (GB) = link rate (Mbps) x distance factor x contact minutes x 60 / 8 / 1000. Data not sent is lost science.
-- **Delta-v.** Orbit insertion (GEO 1500 m/s, Moon 900 m/s, L2 60 m/s, LEO and SSO 0) plus station keeping per year. In low orbit without propulsion, atmospheric drag ends the mission (about 2 years in LEO at 400 km, 25 in SSO at 700 km).
-- **Space weather.** Storms on NOAA's scales: geomagnetic (G4, G5) near the Earth, solar radiation (S3, S4) at the Moon and L2. The player chooses safe mode (half of the month's data lost, a fifth of the risk) or keeps working, and low orbits lose life to drag.
-- **Risk.** Radiation depends on the orbit. CubeSats use commercial electronics, which are more vulnerable. Shielding and redundancy reduce failures. Redundancy adds 10 % dry mass and 20 % hardware cost; shielding adds 4 % mass and 5 % cost.
-- **Science.** Each instrument's yield is scaled by its relevance to the scenario, by pointing accuracy, and by the orbit; it is limited by the data link, power and battery.
-- **Score.** Objectives 400 (200 for covering the needs, 200 for surviving the minimum years), science 300, efficiency 200 (budget 100, mass margin 50, power margin 50), team goals 100 (25 per role). Grades: S from 900, A from 750, B from 600, C from 400, otherwise D.
+Every number, fact, image and model that comes from outside is listed with its link in
+[`docs/sources.md`](docs/sources.md) and shown in the game's credits.
 
-Every formula and value is cited at its definition in the code or the data, with a tag listed in
-[`docs/sources.md`](docs/sources.md).
+## Play it
 
-## NASA data and resources used
+- **In your browser:** https://farpoint-horizon.web.app
+- **On your own computer:** install [Godot 4.7](https://godotengine.org), open `project.godot` and press F5.
 
-PDFs are in `docs/challenge/`.
+The game is made with the free Godot engine. Our 3D models are built with Blender, and the sounds are created by the
+game itself. How it is put together is described in [`docs/guides/architecture.md`](docs/guides/architecture.md).
 
-- [Design and Develop Science Missions](https://www.nasa.gov/wp-content/uploads/2025/04/250323-design-and-develop-science-mission.pdf) (NASA Small Spacecraft Systems Virtual Institute): the launch, space, ground and user segments.
-- [Concept Maturity Levels](https://dataverse.jpl.nasa.gov/dataset.xhtml?persistentId=hdl:2014/44299) (JPL): the game stages follow CML 1 to 4.
-- [CubeSat 101](https://www3.nasa.gov/sites/default/files/atoms/files/nasa_csli_cubesat_101_508.pdf) (NASA CSLI): CubeSat platforms, rideshare and constraints.
-- Inspiration: NASA [Mission Design Lab](https://etd.gsfc.nasa.gov/capabilities/integrated-design-center/mission-design-lab/) (GSFC) and [Build It Yourself: Webb Telescope](https://science.nasa.gov/mission/webb/game-build-it-yourself/).
-- [NASA GIBS](https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi) (Earthdata, Worldview): Blue Marble, shaded relief and VIIRS imagery of the Earth and of the region under the launch.
-- [CGI Moon Kit](https://svs.gsfc.nasa.gov/4720) (NASA GSFC Scientific Visualization Studio, LRO LROC and LOLA): the Moon's colour and relief.
-- [LOLA LDEM_875S_20M](https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/img/ldem_875s_20m.lbl) (NASA PDS, Lunar Reconnaissance Orbiter): the ground of the landing at the south pole and Shackleton's rim.
-- [JPL Horizons API](https://ssd-api.jpl.nasa.gov/doc/horizons.html): the planets' orbital elements and the Moon's position.
-- [NASA Earth Observatory](https://science.nasa.gov/earth/earth-observatory/) (Landsat 8 OLI and others): the photos each mission sends home, such as Sangay's ash and Cotopaxi.
-- [NASA Deep Space Network](https://www.jpl.nasa.gov/news/eight-essential-facts-about-nasas-deep-space-network/) (JPL): the ground stations of ground control.
-- [NSSDC fact sheets](https://nssdc.gsfc.nasa.gov/planetary/factsheet/earthfact.html): the radius, GM and solar constant.
-- Partner data: NOAA Space Weather Prediction Center [scales](https://www.swpc.noaa.gov/noaa-scales-explanation) for the space weather.
-- Real missions named in the reports: Landsat 9, Sentinel-2, Sentinel-5P, ASTER, Sentinel-6 Michael Freilich, SMAP, Jason, Lunar Reconnaissance Orbiter, Chandrayaan-2, Hubble, James Webb, CAPSTONE, NEE-01 Pegaso.
+## How it was made
 
-## Sources
-
-Every formula and value is cited where it is used and listed once in [`docs/sources.md`](docs/sources.md), the
-project's bibliography. The main sources so far:
-
-- NASA Space Science Data Coordinated Archive, [Earth fact sheet](https://nssdc.gsfc.nasa.gov/planetary/factsheet/earthfact.html) (radius, GM, solar constant).
-- NASA Orbital Debris Program Office [FAQ](https://orbitaldebris.jsc.nasa.gov/faq/) (orbital lifetime against altitude) and the NASA 25-year disposal guideline.
-- NASA Glenn [ideal rocket equation](https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/ideal-rocket-equation/) and Hohmann transfer relations.
-- Landsat 9 ([NASA](https://science.nasa.gov/mission/landsat-9)) and Sentinel-2 ([SentiWiki](https://sentiwiki.copernicus.eu/web/s2-mission)) orbit and coverage data.
-- Launch vehicle data (Falcon 9, Falcon Heavy, Electron and others) from manufacturer guides and public references, listed with links in the file.
+We brought nothing to the event: no template, no code, no assets. The work began with a brainstorm at the local event
+in Sangolquí (Universidad de las Fuerzas Armadas ESPE) on Saturday 14 November 2026, and everything in this repository
+was made during the 48 hours of the hackathon, as the rules ask. The repository's history shows it: its first commit is
+of 14 November 2026 at 09:37 (Ecuador time), and every step after it is there, dated, in the order it was made.
 
 ## Use of AI
 
-Artificial intelligence (AI) tools helped build this project, as the challenge rules ask us to disclose. The game idea, the
-design decisions and the balance are the team's.
+AI tools helped us build this project, as the challenge rules ask us to disclose. The idea, the design, the story
+and the decisions are the team's.
 
-- **Claude Code** (Anthropic), models Claude Opus 5.5 and Claude Sonnet: code, documents and research notes.
-- **Cursor**, model Composer 2.5: a feasibility test of the web build (kept outside this repository).
-- **Meshy** and **TRELLIS** (Microsoft, run on Hugging Face): 3D drafts the team used as references for the four cuy
-  crew models; Rumi's body is a TRELLIS mesh, the heads and the other three cuyes were modelled in Blender by script
-  (`assets/source/crew_*.py`). The story portraits are renders of those models.
-- **Claude** (Anthropic): the game's music (`audio/music_horizon.ogg`, `audio/music_horizon_drive.ogg`) was generated with AI. Its files say so in their metadata and the in-game credits say so too.
+- **Claude Code** (Anthropic) helped write code, documents and research notes.
+- **Antigravity** and **Cursor** helped with code and with a first test of the web version.
+- **Meshy** and **TRELLIS** made 3D drafts that served as references for the four cuyes. Rumi's body comes from a
+  TRELLIS model; the rest was modeled in Blender by our own scripts.
+- **Claude** (Anthropic) generated the game's music. The music files and the game's credits say so.
 
-No AI-generated images or videos are used, so no watermark is needed: models come from our scripts and from the cited
-libraries, imagery from NASA. Every source (information, formula, data) is cited where it is used and in
-`docs/sources.md`.
+There are no AI-generated images or videos, and no NASA logos, insignia or mission patches anywhere in the game.
 
 ## Credits
 
-- Engine: [Godot Engine](https://godotengine.org) (MIT).
-- Font: Inter by Rasmus Andersson, [SIL Open Font License 1.1](https://rsms.me/inter/) (see `fonts/FONTS_LICENSE.txt`).
-- Earth and Moon textures: NASA Blue Marble, Black Marble, VIIRS and the SVS CGI Moon Kit, made by `assets/source/planet_textures.py` (sources S-gibs-earth and S-moon-kit in `docs/sources.md`).
-- 3D modeling: [Blender](https://www.blender.org) (GPL), driven by our scripts in `assets/source/`. The craft, the launchers, the tanks, fairings and interstages, the craft components and the launch site are our own models.
-- Outside 3D models: Merlin Engine by hoahluke, Merlin 1D Vacuum by MartianDays, Rocket Nozzle Part by Zachary (corncob_127), all Sketchfab, CC BY 4.0; the Space Shuttle Solid Rocket Booster of NASA 3D Resources (public domain). Sources S-merlin-model, S-mvac-model, S-nozzle-model and S-srb-model in `docs/sources.md`.
-- NASA data in the game: Earth and Moon imagery, the Andes relief under the launch site, the Moon's south pole ground, the photos each mission returns, positions and constants; every item in `docs/sources.md`.
-- Sounds: synthesized in code by the game (`scripts/ui/ui_sound.gd`, `scripts/flight/sound.gd`); no recorded or outside sounds.
+- Engine: Godot Engine, MIT license (godotengine.org).
+- 3D: Blender, GPL (blender.org), driven by our scripts in `assets/source/`.
+- Font: Inter by Rasmus Andersson, SIL Open Font License (rsms.me/inter).
+- Outside 3D models: Merlin Engine by hoahluke, Merlin 1D Vacuum by MartianDays and Rocket Nozzle Part by corncob_127
+  (Sketchfab, CC BY 4.0); the Space Shuttle Solid Rocket Booster from NASA 3D Resources (public domain).
+- NASA imagery and data: the Earth, the Moon, the landing ground, the planets' positions and every mission photo, each
+  listed with its source in `docs/sources.md`.
+- Sounds: made by the game itself, in code; the music, composed for the game (see "Use of AI").
 
 ## Team
 
-Team SK Horizon, Quito, Ecuador.
+Team SK-Horizons, Quito, Ecuador.
 
-- **Alexander Kholodov**: team lead; the flight's real physics, the Moon landing, ground control, the crew room and the NASA data. [GitHub](https://github.com/alexanderkholodov1)
-- **Sebastián Amaguaya**: the rocket builder, the 3D models, the visual identity, the guided design, the music and every sound. [GitHub](https://github.com/XebaxCode)
+- **Alexander Kholodov**: the first brainstorm and the plan by stages that let the work run in parallel, the real physics of the flight and the landing, ground control, testing, debugging and edge cases, design polish, and the care and order of the repository. [GitHub](https://github.com/alexanderkholodov1)
+- **Sebastian Amaguaya**: the story campaign and its cuy crew, nearly every mission and its mechanics, the 3D models, the rocket builder, the music and the look of the game. [GitHub](https://github.com/XebaxCode)
+
+## Delivered to the event
+
+Everything we delivered to the event is in [`spaceapps/`](spaceapps/): the decks presented in Sangolquí
+([`spaceapps/local-pitch/`](spaceapps/local-pitch/)), the texts and deck sent to NASA
+([`spaceapps/global-submission/`](spaceapps/global-submission/)) and the 30-second video. The map of the whole
+repository is [`docs/README.md`](docs/README.md).
 
 ## License
 
-MIT, see LICENSE.
+MIT, see [LICENSE](LICENSE).
 
-## Demo and pitch
+---
 
-- **Demo video (29 s):** [`docs/demo/farpoint_horizon_30s.mp4`](docs/demo/farpoint_horizon_30s.mp4), recorded from the game itself.
-- **Live game:** https://farpoint-horizon.web.app
-- **Pitch deck (7 slides):** in Spanish, [`docs/pitch/build/deck-es.pdf`](docs/pitch/build/deck-es.pdf), and in English, [`docs/pitch/build/deck-en.pdf`](docs/pitch/build/deck-en.pdf).
+## En español
+
+**Seis misiones reales de la NASA. Cuatro cuyes que estuvieron ahí. Y una misión que es toda tuya.**
+
+Farpoint HORIZON es un juego espacial en 3D hecho en Quito por el equipo SK-Horizons para el NASA Space Apps Challenge
+2026. Permite a cualquiera, solo o con hasta tres amigos, vivir una misión espacial desde la primera idea hasta que
+los datos vuelven a casa: construir la nave, lanzarla, volarla, aterrizarla y mantenerla funcionando. En el camino,
+una tripulación de cuyes astronautas te lleva por seis momentos históricos de la NASA: Apollo 13, la primera
+reparación del Hubble, Mars Pathfinder, LCROSS, DART y Artemis I, contados tal como la NASA los cuenta. Todo se mueve
+como en la realidad, sobre datos de la NASA, y equivocarse nunca es perder: entiendes por qué, cambias algo y vuelves
+a intentarlo. Juega en https://farpoint-horizon.web.app.

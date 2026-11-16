@@ -9,8 +9,8 @@ extends "res://scripts/screens/screen.gd"
 ## lands there, or to the operation; after a loss, to the report. The rocket the player built (Space.make_custom_rocket)
 ## sheds its boosters and stages as it climbs.
 
-const Space := preload("res://scripts/space_builder.gd")
-const Ship := preload("res://scripts/ship_builder.gd")
+const Space := preload("res://scripts/world/space_builder.gd")
+const Ship := preload("res://scripts/world/ship_builder.gd")
 const RocketDesign := preload("res://scripts/craft/rocket_design.gd")
 const Ascent := preload("res://scripts/flight/ascent.gd")
 const FlightHud := preload("res://scripts/flight/flight_hud.gd")

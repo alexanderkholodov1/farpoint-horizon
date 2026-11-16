@@ -10,7 +10,7 @@
         "kind": "shadow_edge_m",
         "max": 300.0
       },
-      "photo": "res://assets/mission_photos/moon_south_pole/shackleton_floor_shadowcam.jpg",
+      "photo": "res://assets/photos/moon_south_pole/shackleton_floor_shadowcam.jpg",
       "source": [
         "S-nasa-science",
         "S-svs-south-pole"
@@ -26,7 +26,7 @@
         "kind": "target_m",
         "max": 60.0
       },
-      "photo": "res://assets/mission_photos/moon_south_pole/shackleton_rim_lroc.jpg",
+      "photo": "res://assets/photos/moon_south_pole/shackleton_rim_lroc.jpg",
       "source": [
         "S-nasa-science",
         "S-lola"

@@ -14,7 +14,7 @@ extends "res://scripts/screens/screen.gd"
 
 const Impact := preload("res://scripts/missions/lcross/impact.gd")
 const Sets := preload("res://scripts/story/sets.gd")
-const Space := preload("res://scripts/space_builder.gd")
+const Space := preload("res://scripts/world/space_builder.gd")
 const Sound := preload("res://scripts/flight/sound.gd")
 const VIEW_DIR := Vector3(0.18, 1.0, 0.5)   ## From the impact point toward the falling craft (our simplification).
 

@@ -1,7 +1,7 @@
 extends RefCounted
 ## The landing, as numbers: a lander falling under the Moon's gravity (1.62 m/s2 [S-nssdc-planets]) with a main
 ## engine the pilot throttles and small side thrusters that push it across the ground. No screen, no nodes, so the
-## landing screen and tests/flight.gd fly the same thing. Every value of the flight comes from the scenario's
+## landing screen and tests/ci/flight.gd fly the same thing. Every value of the flight comes from the scenario's
 ## `flight.landing` block (data/scenarios.json): where it starts, the engine, the fuel and the touchdown bands.
 ## The lander's engine and fuel are game values (they are not a real lander's): the descent takes a minute or two,
 ## from about 430 m up and 600 m out: only the last part of a real powered descent, compressed (our simplification).

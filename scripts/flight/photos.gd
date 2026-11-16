@@ -1,6 +1,6 @@
 extends RefCounted
 ## The photos a mission sends home: real NASA images of its target, listed with their source and credit in
-## data/nasa/manifest.json (built by tools/data/, every file with its source ID in docs/sources.md). The caption and
+## data/nasa/manifest.json (built by tools/content/data/, every file with its source ID in docs/sources.md). The caption and
 ## the credit come from the manifest's own words. A photo that an extra objective unlocks (data/objectives.json,
 ## `photo`) comes home only when that objective was met; the others come home with any mission that worked.
 ##   const Photos := preload("res://scripts/flight/photos.gd")

@@ -4,7 +4,7 @@ Takes assets/models/crew/crew_<id>_meshy.glb and writes assets/models/crew/crew_
 hips, spine, and for each side an arm, a hand, a leg and a foot (".L" is the cuy's left, +X; the cuyes face -Y in
 Blender). The parts built separately (sleeves, hands, mitts, legs, boots, the torso, the coat, the vest...) ride
 their bone rigidly; the head and its parts stay free (scripts/story/cuy_actor.gd moves the head itself, after the
-spine). Rumi's body is one mesh (a TRELLIS draft; docs/design/crew.md), so it is skinned: each vertex is weighted to
+spine). Rumi's body is one mesh (a TRELLIS draft; docs/design/crew/README.md), so it is skinned: each vertex is weighted to
 the bones by where it is, with soft blends at the shoulders, wrists, hips and ankles.
 
 Run: blender -b --factory-startup --python assets/source/crew_rig.py -- <repo root> [ids...]

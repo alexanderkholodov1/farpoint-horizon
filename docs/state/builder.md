@@ -18,4 +18,4 @@
   the launch, amber when it costs science (the platform when the craft outweighs it or has too many instruments, an
   instrument too big for it, the solar wings when power or battery fall short, the antenna when the data does not
   fit down the link, the attitude control when pointing is too coarse, the engine when the delta-v does not reach the
-  orbit). Each chosen part sits in its own holder in `scripts/ship_builder.gd` with a `part_key` meta.
+  orbit). Each chosen part sits in its own holder in `scripts/world/ship_builder.gd` with a `part_key` meta.

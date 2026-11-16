@@ -2,11 +2,11 @@ extends RefCounted
 ## The craft in the design screen as a thing the player assembles (C1, issue #6): a part just chosen arrives from
 ## outside the craft and snaps into place with a click, and the part a problem comes from glows (red when it blocks
 ## the launch, amber when it only costs science), so the consequence of a choice shows on the craft itself.
-## The craft is built by scripts/ship_builder.gd, which puts every chosen part in a holder with a "part_key" meta
-## ("panels:dep_m", "instrument:ir_adv", "comms:xband"...). scripts/world.gd calls refresh() after each rebuild.
+## The craft is built by scripts/world/ship_builder.gd, which puts every chosen part in a holder with a "part_key" meta
+## ("panels:dep_m", "instrument:ir_adv", "comms:xband"...). scripts/world/world.gd calls refresh() after each rebuild.
 
-const ALERT := preload("res://shaders/part_alert.gdshader")
-const MARKER := preload("res://shaders/part_marker.gdshader")
+const ALERT := preload("res://assets/shaders/part_alert.gdshader")
+const MARKER := preload("res://assets/shaders/part_marker.gdshader")
 const UiSound := preload("res://scripts/ui/ui_sound.gd")
 const RED := Color(1.0, 0.28, 0.24)
 const AMBER := Color(1.0, 0.72, 0.2)
