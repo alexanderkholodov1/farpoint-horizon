@@ -64,6 +64,8 @@ func _ready() -> void:
 	await until(func(): return s.phase == "beat", 20.0)
 	await wait(2.0)
 	await shot("cabin_beat")
+	await until(func(): return s.phase == "beat", 20.0)
+	await _pass_beats(s)
 	await until(func(): return s.phase == "map", 20.0)
 	await wait(1.5)
 	await shot("map_to_moon")
@@ -92,6 +94,8 @@ func _ready() -> void:
 	await until(func(): return s.phase == "far", 8.0)
 	await wait(1.5)
 	await shot("far")
+	await until(func(): return s.phase == "beat", 20.0)
+	await _pass_beats(s)
 	await until(func(): return s.phase == "map", 20.0)
 	await wait(1.5)
 	await shot("map_home")
@@ -117,8 +121,21 @@ func _ready() -> void:
 	await until(func(): return s.phase == "splash", 30.0)
 	await wait(1.5)
 	await shot("splash")
+	await until(func(): return s.phase == "beat", 20.0)
+	await _pass_beats(s)
 	await until(func(): return s.result_shown, 10.0)
 	await wait(0.8)
 	await shot("result")
 	print("score ", s._score(), " launch ", s._launch_q(), " flyby ", s._flyby_q(), " entry ", s._entry_q())
 	get_tree().quit()
+
+## Reads the crew's lines between the stages: Enter on their card until it closes.
+func _pass_beats(s) -> void:
+	var t0 := Time.get_ticks_msec()
+	while is_instance_valid(s) and s.phase == "beat" and Time.get_ticks_msec() - t0 < 30000:
+		if s.beat_dialogue and is_instance_valid(s.beat_dialogue):
+			var e := InputEventKey.new()
+			e.pressed = true
+			e.physical_keycode = KEY_ENTER
+			s.beat_dialogue._input(e)
+		await get_tree().create_timer(0.9).timeout

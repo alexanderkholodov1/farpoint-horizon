@@ -136,6 +136,8 @@ func enter(args: Dictionary) -> void:
 
 
 func exit() -> void:
+	if beat_dialogue and is_instance_valid(beat_dialogue):
+		beat_dialogue.queue_free()
 	Engine.time_scale = 1.0
 	Sets.restore_world(world, saved)
 
@@ -1145,28 +1147,43 @@ func _cabin_beat(lines: Array, next: Callable) -> void:
 	flash.color = Color(0, 0, 0, 1.0)
 	phase = "beat"
 	phase_t = 0.0
+	beat_t = 0.0
 	_beat_next_line()
 
 
 func _beat_next_line() -> void:
-	beat_i += 1
+	# the lines in the story's own card at the bottom (portrait, name, station), as in every other chapter
+	var ls := []
+	for L in beat_lines:
+		ls.append({"who": L[0], "text": L[3], "mood": L[2]})
+	var d = load("res://scripts/story/dialogue.gd").new()
+	d.lines = ls
+	d.line_started.connect(func(i, _l): _beat_act(i))
+	d.finished.connect(func(_skipped): _beat_done())
+	main.add_child(d)
+	beat_dialogue = d
+
+
+var beat_dialogue: Node
+var beat_t := 0.0
+
+
+func _beat_act(i: int) -> void:
 	for k in beat_actors:
 		beat_actors[k].talking = false
-	if beat_i >= beat_lines.size():
-		var n := beat_next
-		n.call()
-		return
-	var L: Array = beat_lines[beat_i]
+	var L: Array = beat_lines[i]
 	var a = beat_actors[L[0]]
 	a.act = L[1]
 	a.set_mood(L[2])
 	a.talking = true
-	_say(L[0].capitalize(), L[3])
-	hint.text = tr("Enter: go on")
-	beat_t = 0.0
 
 
-var beat_t := 0.0
+func _beat_done() -> void:
+	beat_dialogue = null
+	for k in beat_actors:
+		beat_actors[k].talking = false
+	var n := beat_next
+	n.call()
 
 
 func _beat(delta: float) -> void:
@@ -1174,8 +1191,6 @@ func _beat(delta: float) -> void:
 	# a slow push in on the seat, the crew peeking out of it
 	world.cam.position = world.cam.position.lerp(beat_cam[0] + (beat_cam[1] - beat_cam[0]) * 0.12, clampf(delta * 0.3, 0.0, 1.0))
 	world.cam.look_at(beat_cam[1], Vector3.UP)
-	if beat_t > 3.6:
-		_beat_next_line()
 
 
 # ===================================================================================== THE JOURNEY MAP
@@ -1703,8 +1718,6 @@ func _unhandled_input(e: InputEvent) -> void:
 		_far_to_home()
 	elif phase == "map" and (k == KEY_ENTER or k == KEY_SPACE) and phase_t > 0.8:
 		_map_go()
-	elif phase == "beat" and (k == KEY_ENTER or k == KEY_SPACE) and beat_t > 0.6:
-		_beat_next_line()
 	elif phase == "chutes" and k == KEY_1 and drogue_q < 0.0:
 		_drogue()
 	elif phase == "chutes" and k == KEY_2 and drogue_q >= 0.0 and main_q < 0.0:
