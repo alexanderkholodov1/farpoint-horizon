@@ -21,7 +21,8 @@ const MONTH_S := 30.44 * 86400.0    ## A calendar month in seconds (the mission 
 const MONTH_REAL_S := 1.2           ## Real seconds one month takes at the slowest speed (slow enough to read the log).
 const LUNAR_DAY_S := 29.53 * 86400.0   ## The Sun circles the pole's horizon once a lunar day.
 const SPEEDS := [1.0, 3.0, 10.0]
-const BLUR_LAPS := 0.5              ## Laps a second above which an orbit is drawn as a ring instead of a moving craft.
+const BLUR_LAPS := 0.5
+const MAX_ASKS := 3                 ## Space weather alerts the player answers; after that mission control follows the last answer (#99).              ## Laps a second above which an orbit is drawn as a ring instead of a moving craft.
 
 var months_total := 0
 var base := 1.0                     ## Months per MONTH_REAL_S at ×1 (a long mission plays a little faster).
@@ -233,7 +234,10 @@ func process(delta: float) -> void:
 	var events: Array = sim.events
 	while shown_month < min(target, months):
 		var st := _storm_at(sim, shown_month + 1)
-		if not st.is_empty() and not choices.has(st.month) and month_f < 9000.0:
+		if not st.is_empty() and not choices.has(st.month):
+			if choices.size() >= MAX_ASKS or month_f >= 9000.0:
+				_standing_rule(st)   # no card: the flight rule the player set, and the months go on
+				return
 			month_f = float(st.month)
 			_ask(st)
 			return
@@ -303,7 +307,13 @@ func _ask(st: Dictionary) -> void:
 	var cost := tr("You lose half of this month's data.")
 	_option(row, tr("Safe mode · 1"), tr("Instruments off until it passes.") + " " + cost, st.p_safe, Kit.C_ACCENT, func(): _answer("safe"))
 	_option(row, tr("Keep working · 2"), tr("Every observation kept."), st.p_keep, Kit.C_GOLD, func(): _answer("keep"))
-	v.add_child(Kit.lbl(tr("If you close this card, mission control follows its flight rule: safe mode."), Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true))
+	var left := MAX_ASKS - choices.size() - 1
+	var rule := tr("If you close this card, mission control follows its flight rule: safe mode.")
+	if left > 0:
+		rule += " " + tr("You decide the next %d storms too; after that mission control repeats your last answer.") % left
+	else:
+		rule += " " + tr("This is your last call: later storms get the same answer, without stopping the mission.")
+	v.add_child(Kit.lbl(rule, Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true))
 
 
 func _option(row: HBoxContainer, title: String, text: String, p: float, col: Color, cb: Callable) -> void:
@@ -321,9 +331,26 @@ func _option(row: HBoxContainer, title: String, text: String, p: float, col: Col
 func _answer(c: String) -> void:
 	if not is_instance_valid(alert):
 		return
-	choices[alert_month] = c
 	alert.queue_free()
 	alert = null
+	_resimulate(alert_month, c)
+
+
+## A storm after the player's last call (#99): mission control answers it as the player last did, the log tells it
+## ("You kept the craft working...") and the months go on. Real flight teams work by such standing rules (the "flight rule" of the alert card).
+func _standing_rule(st: Dictionary) -> void:
+	var last := "safe"
+	var m := -1
+	for k in choices:
+		if int(k) > m:
+			m = int(k)
+			last = choices[k]
+	_resimulate(st.month, last)
+
+
+func _resimulate(month: int, c: String) -> void:
+	alert_month = month
+	choices[month] = c
 	var old: Dictionary = GameState.last_sim
 	var s: Dictionary = mission.simulate(int(old.get("seed", 0)), choices)
 	var evs: Array = []
