@@ -19,6 +19,8 @@ func _ok(cond: bool, what: String) -> void:
 
 
 func _initialize() -> void:
+	# the log titles below are the English ones: read them in English whatever the computer's language is
+	TranslationServer.set_locale("en")
 	# GMST at 2000 January 1, 12h UT is 18.697374558 h = 280.46 degrees [S-usno-gast]
 	_ok(absf(Dsn.gmst_deg(946728000.0) - 280.4606) < 0.01, "gmst at J2000: %f" % Dsn.gmst_deg(946728000.0))
 	# a sidereal day later the sky is back where it was (23 h 56 m 4 s)
