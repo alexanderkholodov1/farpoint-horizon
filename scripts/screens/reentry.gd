@@ -43,17 +43,20 @@ func _build() -> void:
 	view.draw.connect(_draw_view)
 	add_child(view)
 	var head := Kit.vbox(4)
-	Kit.place(head, 0, 0, 1, 0, 40, 24, -40, 140)
+	Kit.place(head, 0, 0, 1, 0, 24 if Kit.compact else 40, 12 if Kit.compact else 24, -40, 140)
 	add_child(head)
 	head.add_child(Kit.caps(tr("Coming home") + "  ·  " + tr(str(R.D.date))))
-	title_l = Kit.lbl(tr("Bring them home through the air"), 30, Kit.C_ON_DARK, Kit.FONT_T)
+	title_l = Kit.lbl(tr("Bring them home through the air"), 22 if Kit.compact else 30, Kit.C_ON_DARK, Kit.FONT_T)
 	head.add_child(title_l)
 	hint_l = Kit.lbl("", Kit.T_BODY, Kit.C_GOLD, Kit.FONT_B, true)
 	head.add_child(hint_l)
 	for l in [title_l, hint_l]:
 		Kit.legible(l, 1.4)   # readable over the bright sky of the parachutes
 	gauge = Control.new()
-	Kit.place(gauge, 0, 0.5, 0, 0.5, 60, -190, 150, 190)
+	if Kit.compact:   # a phone: a shorter scale, clear of the title and the buttons
+		Kit.place(gauge, 0, 0.5, 0, 0.5, 30, -60, 100, 70)
+	else:
+		Kit.place(gauge, 0, 0.5, 0, 0.5, 60, -190, 150, 190)
 	gauge.draw.connect(_draw_gauge)
 	add_child(gauge)
 	var right := Kit.vbox(6)
@@ -69,7 +72,10 @@ func _build() -> void:
 	chute_btn.visible = false
 	right.add_child(chute_btn)
 	pad = Kit.hbox(Kit.GAP)   # touch controls for the angle (phones)
-	Kit.place(pad, 0, 1, 0, 1, 40, -90, 360, -30)
+	if Kit.compact:
+		Kit.place(pad, 1, 1, 1, 1, -300, -64, -20, -14)
+	else:
+		Kit.place(pad, 0, 1, 0, 1, 40, -90, 360, -30)
 	add_child(pad)
 	for d in [[tr("▲ Shallower"), 1], [tr("▼ Steeper"), -1]]:
 		var b := Kit.btn(d[0], func(): pass, Kit.T_BODY, 140)
