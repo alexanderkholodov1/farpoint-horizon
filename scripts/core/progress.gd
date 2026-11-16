@@ -1,7 +1,7 @@
 extends RefCounted
-## Which missions the player has finished, kept between sessions (user://settings.cfg, [progress]). The mission select
-## opens the missions in order: each one opens when the one before it is done. "All open" (settings) lifts that, for a
-## demo or a player who wants to choose freely. Missions flagged "soon" in data/scenarios.json are never open.
+## Which missions the player has finished, kept between sessions (user://settings.cfg, [progress]). Every mission is
+## open from the start (the team's call for v0.3.0, so a jury reaches the Moon at once); "In order" (settings) opens
+## them one after another instead, each when the one before it is done. Missions flagged "soon" in data/scenarios.json are never open.
 ##   const Progress := preload("res://scripts/core/progress.gd")
 
 const PATH := "user://settings.cfg"
@@ -27,7 +27,7 @@ static func done(id: String) -> void:
 
 
 static func all_open() -> bool:
-	return bool(_cfg().get_value("progress", "_all_open", false))
+	return bool(_cfg().get_value("progress", "_all_open", true))
 
 
 static func set_all_open(on: bool) -> void:
