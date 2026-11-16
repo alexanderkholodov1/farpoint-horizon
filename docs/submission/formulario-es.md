@@ -25,7 +25,7 @@ Farpoint HORIZON es un juego espacial en 3D que permite a cualquiera, solo o con
 ## Demostración del proyecto
 
 ```
-<enlace público al PDF de 7 diapositivas en inglés>
+https://github.com/alexanderkholodov1/farpoint-horizon/blob/17756daa5165d46bbb136dd145db89161e06f707/docs/submission/deck/EN_17_SK-Horizons_v2.pdf
 ```
 
 La presentación de 7 diapositivas en inglés, no el vídeo de 30 s: la demo debe hacer entender el problema, la
