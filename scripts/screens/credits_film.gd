@@ -6,7 +6,7 @@ extends "res://scripts/screens/screen.gd"
 ## the full list of sources (the "credits" overlay) or goes back to the menu. Text comes from data/credits.json.
 
 const CREDITS_PATH := "res://data/credits.json"
-const Space := preload("res://scripts/space_builder.gd")
+const Space := preload("res://scripts/world/space_builder.gd")
 const Horizon := preload("res://scripts/ui/horizon.gd")
 const Bots := preload("res://scripts/crew/bots.gd")
 const UiSound := preload("res://scripts/ui/ui_sound.gd")
@@ -112,7 +112,7 @@ func _script() -> void:
 	var people: Array = data.get("people", [])
 	cues = [
 		[1.5, func(): _arc(0.44, 0.5, 4.6)],
-		[2.2, func(): _card(tr("SK Horizon presents"), Kit.T_SHOUT * 0.5, Color(Kit.C_ON_DARK, 0.85), 0.52, 4.0, "fade")],   # as the loading screen: the arc above, the team below it
+		[2.2, func(): _card(tr("SK-Horizons presents"), Kit.T_SHOUT * 0.5, Color(Kit.C_ON_DARK, 0.85), 0.52, 4.0, "fade")],   # as the loading screen: the arc above, the team below it
 		[7.0, func(): _title()],
 		[16.5, func(): _card_at(tr("Designed, launched and flown from"), Kit.T_LEAD, Kit.C_ON_DARK, 0.27, 0.36, 6.0, "fade", 720)],
 		[17.3, func(): _card_at("Quito, Ecuador", Kit.T_CINEMA * 0.8, Kit.C_ON_DARK, 0.27, 0.45, 5.6, "track", 720)],

@@ -1,6 +1,6 @@
 # Godot agent tooling: letting AI agents operate Godot 4.7, see the game and make 3D models
 
-Researched 2026-11-14 for the two-person SK Horizon team (Windows 11, Godot 4.7.2 Steam, Claude Code mainly, plus Cursor and Codex).
+Researched 2026-11-14 for the two-person SK-Horizons team (Windows 11, Godot 4.7.2 Steam, Claude Code mainly, plus Cursor and Codex).
 Facts come from GitHub API/README reads and official docs fetched today; each has a URL. "(inference)" marks reasoning not
 verified by a source. Star counts and dates are as of 2026-11-14.
 
@@ -15,7 +15,7 @@ verified by a source. Star counts and dates are as of 2026-11-14.
 | uv / uvx | **Not installed** (needed by Godot AI, Blender MCP, Windows-MCP). |
 | Claude Code | 2.1.325. |
 | Edge/Chrome on PATH | `where msedge chrome` finds nothing on PATH (Edge is installed in the standard location; Playwright found it in the 2026-11-14 spike, see `platform-options.md` section 6). |
-| Existing repo assets | `tests/autoshot.gd` + `tests/autoshot.tscn` (screenshot-by-script), `tests/fuzz.gd`; no `.mcp.json` yet. |
+| Existing repo assets | `tests/look/autoshot.gd` + `tests/look/autoshot.tscn` (screenshot-by-script), `tests/ci/fuzz.gd`; no `.mcp.json` yet. |
 
 ## 1. MCP servers and editor plugins for Godot 4.x
 
@@ -103,7 +103,7 @@ Docs warning: unknown arguments are silently ignored, so a typo gives no error.
 
 Practical error-reading recipes (inference unless noted):
 - Syntax check one script: `godot --headless --path . --check-only --script res://scripts/x.gd` (parse only; it will not catch every cross-script type error).
-- Whole-project load check: `godot --headless --path . --import` or run the main scene with `--quit-after 60`; read stderr and the log. The game log on this machine is at `%APPDATA%\Godot\app_userdata\SK Horizon - Mission Architect\logs\godot.log` (from `CLAUDE.md`).
+- Whole-project load check: `godot --headless --path . --import` or run the main scene with `--quit-after 60`; read stderr and the log. The game log on this machine is at `%APPDATA%\Godot\app_userdata\SK-Horizons - Mission Architect\logs\godot.log` (from `CLAUDE.md`).
 - CI export check: the same headless export command as above.
 
 ### 2.1 GDScript language server (LSP) and debug adapter (DAP)
@@ -114,7 +114,7 @@ Practical error-reading recipes (inference unless noted):
 - DAP is only useful for breakpoint debugging in an IDE; agents get errors from logs instead.
 
 ### 2.2 Screenshot of a running scene
-- **Non-headless**: from any script, `await RenderingServer.frame_post_draw` then `get_viewport().get_texture().get_image().save_png(path)`. The repo's `tests/autoshot.gd` already does this and was reported working on Godot 4.5.1 and 4.7.1 on Linux (Compatibility renderer) (`CLAUDE.md`). Run it with a real renderer and a quit: `godot --path . res://tests/autoshot.tscn --quit-after N` (inference on exact invocation). On this laptop the project must use `gl_compatibility` (AMD iGPU crash with Forward+ per `CLAUDE.md`).
+- **Non-headless**: from any script, `await RenderingServer.frame_post_draw` then `get_viewport().get_texture().get_image().save_png(path)`. The repo's `tests/look/autoshot.gd` already does this and was reported working on Godot 4.5.1 and 4.7.1 on Linux (Compatibility renderer) (`CLAUDE.md`). Run it with a real renderer and a quit: `godot --path . res://tests/look/autoshot.tscn --quit-after N` (inference on exact invocation). On this laptop the project must use `gl_compatibility` (AMD iGPU crash with Forward+ per `CLAUDE.md`).
 - **Headless**: `--headless` uses the Dummy rendering server, so the viewport texture has no data and `get_image()` returns null/empty. Community threads: https://ask.godotengine.org/150510/godot-headless-not-same-godot-window-cant-render-the-backend . So agents must run windowed (a window flashes on screen) to capture. Or use `--write-movie out.png --quit-after N` (also needs rendering; inference).
 - Editor-based capture through MCP: Godot AI `editor_screenshot` (viewport/cinematic/game) and satelliteoflove `screenshot_game`, no OS screen control needed.
 - Web build: see section 3.1.
@@ -204,7 +204,7 @@ Mitigations (inference unless sourced):
 
 Install order, per person (both laptops identical):
 1. **Add Godot to PATH or a project script**: define `GODOT="C:\Program Files\Steam\steamapps\common\Godot Engine\godot.windows.opt.tools.64.exe"` in a `tools\godot.cmd` wrapper (inference) and tell agents the path in `AGENTS.md`. Value: headless export, check-only, smoke run, CI parity. Zero install.
-2. **Smoke/screenshot scripts in the repo** (`tests/autoshot.gd` already exists; add `tests/smoke.gd` and a `run_checks` script). Value: agents see output as PNG and errors as text without any MCP. Zero risk.
+2. **Smoke/screenshot scripts in the repo** (`tests/look/autoshot.gd` already exists; add `tests/smoke.gd` and a `run_checks` script). Value: agents see output as PNG and errors as text without any MCP. Zero risk.
 3. **Install uv** (`winget install --id=astral-sh.uv -e`), needed by Godot AI and Blender MCP.
 4. **Godot AI (hi-godot/godot-ai)** as the main Godot MCP: scene tree, node/script edit, run, logs, screenshots (viewport/cinematic/game), tests. Register from its dock for Claude Code (per-project scope), and each person presses Configure for Cursor/Codex. Commit `addons/godot_ai/` or document installing it from the Release (inference: decide on one; MIT allows committing, but dock warns against extracting over installs).
 5. **satelliteoflove/godot-mcp** as an optional second server for playtesting (deterministic stepping, input injection, runtime-state digest) if running two MCP servers against one editor is acceptable (inference: unverified that both addons coexist; try one at a time first). It needs Node only, which exists.

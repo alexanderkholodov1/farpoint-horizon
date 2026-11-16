@@ -51,13 +51,13 @@
  },
  "photos": [
   {
-   "file": "res://assets/missions/pathfinder/PIA00621.jpg",
+   "file": "res://assets/photos/pathfinder/PIA00621.jpg",
    "caption": "July 4, 1997: Sojourner still latched to its petal, the airbags pulled in, and Ares Vallis around it.",
    "credit": "NASA/JPL, PIA00621",
    "source": "S-mpf-pia00621"
   },
   {
-   "file": "res://assets/missions/pathfinder/PIA00633.jpg",
+   "file": "res://assets/photos/pathfinder/PIA00633.jpg",
    "caption": "Sol 3: Sojourner's own camera sees its tracks in the Martian soil.",
    "credit": "NASA/JPL, PIA00633",
    "source": "S-mpf-pia00633"

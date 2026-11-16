@@ -11,7 +11,7 @@ extends "res://scripts/screens/screen.gd"
 
 const Flight := preload("res://scripts/missions/artemis1/flight.gd")
 const Sets := preload("res://scripts/story/sets.gd")
-const Space := preload("res://scripts/space_builder.gd")
+const Space := preload("res://scripts/world/space_builder.gd")
 const Sound := preload("res://scripts/flight/sound.gd")
 
 var Fl: Flight

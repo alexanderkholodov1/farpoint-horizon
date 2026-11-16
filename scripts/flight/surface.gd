@@ -6,7 +6,7 @@ extends RefCounted
 ## month [S-nssdc-planets]); place_sun(t) puts it where it is t seconds into the mission.
 ##   var s := Surface.new(); s.build(world, mission, landing)   ...   s.place_sun(t); s.camera(delta)   ...   s.restore()
 
-const Space := preload("res://scripts/space_builder.gd")
+const Space := preload("res://scripts/world/space_builder.gd")
 const FlightData := preload("res://scripts/flight/flight_data.gd")
 const Scene3D := preload("res://scripts/flight/flight_scene.gd")
 const Terrain := preload("res://scripts/flight/terrain.gd")

@@ -1,7 +1,7 @@
 """The real relief around Cotopaxi for the launch site (issue #12): a heightmap the game turns into terrain.
 
 Run:  python assets/source/terrain_cotopaxi.py  [download folder, default ./build/terrain_src]
-Needs Pillow and numpy. Writes textures/terrain_cotopaxi.png (256 x 256, height in metres coded as R * 256 + G).
+Needs Pillow and numpy. Writes assets/textures/terrain_cotopaxi.png (256 x 256, height in metres coded as R * 256 + G).
 
 Source [S-terrain-tiles]: the Terrain Tiles of the AWS Open Data registry (Mapzen/Tilezen "terrarium" encoding),
 which in the Andes are NASA SRTM elevation. Sixteen tiles of zoom 11 (4 x 4, about 78 km a side) centred on Cotopaxi
@@ -19,7 +19,7 @@ from PIL import Image
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 SRC = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.path.join(ROOT, "build", "terrain_src")
-OUT = os.path.join(ROOT, "textures", "terrain_cotopaxi.png")
+OUT = os.path.join(ROOT, "assets", "textures", "terrain_cotopaxi.png")
 URL = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/11/{x}/{y}.png"
 XS, YS = range(576, 580), range(1026, 1030)
 CROP = (40, 200, 680, 840)   # pixels of the 1024 x 1024 mosaic: x0, y0, x1, y1 (the pad is at 330, 640 of the mosaic)

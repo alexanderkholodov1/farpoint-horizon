@@ -10,7 +10,7 @@ extends RefCounted
 ## crew's body there: float in the capsules), and nodes the stage animates ("rocket", "capsule", "fire_light"...).
 ##   var S = Sets.build("pad", world)
 
-const Space := preload("res://scripts/space_builder.gd")
+const Space := preload("res://scripts/world/space_builder.gd")
 const K := 3.33              ## Units per metre on the sets.
 
 
@@ -164,7 +164,7 @@ static func shader_mat(code: String) -> ShaderMaterial:
 	return m
 
 
-## The Moon as it looks from the ground or through a window: its real map (textures/moon_color.jpg), lit evenly.
+## The Moon as it looks from the ground or through a window: its real map (assets/textures/moon_color.jpg), lit evenly.
 static func bright_moon(r: float) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
 	var s := SphereMesh.new()
@@ -1485,7 +1485,7 @@ void fragment() {
 
 # ===================================================================================== LCROSS ON THE WAY TO THE MOON
 ## LCROSS, October 2009: the shepherding craft riding on the empty Centaur upper stage, the Moon's south pole ahead
-## (its real map, textures/moon_color.jpg, S-moon-kit), the Sun low. Shapes only, no markings. The Centaur is about
+## (its real map, assets/textures/moon_color.jpg, S-moon-kit), the Sun low. Shapes only, no markings. The Centaur is about
 ## 3 m wide and 12.7 m long (a set, not a model to measure); the shepherding craft is a ring with its instruments.
 ## A second pair farther off, apart, for the separation shot (each shot shows one or the other). Nobody is on board:
 ## the crew fly it from mission control.

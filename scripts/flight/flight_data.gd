@@ -6,7 +6,7 @@ extends RefCounted
 ## [S-horizons] (data/nasa/horizons_moon.json); the landing ground from LOLA [S-lola] (data/nasa/lola_south_pole.json).
 ## All static, so scripts started with -s can use it too.
 
-const GD := preload("res://scripts/game_data.gd")
+const GD := preload("res://scripts/core/game_data.gd")
 const FACTS := "res://data/nasa/nssdc_factsheets.json"
 const MOON_EPHEMERIS := "res://data/nasa/horizons_moon.json"
 

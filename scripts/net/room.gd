@@ -23,7 +23,7 @@ extends RefCounted
 ##   launch     {"seed", "n"}: n grows at every launch, the seed makes every client fly the same random events
 ## Ops (dictionaries with "k"): take, release, set_stations, join, members, patch, enter, sign, clear, phase, launch.
 
-const GD := preload("res://scripts/game_data.gd")
+const GD := preload("res://scripts/core/game_data.gd")
 const Bots := preload("res://scripts/crew/bots.gd")
 
 ## Emitted after every change of the state; by_me is true when this machine's own op caused it.
@@ -274,6 +274,6 @@ func _bots_review() -> void:
 
 
 func _mission():
-	var m = load("res://scripts/mission.gd").new()
+	var m = load("res://scripts/core/mission.gd").new()
 	m.from_dict(state.mission)
 	return m

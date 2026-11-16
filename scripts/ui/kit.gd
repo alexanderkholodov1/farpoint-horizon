@@ -7,9 +7,9 @@ extends RefCounted
 ##   const Kit := preload("res://scripts/ui/kit.gd")   (screens already have it from scripts/screens/screen.gd)
 ##   add_child(Kit.lbl("Hola", 16, Kit.C_ACCENT, Kit.FONT_B))
 
-const FONT_R := preload("res://fonts/Inter-Regular.otf")
-const FONT_B := preload("res://fonts/Inter-SemiBold.otf")
-const FONT_T := preload("res://fonts/InterDisplay-Bold.otf")
+const FONT_R := preload("res://assets/fonts/Inter-Regular.otf")
+const FONT_B := preload("res://assets/fonts/Inter-SemiBold.otf")
+const FONT_T := preload("res://assets/fonts/InterDisplay-Bold.otf")
 
 ## Two appearances the player chooses on the menu, remembered between sessions (user://settings.cfg, [ui] mode):
 ## - "dark" (the default): deep navy frosted glass over the scene, light text, bright status colours.
@@ -41,7 +41,7 @@ static var C_TEXT := Color(0.94, 0.96, 1.0)
 static var C_LINE := Color(0.6, 0.75, 1.0, 0.16)      ## Hairlines: borders, dividers, empty bars.
 static var C_SHADE := Color(0.0, 0.01, 0.03, 0.55)    ## Behind an overlay.
 const C_ON_DARK := Color(0.96, 0.97, 1.0)             ## Text drawn straight on the 3D scene (space, sky).
-const FROST := preload("res://shaders/ui_frost.gdshader")
+const FROST := preload("res://assets/shaders/ui_frost.gdshader")
 
 ## The type scale, in pixels. Every text in the game uses one of these.
 static var T_CAPS := 11       ## Section labels, in spaced capitals (caps()).

@@ -7,7 +7,7 @@
   blur in the danger zone. Wayra (Mission Control) reads four steps; the table holds only what the crew had.
   When the air runs out the game is lost and tried again (team choice). The win: slow motion, a flash,
   needle turns around, "Saved!", then NASA's photo of the real "Mail Box" (AS13-62-9004) and up to three stars.
-- Rules in `scripts/missions/apollo13/adapter.gd` (tested by `tests/apollo13.gd`), data in
+- Rules in `scripts/missions/apollo13/adapter.gd` (tested by `tests/ci/apollo13.gd`), data in
   `data/missions/apollo13.json`. NASA facts only from S-apollo13-nasa and S-apollo13-mailbox; the steps' order and
   the gauge's pace are our simplification, said on screen.
 - Next: the flight home (free return, `scripts/flight/transfer.gd`) and re-entry (#67); a card in the Missions screen

@@ -3,7 +3,7 @@ extends RefCounted
 ## a flight met each one. Texts come translated (GameData's own preparation).
 ##   const Objectives := preload("res://scripts/flight/objectives.gd")
 
-const GD := preload("res://scripts/game_data.gd")
+const GD := preload("res://scripts/core/game_data.gd")
 
 
 ## Every objective, id -> entry (texts translated).

@@ -14,7 +14,7 @@ branches add entries at the same place (`.gitattributes`).
 
 ## Challenge and NASA resources
 - **S1** NASA Space Apps Challenge. *Space Mission Design Game* (challenge statement and resources). 2026.
-  https://www.spaceappschallenge.org/2026/challenges/space-mission-design-game/ (copy in `docs/challenge/`). The brief.
+  https://www.spaceappschallenge.org/2026/challenges/space-mission-design-game/ (copy in `spaceapps/challenge/`). The brief.
 - **S2** NASA. *Design and Develop Science Missions*. 2025.
   https://www.nasa.gov/wp-content/uploads/2025/04/250323-design-and-develop-science-mission.pdf. The four mission
   segments (launch, space, ground, user) and the path from need to mission.
@@ -53,8 +53,10 @@ branches add entries at the same place (`.gitattributes`).
   Verification and Operation of Flight Systems*, Rule 1.06 and Table 1.06-1.
   https://standards.nasa.gov/system/files/tmp/GSFC-STD-1000RevI_Approved_0.pdf. Mass margin above 10 % and power margin
   above 15 %, the margins of the Systems Engineer's goal.
-- **S-ntrs-dod** NASA Technical Reports Server. *Lithium-ion battery depth of discharge in low Earth orbit*, 2007.
-  https://ntrs.nasa.gov/citations/20070022412. Why the game uses 60 % of the battery per eclipse.
+- **S-ntrs-dod** NASA Glenn Research Center (NASA Technical Reports Server). *An Update on the Lithium-Ion Cell
+  Low-Earth-Orbit Verification Test Program*, 2007. https://ntrs.nasa.gov/citations/20070022412. Checked 2026-11-15: the
+  low-orbit cycling tests run at depths of discharge of 20 %, 30 % and 40 %. The game lets a battery give 60 % of its
+  charge per eclipse: our game value, more generous than those tests, so small craft can work (a simplification).
 - **S-wiki-geo** Wikipedia. *Geostationary orbit*. https://en.wikipedia.org/wiki/Geostationary_orbit. Altitude 35,786 km,
   period 1,436 min, continuous view of one hemisphere.
 - **S-wiki-dv** Wikipedia. *Delta-v budget*. https://en.wikipedia.org/wiki/Delta-v_budget. Delta-v from low Earth orbit to
@@ -138,12 +140,14 @@ branches add entries at the same place (`.gitattributes`).
   cold (38 degrees Fahrenheit, condensation on the walls), noncritical systems off and power use cut to 1/5, the
   five-minute burn near the Moon to speed up the return, launch at 1:13 p.m. CST, and splashdown in the Pacific near
   Samoa with USS Iwo Jima as recovery ship.
-- **S-apollo13-mailbox** NASA. *Apollo 13 Crew Installing "Mail Box" for Purging Carbon Dioxide From Lunar Module,
-  April 14, 1970*, photograph AS13-62-9004 (public domain). https://images.nasa.gov/details/as13-62-9004, caption on
-  the Apollo Flight Journal page https://www.nasa.gov/history/afj/ap13fj/. The real adapter, shown when mission 1's
-  adapter game is won (assets/missions/apollo13/as13-62-9004.jpg). The same mission page [S-apollo13-nasa] gives the
-  game's other facts: the CO2 warning after a day and a half in the lunar module, and the lunar module made for two
-  men for two days, asked to keep three for about four.
+- **S-apollo13-mailbox** NASA. Apollo 13 photograph *AS13-62-9004*: in the lunar module, hoses and the canister of the
+  "mail box", the crew's carbon dioxide adapter (public domain). Full-size file in the Apollo Lunar Surface Journal
+  (NASA History Office, hosted at apollojournals.org): https://apollojournals.org/alsj/a13/AS13-62-9004.jpg. Checked
+  2026-11-15 (this frame is not in the NASA Image and Video Library; frame AS13-62-8929 there shows the same mail box
+  from the front: https://images.nasa.gov/details/as13-62-8929). The real adapter, shown when mission 1's adapter game
+  is won (assets/photos/apollo13/as13-62-9004.jpg). The same mission page [S-apollo13-nasa] gives the game's other
+  facts: the CO2 warning after a day and a half in the lunar module, and the lunar module made for two men for two
+  days, asked to keep three for about four.
 - **S-hubble-sm1** NASA Science. *Hubble Servicing Mission 1*.
   https://science.nasa.gov/mission/hubble/observatory/missions-to-hubble/servicing-mission-1/. Endeavour launched
   Dec 2, 1993; the mirror's flaw (spherical aberration: many foci instead of one, fuzzy first images); five
@@ -156,7 +160,7 @@ branches add entries at the same place (`.gitattributes`).
 - **S-m100-pia22913** NASA/JPL. *M100 Through 3 Cameras*, PIA22913 (public domain).
   https://images.nasa.gov/details/PIA22913. M100 with WFPC1 in 1993, blurry from the mirror's flaw, and with WFPC2
   after STS-61, "snapped into sharp focus". Cropped for mission 2's first image
-  (assets/missions/sts61/m100_wfpc1_1993.jpg, m100_wfpc2_1993.jpg).
+  (assets/photos/sts61/m100_wfpc1_1993.jpg, m100_wfpc2_1993.jpg).
 - **S-nasa-9408670** NASA Marshall Space Flight Center. *History of Hubble Space Telescope (HST)*, image 9408670.
   https://images.nasa.gov/details/9408670. Hubble launched by Discovery (STS-31) in April 1990; two months later a
   2-micron spherical aberration found in the primary mirror, one-fiftieth of the width of a human hair.
@@ -222,28 +226,28 @@ branches add entries at the same place (`.gitattributes`).
 - **S-artemis-art672** NASA. *Artemis I Flight Day 13: Orion, Earth, and Moon*, art001e000672 (Nov 28, 2022), NASA Image
   and Video Library, https://images.nasa.gov/details/art001e000672 (public domain). Orion at its farthest, 268,563 miles
   from Earth. Our processing: cropped to the Moon and the Earth (the spacecraft and its markings left out). In
-  `assets/missions/artemis1/`.
+  `assets/photos/artemis1/`.
 
 ## The look: Earth, Moon, the Andes and the launch site (issue 12; scripts in `assets/source/`)
 - **S-moon-kit** NASA Goddard Space Flight Center, Scientific Visualization Studio. *CGI Moon Kit* (2019).
   https://svs.gsfc.nasa.gov/4720. LRO LROC WAC colour map (`lroc_color_poles_4k.tif`, colour enhanced from LROC and Kaguya) and
-  LOLA elevation (`ldem_16.tif`, 16 pixels per degree); the game's Moon colour and relief (`textures/moon_color.jpg`, `moon_normal.jpg`, made by
+  LOLA elevation (`ldem_16.tif`, 16 pixels per degree); the game's Moon colour and relief (`assets/textures/moon_color.jpg`, `moon_normal.jpg`, made by
   `assets/source/planet_textures.py`). Credit: "NASA/GSFC/Scientific Visualization Studio, LRO". NASA media guidelines.
 - **S-gibs-earth** NASA GIBS WMS (see S-gibs), whole globe at 4096 x 2048: `BlueMarble_NextGeneration` and
   `BlueMarble_ShadedRelief` (August 2004, NASA Earth Observatory, Reto Stockli, MODIS), `VIIRS_Black_Marble` (2016,
   Suomi NPP VIIRS) and `VIIRS_SNPP_CorrectedReflectance_TrueColor` of 2024-08-31 (the day of the volcano photos). The
-  Earth by day, its relief, its city lights and its clouds (`textures/earth_*.jpg`, `assets/source/planet_textures.py`).
-  Replaces `textures/earth_albedo.jpg`, whose source was unknown. Credit: "NASA Earth Observatory / NASA GIBS".
+  Earth by day, its relief, its city lights and its clouds (`assets/textures/earth_*.jpg`, `assets/source/planet_textures.py`).
+  Replaces the former Earth texture (earth_albedo.jpg), whose source was unknown. Credit: "NASA Earth Observatory / NASA GIBS".
 - **S-gibs-region** NASA GIBS WMS (see S-gibs), the same three layers (Blue Marble, shaded relief, VIIRS of 2024-08-31)
   over 92-68 W, 12 N-12 S at 2048 x 2048 (about 1.3 km per pixel): the sharper Earth under the climb from Ecuador
-  (`textures/earth_region_*.jpg`, `assets/source/planet_textures.py` `region()`).
+  (`assets/textures/earth_region_*.jpg`, `assets/source/planet_textures.py` `region()`).
 - **S-terrain-tiles** Mapzen/Tilezen. *Terrain Tiles* on the Registry of Open Data on AWS,
   https://registry.opendata.aws/terrain-tiles/ (terrarium encoding), which in the Andes is NASA SRTM elevation (NASA/
   USGS, public domain); attribution as the registry asks. Sixteen zoom-11 tiles around Cotopaxi; the launch site's
-  relief (`textures/terrain_cotopaxi.png`, `assets/source/terrain_cotopaxi.py`). Our check: the summit comes out at
+  relief (`assets/textures/terrain_cotopaxi.png`, `assets/source/terrain_cotopaxi.py`). Our check: the summit comes out at
   5,876 m against the published 5,897 m.
 - **S-cotopaxi-belts** Our simplification of the altitude belts painted on that relief: valley farmland, paramo grass
-  from about 3,500 m, volcanic sand from about 4,500 m, glacier from about 4,850 m (`shaders/terrain.gdshader`). To be
+  from about 3,500 m, volcanic sand from about 4,500 m, glacier from about 4,850 m (`assets/shaders/terrain.gdshader`). To be
   checked against a published source; the glacier line of Cotopaxi is near 4,800-5,000 m in recent surveys.
 - The launch site (`assets/source/launch_site.py`) and the craft components (`assets/source/craft_kit.py`) are our own
   models after photographs of the East Coast pads and of real spacecraft hardware; their sizes are our estimates.
@@ -254,7 +258,7 @@ branches add entries at the same place (`.gitattributes`).
   and not yet checked one by one).
 - The fonts, the engine and every library, model, image and sound, with their licenses.
 
-## NASA data used by the mission photos and the route numbers (issue 19; pipeline in `tools/data/`)
+## NASA data used by the mission photos and the route numbers (issue 19; pipeline in `tools/content/data/`)
 All checked 2026-11-14. NASA media are used under the NASA Media Usage Guidelines
 (https://www.nasa.gov/nasa-brand-center/images-and-media/): no NASA logo or insignia, no implied endorsement.
 - **S-gibs** NASA ESDIS, Global Imagery Browse Services (GIBS), NASA Worldview, WMS
@@ -266,7 +270,7 @@ All checked 2026-11-14. NASA media are used under the NASA Media Usage Guideline
   Cotopaxi (Landsat 8 OLI, 15 Sep 2015, https://science.nasa.gov/earth/earth-observatory/cotopaxi-volcano-ecuador-86618/),
   Tungurahua (EO-1 ALI natural and short-wave infrared, 1 Jan 2011,
   https://science.nasa.gov/earth/earth-observatory/ongoing-eruption-of-tungurahua-ecuador-48337/). In
-  `assets/mission_photos/volcano_watch/`. Credits as the pages print them: "NASA Earth Observatory images by Lauren
+  `assets/photos/volcano_watch/`. Credits as the pages print them: "NASA Earth Observatory images by Lauren
   Dauphin / Jesse Allen, using Landsat data from the U.S. Geological Survey" (Landsat data are public domain, USGS);
   "NASA Earth Observatory image created by Jesse Allen, using EO-1 ALI data provided courtesy of the NASA EO-1 team and
   the U.S. Geological Survey". Our processing: cropped to the volcano, resized.
@@ -274,15 +278,15 @@ All checked 2026-11-14. NASA media are used under the NASA Media Usage Guideline
   credit "NASA/GSFC/Arizona State University" (https://science.nasa.gov/resource/shackleton-craters-illuminated-rim-shadowed-interior/);
   Shackleton floor seen by ShadowCam, a NASA instrument on the Korean KPLO orbiter, credit as printed "NASA, ShadowCam,
   Korea Aerospace Research Institute, Arizona State University" (https://science.nasa.gov/image-article/apod-2023-may-5-shackleton-from-shadowcam/);
-  the Korean partner is named in the credit; no separate terms found. In `assets/mission_photos/moon_south_pole/`.
+  the Korean partner is named in the credit; no separate terms found. In `assets/photos/moon_south_pole/`.
 - **S-lroc-wac** NASA/GSFC/Arizona State University, Lunar Reconnaissance Orbiter Camera (LROC) Wide Angle Camera global
   mosaic (100 m), served by NASA Moon Trek, https://trek.nasa.gov/tiles/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd_v02/1.0.0/WMTSCapabilities.xml.
-  Photos in `assets/mission_photos/moon_south_pole/`. Credit: "NASA/GSFC/Arizona State University, LRO". Our processing:
+  Photos in `assets/photos/moon_south_pole/`. Credit: "NASA/GSFC/Arizona State University, LRO". Our processing:
   tiles joined and re-projected to a view from above the south pole.
 - **S-nasa-images** NASA Image and Video Library, https://images.nasa.gov (API https://images-api.nasa.gov), records
   PIA00022 (Jupiter, Voyager 1), PIA01374 (Saturn, Voyager 1), PIA18182 (Uranus, Voyager 2), PIA00049 (Neptune,
-  Voyager 2); catalogued by NASA/JPL Photojournal. Photos in `assets/mission_photos/grand_tour/`. Credit: "NASA/JPL-Caltech".
-  Our processing: resized. Also the ASTER pictures in `assets/mission_photos/volcano_watch/`: PIA23914 (Sangay, night
+  Voyager 2); catalogued by NASA/JPL Photojournal. Photos in `assets/photos/grand_tour/`. Credit: "NASA/JPL-Caltech".
+  Our processing: resized. Also the ASTER pictures in `assets/photos/volcano_watch/`: PIA23914 (Sangay, night
   thermal infrared, 11 Jun 2020, credit "NASA/METI/AIST/Japan Space Systems, and U.S./Japan ASTER Science Team") and
   PIA15151 (Cotopaxi, false colour, 22 Aug 2015, credit "NASA/GSFC/METI/ERSDAC/JAROS, and U.S./Japan ASTER Science
   Team"); ASTER is a joint Japanese (METI) and NASA instrument on Terra, hence the credit.
@@ -300,7 +304,7 @@ All checked 2026-11-14.
   version 2.0, 2017), NASA Planetary Data System, Geosciences Node.
   https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/img/ldem_875s_20m.lbl.
   The ground of the landing: a 12 km square around the south pole and Shackleton's rim, averaged to 60 m, in
-  `data/nasa/lola_south_pole.json` (made by `tools/data/fetch_lola_terrain.py`). Credit: "NASA/GSFC LOLA team, NASA PDS".
+  `data/nasa/lola_south_pole.json` (made by `tools/content/data/fetch_lola_terrain.py`). Credit: "NASA/GSFC LOLA team, NASA PDS".
 - **S-svs-south-pole** NASA Scientific Visualization Studio. *Shadows near the Moon's South Pole*, 2021.
   https://svs.gsfc.nasa.gov/4893. At the poles the Sun is never more than 1.5 degrees above or below the horizon;
   places it never reaches are permanently shadowed and trap water ice.
@@ -321,6 +325,20 @@ All checked 2026-11-14.
 - **S-apollo-gear** Rogers, W. F. (NASA Johnson Space Center). *Apollo Lunar Module Landing Gear*, 1972. NASA Technical
   Reports Server 19730010151, https://ntrs.nasa.gov/citations/19730010151. A landing is decided mainly by the touchdown
   speed and the slope of the ground under the legs; the game's touchdown bands use those two (their values are ours).
+- **S-afj11-tli** Woods, W. D., et al. *Apollo 11, Day 1 part 2: Earth Orbit and Translunar Injection*, Apollo Flight
+  Journal (NASA History Office, hosted at apollojournals.org).
+  https://apollojournals.org/afj/ap11fj/02earth-orbit-tli.html. Checked 2026-11-15. "Duration of the burn expected to
+  be 5 minutes, 47 seconds"; inertial velocity at cutoff 35,575 ft/s (10,843 m/s); "an orbital weight of the combined
+  vehicles of 297,914 pounds" in the parking orbit. The departure stage of the trip (`data/engines.json`).
+- **S-afj11-loi** Woods, W. D., et al. *Apollo 11, Day 4 part 2: Entering Lunar Orbit*, Apollo Flight Journal.
+  https://apollojournals.org/afj/ap11fj/12day4-loi1.html. Checked 2026-11-15. LOI-1: "duration 6 minutes, 2 seconds",
+  delta-v 2,917 ft/s (889 m/s), weight before the burn 96,012 lb (43,550 kg), resulting orbit about 113 x 313 km. The
+  craft's engine of the trip (`data/engines.json`) and `tests/ci/flight.gd`.
+- **S-j2** Wikipedia. *Rocketdyne J-2* (infobox). https://en.wikipedia.org/wiki/Rocketdyne_J-2. Checked 2026-11-15.
+  Vacuum thrust 1,033.1 kN (232,250 lbf), vacuum specific impulse 421 s. The departure stage's Isp.
+- **S-apollo-csm** Wikipedia. *Apollo command and service module* (Service Propulsion System).
+  https://en.wikipedia.org/wiki/Apollo_command_and_service_module. Checked 2026-11-15. SPS thrust 91.19 kN
+  (20,500 lbf), specific impulse 314.5 s. The craft's engine of the trip.
 
 ## Ground control: the Deep Space Network and the in-flight alarms (issue 9)
 All checked 2026-11-14; the research behind them is `kb/research/in-flight-failures.md`.
@@ -336,8 +354,9 @@ All checked 2026-11-14; the research behind them is `kb/research/in-flight-failu
   about 23.44 degrees. Which way each dish faces at each moment of the flight.
 - **S-codata-c** NIST. *CODATA value: speed of light in vacuum*. https://physics.nist.gov/cgi-bin/cuu/Value?c.
   299 792 458 m/s, exact. The light time to the craft and its Doppler shift.
-- **S-jpl-lighttime** NASA Jet Propulsion Laboratory. *Basics of Space Flight: Light Time*.
-  https://www2.jpl.nasa.gov/basics/soi/lighttime.html. The Moon is a little over a light-second away (about 1.3 s).
+- **S-jpl-lighttime** NASA Science. *Basics of Space Flight, Chapter 1-1: The Realm of the Sun* (light time table;
+  formerly at www2.jpl.nasa.gov/basics, now moved). https://science.nasa.gov/learn/basics-of-space-flight/chapter1-1/.
+  Checked 2026-11-15: "3 seconds, 900,000 km, ~ Earth-Moon round trip"; the Moon is a little over a light-second away.
 - **S-descanso-bands** Taylor, J. (ed.), *Deep Space Communications*, DESCANSO series vol. 4, ch. 10, JPL.
   https://descanso.jpl.nasa.gov/monograph/series4/Mono4_Ch10.pdf. S, X and Ka are the deep-space bands; the X-band
   downlink near 8.4 GHz is the craft's tone in "Find the carrier".
@@ -346,7 +365,7 @@ All checked 2026-11-14; the research behind them is `kb/research/in-flight-failu
   Voyager 2's carrier when it was too faint to carry data: the idea of "Find the carrier".
 - **S-soho-recovery** NASA/ESA. *SOHO Mission Interruption and Recovery*. https://soho.nascom.nasa.gov/about/Recovery/.
   SOHO's faint carrier found again on 3 August 1998, six weeks after the loss.
-- **S-afj-loi** O'Brien, F. *Lunar Orbit Insertion*, Apollo Flight Journal (NASA History Office, hosted at apollojournals.org, linked from https://www.nasa.gov/history/afj/). https://apollojournals.org/afj/loiessay.html. The crew had to "perform and monitor the burn on the far side of the Moon, without assistance from the ground": the trip's loss of signal when the braking burn happens behind the Moon.
+- **S-afj-loi** O'Brien, F. *Lunar Orbit Insertion*, Apollo Flight Journal (NASA History Office, hosted at apollojournals.org). https://apollojournals.org/afj/loiessay.html. The crew had to "perform and monitor the burn on the far side of the Moon, without assistance from the ground": the trip's loss of signal when the braking burn happens behind the Moon.
 - **S-eo-orbits** Riebeek, H. *Catalog of Earth Satellite Orbits*, NASA Earth Observatory, 2009.
   https://earthobservatory.nasa.gov/features/OrbitsCatalog. Low, Sun-synchronous and geostationary orbits in plain
   words: the glossary of the game (issue #69) and the plain names of its orbits.

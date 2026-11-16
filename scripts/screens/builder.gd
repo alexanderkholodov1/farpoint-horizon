@@ -10,7 +10,7 @@ extends "res://scripts/screens/screen.gd"
 ## "Use this rocket" makes it the mission's launcher (RocketDesign.CUSTOM) and goes back to the launcher step.
 ## args: {"back_step": index of GameData.STEPS to return to}.
 
-const Space := preload("res://scripts/space_builder.gd")
+const Space := preload("res://scripts/world/space_builder.gd")
 const RocketDesign := preload("res://scripts/craft/rocket_design.gd")
 const PartIcon := preload("res://scripts/ui/part_icon.gd")
 
