@@ -164,7 +164,7 @@ add(s3, textbox("Card heading", 1.03, 3.78, 3.6, 0.2, [para([run("PLAY TOGETHER"
 add(s3, textbox("Text", 1.03, 4.08, 3.6, 2.0, bullets([
     ("Alone or with up to 3 friends, ", "on one screen or online."),
     ("Four stations: ", "engineer, scientist, pilot, ground control, each with its own decisions."),
-    ("Crew bots ", "take any empty station."),
+    ("The cuyes ", "take any empty station."),
 ], 1200, 1600, 400)))
 add(s3, textbox("Caption", 0.83, 5.95, 4.0, 0.5, [para([run("Gameplay video (30 s): ", 900, MUTED), run("youtu.be/3xZdPJr71bg", 900, AMBER, True)], 1215),
                                                   para([run("Play it now: ", 900, MUTED), run("farpoint-horizon.web.app", 900, AMBER, True)], 1215)]))

@@ -83,7 +83,7 @@ YOUR OWN MISSION
 Players pick a question worth answering (watch Ecuador's volcanoes, follow El Niño, map the Moon, look at distant galaxies, find ice at the Moon's south pole). Then they design the spacecraft, build the rocket, fly the launch from the equator, travel to the Moon, land on the real ground of its south pole and handle alarms and solar storms from the ground. At the end they see the real pictures their mission would send home, with a report that explains what went well and what to try next.
 
 PLAYING TOGETHER
-Up to four players share a mission, on one screen or online. Each holds a station (engineer, scientist, pilot, ground control) with its own decisions, and the mission flies only when the team agrees. Crew bots fill any empty station.
+Up to four players share a mission, on one screen or online. Each holds a station (engineer, scientist, pilot, ground control) with its own decisions, and the mission flies only when the team agrees. The cuyes of the story hold any empty station: Rumi the engineer, Killa the scientist, Inti the pilot and Wayra at ground control.
 
 WHAT MAKES IT SPECIAL
 - The whole mission, not one piece of it: every decision connects to the next.

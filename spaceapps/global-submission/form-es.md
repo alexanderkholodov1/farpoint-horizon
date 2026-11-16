@@ -65,7 +65,7 @@ TU PROPIA MISIÓN
 El jugador elige una pregunta que valga la pena (vigilar los volcanes del Ecuador, seguir El Niño, cartografiar la Luna, mirar galaxias lejanas, encontrar hielo en el polo sur lunar). Después diseña la nave, arma el cohete, vuela el despegue desde la línea ecuatorial, viaja a la Luna, aterriza sobre el suelo real de su polo sur y enfrenta alarmas y tormentas solares desde tierra. Al final ve las fotos reales que enviaría su misión, con un informe que explica qué salió bien y qué probar la próxima vez.
 
 JUGAR EN EQUIPO
-Hasta cuatro jugadores comparten una misión, en una misma pantalla o en línea. Cada uno ocupa una estación (ingeniería, ciencia, piloto, control de tierra) con sus propias decisiones, y la misión despega solo cuando el equipo está de acuerdo. Los bots de la tripulación ocupan las estaciones vacías.
+Hasta cuatro jugadores comparten una misión, en una misma pantalla o en línea. Cada uno ocupa una estación (ingeniería, ciencia, piloto, control de tierra) con sus propias decisiones, y la misión despega solo cuando el equipo está de acuerdo. Los cuyes de la historia ocupan las estaciones vacías: Rumi el ingeniero, Killa la científica, Inti el piloto y Wayra en el control de tierra.
 
 QUÉ LO HACE ESPECIAL
 - La misión completa, no una pieza: cada decisión se conecta con la siguiente.

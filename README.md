@@ -67,7 +67,8 @@ at distant galaxies or find ice at the Moon's south pole. Then:
 
 Play alone, or with up to three friends on one screen or online. Each player holds a station of a real mission team:
 engineer, scientist, pilot or ground control. Every station makes its own decisions, and the mission succeeds only
-when the team agrees. Crew bots take any empty station.
+when the team agrees. The cuyes of the story take any empty station: Rumi the engineer, Killa the scientist, Inti
+the pilot and Wayra at ground control.
 
 ## What makes it special
 

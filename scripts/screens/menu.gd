@@ -75,19 +75,21 @@ func enter(args: Dictionary) -> void:
 
 
 ## The menu itself: one line about the game and the list of what the player can do, the first one the main action.
-## Playing is alone for now: the crew of friends (same screen, online) and the ranking come back in v0.3.0.
+## The main action is the story (the chapter select, #43); then the player's own mission, alone or with friends (#51).
 func _main_list(box: VBoxContainer) -> void:
-	var lead := Kit.lbl(tr("Design, launch and fly your own space mission."), Kit.T_LEAD, Color(Kit.C_ON_DARK, 0.72), Kit.FONT_R, true)
+	var lead := Kit.lbl(tr("Six real NASA missions, and one that is all yours."), Kit.T_LEAD, Color(Kit.C_ON_DARK, 0.72), Kit.FONT_R, true)
 	lead.add_theme_color_override("font_color", Color(Kit.C_ON_DARK, 0.72))
 	box.add_child(lead)
 	box.add_child(Kit.spacer(6 if Kit.compact else 18))
-	var play := Kit.accent_btn(Kit.btn(tr("▶  Play"), _play, Kit.T_ACTION, 300), Kit.C_GOLD)
+	var play := Kit.accent_btn(Kit.btn(tr("▶  Play the story"), func(): go("chapters"), Kit.T_ACTION, 300), Kit.C_GOLD)
 	play.custom_minimum_size.y = 48 if Kit.compact else 60
 	play.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	box.add_child(play)
 	play.grab_focus.call_deferred()   # the keyboard starts on Play: arrows move along the list, Enter chooses
 	box.add_child(Kit.spacer(2 if Kit.compact else 10))
 	var items := [
+		[tr("Your own mission"), _play],
+		[tr("Play with friends"), func(): go("team")],
 		[tr("Guided first mission"), func(): Coach.start(main)],
 		[tr("How to play"), func(): main.overlay("howto")],
 		[tr("The crew"), func(): go("crew_gallery")],
