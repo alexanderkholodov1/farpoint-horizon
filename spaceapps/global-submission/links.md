@@ -5,7 +5,7 @@ Written by `python tools/content/submission_links.py`; do not edit by hand. Each
 200 means it opens; 403 or 000 means the site refuses scripts or was slow: open those by hand in a private
 window before pasting.
 
-## NASA Data (64)
+## NASA Data (72)
 
 | Link Text | Link Url | Source | Opens |
 |---|---|---|---|
@@ -46,6 +46,7 @@ window before pasting.
 | Artemis I Mission Timeline (NASA) | https://www.nasa.gov/reference/artemis-i-mission-timeline/ | S-artemis-timeline | 200 |
 | Public Names Moonikin Flying Around Moon on NASA's Artemis I Mission (NASA) | https://www.nasa.gov/news-release/public-names-moonikin-flying-around-moon-on-nasas-artemis-i-mission/ | S-artemis-campos | 200 |
 | Artemis I Flight Day 13: Orion, Earth, and Moon (NASA) | https://images.nasa.gov/details/art001e000672 | S-artemis-art672 | 200 |
+| DART's Penultimate View (NASA/Johns Hopkins APL) | https://www.nasa.gov/image-article/darts-penultimate-view/ | S-dart-penultimate | 200 |
 | NASA's DART at the Didymos System (NASA/Johns Hopkins APL) | https://images.nasa.gov/details/PIA25329 | S-dart-pia25329 | 200 |
 | CGI Moon Kit (NASA Goddard Space Flight Center, Scientific Visualization Studio) | https://svs.gsfc.nasa.gov/4720 | S-moon-kit | 200 |
 | NASA ESDIS, Global Imagery Browse Services (GIBS), NASA Worl | https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi | S-gibs | 200 |
@@ -71,14 +72,21 @@ window before pasting.
 | Deep Space Communications | https://descanso.jpl.nasa.gov/monograph/series4/Mono4_Ch10.pdf | S-descanso-bands | 200 |
 | NASA Mission Update: Voyager 2 Communications Pause (NASA Jet Propulsion Laboratory) | https://www.jpl.nasa.gov/news/nasa-mission-update-voyager-2-communications-pause/ | S-jpl-voyager2 | 200 |
 | SOHO Mission Interruption and Recovery (NASA/ESA) | https://soho.nascom.nasa.gov/about/Recovery/ | S-soho-recovery | 200 |
+| Apollo 12: Launch and Reaching Earth Orbit (Apollo Flight Journal) | https://apollojournals.org/afj/ap12fj/01launch_to_earth_orbit.html | S-afj12-launch | 200 |
+| NASA's Voyager 1 Resumes Sending Engineering Updates to Earth (NASA Jet Propulsion Laboratory) | https://www.jpl.nasa.gov/news/nasas-voyager-1-resumes-sending-engineering-updates-to-earth/ | S-jpl-voyager1-fds | 200 |
+| Kepler's Second Light: How K2 Will Work (NASA) | https://www.nasa.gov/image-article/keplers-second-light-how-k2-will-work | S-kepler-k2 | 200 |
+| Apollo 13, Day 6, part 8: The Blackout, Splashdown and Recovery (Apollo Flight Journal) | https://apollojournals.org/afj/ap13fj/29day6-returnhome.html | S-afj13-return | 200 |
+| Apollo 13 Crew Returns Safely to Earth (NASA History) | https://www.nasa.gov/history/apollo-13-crew-returns-safely-to-earth/ | S-apollo13-return | 200 |
+| NASA's SpaceX Crew-10 Launch Day Milestones (NASA) | https://www.nasa.gov/blogs/commercialcrew/2025/03/12/nasas-spacex-crew-10-launch-day-milestones | S-nasa-crew10 | 200 |
+| Apollo 11 Flight Journal, Day 4: Lunar Orbit Insertion (NASA History Office) | https://www.nasa.gov/history/afj/ap11fj/12day4-loi1.html | S-afj-a11-loi | 200 |
 | Lunar Orbit Insertion (O'Brien, F) | https://apollojournals.org/afj/loiessay.html | S-afj-loi | 200 |
 | Catalog of Earth Satellite Orbits (Riebeek, H) | https://earthobservatory.nasa.gov/features/OrbitsCatalog | S-eo-orbits | 200 |
 
-## Space Agency Partner & Other Data (42)
+## Space Agency Partner & Other Data (58)
 
 | Link Text | Link Url | Source | Opens |
 |---|---|---|---|
-| Space Mission Design Game (NASA Space Apps Challenge) | https://www.spaceappschallenge.org/2026/challenges/space-mission-design-game/ | S1 | 000 |
+| Space Mission Design Game (NASA Space Apps Challenge) | https://www.spaceappschallenge.org/2026/challenges/space-mission-design-game/ | S1 | 200 |
 | eoPortal, Satellite Missions Directory (European Space Agency) | https://www.eoportal.org/satellite-missions | S-eoportal | 200 |
 | Geostationary orbit (Wikipedia) | https://en.wikipedia.org/wiki/Geostationary_orbit | S-wiki-geo | 200 |
 | Delta-v budget (Wikipedia) | https://en.wikipedia.org/wiki/Delta-v_budget | S-wiki-dv | 200 |
@@ -98,6 +106,7 @@ window before pasting.
 | Rutherford (rocket engine) (Wikipedia) | https://en.wikipedia.org/wiki/Rutherford_(rocket_engine) | S-rutherford | 200 |
 | Space Shuttle Solid Rocket Booster (Wikipedia) | https://en.wikipedia.org/wiki/Space_Shuttle_Solid_Rocket_Booster | S-srb | 200 |
 | Delta-v budget (Wikipedia) | https://en.wikipedia.org/wiki/Delta-v_budget | S-delta-v | 200 |
+| Payload fairing (Wikipedia) | https://en.wikipedia.org/wiki/Payload_fairing | S-wiki-fairing | 200 |
 | Sentinel-2 mission (European Space Agency, Copernicus) | https://sentiwiki.copernicus.eu/web/s2-mission | S12 | 200 |
 | Copernicus Sentinel-5P (European Space Agency, eoPortal) | https://www.eoportal.org/satellite-missions/copernicus-sentinel-5p | S-sentinel5p | 200 |
 | Advanced Spaceborne Thermal Emission and Reflection Radiometer (Wikipedia) | https://en.wikipedia.org/wiki/Advanced_Spaceborne_Thermal_Emission_and_Reflection_Radiometer | S-aster | 200 |
@@ -109,6 +118,20 @@ window before pasting.
 | CAPSTONE (Wikipedia) | https://en.wikipedia.org/wiki/CAPSTONE | S-capstone | 200 |
 | Gazetteer of Planetary Nomenclature (IAU / USGS Astrogeology Science Center (NASA-supported)) | https://planetarynames.wr.usgs.gov/SearchResults?Target=16_Moon&Feature%20Name=Cabeus | S-cabeus-gazetteer | 200 |
 | Terrain Tiles (Mapzen/Tilezen) | https://registry.opendata.aws/terrain-tiles/ | S-terrain-tiles | 200 |
+| Cotopaxi (Wikipedia) | https://en.wikipedia.org/wiki/Cotopaxi | S-cotopaxi-height | 200 |
+| Godot Engine 4.7, the game engine and its web export templat | https://godotengine.org/license/ | S-tool-godot | 200 |
+| Google Firebase: Hosting (the live web game and every pull r | https://firebase.google.com/terms/ | S-tool-firebase | 200 |
+| Firebase JavaScript SDK 10.14.1 (pinned in `web/build_head.p | https://github.com/firebase/firebase-js-sdk/blob/master/LICENSE | S-tool-firebase-js | 200 |
+| Blender, GNU GPL 2 or later (SPDX list: https://github.com/b | https://github.com/blender/blender/blob/main/doc/license/SPDX-license-identifiers.txt | S-tool-blender | 200 |
+| Blender, GNU GPL 2 or later (SPDX list: https://github.com/b [2] | https://www.blender.org | S-tool-blender | 403 |
+| Python, Python Software Foundation License. https://www.pyth | https://www.python.org/psf/license/ | S-tool-python | 200 |
+| NumPy, BSD 3-Clause (https://github.com/numpy/numpy/blob/mai | https://github.com/numpy/numpy/blob/main/LICENSE.txt | S-tool-numpy | 200 |
+| Pillow, the Pillow license (HPND, https://github.com/python- | https://github.com/python-pillow/Pillow/blob/main/LICENSE | S-tool-pillow | 200 |
+| FFmpeg, LGPL 2.1 or later (GPL parts not used; https://ffmpe | https://ffmpeg.org/legal.html | S-tool-ffmpeg | 200 |
+| python-pptx, MIT License (https://github.com/scanny/python-p | https://github.com/scanny/python-pptx/blob/master/LICENSE | S-tool-pptx | 200 |
+| lxml, BSD License (https://github.com/lxml/lxml/blob/master/ | https://github.com/lxml/lxml/blob/master/LICENSE.txt | S-tool-lxml | 200 |
+| Inter typeface, Rasmus Andersson, SIL Open Font License 1.1  | https://github.com/rsms/inter/blob/master/LICENSE.txt | S-font-inter | 200 |
+| Inter typeface, Rasmus Andersson, SIL Open Font License 1.1  [2] | https://rsms.me/inter/ | S-font-inter | 200 |
 | Chandrayaan-3 (Wikipedia) | https://en.wikipedia.org/wiki/Chandrayaan-3 | S-chandrayaan3 | 200 |
 | IM-1 (Wikipedia) | https://en.wikipedia.org/wiki/IM-1 | S-im1 | 200 |
 | Apollo 11 (Wikipedia) | https://en.wikipedia.org/wiki/Apollo_11 | S-apollo11 | 200 |
@@ -117,6 +140,7 @@ window before pasting.
 | NASA Deep Space Network (Wikipedia) | https://en.wikipedia.org/wiki/NASA_Deep_Space_Network | S-dsn-sites | 200 |
 | Computing Greenwich Apparent Sidereal Time (U.S. Naval Observatory) | https://aa.usno.navy.mil/faq/GAST | S-usno-gast | 000 |
 | CODATA value: speed of light in vacuum (NIST) | https://physics.nist.gov/cgi-bin/cuu/Value?c | S-codata-c | 200 |
+| Approximate Solar Coordinates (U.S. Naval Observatory) | https://aa.usno.navy.mil/faq/sun_approx | S-usno-sun | 000 |
 | NOAA Space Weather Scales (NOAA Space Weather Prediction Center) | https://www.swpc.noaa.gov/noaa-scales-explanation | S-noaa-scales | 200 |
 | NOAA Space Weather Scales (NOAA Space Weather Prediction Center) [2] | https://www.swpc.noaa.gov/phenomena/coronal-mass-ejections | S-noaa-scales | 200 |
 | NOAA Space Weather Scales (NOAA Space Weather Prediction Center) [3] | https://www.swpc.noaa.gov/phenomena/solar-radiation-storm | S-noaa-scales | 200 |

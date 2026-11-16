@@ -1,5 +1,5 @@
-"""Builds EN_17_SK-Horizons_v2.pptx from the presented v1 deck, keeping its look (Segoe UI, glass cards, amber dashes).
-Usage (from the repository root): python tools/content/deck/build_v2.py spaceapps/local-pitch/EN_17_SK-Horizons.pptx spaceapps/global-submission/deck/EN_17_SK-Horizons_v2.pptx spaceapps/global-submission/deck/img
+"""Builds Farpoint-HORIZON_NASA-Space-Apps-2026_Demo_EN.pptx from the presented v1 deck, keeping its look (Segoe UI, glass cards, amber dashes).
+Usage (from the repository root): python tools/content/deck/build_v2.py spaceapps/local-pitch/EN_17_SK-Horizons.pptx spaceapps/global-submission/deck/Farpoint-HORIZON_NASA-Space-Apps-2026_Demo_EN.pptx spaceapps/global-submission/deck/img
 The images are in-game captures (shots/ from tests/*shot.tscn, cropped) and the crew portraits of assets/story/portraits.
 """
 import sys, copy
@@ -14,7 +14,7 @@ NS = {"a": "http://schemas.openxmlformats.org/drawingml/2006/main",
       "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships"}
 E = lambda inch: int(round(inch * 914400))
 WHITE, MUTED, AMBER, BLUE = "EFF4FF", "A9B9D4", "FFA842", "78B8FF"
-FOOT = "Farpoint HORIZON · SK-Horizons · NASA Space Apps Challenge 2026 · Sangolquí"
+FOOT = "Farpoint HORIZON · SK-Horizons · NASA Space Apps Challenge 2026"
 
 prs = Presentation(SRC)
 S = list(prs.slides)
@@ -128,7 +128,7 @@ def footer(slide, n):
 s1 = S[0]
 set_paras(shape(s1, "Tagline"), [para([run("Six real NASA missions. Four cuyes who were there.", 1900, WHITE)], 2470, 0, align="ctr"),
                                   para([run("And one mission that is all yours.", 1900, WHITE, True)], 2470, 0, align="ctr")])
-set_paras(shape(s1, "Team"), [para([run("Team SK-Horizons", 1400, WHITE, True), run(" · Quito, Ecuador · Sangolquí local event (ESPE)", 1400, WHITE)], 1890, 0, align="ctr"),
+set_paras(shape(s1, "Team"), [para([run("Team SK-Horizons", 1400, WHITE, True), run(" · Quito, Ecuador", 1400, WHITE)], 1890, 0, align="ctr"),
                               para([run("Alexander Kholodov · Sebastian Amaguaya", 1400, WHITE)], 1890, 0, align="ctr")])
 notes(s1, "(15 s) We are SK-Horizons, from Quito. Our answer to the Space Mission Design Game challenge is Farpoint HORIZON: "
           "six real NASA missions lived with a crew of four cuyes, and a mission of your own, from the first idea to the data coming home.")

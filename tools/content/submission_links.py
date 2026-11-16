@@ -6,6 +6,8 @@ so this script reads every entry of docs/sources.md (the list of what the game r
 lists, opens each URL and writes spaceapps/global-submission/links.md with the result of the check beside each row.
 
 Usage: python tools/content/submission_links.py            (checks every URL; about a minute)
+       CURL_CA_BUNDLE=<file> python tools/content/submission_links.py   (on a network whose certificate chain curl does not
+                                  trust, e.g. an intermediate that the server omits: a bundle with that intermediate)
        python tools/content/submission_links.py --no-check
 """
 import re
