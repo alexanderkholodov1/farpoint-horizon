@@ -10,4 +10,4 @@
   links that open in the browser (`scripts/screens/credits.gd`).
 - They are built from the bibliography and the README by `python tools/credits.py` into `data/credits.json`;
   `tests/credits.gd` fails when a source is missing from the credits, so after adding a source run the script.
-- Still open in #14: the first mission that teaches while you play. The README's AI list still has the teammate's TODO.
+- Still open in #14: the first mission that teaches while you play.

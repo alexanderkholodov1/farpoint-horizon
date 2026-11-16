@@ -23,6 +23,18 @@ var extras_offered: Array = []   ## Extra objective ids drawn for this mission (
 var extras: Array = []           ## The ones the team goes for.
 
 const DOD := 0.6            # safe battery depth of discharge in low orbit, simplified from [S-ntrs-dod]
+# Our game values (balance, not measured): what redundancy and shielding add to the dry mass and to the hardware cost,
+# the fixed cost of fitting propulsion (M$), how much of its power electric propulsion draws on average, the years a
+# high orbit lasts once its station-keeping fuel is gone, and how much science an instrument the attitude control
+# cannot point well still returns.
+const REDUNDANCY_MASS := 0.10
+const SHIELDING_MASS := 0.04
+const REDUNDANCY_COST := 0.20
+const SHIELDING_COST := 0.05
+const PROPULSION_FIT_COST := 0.05
+const EP_DUTY := 0.5
+const GRACE_YEARS := {"geo": 3.0, "lunar": 0.5, "l2": 1.0}
+const POORLY_POINTED := 0.35
 const KEYS := ["scenario", "difficulty", "orbit", "bus", "instruments", "panels", "battery", "comms",
 	"adcs", "propulsion", "launcher", "years", "redundancy", "shielding", "extras_offered", "extras"]
 
@@ -63,7 +75,7 @@ func compute() -> Dictionary:
 	var D: Dictionary = GameData.DIFFICULTY[difficulty]
 	var r := {}
 
-	# ---------- masa
+	# ---------- mass
 	var instr_mass := 0.0
 	var instr_power := 0.0
 	var instr_cost := 0.0
@@ -80,9 +92,9 @@ func compute() -> Dictionary:
 	var dry_sub: float = B.dry + instr_mass + P.mass + BT.mass + C.mass + adcs_mass
 	var extra_mass := 0.0
 	if redundancy:
-		extra_mass += dry_sub * 0.10
+		extra_mass += dry_sub * REDUNDANCY_MASS
 	if shielding:
-		extra_mass += dry_sub * 0.04
+		extra_mass += dry_sub * SHIELDING_MASS
 	var dry_total := dry_sub + extra_mass
 	var prop_mass: float = dry_total * PR.mass_pct
 	var mass_total := dry_total + prop_mass
@@ -96,9 +108,9 @@ func compute() -> Dictionary:
 	r.mass_limit = mass_limit
 	r.mass_margin = (mass_limit - mass_total) / mass_limit if mass_limit > 0.0 else -1.0
 
-	# ---------- energía
+	# ---------- power
 	var adcs_power: float = B.base_power * A.power_pct
-	var ep_power: float = B.ep_power * 0.5 if PR.electric else 0.0
+	var ep_power: float = B.ep_power * EP_DUTY if PR.electric else 0.0
 	var load: float = B.base_power + instr_power + C.power + adcs_power + ep_power
 	var gen: float = P.power * (1.0 - O.eclipse_frac)
 	r.power_load = load
@@ -110,13 +122,13 @@ func compute() -> Dictionary:
 	r.battery_wh = BT.wh
 	r.battery_ratio = BT.wh / batt_need if batt_need > 0.0 else 99.0
 
-	# ---------- datos
+	# ---------- data
 	var downlink: float = C.rate * O.comm_factor * O.contact_min * 60.0 / 8.0 / 1000.0
 	r.data_gen = instr_data
 	r.data_down = downlink
 	r.data_ratio = downlink / instr_data if instr_data > 0.0 else 99.0
 
-	# ---------- delta-v y vida útil
+	# ---------- delta-v and lifetime
 	var dv_have: float = PR.dv
 	var dv_left: float = dv_have - O.insert_dv
 	r.dv_have = dv_have
@@ -129,11 +141,10 @@ func compute() -> Dictionary:
 	elif O.drag_life < 900.0:
 		life = O.drag_life + dv_left / O.maint_dv
 	else:
-		var grace := {"geo": 3.0, "lunar": 0.5, "l2": 1.0}
-		life = dv_left / O.maint_dv + grace.get(orbit, 1.0)
+		life = dv_left / O.maint_dv + GRACE_YEARS.get(orbit, 1.0)
 	r.life_years = life
 
-	# ---------- apuntado
+	# ---------- pointing
 	var bad_point: Array = []
 	for id in instruments:
 		if GameData.INSTRUMENTS[id].pointing > A.level:
@@ -141,15 +152,15 @@ func compute() -> Dictionary:
 	r.pointing_bad = bad_point
 	r.pointing_need = max_point
 
-	# ---------- costo
+	# ---------- cost
 	var hw: float = B.cost + instr_cost + P.cost + BT.cost + C.cost + B.cost * A.cost_pct + B.cost * PR.cost_pct
 	if propulsion != "none":
-		hw += 0.05
+		hw += PROPULSION_FIT_COST
 	var extras_cost := 0.0
 	if redundancy:
-		extras_cost += hw * 0.20
+		extras_cost += hw * REDUNDANCY_COST
 	if shielding:
-		extras_cost += hw * 0.05
+		extras_cost += hw * SHIELDING_COST
 	var launch_cost: float = max(L.min_cost, L.cost + L.cost_per_kg * mass_total)
 	var ops_cost: float = O.ops * B.ops_mult * years
 	var total_cost := hw + extras_cost + launch_cost + ops_cost
@@ -159,7 +170,7 @@ func compute() -> Dictionary:
 	r.budget = budget
 	r.reserve = (budget - total_cost) / budget
 
-	# ---------- objetivos
+	# ---------- objectives
 	var tags := {}
 	for id in instruments:
 		for t in GameData.INSTRUMENTS[id].tags:
@@ -178,13 +189,13 @@ func compute() -> Dictionary:
 	r.needs_frac = float(met) / S.needs.size() if S.needs.size() > 0 else 1.0
 	r.orbit_mult = S.orbit_mult.get(orbit, 0.0)
 
-	# ---------- ciencia esperada
+	# ---------- expected science
 	r.monthly_science = science_rate(instruments, A.level, 1.0)
 	r.science_target = S.science_target
 	var op_years: float = min(float(years), life)
 	r.expected_science = r.monthly_science * op_years * 12.0
 
-	# ---------- revisiones
+	# ---------- checks
 	r.checks = _checks(r, S, B, O, L, PR)
 	r.fatal = false
 	for c in r.checks:
@@ -215,19 +226,19 @@ func science_rate(instr_list: Array, point_level: int, power_mult: float) -> flo
 			rel = max(rel, S.relevance.get(t, default_rel))
 		if S.relevance.is_empty():
 			rel = default_rel
-		var pf := 1.0 if point_level >= I.pointing else 0.35
+		var pf := 1.0 if point_level >= I.pointing else POORLY_POINTED
 		total += I.sci * rel * pf
 		data += I.data
 		ipower += I.power
-	# limitación por enlace de datos
+	# limited by the data link
 	var downlink: float = C.rate * O.comm_factor * O.contact_min * 60.0 / 8.0 / 1000.0
 	var data_f: float = 1.0 if data <= 0.0 else min(1.0, downlink / data)
-	# limitación por energía
-	var ep_power: float = B.ep_power * 0.5 if PR.electric else 0.0
+	# limited by power
+	var ep_power: float = B.ep_power * EP_DUTY if PR.electric else 0.0
 	var load: float = B.base_power + ipower + C.power + B.base_power * A.power_pct + ep_power
 	var gen: float = P.power * (1.0 - O.eclipse_frac) * power_mult
 	var power_f: float = 1.0 if gen >= load else clamp(gen / load, 0.1, 1.0)
-	# batería: si no alcanza, los instrumentos se apagan en los eclipses
+	# battery: when it falls short, the instruments switch off in the eclipses
 	var need: float = load * O.eclipse_min / 60.0 / DOD
 	var batt_f: float = 1.0 if (need <= 0.0 or BT.wh >= need) else 1.0 - O.eclipse_frac * 0.9
 	return total * S.orbit_mult.get(orbit, 0.0) * data_f * power_f * batt_f
@@ -454,7 +465,7 @@ func simulate(seed_value: int = -1, choices := {}) -> Dictionary:
 				events.append(_ev(m, "good", tr("Storm weathered"),
 					tr("The craft rode the storm out in safe mode.") if safe else tr("The craft rode the storm out%s.") % (tr(" thanks to the shielding") if shielding else tr(", with a bit of luck"))))
 
-		# falla de rueda de reacción
+		# a reaction wheel fails
 		if point_level >= 2 and rng.randf() < 0.008 * ev_mult:
 			if redundancy:
 				events.append(_ev(m, "info", tr("Reaction wheel failed, backup switched on"), tr("Redundancy saved the fine pointing.")))
@@ -462,7 +473,7 @@ func simulate(seed_value: int = -1, choices := {}) -> Dictionary:
 				point_level -= 1
 				events.append(_ev(m, "bad", tr("A reaction wheel failed"), tr("With no spare wheel, pointing stays less precise for the rest of the mission.")))
 
-		# basura espacial
+		# space debris
 		if (orbit == "leo" or orbit == "sso") and rng.randf() < 0.006 * ev_mult:
 			if dv_left >= 5.0:
 				dv_left -= 5.0
@@ -473,18 +484,18 @@ func simulate(seed_value: int = -1, choices := {}) -> Dictionary:
 			else:
 				events.append(_ev(m, "info", tr("Space debris flew by"), tr("With no propulsion there was no way to dodge… luckily it passed 200 m away.")))
 
-		# estación terrena
+		# ground station
 		if rng.randf() < 0.02 * ev_mult:
 			month_sci *= 0.5
 			events.append(_ev(m, "info", tr("Ground station offline"), tr("A week without contact cost half of this month's data.")))
 
-		# envejecimiento de batería
+		# the battery ages
 		if not aged and m > months_total * 0.6 and r.battery_ratio < 1.3 and rng.randf() < 0.3:
 			aged = true
 			power_mult *= 0.85
 			events.append(_ev(m, "bad", tr("The battery is aging"), tr("Thousands of charge cycles cut its capacity. With more margin nobody would have noticed.")))
 
-		# descubrimientos (premian un buen diseño)
+		# discoveries (they reward a good design)
 		if bonuses < 2 and rng.randf() < 0.05:
 			var b := _discovery(working, bonuses)
 			if not b.is_empty():

@@ -3,42 +3,28 @@
 Everything in the game is built in code. `scenes/main.tscn` holds a single node with `scripts/main.gd` attached: a
 small flow controller that owns the 3D world and the UI root and switches screens. Each screen is its own script in
 `scripts/screens/`, so several people can build different screens without touching the same file. Checked against the
-code on 2026-11-14.
+code on 2026-11-15.
 
 ## Files and roles
 
-| File | Lines | Role |
-|---|---|---|
-| `project.godot` | | Project name Farpoint HORIZON; main scene `res://scenes/main.tscn`; English fallback locale and the Spanish translation table; autoloads `GameData` then `GameState`; renderer `gl_compatibility` (also for mobile); window 1600x900, stretch mode `canvas_items`, aspect `expand`; `run/flush_stdout_on_print=true` |
-| `scripts/main.gd` | 127 | Flow controller: creates the world and the UI root (theme, fade layer), finds the screens and overlays in `scripts/screens/` (`SCREENS`, by `scripts/found.gd`), and switches them: `go(id, args)`, `go_faded(id, out, in, args)`, `overlay(id)`, `fade()`, `launch()`. Each frame it updates the world, then the current screen |
-| `scripts/game_state.gd` | 134 | Autoload `GameState`: the shared state of the game being played (below) and its rules: `start_solo`, `set_team`, `start_mission`, `can_launch`, `begin_flight`, `approve_all`, the local ranking, `trace()` |
-| `scripts/world.gd` | 277 | The 3D world every screen shares: sky, lights, the orbital camera (mouse drag and wheel), and the stage. Ready stages: `stage_menu`, `stage_design` with `rebuild_ship`, `stage_orbit`, `stage_earth`; `clear_stage()` for a screen that builds its own; `lose_ship()`; `cam_free` |
-| `scripts/ui/kit.gd` | 256 | The UI kit, all static: colors `C_*`, fonts `FONT_R/B/T`, `build_theme()`, `flat()` style boxes, `place()` anchors, `lbl`, `btn`, `accent_btn`, `panel_box`, `vbox`, `hbox`, `spacer`, `card`, `toast`, `overlay`, and number formatting `pct`, `money`, `kg`, `watts`, `gb`, `mins` |
-| `scripts/screens/screen.gd` | 51 | The base every screen and overlay extends: `enter(args)`, `exit()`, `process(delta)`, `go()`, `clear()`, `toast()`; the members `main`, `world`, `mission` and the constants `Kit`, `World` |
-| `scripts/screens/menu.gd` | 42 | Main menu: one player or a team, difficulty, how to play, ranking |
-| `scripts/screens/team.gd` | 270 | The lobby: Solo (pick a station), Same screen (names and who holds which station) and Online (create or join a room, then the room view with the four stations). `args.view` or `args.players` |
-| `scripts/net/room.gd`, `room_local.gd`, `room_online.gd` | | The Room (below) |
-| `scripts/net/transport_web.gd`, `transport_memory.gd` | | The online room's two links: Firebase through the page (`web/room_bridge.js`), and an in-memory one for tests |
-| `scripts/crew/bots.gd` | | The crew's bots (below) |
-| `web/room_bridge.js`, `web/build_head.py` | | The page's JavaScript for Firebase; `build_head.py` writes it into the Web preset's `html/head_include` (Godot's export copies only `index.html`) |
-| `database.rules.json` | | Realtime Database rules: only `rooms/<code>` |
-| `scripts/screens/missions.gd` | 51 | Choice of the scenario (CML 1) |
-| `scripts/screens/design.gd` | 378 | The eight design steps (CML 2-4), the review with the team's approvals, the mission dashboard, the "why it matters" box. `args.step` is the step |
-| `scripts/screens/launch.gd` | 121 | Countdown, liftoff from the pad, ascent or the launcher's failure; it drives the camera itself |
-| `scripts/screens/operation.gd` | 133 | Month-by-month playback of `GameState.last_sim`: mission log, time and science bars, speed controls |
-| `scripts/screens/report.gd` | 143 | Grade, score, what happened and why, real missions like it; redesign, fly again, new mission, save to the ranking |
-| `scripts/screens/ranking.gd`, `howto.gd` | 26, 33 | Overlays: the local ranking, how to play |
-| `scripts/game_data.gd` | 150 | Loader of the catalogs (autoload `GameData`, extends `Node`). Reads `data/*.json` at startup and keeps the same public names as before: `SCENARIOS`, `BUSES`, `INSTRUMENTS`, `PANELS`, `BATTERIES`, `COMMS`, `ADCS`, `PROPULSION`, `ORBITS`, `LAUNCHERS`, `ROLES`, `ROLE_ORDER`, `STEPS`, `DIFFICULTY`, `CML_NAMES`, `SIZE_NAMES` (static variables). Translates the text fields, remembers the language in `user://settings.cfg`. No content lives in it |
-| `data/*.json`, `i18n/*.csv` | | The content (see "Data and translation") and the Spanish texts, one file per piece |
-| `scripts/found.gd` | 50 | What the game finds by folder instead of by a shared list: the screens, the translations |
-| `scripts/mission.gd` | 563 | `Mission` model (extends `RefCounted`). Holds the player's choices; `compute()` returns mass, power, battery, data, delta-v, lifetime, cost, pointing, objectives, expected science, review checks (`fatal`, `warn`, `ok`) and role goals; `science_rate()`; `simulate(seed)` runs the month-by-month events; `score()` gives objectives 400, science 300, efficiency 200, team 100; `real_missions()` |
-| `scripts/ship_builder.gd` | 230 | Modular 3D spacecraft from primitives, changing with the chosen parts |
-| `scripts/space_builder.gd` | 282 | Sky, Earth (texture and an Ecuador marker), procedural Moon, orbit rings, rocket, launch pad with Andean volcanoes, particles, `Label3D` |
-| `shaders/` | | `earth`, `clouds`, `atmosphere`, `moon`, `sky`, `solar_cell`, `engine_glow`, and the include `noise.gdshaderinc` |
-| `fonts/` | | Inter Regular, SemiBold and Display Bold, with `FONTS_LICENSE.txt` |
-| `textures/` | | `earth_day/night/relief/clouds.jpg`, `moon_color/normal.jpg`, `terrain_cotopaxi.png` (NASA data, made by `assets/source/planet_textures.py` and `terrain_cotopaxi.py`) |
-| `tests/fuzz.gd` | 34 | 600 random designs across all scenarios (see below) |
-| `tests/autoshot.gd`, `tests/autoshot.tscn` | 97, 6 | Automatic walkthrough that saves screenshots |
+Every script describes itself in the `##` lines at its top; `tools/map.sh` lists them all with their length, so
+the map of the code is read from the code and never goes stale (issue #29). Folders: `scripts/screens/` (one script per
+screen or overlay, found by folder), `scripts/flight/` (launch, trip and landing physics and their HUD),
+`scripts/missions/` and `scripts/minigames/` (the rules of each mini-game, apart from their screens), `scripts/story/`
+(the cuyes' scenes), `scripts/craft/` (the rocket and craft builders), `scripts/net/` and `scripts/crew/` (the room and
+its bots), `scripts/ui/` (the kit and shared widgets), `tests/` (one file per test, run by `tools/check.sh`).
+
+What is not a script:
+
+| File | Role |
+|---|---|
+| `project.godot` | Project name Farpoint HORIZON; main scene `res://scenes/main.tscn`; English fallback locale and the Spanish translation table; autoloads `GameData` then `GameState`; renderer `gl_compatibility` (also for mobile); window 1600x900, stretch mode `canvas_items`, aspect `expand`; `run/flush_stdout_on_print=true` |
+| `web/room_bridge.js`, `web/build_head.py` | The page's JavaScript for Firebase; `build_head.py` writes it into the Web preset's `html/head_include` (Godot's export copies only `index.html`) |
+| `database.rules.json` | Realtime Database rules: only `rooms/<code>` |
+| `data/*.json`, `i18n/*.csv` | The content (see "Data and translation") and the Spanish texts, one file per piece |
+| `shaders/` | `earth`, `clouds`, `atmosphere`, `moon`, `sky`, `solar_cell`, `engine_glow`, and the include `noise.gdshaderinc` |
+| `fonts/` | Inter Regular, SemiBold and Display Bold, with `FONTS_LICENSE.txt` |
+| `textures/` | `earth_day/night/relief/clouds.jpg`, `moon_color/normal.jpg`, `terrain_cotopaxi.png` (NASA data, made by `assets/source/planet_textures.py` and `terrain_cotopaxi.py`) |
 
 Node tree at run time: `Main` (main.gd) holds `World` (world.gd: environment, lights, camera, `stage`), the UI
 `CanvasLayer` with the themed root `Control`, and a top `CanvasLayer` with the fade rectangle. The current screen is a
