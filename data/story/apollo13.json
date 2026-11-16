@@ -42,7 +42,8 @@
   ],
   "fixed": [
    {"set": "lm", "fx": "dim", "shot": "wide", "wait": 0.5},
-   {"who": "inti", "mood": "determined", "act": "point", "shot": "low", "text": "Around the Moon, and home.", "fact": "As they approached the Moon, a long five-minute burn sped up the return home.", "source": "S-apollo13-nasa"}
+   {"who": "inti", "mood": "determined", "act": "point", "shot": "low", "text": "Around the Moon, and home.", "fact": "As they approached the Moon, a long five-minute burn sped up the return home.", "source": "S-apollo13-nasa"},
+   {"set": "lm", "fx": "dim", "title": "Your turn", "sub": "Bring Odyssey home through the air", "shot": "window", "wait": 2.5, "play": "reentry"}
   ],
   "home": [
    {"set": "ocean", "title": "April 17, 1970", "sub": "The Pacific Ocean, near Samoa", "shot": "descent", "wait": 3.5, "fx": "splashdown"},

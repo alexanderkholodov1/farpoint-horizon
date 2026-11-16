@@ -1,0 +1,23 @@
+{
+ "doc": "Coming home (issue #67): the re-entry mechanic's values per craft, read by scripts/flight/reentry.gd. Real values carry their source; the corridor, the drift and the compressed times are game values, said on screen.",
+ "entries": {
+  "apollo13": {
+   "craft": "Odyssey",
+   "date": "April 17, 1970",
+   "speed_fts": 36211.0,
+   "blackout_start_s": 19.0,
+   "blackout_end_s": 218.0,
+   "drogue_ft": 24000.0,
+   "main_ft": 10000.0,
+   "source": ["S-afj13-return", "S-apollo13-return"],
+   "corridor_deg": [-7.5, -5.5],
+   "start_deg": -6.5,
+   "drift_deg_s": 1.2,
+   "push_deg_s": 3.5,
+   "plasma_s": 24.0,
+   "fall_s": 16.0,
+   "window_ft": 3000.0,
+   "simplified": "The corridor's edges, the drift and the pace are our game values; the plasma lasts 24 s here, the real blackout 3 min 19 s."
+  }
+ }
+}
