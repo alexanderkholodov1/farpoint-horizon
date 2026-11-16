@@ -42,7 +42,7 @@ flow: Choose a mission -> Design the craft (CML 1-4) -> Build the rocket -> Laun
 Every choice moves the shared gauges and shows on the craft itself. Missing a goal is never a failure screen: every mission that flies achieves something, and doing more earns bonuses. Four stations for up to four players (engineer, scientist, pilot, ground control), with bots in the free ones.
 
 Notes:
-(60 s) Live demo here if the room allows it; otherwise these four pictures. TODO: decide demo or pictures after the game is complete.
+(60 s) Live demo here if the room allows it; otherwise these four pictures.
 
 ---
 layout: split
@@ -63,7 +63,7 @@ Notes:
 ---
 layout: split
 label: Technology · the working game
-image: shot: the menu or mission cards in the web build, browser frame visible | Plays in the browser: TODO add the live link
+image: shot: the menu or mission cards in the web build, browser frame visible | Plays in the browser: farpoint-horizon.web.app
 
 ## Built to run anywhere a school has a browser
 - **Godot 4.7**, GL Compatibility renderer: runs on integrated GPUs and in the browser; desktop build as a fallback.
@@ -71,7 +71,7 @@ image: shot: the menu or mission cards in the web build, browser frame visible |
 - **Real behavior**: gravity of every body, real constants; time runs real by default and the player speeds it visibly (×1, ×10, ×100).
 - **Checked on every push**: import, a headless run, a fuzz test and the web export; each change gets its own preview page.
 ### Play it
-TODO: live game link · repository: github.com/alexanderkholodov1/farpoint-horizon (MIT)
+Live: farpoint-horizon.web.app (released build) · v0.3.0 story: https://farpoint-horizon--pr93-v0-3-0-a59yjofm.web.app · repository: github.com/alexanderkholodov1/farpoint-horizon/tree/v0.3.0 (MIT)
 
 Notes:
 (45 s) Architecture in one breath, then the live link. IET 2.1-2.5.
@@ -84,10 +84,10 @@ image: assets/photos/volcano_watch/cotopaxi_landsat8_2015-09-15_truecolor.jpg | 
 ## From Ecuador's volcanoes to the Moon, in Spanish and English
 - **For** students, teachers and anyone curious: no install, every concept explained in plain words.
 - **Local**: launch from the equator (the Earth's spin is a free boost), watch Cotopaxi and Sangay, follow El Niño.
-- **Missions**: TODO confirm the list that ships (volcanoes, El Niño, the Moon, a space telescope).
+- **Missions**: the six NASA chapters (Apollo 13, STS-61, Mars Pathfinder, LCROSS, DART, Artemis I) and the free scenarios: Ecuador Volcano Watch, Ocean Guardians and El Niño, Lunar Cartographer, Eye on the Universe, Ice at the Moon's South Pole, and Free mode.
 ### After the hackathon
 - A story campaign; play with up to three friends online.
-- Classroom pilots in Ecuador. TODO: a partner or first step.
+- Classroom pilots in Ecuador are planned; no partner is confirmed yet.
 
 Notes:
 (45 s) Who it is for, why it fits Ecuador, a realistic path. IR 3.1-3.5.
@@ -99,8 +99,8 @@ image: shot: the credits film over the Earth, or the sources list in the game (s
 
 ## Our work, our sources, our help
 - **Made by us**: the game, its 3D models (from our scripts), music and sounds. **No AI-generated images.**
-- **Cited**: TODO count of `docs/sources.md` (69 today), in the repository and the game's credits. No NASA logos.
-- **AI disclosed**: Claude Code for code and research; Cursor for a web test. TODO: the teammate's tools (README). The idea and design are ours.
+- **Cited**: every source of `docs/sources.md` is in the repository and in the game's credits. No NASA logos.
+- **AI disclosed**: Claude Code (code, research), Antigravity and Cursor (code, a web test); Meshy and TRELLIS (3D references, see the README's "Use of AI"). The idea and design are ours.
 ### Team SK-Horizons
 - **Alexander Kholodov**: the mission and the flight to the Moon.
 - **Sebastian Amaguaya**: the rocket builder, 3D models, look and sound.

@@ -138,11 +138,14 @@ and the decisions are the team's.
 
 - **Claude Code** (Anthropic) helped write code, documents and research notes.
 - **Antigravity** and **Cursor** helped with code and with a first test of the web version.
-- **Meshy** and **TRELLIS** made 3D drafts that served as references for the four cuyes. Rumi's body comes from a
-  TRELLIS model; the rest was modeled in Blender by our own scripts.
-- **Claude** (Anthropic) generated the game's music. The music files and the game's credits say so.
+- **Meshy** (AI 3D tool) made reference models that the team measured the four cuyes on. Rumi's body is a
+  **TRELLIS** (AI 3D) mesh made from a screenshot of those references; the other cuy models were modeled in Blender by
+  our own scripts (`assets/source/crew_cuy.py`).
+- **Claude** (Anthropic) helped write the script that composes the game's music (`tools/content/audio/compose_music.py`,
+  numpy and ffmpeg, no samples). The music files and the game's credits say so.
 
-There are no AI-generated images or videos, and no NASA logos, insignia or mission patches anywhere in the game.
+The game and the deck contain no AI-generated images or videos, and no NASA logos, insignia or mission patches. The
+Meshy renders kept in `docs/design/crew/ai-references/` are AI output, shown only to document how the models were made.
 
 ## Credits
 
@@ -153,7 +156,7 @@ There are no AI-generated images or videos, and no NASA logos, insignia or missi
   (Sketchfab, CC BY 4.0); the Space Shuttle Solid Rocket Booster from NASA 3D Resources (public domain).
 - NASA imagery and data: the Earth, the Moon, the landing ground, the planets' positions and every mission photo, each
   listed with its source in `docs/sources.md`.
-- Sounds: made by the game itself, in code; the music, composed for the game (see "Use of AI").
+- Sounds: synthesized by the game's own code; the music is composed by our script (see "Use of AI").
 
 ## Team
 

@@ -63,11 +63,11 @@ Candidate missions for the game, each with a real twin and real numbers. Researc
 **Twins.**
 - Suomi NPP with VIIRS (NASA/NOAA, 2011): see mission 1 numbers; VIIRS data "will also be used to observe active fires". https://en.wikipedia.org/wiki/Suomi_NPP
 - Landsat 9 thermal sensor TIRS-2, 705 km. https://en.wikipedia.org/wiki/Landsat_9
-- NASA FIRMS delivers fire detections in near real time; the commonly quoted latency is about 3 hours from observation. This came from secondary sources; no official NASA number was found. The 375 m VIIRS product name is documented on https://catalog.data.gov/dataset/viirs-s-npp-i-band-375-m-active-fire-product-nrt-vector-data-6f751
+- NASA FIRMS delivers fire detections in near real time; the commonly quoted latency is about 3 hours from observation. This came from secondary sources; no official NASA number was found. The 375 m VIIRS product name is documented on https://catalog.data.gov/dataset/viirs-s-npp-i-band-375-m-active-fire-product-nrt-vector-data-6f751 (404 on 2026-11-16)
 
 **Extra objectives.**
 1. "Under the smoke": thermal infrared sees fire through smoke. Source (instrument): https://en.wikipedia.org/wiki/Landsat_9; claim is inference.
-2. "Three-hour alert": get the fire map to the ground within about 3 hours, as FIRMS does (secondary, https://africa-knowledge-platform.ec.europa.eu/dataset/fires-last-72-hours).
+2. "Three-hour alert": get the fire map to the ground within about 3 hours, as FIRMS does (secondary, https://africa-knowledge-platform.ec.europa.eu/dataset/fires-last-72-hours (blocks automated checks; open in a browser)).
 3. "Night eyes": VIIRS-class sensors work at night; the 375 m product improved nighttime performance (NASA Earthdata, via search summary). https://www.earthdata.nasa.gov/learn/find-data/near-real-time/firms
 4. "Burn scar": a 30 m optical sensor maps the burned area afterward. https://en.wikipedia.org/wiki/Landsat_9
 

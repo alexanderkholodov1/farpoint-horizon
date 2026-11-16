@@ -63,8 +63,7 @@ sunrise from NASA Blue Marble and Black Marble [S-gibs-earth]; the other backgro
 ## When the game is complete
 1. Take the screenshots each `shot:` frame asks for (`tools/dev/shots.sh`, or play and capture at 1600x900 or larger),
    put them in an `img/` folder beside `en.md` and point the `image:` lines at them, then rebuild.
-2. Settle every `TODO`: the live link, the missions that ship, the source count, the teammate's AI tools, the
-   classroom step.
+2. Check that no `TODO` is left in the text (the build lists any it finds).
 3. Check every number on the slides against the game and `docs/sources.md` as it is then.
 4. `python tools/content/deck/pitch.py --final` and `python tools/content/deck/pitch_pptx.py`, look at both PDFs and PPTXs, upload: the English PDF to the global platform, both to the
    venue's form.

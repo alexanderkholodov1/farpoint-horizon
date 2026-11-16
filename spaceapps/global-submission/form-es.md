@@ -25,7 +25,7 @@ Farpoint HORIZON es un juego espacial en 3D que permite a cualquiera, solo o con
 ## Demostración del proyecto
 
 ```
-https://github.com/alexanderkholodov1/farpoint-horizon/blob/2303ea4ba2638453eb2f94dd0c1ae83f3b9ac748/spaceapps/global-submission/deck/EN_17_SK-Horizons_v2.pdf
+https://github.com/alexanderkholodov1/farpoint-horizon/blob/v0.3.0/spaceapps/global-submission/deck/EN_17_SK-Horizons_v2.pdf
 ```
 
 La presentación de 7 diapositivas en inglés, no el vídeo de 30 s: la demo debe hacer entender el problema, la
@@ -35,10 +35,12 @@ comprobación en [`form-en.md`](form-en.md).
 ## Proyecto
 
 ```
-https://farpoint-horizon.web.app
+https://farpoint-horizon--pr93-v0-3-0-a59yjofm.web.app
 ```
 
-Repositorio: https://github.com/alexanderkholodov1/farpoint-horizon
+(Build v0.3.0: la historia de las seis misiones de la NASA y de los cuyes. La versión publicada en https://farpoint-horizon.web.app tiene solo las misiones anteriores. El enlace de vista previa caduca a los 7 días; el equipo decide cuándo se fusiona v0.3.0 en main y se despliega en la dirección publicada.)
+
+Repositorio: https://github.com/alexanderkholodov1/farpoint-horizon/tree/v0.3.0
 
 ---
 
@@ -85,7 +87,7 @@ Godot Engine (libre y de código abierto), Blender para los modelos 3D, Python p
 CREATIVIDAD Y LO QUE CONSIDERAMOS
 Elegimos física real en lugar de animaciones guionadas para que lo que se aprende sea verdad, y una historia contada solo con las páginas de la propia NASA. Los cuyes aportan humor e identidad andina sin cambiar la historia. Diseñamos para computadoras escolares modestas, para quien nunca estudió el espacio, para dos idiomas y para las reglas del reto: sin logos ni insignias de la NASA, y con todo uso de IA declarado.
 
-Repositorio: https://github.com/alexanderkholodov1/farpoint-horizon
+Repositorio: https://github.com/alexanderkholodov1/farpoint-horizon/tree/v0.3.0
 Equipo SK-Horizons, Quito, Ecuador: Alexander Kholodov y Sebastian Amaguaya.
 ```
 
@@ -94,7 +96,7 @@ Equipo SK-Horizons, Quito, Ecuador: Alexander Kholodov y Sebastian Amaguaya.
 ## Uso de IA (Super Intelligence)
 
 ```
-Código y documentos: Claude Code (Anthropic, Claude Opus 5.5 y Sonnet), Antigravity y Cursor (Composer 2.5). Música: generada con Claude (Anthropic), declarada en los metadatos de los archivos de audio y en los créditos del juego. 3D: borradores de Meshy y TRELLIS (Microsoft, vía Hugging Face) como referencia para los cuatro cuyes; el cuerpo de Rumi es una malla de TRELLIS y el resto se modeló en Blender con nuestros scripts. No hay imágenes ni videos generados con IA, ni logos, insignias o identificadores de misiones de la NASA. La idea, el diseño, la historia y el balance son del equipo.
+Código y documentos: Claude Code (Anthropic, Claude Opus 5.5 y Sonnet), Antigravity y Cursor (Composer 2.5). Música: compuesta por nuestro propio script (numpy, ffmpeg), escrito con ayuda de Claude; declarada en los metadatos de los archivos de audio y en los créditos del juego. 3D: Meshy (IA) hizo modelos de referencia para los cuatro cuyes y TRELLIS (IA) hizo el cuerpo de Rumi a partir de una captura de esas referencias; el resto se modeló en Blender con nuestros scripts. Los renders de Meshy que quedan en el repositorio no están en el juego ni en la presentación. No hay imágenes ni videos generados con IA en el juego ni en la presentación, ni logos, insignias o identificadores de misiones de la NASA. La idea, el diseño, la historia y el balance son del equipo.
 ```
 
 ## Datos de la NASA y de otras fuentes
