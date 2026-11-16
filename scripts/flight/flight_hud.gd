@@ -294,11 +294,12 @@ func cap_warp(cap: float, why := "") -> void:
 func _show_warp() -> void:
 	if warp_box == null:
 		return
-	# the chosen speed lit in the accent colour (the largest button not above it), the ones not allowed now faded
-	var lit_w := 1.0
+	# the speed lit in the accent colour only when time runs exactly at it; at a speed the flight set itself (a burn
+	# at x50, a wait at x8,640) no button is lit and the line below says the real one (#57: x10 was lit at x50)
+	var lit_w := -1.0
 	for w in _warp_btns:
-		if w <= warp + 0.001:
-			lit_w = maxf(lit_w, w)
+		if absf(w - warp) <= 0.001 * maxf(w, 1.0):
+			lit_w = w
 	for w in _warp_btns:
 		var b: Button = _warp_btns[w]
 		for st in ["normal", "hover", "pressed", "disabled"]:
