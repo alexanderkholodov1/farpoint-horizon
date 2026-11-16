@@ -12,6 +12,7 @@ extends "res://scripts/screens/screen.gd"
 ## (go("apollo13")) or inside the story (args {"campaign": true, "then": [scene refs], "back": id}), where Rumi and
 ## Killa work beside the adapter and the story's outro follows.
 
+const Progress := preload("res://scripts/story/campaign_progress.gd")
 const Adapter := preload("res://scripts/missions/apollo13/adapter.gd")
 const Sets := preload("res://scripts/story/sets.gd")
 const CuyActor := preload("res://scripts/story/cuy_actor.gd")
@@ -528,6 +529,7 @@ func _show_photo() -> void:
 	h.add_child(v)
 	v.add_child(Kit.caps(tr("Mission 1 · done")))
 	var stars := A.stars()
+	Progress.earn("apollo13", stars)
 	v.add_child(Kit.lbl("★".repeat(stars) + "☆".repeat(3 - stars), Kit.T_CLOCK, Kit.C_GOLD, Kit.FONT_T))
 	v.add_child(Kit.lbl(tr("Wrong parts: %d · Perfect tape: %d of 3") % [A.wrong, A.perfect], Kit.T_SMALL + 1, Kit.C_DIM))
 	v.add_child(Kit.rule())

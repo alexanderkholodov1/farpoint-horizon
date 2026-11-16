@@ -1,5 +1,5 @@
 {
- "doc": "The story's chapter select (scripts/screens/chapters.gd, issue #43): the six NASA missions in the order they happened. Each chapter plays its story scenes (data/story/<id>.json: intro, mission, outro); its mission alone is the screen with the same id. Dates and names from each chapter's NASA page (docs/sources.md: S-apollo13-nasa, S-sts61-nasa, S-mpf-nasa, S-lcross-nasa, S-dart-nasa, and Artemis I's). The pictures are NASA images already in the game; DART's is an illustration (S-dart-pia25329).",
+ "doc": "The story's chapter select (scripts/screens/chapters.gd, issue #43): the six NASA missions in the order they happened. Each chapter plays its story scenes (data/story/<id>.json: intro, mission, outro); its mission alone is the screen with the same id. Dates and names from each chapter's NASA page (docs/sources.md: S-apollo13-nasa, S-sts61-nasa, S-mpf-nasa, S-lcross-nasa, S-dart-nasa, and Artemis I's). The pictures are NASA images already in the game; DART's is the last full frame of its own camera (S-dart-penultimate).",
  "prologue": "prologue",
  "chapters": [
   {
@@ -39,8 +39,9 @@
    "year": "September 2022",
    "name": "DART",
    "line": "Push an asteroid off its path: the first test of planetary defense.",
-   "picture": "res://assets/photos/dart/PIA25329.jpg",
-   "caption": "DART at Didymos · illustration, 2022"
+   "picture": "res://assets/photos/dart/dart_penultimate.jpg",
+   "caption": "DART's camera · Dimorphos 2 s before impact, 2022",
+   "source": "S-dart-penultimate"
   },
   {
    "id": "artemis1",

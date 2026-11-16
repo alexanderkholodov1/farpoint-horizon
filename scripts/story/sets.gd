@@ -16,11 +16,17 @@ const K := 3.33              ## Units per metre on the sets.
 
 static func build(id: String, world) -> Dictionary:
 	world.clear_stage()
+	# every set starts from the same camera and look: a mission before it may have changed them (DART's camera
+	# brings the near plane to a few centimetres; left so, the next scenes lose their depth and draw black on the web)
+	world.cam.near = 0.05
 	world.cam.far = 3000.0
+	world.cam.fov = 50.0
 	world.sun.light_energy = 0.0
 	world.sun.shadow_enabled = true
 	world.sun.light_cull_mask = 0xFFFFF
 	var env: Environment = world.world_env.environment
+	env.adjustment_enabled = false
+	env.background_mode = Environment.BG_SKY
 	env.glow_enabled = true
 	env.fog_enabled = false
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
@@ -65,12 +71,13 @@ static func save_world(world) -> Dictionary:
 	var env: Environment = world.world_env.environment
 	for k in ["background_mode", "background_color", "background_energy_multiplier", "ambient_light_source",
 			"ambient_light_color", "ambient_light_energy", "fog_enabled", "fog_density", "fog_light_color", "glow_enabled",
-			"tonemap_exposure", "sky"]:
+			"tonemap_exposure", "sky", "adjustment_enabled", "adjustment_saturation"]:
 		out["env." + k] = env.get(k)
 	for k in ["light_energy", "light_color", "rotation_degrees", "shadow_enabled", "light_cull_mask"]:
 		out["sun." + k] = world.sun.get(k)
 	out["fov"] = world.cam.fov
 	out["far"] = world.cam.far
+	out["near"] = world.cam.near
 	return out
 
 
@@ -84,6 +91,7 @@ static func restore_world(world, saved: Dictionary) -> void:
 			world.sun.set(k.substr(4), saved[k])
 	world.cam.fov = saved.get("fov", 50.0)
 	world.cam.far = saved.get("far", 2000.0)
+	world.cam.near = saved.get("near", 0.05)
 
 
 # ===================================================================================== HELPERS

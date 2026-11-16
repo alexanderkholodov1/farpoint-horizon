@@ -10,6 +10,7 @@ extends "res://scripts/screens/screen.gd"
 ## orbit 32 minutes shorter. Rules: scripts/missions/dart/approach.gd; data: data/missions/dart.json. The world is in
 ## km: Dimorphos at the origin, DART coming down the +z axis.
 
+const Progress := preload("res://scripts/story/campaign_progress.gd")
 const Approach := preload("res://scripts/missions/dart/approach.gd")
 const Sets := preload("res://scripts/story/sets.gd")
 const Space := preload("res://scripts/world/space_builder.gd")
@@ -669,6 +670,7 @@ func _show_result() -> void:
 	top.add_child(v)
 	v.add_child(Kit.caps(tr("Mission 5 · done")))
 	var stars := A.stars_for(total)
+	Progress.earn("dart", stars)
 	var sh := Kit.hbox(Kit.PAD)
 	v.add_child(sh)
 	sh.add_child(Kit.lbl("★".repeat(stars) + "☆".repeat(3 - stars), Kit.T_CLOCK, Kit.C_GOLD, Kit.FONT_T))

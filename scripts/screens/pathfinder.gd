@@ -9,6 +9,7 @@ extends "res://scripts/screens/screen.gd"
 ## by the player (off the edge: lost). Climax: the first wheel on Mars, its tracks, then NASA's own pictures.
 ## Rules of the descent: scripts/missions/pathfinder/landing.gd; data: data/missions/pathfinder.json.
 
+const Progress := preload("res://scripts/story/campaign_progress.gd")
 const Landing := preload("res://scripts/missions/pathfinder/landing.gd")
 const Sets := preload("res://scripts/story/sets.gd")
 const CuyActor := preload("res://scripts/story/cuy_actor.gd")
@@ -620,6 +621,7 @@ func _show_photo() -> void:
 	top.add_child(side)
 	side.add_child(Kit.caps(tr("Mission 3 · done")))
 	var stars := L.stars(rocks_hit)
+	Progress.earn("pathfinder", stars)
 	side.add_child(Kit.lbl("★".repeat(stars) + "☆".repeat(3 - stars), Kit.T_CLOCK, Kit.C_GOLD, Kit.FONT_T))
 	side.add_child(Kit.lbl(tr("Impact: %d m/s (the real one: 18) · Bounces: %d · Rocks hit: %d") % [int(round(L.impact)), bounce, rocks_hit], Kit.T_SMALL + 1, Kit.C_DIM, Kit.FONT_R, true))
 	side.add_child(Kit.rule())

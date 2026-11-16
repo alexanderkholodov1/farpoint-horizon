@@ -10,6 +10,7 @@ extends "res://scripts/screens/screen.gd"
 ## Space weather (issue #90): when a storm on NOAA's scales reaches the craft [S-noaa-scales], time stops and an alert
 ## card asks what to do (safe mode or keep working, each with its real cost and its chance of damage); the months from
 ## the storm on are simulated again with the answer (mission.simulate is the same for the same seed and choices).
+## Ground control's games of the operation (issue #63, scripts/minigames/desk.gd) hold the time-lapse while open.
 ## The time panel says in words how fast time runs (the rule of AGENTS.md: real time, said on screen). At the end (or
 ## when the craft is lost) it fades to the report.
 
@@ -21,6 +22,7 @@ const MONTH_REAL_S := 1.2           ## Real seconds one month takes at the slowe
 const LUNAR_DAY_S := 29.53 * 86400.0   ## The Sun circles the pole's horizon once a lunar day.
 const SPEEDS := [1.0, 3.0, 10.0]
 const BLUR_LAPS := 0.5              ## Laps a second above which an orbit is drawn as a ring instead of a moving craft.
+const MAX_ASKS := 1                 ## The player sets a storm rule once; every later storm follows it (#99).
 
 var months_total := 0
 var base := 1.0                     ## Months per MONTH_REAL_S at ×1 (a long mission plays a little faster).
@@ -221,13 +223,21 @@ func process(delta: float) -> void:
 	var sim: Dictionary = GameState.last_sim
 	if sim.is_empty() or leaving or is_instance_valid(alert):
 		return
-	month_f += delta * speed / MONTH_REAL_S
+	var desk = main.get_node_or_null("GroundDesk")
+	if desk and desk.busy:   # ground control has a game open (#63): the months wait for it
+		return
+	# a slow frame (the scene loading, a hitch) never skips months: what happens in them, and ground control's games
+	# (#63), get their turn
+	month_f += minf(delta, 0.1) * speed / MONTH_REAL_S
 	var target := int(floor(month_f))
 	var months: int = sim.months
 	var events: Array = sim.events
 	while shown_month < min(target, months):
 		var st := _storm_at(sim, shown_month + 1)
-		if not st.is_empty() and not choices.has(st.month) and month_f < 9000.0:
+		if not st.is_empty() and not choices.has(st.month):
+			if choices.size() >= MAX_ASKS or month_f >= 9000.0:
+				_standing_rule(st)   # no card: the flight rule the player set, and the months go on
+				return
 			month_f = float(st.month)
 			_ask(st)
 			return
@@ -266,38 +276,19 @@ func _storm_at(sim: Dictionary, m: int) -> Dictionary:
 ## The alert card: what is coming, what it does to this craft, how rare it is, and the two answers with their cost.
 func _ask(st: Dictionary) -> void:
 	alert_month = st.month
-	var v := Kit.overlay(self, tr("Space weather alert"), 780.0, 470.0, func(): _answer("safe"))
+	var v := Kit.overlay(self, tr("A storm from the Sun!"), 720.0, 430.0, func(): _answer("safe"))
 	alert = v.get_parent().get_parent()
-	var O: Dictionary = GameData.ORBITS[mission.orbit]
-	var low: bool = float(O.drag_life) < 900.0
-	var beyond: bool = mission.orbit == "lunar" or mission.orbit == "l2"
-	v.add_child(Kit.lbl(tr("Forecast for month %d · %s") % [st.month, st.name], Kit.T_LEAD, Kit.C_WARN, Kit.FONT_B, true))
-	var what: String
-	var craft: String
-	if st.kind == "G":
-		what = tr("A cloud of solar gas thrown out by the Sun (a coronal mass ejection) is on its way to the Earth. The fastest arrive in 15 to 18 hours, slower ones take several days, so NOAA's forecasters give a warning.")
-		craft = tr("For your craft: electric charge builds up on its surface and it can lose its orientation.")
-		if st.drag:
-			craft += " " + tr("In a low orbit the heated upper air also drags it down.")
-	else:
-		what = tr("An eruption on the Sun is sending out protons so fast they cross to the Earth in tens of minutes. A radiation storm lasts from hours to days.")
-		craft = tr("For your craft: protons can flip bits in its memory, add noise to its images and wear its solar panels.")
-		if beyond:
-			craft += " " + tr("Out here the Earth's magnetic field does not shield it.")
-		elif low:
-			craft += " " + tr("In a low orbit the Earth's magnetic field shields it from most of them.")
+	v.add_child(Kit.lbl(tr("Choose your storm rule"), Kit.T_LEAD, Kit.C_WARN, Kit.FONT_B, true))
+	v.add_child(Kit.lbl(tr("Now and then the Sun throws out storms of fast particles that can damage a spacecraft. Choose once what your craft does when one hits: mission control will do the same at every storm for the rest of the mission."), Kit.T_BODY, Kit.C_TEXT, Kit.FONT_R, true))
 	var often := {4: tr("About 100 storms this strong come in an 11-year solar cycle."),
-		5: tr("Only about 4 storms this strong come in an 11-year solar cycle.")} if st.kind == "G" else 		{3: tr("About 10 storms this strong come in an 11-year solar cycle."),
+		5: tr("Only about 4 storms this strong come in an 11-year solar cycle.")} if st.kind == "G" else {3: tr("About 10 storms this strong come in an 11-year solar cycle."),
 		4: tr("Only about 3 storms this strong come in an 11-year solar cycle.")}
-	v.add_child(Kit.lbl(what, Kit.T_BODY, Kit.C_TEXT, Kit.FONT_R, true))
-	v.add_child(Kit.lbl(craft, Kit.T_BODY, Kit.C_TEXT, Kit.FONT_R, true))
-	v.add_child(Kit.lbl(str(often[int(st.level)]) + " " + tr("Source: NOAA's space weather scales."), Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true))
+	v.add_child(Kit.lbl(tr("Coming now, in month %d: %s.") % [st.month, st.name] + " " + str(often[int(st.level)]) + " " + tr("Source: NOAA's space weather scales."), Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true))
 	var row := Kit.hbox(Kit.GAP * 2)
 	v.add_child(row)
-	var cost := tr("You lose half of this month's data.")
-	_option(row, tr("Safe mode · 1"), tr("Instruments off until it passes.") + " " + cost, st.p_safe, Kit.C_ACCENT, func(): _answer("safe"))
-	_option(row, tr("Keep working · 2"), tr("Every observation kept."), st.p_keep, Kit.C_GOLD, func(): _answer("keep"))
-	v.add_child(Kit.lbl(tr("If you close this card, mission control follows its flight rule: safe mode."), Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true))
+	_option(row, tr("Safe mode · 1"), tr("Hide: instruments off while each storm lasts. Safer, but half of that month's data is lost."), st.p_safe, Kit.C_ACCENT, func(): _answer("safe"))
+	_option(row, tr("Keep working · 2"), tr("Keep observing: every bit of data kept, with more risk of damage."), st.p_keep, Kit.C_GOLD, func(): _answer("keep"))
+	v.add_child(Kit.lbl(tr("If you close this card, mission control picks safe mode."), Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true))
 
 
 func _option(row: HBoxContainer, title: String, text: String, p: float, col: Color, cb: Callable) -> void:
@@ -315,9 +306,26 @@ func _option(row: HBoxContainer, title: String, text: String, p: float, col: Col
 func _answer(c: String) -> void:
 	if not is_instance_valid(alert):
 		return
-	choices[alert_month] = c
 	alert.queue_free()
 	alert = null
+	_resimulate(alert_month, c)
+
+
+## A storm after the player's storm rule (#99): mission control answers it as the player last did, the log tells it
+## ("You kept the craft working...") and the months go on. Real flight teams work by such standing rules (the "flight rule" of the alert card).
+func _standing_rule(st: Dictionary) -> void:
+	var last := "safe"
+	var m := -1
+	for k in choices:
+		if int(k) > m:
+			m = int(k)
+			last = choices[k]
+	_resimulate(st.month, last)
+
+
+func _resimulate(month: int, c: String) -> void:
+	alert_month = month
+	choices[month] = c
 	var old: Dictionary = GameState.last_sim
 	var s: Dictionary = mission.simulate(int(old.get("seed", 0)), choices)
 	var evs: Array = []
