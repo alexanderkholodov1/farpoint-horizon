@@ -67,7 +67,7 @@ func _card(i: int, C: Dictionary) -> Control:
 	pc.clip_children = CanvasItem.CLIP_CHILDREN_AND_DRAW   # the picture takes the card's rounded corners
 	var v := Kit.vbox(0)
 	pc.add_child(v)
-	var h: float = 84.0 if Kit.compact else PHOTO_H
+	var h: float = 40.0 if Kit.compact else PHOTO_H   # a phone: a strip of the picture, so both rows of chapters fit
 	var path: String = C.get("picture", "")
 	if path != "" and ResourceLoader.exists(path):
 		var pic := Kit.cover(load(path), h)
@@ -100,7 +100,8 @@ func _card(i: int, C: Dictionary) -> Control:
 	var row := Kit.hbox(8)
 	t.add_child(row)
 	row.add_child(Kit.accent_btn(Kit.btn(tr("▶ Play the chapter"), func(): _play_chapter(C.id), Kit.T_SMALL + 1), Kit.C_GOLD))
-	row.add_child(Kit.btn(tr("Mission only"), func(): _play_mission(C.id), Kit.T_SMALL + 1))
+	# a phone: the shorter word, so the third column is not cut at the screen's edge
+	row.add_child(Kit.btn(tr("Mission") if Kit.compact else tr("Mission only"), func(): _play_mission(C.id), Kit.T_SMALL + 1))
 	return pc
 
 

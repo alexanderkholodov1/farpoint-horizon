@@ -12,6 +12,7 @@ extends "res://scripts/screens/screen.gd"
 ## scripts/missions/lcross/impact.gd; data: data/missions/lcross.json. The world is in km: the south pole at the
 ## origin, the map's x as x and its y as z.
 
+const TouchKeys := preload("res://scripts/ui/touch_keys.gd")
 const Progress := preload("res://scripts/story/campaign_progress.gd")
 const Impact := preload("res://scripts/missions/lcross/impact.gd")
 const Sets := preload("res://scripts/story/sets.gd")
@@ -112,6 +113,8 @@ func enter(args: Dictionary) -> void:
 	impact_at = Vector3(I.point.x, 0.0, I.point.y)
 	_say("Wayra", tr("Separation at 01:50 UT. The Centaur is ours to aim, nine hours and forty minutes before it hits."))
 	_show_brief()
+	_phone_layout()
+	TouchKeys.attach(self)
 
 
 func exit() -> void:
@@ -1218,6 +1221,8 @@ func process(delta: float) -> void:
 	(data_bar as DataBar).value = _data()
 	(data_bar as DataBar).need = float(I.D.stages.need)
 	map_panel.visible = phase == "aim" or phase == "brief"
+	if Kit.compact:
+		clock_lbl.get_parent().get_parent().visible = not map_panel.visible
 	hint_panel.visible = hint.text != ""
 	shout_panel.visible = big.text != ""
 	big_sub.visible = big_sub.text != ""
@@ -1408,3 +1413,51 @@ class Tags extends Control:
 				draw_circle(p, 4.5, Color(1.0, 0.95, 0.8))
 			draw_arc(p, 9.0, 0, TAU, 16, it[2], 2.0)
 			draw_string(Kit.FONT_B, p + Vector2(14, 5), it[1], HORIZONTAL_ALIGNMENT_LEFT, -1, Kit.T_SMALL, it[2])
+
+
+## The buttons a phone needs now (scripts/ui/touch_keys.gd): only what this stage asks for.
+func touch_keys() -> Array:
+	var pad := [["◀", KEY_A, "left"], ["▲", KEY_W, "left"], ["▼", KEY_S, "left"], ["▶", KEY_D, "left"]]
+	match phase:
+		"aim":
+			return pad + [[tr("LET IT GO"), KEY_ENTER, "right"]]
+		"fall":
+			if arm_i >= 0 and armed[arm_i] == "":
+				return [[tr("ON: %d") % (arm_i + 1), KEY_1 + arm_i, "right"]]
+		"flash":
+			return [[tr("PEAK!"), KEY_SPACE, "right"]]
+		"four":
+			return pad + [[tr("CATCH"), KEY_SPACE, "right"]]
+		"dive":
+			return pad
+	return []
+
+
+## A phone in landscape (Kit.compact): fewer panels and nothing over anything. The stage list goes (the step is in the
+## title and the call to act), the radio keeps one short line at the top right, the line of what to do sits in the
+## middle above the touch buttons (scripts/ui/touch_keys.gd), and the big call to act just above it.
+func _phone_layout() -> void:
+	if not Kit.compact:
+		return
+	if not stage_rows.is_empty():
+		(stage_rows[0] as Control).get_parent().get_parent().visible = false
+	var radio_card: Control = radio.get_parent().get_parent()
+	Kit.place(radio_card, 1, 0, 1, 0, -Kit.MARGIN - 330, Kit.MARGIN, -Kit.MARGIN, Kit.MARGIN + 50)
+	radio.custom_minimum_size.x = 300
+	radio.add_theme_font_size_override("font_size", Kit.T_BODY)
+	Kit.place(hint_panel, 0.5, 1, 0.5, 1, -250, -150, 250, -96)
+	hint.add_theme_font_size_override("font_size", Kit.T_BODY)
+	Kit.place(now_panel, 0.5, 1, 0.5, 1, -10, -210, 10, -160)
+	now_lbl.add_theme_font_size_override("font_size", Kit.T_ACTION + 2)
+	# the map of the south pole, smaller, clear of the radio and the buttons
+	# while aiming the map takes the top middle; the clock steps aside (it shows only the separation's time then)
+	Kit.place(map_panel, 0.5, 0, 0.5, 0, -160, 8, 160, 330)
+	map_view.custom_minimum_size = Vector2(176, 176)
+	aim_info.add_theme_font_size_override("font_size", Kit.T_SMALL)
+	for c in map_view.get_parent().get_children():
+		if c is Label:
+			(c as Label).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			(c as Label).custom_minimum_size.x = 290
+			(c as Label).add_theme_font_size_override("font_size", Kit.T_SMALL - 1)
+	Kit.place(side_panel, 1, 1, 1, 1, -Kit.MARGIN - 300, -Kit.MARGIN - 230, -Kit.MARGIN, -Kit.MARGIN - 96)
+	spectrum.custom_minimum_size = Vector2(280, 60)

@@ -10,6 +10,7 @@ extends "res://scripts/screens/screen.gd"
 ## Rules: scripts/missions/sts61/spacewalks.gd; data: data/missions/sts61.json. Inside the story it is reached from
 ## the "Your turn" card (args {"campaign": true, "then": [scene refs], "back": id}) and the outro follows.
 
+const TouchKeys := preload("res://scripts/ui/touch_keys.gd")
 const Progress := preload("res://scripts/story/campaign_progress.gd")
 const Spacewalks := preload("res://scripts/missions/sts61/spacewalks.gd")
 const Sets := preload("res://scripts/story/sets.gd")
@@ -119,6 +120,7 @@ func enter(args: Dictionary) -> void:
 	_start_walk()
 	cam_pos = _cam_goal()[0]
 	cam_look = _cam_goal()[1]
+	TouchKeys.attach(self)
 
 
 func exit() -> void:
@@ -898,3 +900,10 @@ class PartIcon extends Control:
 					draw_line(c + p + Vector2(0, -5), c + p + Vector2(0, 5), Color(1, 1, 0.8), 2.0)
 			_:
 				draw_rect(Rect2(c + Vector2(-24, -24), Vector2(48, 48)), metal)
+
+
+## The buttons a phone needs now (scripts/ui/touch_keys.gd): the parts are tapped; the work needs its keys.
+func touch_keys() -> Array:
+	if phase == "walks" and W.picked != "":
+		return [["◀", KEY_A, "left"], ["▶", KEY_D, "left"], ["▼", KEY_S, "left"], [tr("WORK"), KEY_SPACE, "right"]]
+	return []

@@ -9,6 +9,7 @@ extends "res://scripts/screens/screen.gd"
 ## by the player (off the edge: lost). Climax: the first wheel on Mars, its tracks, then NASA's own pictures.
 ## Rules of the descent: scripts/missions/pathfinder/landing.gd; data: data/missions/pathfinder.json.
 
+const TouchKeys := preload("res://scripts/ui/touch_keys.gd")
 const Progress := preload("res://scripts/story/campaign_progress.gd")
 const Landing := preload("res://scripts/missions/pathfinder/landing.gd")
 const Sets := preload("res://scripts/story/sets.gd")
@@ -98,6 +99,8 @@ func enter(args: Dictionary) -> void:
 	cam_look = g[1]
 	houston.text = tr("Radar has the ground: 1.6 km. Steady the lander, then the rockets, then the cut.")
 	_show_brief()
+	_phone_layout()
+	TouchKeys.attach(self)
 
 
 func exit() -> void:
@@ -685,7 +688,7 @@ func process(delta: float) -> void:
 				phase = "done"
 				_show_photo()
 	ladder.visible = phase == "descent" or phase == "ramp" or phase == "brief"
-	steps_box.get_parent().visible = phase == "descent" or phase == "brief"
+	steps_box.get_parent().visible = (phase == "descent" or phase == "brief") and not Kit.compact
 	hint_panel.visible = hint.text != ""
 	shout_panel.visible = big.text != ""
 	big_sub.visible = big_sub.text != ""
@@ -780,3 +783,36 @@ class Ladder extends Control:
 		draw_string(Kit.FONT_B, Vector2(size.x - 100, size.y - 54), TranslationServer.translate("Swing"), HORIZONTAL_ALIGNMENT_LEFT, -1, Kit.T_SMALL, Kit.C_DIM)
 		var a: float = L.swing
 		draw_line(sc - Vector2(0, 26), sc - Vector2(0, 26) + Vector2(sin(a), cos(a)) * 26.0, Kit.C_BAD if absf(a) > 0.17 else Kit.C_OK, 4.0)
+
+
+## The buttons a phone needs now (scripts/ui/touch_keys.gd): only what this moment of the landing asks for.
+func touch_keys() -> Array:
+	match phase:
+		"descent":
+			var k := [["◀", KEY_A, "left"], ["▶", KEY_D, "left"]]
+			if not L.fired:
+				k.append([tr("ROCKETS"), KEY_SPACE, "right"])
+			elif not L.released:
+				k.append([tr("CUT"), KEY_C, "right"])
+			return k
+		"bounce":
+			return [["◀", KEY_A, "left"], ["▶", KEY_D, "left"]]
+		"ramp":
+			return [["◀", KEY_A, "left"], ["▶", KEY_D, "left"], [tr("ROLL ▲"), KEY_W, "right"]]
+	return []
+
+
+## A phone in landscape (Kit.compact): the height ladder shorter and clear of the title and the buttons, the steps
+## list gone (the call to act says the step), the line of what to do in the middle above the touch buttons.
+func _phone_layout() -> void:
+	if not Kit.compact:
+		return
+	Kit.place(ladder, 0, 0.5, 0, 0.5, Kit.MARGIN, -150, Kit.MARGIN + 150, 120)
+	steps_box.get_parent().visible = false
+	var radio_card: Control = houston.get_parent().get_parent()
+	Kit.place(radio_card, 1, 0, 1, 0, -Kit.MARGIN - 330, Kit.MARGIN, -Kit.MARGIN, Kit.MARGIN + 50)
+	houston.custom_minimum_size.x = 300
+	houston.add_theme_font_size_override("font_size", Kit.T_BODY)
+	Kit.place(hint_panel, 0.5, 1, 0.5, 1, -250, -150, 250, -96)
+	hint.add_theme_font_size_override("font_size", Kit.T_BODY)
+	Kit.place(now_lbl, 0, 1, 1, 1, 0, -215, 0, -160)
