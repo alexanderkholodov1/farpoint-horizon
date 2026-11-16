@@ -1,16 +1,7 @@
 [
  {
-  "file": "data/nasa/horizons_planets.json",
-  "mission": "grand_tour",
-  "source_id": "S-horizons",
-  "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='199'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='ELEMENTS'&CENTER='500@10'&START_TIME='2026-11-15'&STOP_TIME='2026-11-16'&STEP_SIZE='1d'&REF_SYSTEM='ICRF'&REF_PLANE='ECLIPTIC'&OUT_UNITS='KM-S'&CSV_FORMAT='YES'; https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='299'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='ELEMENTS'&CENTER='500@10'&START_TIME='2026-11-15'&STOP_TIME='2026-11-16'&STEP_SIZE='1d'&REF_SYSTEM='ICRF'&REF_PLANE='ECLIPTIC'&OUT_UNITS='KM-S'&CSV_FORMAT='YES'; https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='399'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='ELEMENTS'&CENTER='500@10'&START_TIME='2026-11-15'&STOP_TIME='2026-11-16'&STEP_SIZE='1d'&REF_SYSTEM='ICRF'&REF_PLANE='ECLIPTIC'&OUT_UNITS='KM-S'&CSV_FORMAT='YES'; https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='499'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='ELEMENTS'&CENTER='500@10'&START_TIME='2026-11-15'&STOP_TIME='2026-11-16'&STEP_SIZE='1d'&REF_SYSTEM='ICRF'&REF_PLANE='ECLIPTIC'&OUT_UNITS='KM-S'&CSV_FORMAT='YES'; https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='599'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='ELEMENTS'&CENTER='500@10'&START_TIME='2026-11-15'&STOP_TIME='2026-11-16'&STEP_SIZE='1d'&REF_SYSTEM='ICRF'&REF_PLANE='ECLIPTIC'&OUT_UNITS='KM-S'&CSV_FORMAT='YES'; https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='699'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='ELEMENTS'&CENTER='500@10'&START_TIME='2026-11-15'&STOP_TIME='2026-11-16'&STEP_SIZE='1d'&REF_SYSTEM='ICRF'&REF_PLANE='ECLIPTIC'&OUT_UNITS='KM-S'&CSV_FORMAT='YES'; https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='799'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='ELEMENTS'&CENTER='500@10'&START_TIME='2026-11-15'&STOP_TIME='2026-11-16'&STEP_SIZE='1d'&REF_SYSTEM='ICRF'&REF_PLANE='ECLIPTIC'&OUT_UNITS='KM-S'&CSV_FORMAT='YES'; https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='899'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='ELEMENTS'&CENTER='500@10'&START_TIME='2026-11-15'&STOP_TIME='2026-11-16'&STEP_SIZE='1d'&REF_SYSTEM='ICRF'&REF_PLANE='ECLIPTIC'&OUT_UNITS='KM-S'&CSV_FORMAT='YES'",
-  "date_checked": "2026-11-14",
-  "processing": "CSV rows parsed to JSON",
-  "bytes": 5830
- },
- {
   "file": "data/nasa/horizons_moon.json",
-  "mission": "grand_tour",
+  "mission": "moon_south_pole",
   "source_id": "S-horizons",
   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='301'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='VECTORS'&CENTER='500@399'&START_TIME='2026-11-15'&STOP_TIME='2026-12-15'&STEP_SIZE='1d'&REF_SYSTEM='ICRF'&REF_PLANE='ECLIPTIC'&OUT_UNITS='KM-S'&CSV_FORMAT='YES'",
   "date_checked": "2026-11-14",
@@ -108,35 +99,8 @@
   "bytes": 228528
  },
  {
-  "file": "assets/photos/grand_tour/jupiter_voyager1_1979.jpg",
-  "mission": "grand_tour",
-  "source_id": "S-nasa-images",
-  "query": "https://images-assets.nasa.gov/image/PIA00022/PIA00022~large.jpg",
-  "date_checked": "2026-11-14",
-  "processing": "resized to at most 1024 px; Jupiter's Great Red Spot, Voyager 1, March 1979; library record PIA00022, credit NASA/JPL",
-  "bytes": 69786
- },
- {
-  "file": "assets/photos/grand_tour/saturn_voyager1_1980.jpg",
-  "mission": "grand_tour",
-  "source_id": "S-nasa-images",
-  "query": "https://images-assets.nasa.gov/image/PIA01374/PIA01374~orig.jpg",
-  "date_checked": "2026-11-14",
-  "processing": "resized to at most 1024 px; Saturn's limb and ring shadow, Voyager 1, 9 Nov 1980; library record PIA01374, credit NASA/JPL",
-  "bytes": 30420
- },
- {
-  "file": "assets/photos/grand_tour/uranus_voyager2_1986.jpg",
-  "mission": "grand_tour",
-  "source_id": "S-nasa-images",
-  "query": "https://images-assets.nasa.gov/image/PIA18182/PIA18182~medium.jpg",
-  "date_checked": "2026-11-14",
-  "processing": "resized to at most 1024 px; Uranus, Voyager 2, 1986; library record PIA18182, credit NASA/JPL-Caltech",
-  "bytes": 38388
- },
- {
-  "file": "assets/photos/grand_tour/neptune_voyager2_1989.jpg",
-  "mission": "grand_tour",
+  "file": "assets/photos/telescope/neptune_voyager2_1989.jpg",
+  "mission": "telescopio",
   "source_id": "S-nasa-images",
   "query": "https://images-assets.nasa.gov/image/PIA00049/PIA00049~orig.jpg",
   "date_checked": "2026-11-14",
