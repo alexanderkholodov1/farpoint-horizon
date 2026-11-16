@@ -95,8 +95,8 @@ func _initialize():
 			ch[next.month] = "keep" if asked_months.size() % 2 == 0 else "safe"
 			sim = mm.simulate(500 + i, ch)
 		most = maxi(most, asked_months.size())
-	print("most storms in one 15-year mission: ", most, " (the player answers at most ", Op.MAX_ASKS, ")")
-	if Op.MAX_ASKS > 3:
+	print("most storms in one 15-year mission: ", most, " (the player is asked ", Op.MAX_ASKS, ")")
+	if Op.MAX_ASKS != 1:
 		fails += 1
 	if dmg.safe > dmg.keep:
 		fails += 1

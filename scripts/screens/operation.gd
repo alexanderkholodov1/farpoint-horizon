@@ -21,8 +21,8 @@ const MONTH_S := 30.44 * 86400.0    ## A calendar month in seconds (the mission 
 const MONTH_REAL_S := 1.2           ## Real seconds one month takes at the slowest speed (slow enough to read the log).
 const LUNAR_DAY_S := 29.53 * 86400.0   ## The Sun circles the pole's horizon once a lunar day.
 const SPEEDS := [1.0, 3.0, 10.0]
-const BLUR_LAPS := 0.5
-const MAX_ASKS := 3                 ## Space weather alerts the player answers; after that mission control follows the last answer (#99).              ## Laps a second above which an orbit is drawn as a ring instead of a moving craft.
+const BLUR_LAPS := 0.5              ## Laps a second above which an orbit is drawn as a ring instead of a moving craft.
+const MAX_ASKS := 1                 ## The player sets a storm rule once; every later storm follows it (#99).
 
 var months_total := 0
 var base := 1.0                     ## Months per MONTH_REAL_S at ×1 (a long mission plays a little faster).
@@ -276,44 +276,19 @@ func _storm_at(sim: Dictionary, m: int) -> Dictionary:
 ## The alert card: what is coming, what it does to this craft, how rare it is, and the two answers with their cost.
 func _ask(st: Dictionary) -> void:
 	alert_month = st.month
-	var v := Kit.overlay(self, tr("Space weather alert"), 780.0, 470.0, func(): _answer("safe"))
+	var v := Kit.overlay(self, tr("A storm from the Sun!"), 720.0, 430.0, func(): _answer("safe"))
 	alert = v.get_parent().get_parent()
-	var O: Dictionary = GameData.ORBITS[mission.orbit]
-	var low: bool = float(O.drag_life) < 900.0
-	var beyond: bool = mission.orbit == "lunar" or mission.orbit == "l2"
-	v.add_child(Kit.lbl(tr("Forecast for month %d · %s") % [st.month, st.name], Kit.T_LEAD, Kit.C_WARN, Kit.FONT_B, true))
-	var what: String
-	var craft: String
-	if st.kind == "G":
-		what = tr("A cloud of solar gas thrown out by the Sun (a coronal mass ejection) is on its way to the Earth. The fastest arrive in 15 to 18 hours, slower ones take several days, so NOAA's forecasters give a warning.")
-		craft = tr("For your craft: electric charge builds up on its surface and it can lose its orientation.")
-		if st.drag:
-			craft += " " + tr("In a low orbit the heated upper air also drags it down.")
-	else:
-		what = tr("An eruption on the Sun is sending out protons so fast they cross to the Earth in tens of minutes. A radiation storm lasts from hours to days.")
-		craft = tr("For your craft: protons can flip bits in its memory, add noise to its images and wear its solar panels.")
-		if beyond:
-			craft += " " + tr("Out here the Earth's magnetic field does not shield it.")
-		elif low:
-			craft += " " + tr("In a low orbit the Earth's magnetic field shields it from most of them.")
+	v.add_child(Kit.lbl(tr("Choose your storm rule"), Kit.T_LEAD, Kit.C_WARN, Kit.FONT_B, true))
+	v.add_child(Kit.lbl(tr("Now and then the Sun throws out storms of fast particles that can damage a spacecraft. Choose once what your craft does when one hits: mission control will do the same at every storm for the rest of the mission."), Kit.T_BODY, Kit.C_TEXT, Kit.FONT_R, true))
 	var often := {4: tr("About 100 storms this strong come in an 11-year solar cycle."),
-		5: tr("Only about 4 storms this strong come in an 11-year solar cycle.")} if st.kind == "G" else 		{3: tr("About 10 storms this strong come in an 11-year solar cycle."),
+		5: tr("Only about 4 storms this strong come in an 11-year solar cycle.")} if st.kind == "G" else {3: tr("About 10 storms this strong come in an 11-year solar cycle."),
 		4: tr("Only about 3 storms this strong come in an 11-year solar cycle.")}
-	v.add_child(Kit.lbl(what, Kit.T_BODY, Kit.C_TEXT, Kit.FONT_R, true))
-	v.add_child(Kit.lbl(craft, Kit.T_BODY, Kit.C_TEXT, Kit.FONT_R, true))
-	v.add_child(Kit.lbl(str(often[int(st.level)]) + " " + tr("Source: NOAA's space weather scales."), Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true))
+	v.add_child(Kit.lbl(tr("Coming now, in month %d: %s.") % [st.month, st.name] + " " + str(often[int(st.level)]) + " " + tr("Source: NOAA's space weather scales."), Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true))
 	var row := Kit.hbox(Kit.GAP * 2)
 	v.add_child(row)
-	var cost := tr("You lose half of this month's data.")
-	_option(row, tr("Safe mode · 1"), tr("Instruments off until it passes.") + " " + cost, st.p_safe, Kit.C_ACCENT, func(): _answer("safe"))
-	_option(row, tr("Keep working · 2"), tr("Every observation kept."), st.p_keep, Kit.C_GOLD, func(): _answer("keep"))
-	var left := MAX_ASKS - choices.size() - 1
-	var rule := tr("If you close this card, mission control follows its flight rule: safe mode.")
-	if left > 0:
-		rule += " " + tr("You decide the next %d storms too; after that mission control repeats your last answer.") % left
-	else:
-		rule += " " + tr("This is your last call: later storms get the same answer, without stopping the mission.")
-	v.add_child(Kit.lbl(rule, Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true))
+	_option(row, tr("Safe mode · 1"), tr("Hide: instruments off while each storm lasts. Safer, but half of that month's data is lost."), st.p_safe, Kit.C_ACCENT, func(): _answer("safe"))
+	_option(row, tr("Keep working · 2"), tr("Keep observing: every bit of data kept, with more risk of damage."), st.p_keep, Kit.C_GOLD, func(): _answer("keep"))
+	v.add_child(Kit.lbl(tr("If you close this card, mission control picks safe mode."), Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true))
 
 
 func _option(row: HBoxContainer, title: String, text: String, p: float, col: Color, cb: Callable) -> void:
@@ -336,7 +311,7 @@ func _answer(c: String) -> void:
 	_resimulate(alert_month, c)
 
 
-## A storm after the player's last call (#99): mission control answers it as the player last did, the log tells it
+## A storm after the player's storm rule (#99): mission control answers it as the player last did, the log tells it
 ## ("You kept the craft working...") and the months go on. Real flight teams work by such standing rules (the "flight rule" of the alert card).
 func _standing_rule(st: Dictionary) -> void:
 	var last := "safe"
