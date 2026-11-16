@@ -102,7 +102,7 @@ Each entry: what happened, how people noticed, how it was solved, how long, sour
 - **What happened.** On June 25, 1998 contact was lost after a gyro calibration and momentum-management sequence went
   wrong; an ESA/NASA board blamed a "calamitous sequence" of operational errors, not the spacecraft.
 - **How it was noticed.** The spacecraft stopped answering; ground lost telemetry.
-- **How it was solved.** A radar echo and a faint carrier were hunted for; on August 3 a carrier was detected, six weeks
+- **How it was solved.** A radar echo and a faint carrier were hunted for; a carrier was detected (the date given here, 3 August, is not on the NASA page cited in docs/sources.md; six weeks
   after the loss. Then thaw (the frozen hydrazine lines), power, attitude recovery; on September 16 the spacecraft
   faced the Sun again. Instruments recovered Oct 5 to Oct 24, 1998. One gyro later failed, and new gyroless software
   made SOHO the first 3-axis stabilised spacecraft to operate without a gyroscope (by Feb 1999).
