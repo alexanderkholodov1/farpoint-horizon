@@ -28,7 +28,7 @@ Farpoint HORIZON is a 3D space game that lets anyone, alone or with up to three 
 ## Project Demonstration  ("Link to Project Demo": 7 slides at most, or a video of 30 s at most)
 
 ```
-https://github.com/alexanderkholodov1/farpoint-horizon/blob/2303ea4ba2638453eb2f94dd0c1ae83f3b9ac748/spaceapps/global-submission/deck/EN_17_SK-Horizons_v2.pdf
+https://github.com/alexanderkholodov1/farpoint-horizon/blob/v0.3.0/spaceapps/global-submission/deck/EN_17_SK-Horizons_v2.pdf
 ```
 
 Use the **7-slide English deck**, not the 30-second video. The demo is how the judges understand the problem, the
@@ -52,11 +52,12 @@ Not allowed to remain on it: any `TODO`, a placeholder link, NASA logos, images 
 ## Project  ("Link to Final Project": a public website, app or repository)
 
 ```
-https://farpoint-horizon.web.app
+https://farpoint-horizon--pr93-v0-3-0-a59yjofm.web.app
 ```
 
-(The live game. The repository, https://github.com/alexanderkholodov1/farpoint-horizon, goes in the Details and is
-linked from the game's credits. If the judges should see the code first, put the repository here instead.)
+(The v0.3.0 build: the story of the six NASA missions and the cuyes, the version this form describes. The released build at
+https://farpoint-horizon.web.app has the earlier missions only. The preview link expires after 7 days; the team decides
+when v0.3.0 is merged into main and deployed at the released address. The repository, https://github.com/alexanderkholodov1/farpoint-horizon/tree/v0.3.0, goes in the Details.)
 
 ---
 
@@ -103,7 +104,7 @@ Godot Engine (free and open source), Blender for the 3D models, Python for prepa
 CREATIVITY AND WHAT WE CONSIDERED
 We chose real physics over scripted animation so that what players learn is true, and a story told only from NASA's own pages. The cuyes add humor and an Andean identity without changing history. We designed for modest school computers, for players who have never studied space, for two languages, and for the challenge's rules: no NASA logos or insignia, and every use of AI disclosed.
 
-Repository: https://github.com/alexanderkholodov1/farpoint-horizon
+Repository: https://github.com/alexanderkholodov1/farpoint-horizon/tree/v0.3.0
 Team SK-Horizons, Quito, Ecuador: Alexander Kholodov and Sebastian Amaguaya.
 ```
 
@@ -115,16 +116,17 @@ Tick every option that matches. The form's exact labels are not in our copy; pic
 
 - **Code:** yes (Claude Code, Antigravity, Cursor).
 - **Text / documentation:** yes (Claude Code: documents and research notes).
-- **Audio / music:** yes (the game's music was generated with Claude; the files' metadata and the in-game credits
-  say so).
-- **3D models**, or "Images" if there is no 3D option: yes, as drafts (Meshy and TRELLIS gave references for the
-  cuy crew; Rumi's body is a TRELLIS mesh). If the options include it, say it is a 3D model and not an image.
+- **Audio / music:** yes: the music is composed by our own script (`tools/content/audio/compose_music.py`, numpy and
+  ffmpeg, no samples), written with Claude's help; the audio files' metadata and the in-game credits say so.
+- **3D models**, or "Images" if there is no 3D option: yes. Meshy (AI 3D) made reference models the cuy crew was measured
+  on; TRELLIS (AI 3D) made Rumi's body from a screenshot of them. The other models are modelled in Blender by our scripts.
+  If the options include it, say it is a 3D model and not an image.
 - **Images and video:** no AI-generated images or videos are used.
 
 If the form has a text box for details, paste:
 
 ```
-Code and documents: Claude Code (Anthropic, Claude Opus 5.5 and Sonnet), Antigravity and Cursor (Composer 2.5). Music: generated with Claude (Anthropic), declared in the audio files' metadata and the in-game credits. 3D: Meshy and TRELLIS (Microsoft, via Hugging Face) drafts as references for the four cuy crew models; Rumi's body is a TRELLIS mesh, the rest modelled in Blender by our scripts. No AI-generated images or videos; no NASA logos, insignia or mission identifiers anywhere. The idea, design, story and balance are the team's. Full disclosure in the README.
+Code and documents: Claude Code (Anthropic, Claude Opus 5.5 and Sonnet), Antigravity and Cursor (Composer 2.5). Music: composed by our own script (numpy, ffmpeg), written with Claude's help; declared in the audio files' metadata and the in-game credits. 3D: Meshy (AI 3D) made reference models for the four cuy crew, and TRELLIS (AI 3D) made Rumi's body from a screenshot of them; the other models are modelled in Blender by our scripts. The Meshy renders kept in the repository are not in the game or the deck. No AI-generated images or videos in the game or the deck; no NASA logos, insignia or mission identifiers anywhere. The idea, design, story and balance are the team's. Full disclosure in the README.
 ```
 
 ---
@@ -132,9 +134,10 @@ Code and documents: Claude Code (Anthropic, Claude Opus 5.5 and Sonnet), Antigra
 ## NASA Data  (one row per resource: Link Text | Link Url)
 
 Every row is one link of `docs/sources.md`, the bibliography of what the game really uses, written by
-`python tools/content/submission_links.py`. "Opens" is the HTTP status it got; each page was also read for the cited
-title and numbers (the sources whose page is drawn by JavaScript were checked through NASA's APIs or by hand). Paste
-the first two columns.
+`python tools/content/submission_links.py`. "Opens" is the HTTP status that check got on 16 November 2026. 403 means the site
+blocks automated checks, and 000 means the check could not open the site (certificate not trusted on that network): open
+those rows in a browser before pasting. Each entry's numbers and dates are checked against the page it cites, and the
+bibliography says where a value is ours rather than the source's. Paste the first two columns.
 
 | Link Text | Link Url | Source | Opens |
 |---|---|---|---|
@@ -207,7 +210,7 @@ the first two columns.
 
 ## Space Agency Partner & Other Data
 
-The partner agency's data (NOAA) and every other source, image, model and tool. "000" means this computer could not
+NOAA's space weather scales (NOAA is not a space agency partner; it is listed here as other data) and every other source, image, model and tool. "000" means this computer could not
 open it (an SSL problem here, not on the site): open those rows in a browser before pasting.
 
 | Link Text | Link Url | Source | Opens |

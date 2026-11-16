@@ -219,7 +219,7 @@ set_paras(shape(s5, "Bullets"), bullets([
     ("JPL Horizons: ", "where the Moon is on launch day; the trip meets it."),
     ("GIBS, Landsat, ASTER, SRTM: ", "the Earth, the Andes, our volcanoes."),
     ("NSSDC fact sheets: ", "size, mass and gravity of every body."),
-    ("Deep Space Network: ", "ground control's three antennas."),
+    ("Deep Space Network: ", "ground control's three complexes, each with a 70 m dish."),
     ("Mission pages, Apollo Flight Journal: ", "the six chapters."),
 ], 1200, 1560, 300))
 move(shape(s5, "Bullets"), y=2.25, h=2.55)
@@ -267,9 +267,9 @@ notes(s6, "(30 s) It runs in any browser, in two languages, so a class can play 
 s7 = S[6]
 footer(s7, 7)
 set_paras(shape(s7, "Bullets"), bullets([
-    ("Made by us: ", "the game, the story, the 3D models (from our scripts) and every sound."),
-    ("Cited: ", "80+ sources in docs/sources.md and in the game's credits. No NASA logos, no AI images."),
-    ("AI, disclosed: ", "Claude Code (code, research), Antigravity and Cursor (code); Meshy and TRELLIS 3D drafts for the cuyes; music generated with Claude."),
+    ("Made by us: ", "the game, the story, the 3D models (our scripts; Rumi's body is a TRELLIS mesh) and the sounds."),
+    ("Cited: ", "every source is in docs/sources.md and in the game's credits. No NASA logos; no AI-generated images in the game or the deck."),
+    ("AI, disclosed: ", "Claude Code (code, research), Antigravity and Cursor (code); Meshy and TRELLIS 3D drafts for the cuyes; music composed by our script, written with Claude's help."),
 ], 1150, 1500, 350))
 move(shape(s7, "Bullets"), w=4.25, h=2.5)
 set_paras(shape(s7, "Card heading"), [para([run("TEAM SK-HORIZONS", 950, AMBER, True, 400)], 1235)])

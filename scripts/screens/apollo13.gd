@@ -445,17 +445,19 @@ func _win() -> void:
 	flash.color.a = 0.85
 	Kit.UiSound.play("whoosh", 0.0)
 	alarm.stop()
-	clock.text = tr(A.D.saved)
+	# one headline at a time (#97): the clock just freezes, green, on the air that was left; the big line says what
+	# happened; Houston's panel carries the why, away from the crew's faces
+	clock.text = _mmss(A.seconds_left())
 	clock.add_theme_color_override("font_color", Kit.C_OK)
 	clock.scale = Vector2.ONE
-	clock_cap.text = tr("Air left") + "  ·  " + _mmss(A.seconds_left())
+	clock_cap.text = tr(A.D.saved)
 	ring.set("active", false)
-	houston.text = tr(A.D.win)
+	houston.text = tr(A.D.win_sub)
 	_show_step()
 	msg.text = tr(A.D.win)
-	msg_sub.text = tr(A.D.win_sub)
+	msg_sub.text = ""
 	msg.visible = true
-	msg_sub.visible = true
+	msg_sub.visible = false
 	msg.pivot_offset = Vector2(msg.size.x * 0.5, 30)
 	msg.scale = Vector2(0.6, 0.6)
 	msg.create_tween().tween_property(msg, "scale", Vector2.ONE, 0.5).set_trans(Tween.TRANS_BACK)

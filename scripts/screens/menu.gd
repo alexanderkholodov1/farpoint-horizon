@@ -129,6 +129,23 @@ func _more(box: VBoxContainer) -> void:
 
 
 ## The settings, in the menu's own place: language, difficulty, appearance, sound. Each choice is kept and shown at once.
+## One setting: its name above its choices, or beside them on a phone, where the height is short (issue #93).
+func _setting_row(rows: VBoxContainer, title: String) -> Control:
+	var seg := segmented()
+	if Kit.compact:
+		var h := Kit.hbox(10)
+		var c := caps(title)
+		c.custom_minimum_size.x = 120
+		c.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		h.add_child(c)
+		h.add_child(seg)
+		rows.add_child(h)
+	else:
+		rows.add_child(caps(title))
+		rows.add_child(seg)
+	return seg
+
+
 func _settings(box: VBoxContainer) -> void:
 	var again := {"settings": true}
 	var rows := Kit.vbox(Kit.GAP)
@@ -137,40 +154,31 @@ func _settings(box: VBoxContainer) -> void:
 	box.add_child(Kit.spacer(8))
 	box.add_child(pn)
 	rows.add_child(Kit.lbl(tr("Settings"), Kit.T_STAT, Kit.C_TEXT, Kit.FONT_T))
-	rows.add_child(caps(tr("Language")))
-	var lh := segmented()
-	rows.add_child(lh)
+	var lh := _setting_row(rows, tr("Language"))
 	for code in GameData.LANGUAGES:
 		lh.add_child(Kit.choice(GameData.LANGUAGES[code], GameData.language == code, func():
 			GameData.set_language(code)
 			go("menu", again), 130))
-	rows.add_child(caps(tr("Difficulty")))
-	var dh := segmented()
-	rows.add_child(dh)
+	var dh := _setting_row(rows, tr("Difficulty"))
 	for d in ["facil", "normal", "dificil"]:
 		dh.add_child(Kit.choice(GameData.DIFFICULTY[d].name, GameState.difficulty == d, func():
 			GameState.difficulty = d
 			go("menu", again), 130))
-	rows.add_child(Kit.lbl(GameData.DIFFICULTY[GameState.difficulty].desc, Kit.T_SMALL, Kit.C_DIM))
-	rows.add_child(caps(tr("Missions")))
-	var uh := segmented()
-	rows.add_child(uh)
+	if not Kit.compact:
+		rows.add_child(Kit.lbl(GameData.DIFFICULTY[GameState.difficulty].desc, Kit.T_SMALL, Kit.C_DIM))
+	var uh := _setting_row(rows, tr("Missions"))
 	for open in [false, true]:
 		uh.add_child(Kit.choice(tr("All open") if open else tr("In order"), Progress.all_open() == open, func():
 			Progress.set_all_open(open)
 			go("menu", again), 130))
-	rows.add_child(caps(tr("Appearance")))
-	var mh := segmented()
-	rows.add_child(mh)
+	var mh := _setting_row(rows, tr("Appearance"))
 	for m in Kit.MODES:
 		mh.add_child(Kit.choice(tr("Dark") if m == "dark" else tr("Light"), Kit.mode == m, func():
 			if m != Kit.mode:
 				Kit.set_mode(m)
 				main.root_ui.theme = Kit.build_theme()
 				go("menu", again), 130))
-	rows.add_child(caps(tr("Sound")))
-	var sh := segmented()
-	rows.add_child(sh)
+	var sh := _setting_row(rows, tr("Sound"))
 	for on in [true, false]:
 		sh.add_child(Kit.choice(tr("On") if on else tr("Off"), Kit.UiSound.is_muted() != on, func():
 			Kit.UiSound.set_muted(not on)
