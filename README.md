@@ -146,7 +146,7 @@ There are no AI-generated images or videos, and no NASA logos, insignia or missi
 
 ## Team
 
-Team SK-Horizons, Quito, Ecuador: two teammates who built it side by side, as equals.
+Team SK-Horizons, Quito, Ecuador.
 
 - **Sebastian Amaguaya**: the story campaign and its cuy crew, nearly every mission and its mechanics, the 3D models, the rocket builder, the music and the look of the game. [GitHub](https://github.com/XebaxCode)
 - **Alexander Kholodov**: the first brainstorm and the plan by stages that let the work run in parallel, the flight's real physics, testing, debugging and edge cases, design polish and the order of the repository. [GitHub](https://github.com/alexanderkholodov1)

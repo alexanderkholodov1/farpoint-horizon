@@ -272,7 +272,7 @@ set_paras(shape(s7, "Bullets"), bullets([
     ("AI, disclosed: ", "Claude Code (code, research), Antigravity and Cursor (code); Meshy and TRELLIS 3D drafts for the cuyes; music generated with Claude."),
 ], 1150, 1500, 350))
 move(shape(s7, "Bullets"), w=4.25, h=2.5)
-set_paras(shape(s7, "Card heading"), [para([run("TEAM SK-HORIZONS · SIDE BY SIDE", 950, AMBER, True, 400)], 1235)])
+set_paras(shape(s7, "Card heading"), [para([run("TEAM SK-HORIZONS", 950, AMBER, True, 400)], 1235)])
 move(shape(s7, "Card"), y=4.75, w=4.25, h=1.5)
 move(shape(s7, "Card heading"), y=4.9, w=3.9)
 set_paras(shape(s7, "Bullets", 1), [
@@ -284,7 +284,7 @@ move(shape(s7, "Bullets", 1), y=5.15, w=3.9, h=1.3)
 move(shape(s7, "Title"), w=4.6)
 move(shape(s7, "Picture 14"), x=5.9, y=1.45, w=6.6, h=6.6 * 5.02 / 7.84)
 move(shape(s7, "Caption"), x=5.9, y=1.45 + 6.6 * 5.02 / 7.84 + 0.12, w=6.6)
-notes(s7, "(20 s) Everything is ours and everything is cited, with every use of AI disclosed. We are Sebastian and Alexander, SK-Horizons, and we built it side by side. Thank you.")
+notes(s7, "(20 s) Everything is ours and everything is cited, with every use of AI disclosed. We are Sebastian and Alexander, SK-Horizons. Thank you.")
 
 # ===================================================================================== ORDER: story after the solution
 lst = prs.slides._sldIdLst

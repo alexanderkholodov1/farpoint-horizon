@@ -86,7 +86,7 @@ CREATIVIDAD Y LO QUE CONSIDERAMOS
 Elegimos física real en lugar de animaciones guionadas para que lo que se aprende sea verdad, y una historia contada solo con las páginas de la propia NASA. Los cuyes aportan humor e identidad andina sin cambiar la historia. Diseñamos para computadoras escolares modestas, para quien nunca estudió el espacio, para dos idiomas y para las reglas del reto: sin logos ni insignias de la NASA, y con todo uso de IA declarado.
 
 Repositorio: https://github.com/alexanderkholodov1/farpoint-horizon
-Equipo SK-Horizons, Quito, Ecuador: Sebastian Amaguaya y Alexander Kholodov, que lo construyeron lado a lado.
+Equipo SK-Horizons, Quito, Ecuador: Sebastian Amaguaya y Alexander Kholodov.
 ```
 
 ---
