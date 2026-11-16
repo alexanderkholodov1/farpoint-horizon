@@ -41,4 +41,4 @@ at the local event in Sangolquí, and what we send to NASA. Start at `spaceapps/
 - Documents and folders: lowercase words joined by hyphens (`event-and-judging.md`). Code follows its language
   (`snake_case.gd`, `snake_case.py`). Delivered files keep the name the venue asked for (`EN_17_SK-Horizons.pdf`).
 - One fact in one place: a document links to another instead of repeating it, and what can be generated is
-  generated (`tools/content/credits.py`, `tools/content/submission_links.py`, `tools/dev/map.sh`).
+  generated (`tools/content/credits.py`, `tools/dev/map.sh`).

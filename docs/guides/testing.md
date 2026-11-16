@@ -31,5 +31,5 @@ and wrote down what is wrong.
 
 ## Sources
 
-`python tools/content/submission_links.py` opens every link of `docs/sources.md`. A page that answers is not yet a
+Open every link of `docs/sources.md`. A page that answers is not yet a
 page that says what we cite: open it and find the cited words or numbers before trusting it.

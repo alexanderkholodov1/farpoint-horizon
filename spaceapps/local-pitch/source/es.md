@@ -2,7 +2,7 @@ title: Farpoint HORIZON · presentación
 footer: Farpoint HORIZON · SK-Horizons · NASA Space Apps Challenge 2026 · Sangolquí
 <!-- Mazo en español: el del pitch en vivo (la sede lo pide en español) y la versión ES de los entregables. Debe ir
      diapositiva por diapositiva igual que en.md. Las notas son el guion hablado: 5 minutos en total.
-     Formato y reglas: spaceapps/local-pitch/source/README.md. Generar: python tools/content/deck/pitch.py -->
+     Formato y reglas: spaceapps/local-pitch/source/README.md. Generar: (script no longer in the repository) -->
 
 ---
 layout: cover

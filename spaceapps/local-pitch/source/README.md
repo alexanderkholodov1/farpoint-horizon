@@ -1,6 +1,6 @@
 # The pitch deck
 
-Seven slides in two languages, written as text and built into HTML and PDF by `python tools/content/deck/pitch.py`, so any agent
+Seven slides in two languages, written as text and built into HTML and PDF by `<deck script, removed> so any agent
 edits a line of text instead of a slide file. `en.md` is the deck for the global platform (decks must be in English);
 `es.md` is the one shown at the live pitch in Sangolquí (in Spanish) and the Spanish deliverable. Its notes are the
 spoken script, five minutes in all.
@@ -8,7 +8,7 @@ spoken script, five minutes in all.
 ## The rules it follows
 From `spaceapps/rules/local-event.md` and `spaceapps/rules/event-and-judging.md`:
 - **At most 7 slides, cover and closing included.** 8 or more costs a point locally and the global eligibility.
-  `tools/content/deck/pitch.py` fails above 7.
+  a deck script (no longer kept in the repository) fails above 7.
 - **The order the venue recommends:** cover (team, members, challenge, venue) · problem · solution · NASA data with
   visual evidence and how it is processed · architecture and the working game · impact, scale, roadmap ·
   transparency (AI and tools), credits and team roles. Each slide's notes name the rubric questions it carries.
@@ -39,10 +39,10 @@ Anything still to do is written `TODO` in the text: it shows highlighted on the 
 
 ## Build and check
 ```
-python tools/content/deck/pitch.py              # both languages -> build/deck/deck-{en,es}.{html,pdf}, notes-{en,es}.md
-python tools/content/deck/pitch.py --final      # also fails while any TODO or screenshot frame is left
-python tools/content/deck/pitch_pptx.py         # the same slides as editable PowerPoint -> build/deck/deck-{en,es}.pptx
-python tools/content/deck/pitch_art.py          # only to redraw the backgrounds in spaceapps/local-pitch/source/art
+python <deck script, removed>              # both languages -> build/deck/deck-{en,es}.{html,pdf}, notes-{en,es}.md
+python <deck script, removed> --final      # also fails while any TODO or screenshot frame is left
+python <deck script, removed>         # the same slides as editable PowerPoint -> build/deck/deck-{en,es}.pptx
+python <deck script, removed>          # only to redraw the backgrounds in spaceapps/local-pitch/source/art
 ```
 `pitch.py` needs Python 3 and Chrome or Edge (set `CHROME` to its path if it is not found); `pitch_pptx.py` needs
 `pip install python-pptx pillow`; `pitch_art.py` needs numpy, Pillow and, for the cover, ffmpeg and the game's own
@@ -57,7 +57,7 @@ last word), but they are lost on the next build: put text changes in the `.md` t
 ## The look
 The game's own (`scripts/ui/kit.gd`, `scripts/ui/horizon.gd`): deep space, the horizon arc from sunrise amber to deep
 blue, horizon-blue glass cards, the title as the game shows it. The cover is the credits film's opening, the Earth at
-sunrise from NASA Blue Marble and Black Marble [S-gibs-earth]; the other backgrounds are drawn by `tools/content/deck/pitch_art.py`
+sunrise from NASA Blue Marble and Black Marble [S-gibs-earth]; the other backgrounds are drawn by a script (no longer kept in the repository)
 (procedural, no AI images). The HTML and PDF use Inter (the game's type); the PPTX uses Segoe UI, on every Windows PC.
 
 ## When the game is complete
@@ -65,5 +65,5 @@ sunrise from NASA Blue Marble and Black Marble [S-gibs-earth]; the other backgro
    put them in an `img/` folder beside `en.md` and point the `image:` lines at them, then rebuild.
 2. Check that no `TODO` is left in the text (the build lists any it finds).
 3. Check every number on the slides against the game and `docs/sources.md` as it is then.
-4. `python tools/content/deck/pitch.py --final` and `python tools/content/deck/pitch_pptx.py`, look at both PDFs and PPTXs, upload: the English PDF to the global platform, both to the
+4. `<deck script, removed> --final` and `<deck script, removed> look at both PDFs and PPTXs, upload: the English PDF to the global platform, both to the
    venue's form.

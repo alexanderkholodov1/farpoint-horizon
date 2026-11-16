@@ -384,7 +384,7 @@
     },
     {
      "id": "S-tool-pillow",
-     "text": "Pillow, the Pillow license (HPND, https://github.com/python-pillow/Pillow/blob/main/LICENSE). Image processing in tools/content/deck/pitch_art.py, the NASA photos' cropping and the Earth and Cotopaxi textures (assets/source/planet_textures.py, assets/source/terrain_cotopaxi.py)."
+     "text": "Pillow, the Pillow license (HPND, https://github.com/python-pillow/Pillow/blob/main/LICENSE). Image processing for the decks' backgrounds, the NASA photos' cropping and the Earth and Cotopaxi textures (assets/source/planet_textures.py, assets/source/terrain_cotopaxi.py)."
     },
     {
      "id": "S-tool-ffmpeg",
@@ -392,11 +392,11 @@
     },
     {
      "id": "S-tool-pptx",
-     "text": "python-pptx, MIT License (https://github.com/scanny/python-pptx/blob/master/LICENSE). Builds the deck (tools/content/deck/build_v2.py, pitch_pptx.py)."
+     "text": "python-pptx, MIT License (https://github.com/scanny/python-pptx/blob/master/LICENSE). Built the decks (by scripts no longer kept in the repository)."
     },
     {
      "id": "S-tool-lxml",
-     "text": "lxml, BSD License (https://github.com/lxml/lxml/blob/master/LICENSE.txt). XML editing in tools/content/deck/build_v2.py."
+     "text": "lxml, BSD License (https://github.com/lxml/lxml/blob/master/LICENSE.txt). XML editing of the deck (by a script no longer kept in the repository)."
     },
     {
      "id": "S-font-inter",

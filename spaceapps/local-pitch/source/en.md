@@ -1,7 +1,7 @@
 title: Farpoint HORIZON · pitch deck
 footer: Farpoint HORIZON · SK-Horizons · NASA Space Apps Challenge 2026 · Sangolquí
 <!-- English deck: the one uploaded to the global platform (decks must be in English). Keep it slide for slide in
-     step with es.md. Format and rules: spaceapps/local-pitch/source/README.md. Build: python tools/content/deck/pitch.py -->
+     step with es.md. Format and rules: spaceapps/local-pitch/source/README.md. Build: (script no longer in the repository) -->
 
 ---
 layout: cover

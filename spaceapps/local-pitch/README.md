@@ -10,5 +10,5 @@ What we delivered at 09:00 and presented at 11:00, as it was presented.
 | `Guion_Pitch_ES_v2.pdf` | The spoken script (`Guion_Pitch_ES_v1.pdf`, its first draft) |
 
 `source/`: how the decks were first drafted (the slides as text in `en.md` and `es.md`, built by
-`tools/content/deck/pitch.py` and `pitch_pptx.py`, backgrounds in `art/`) and the project sheet's source
+scripts no longer kept in the repository, backgrounds in `art/`) and the project sheet's source
 (`ficha.html`).

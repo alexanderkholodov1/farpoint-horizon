@@ -282,14 +282,14 @@ Licences were read on the owners' pages on 2026-11-16 (the link in each entry).
   (`tools/content/audio/compose_music.py`) and the terrain and planet textures (`assets/source/planet_textures.py`,
   `assets/source/terrain_cotopaxi.py`).
 - **S-tool-pillow** Pillow, the Pillow license (HPND, https://github.com/python-pillow/Pillow/blob/main/LICENSE). Image
-  processing in `tools/content/deck/pitch_art.py`, the NASA photos' cropping and the Earth and Cotopaxi textures
+  processing for the decks' backgrounds, the NASA photos' cropping and the Earth and Cotopaxi textures
   (`assets/source/planet_textures.py`, `assets/source/terrain_cotopaxi.py`).
 - **S-tool-ffmpeg** FFmpeg, LGPL 2.1 or later (GPL parts not used; https://ffmpeg.org/legal.html). Encodes the music
   (`audio/music_horizon.ogg`) and the 30-second demo (`tools/content/video/make_trailer.py`).
-- **S-tool-pptx** python-pptx, MIT License (https://github.com/scanny/python-pptx/blob/master/LICENSE). Builds the deck
-  (`tools/content/deck/build_v2.py`, `pitch_pptx.py`).
-- **S-tool-lxml** lxml, BSD License (https://github.com/lxml/lxml/blob/master/LICENSE.txt). XML editing in
-  `tools/content/deck/build_v2.py`.
+- **S-tool-pptx** python-pptx, MIT License (https://github.com/scanny/python-pptx/blob/master/LICENSE). Built the decks
+  (by scripts no longer kept in the repository).
+- **S-tool-lxml** lxml, BSD License (https://github.com/lxml/lxml/blob/master/LICENSE.txt). XML editing of
+  the deck (by a script no longer kept in the repository).
 - **S-font-inter** Inter typeface, Rasmus Andersson, SIL Open Font License 1.1 (https://github.com/rsms/inter/blob/master/LICENSE.txt;
   project page https://rsms.me/inter/). The game's text font: `assets/fonts/Inter-Regular.otf`, `Inter-SemiBold.otf`,
   `InterDisplay-Bold.otf`.
