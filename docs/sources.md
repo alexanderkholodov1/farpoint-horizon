@@ -227,13 +227,16 @@ branches add entries at the same place (`.gitattributes`).
   and Video Library, https://images.nasa.gov/details/art001e000672 (public domain). Orion at its farthest, 268,563 miles
   from Earth. Our processing: cropped to the Moon and the Earth (the spacecraft and its markings left out). In
   `assets/photos/artemis1/`.
+- **S-dart-penultimate** NASA/Johns Hopkins APL. *DART's Penultimate View*, 2022.
+  https://www.nasa.gov/image-article/darts-penultimate-view/ (checked 2026-11-16): "the last complete image of the
+  asteroid Dimorphos, as seen by our Double Asteroid Redirection Test (DART) two seconds before impact", a 100-foot-wide
+  patch taken by DRACO; image credit NASA/Johns Hopkins APL. Downscaled to 1024 px for the web build. The picture of
+  chapter 5's card in the chapter select (issue 68).
 - **S-dart-pia25329** NASA/Johns Hopkins APL. *NASA's DART at the Didymos System*, PIA25329 (illustration, Sept. 22,
   2022), NASA Image and Video Library, https://images.nasa.gov/details/PIA25329 (checked 2026-11-15 through the
   library's API: "This illustration depicts NASA's Double Asteroid Redirection Test (DART) spacecraft prior to impact at
-  the Didymos binary asteroid system"). An illustration, said so on screen. The picture of chapter 5's card in the
-  chapter select (`assets/photos/dart/PIA25329.jpg`).
-
-## The look: Earth, Moon, the Andes and the launch site (issue 12; scripts in `assets/source/`)
+  the Didymos binary asteroid system"). An illustration. It was the picture of chapter 5's card until DART's own camera image replaced it
+  (S-dart-penultimate, issue 68).
 - **S-moon-kit** NASA Goddard Space Flight Center, Scientific Visualization Studio. *CGI Moon Kit* (2019).
   https://svs.gsfc.nasa.gov/4720. LRO LROC WAC colour map (`lroc_color_poles_4k.tif`, colour enhanced from LROC and Kaguya) and
   LOLA elevation (`ldem_16.tif`, 16 pixels per degree); the game's Moon colour and relief (`assets/textures/moon_color.jpg`, `moon_normal.jpg`, made by
