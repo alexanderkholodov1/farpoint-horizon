@@ -25,25 +25,38 @@ Farpoint HORIZON is a 3D space game that lets anyone, alone or with up to three 
 
 ---
 
-## Project Demonstration  (a public link: a video of 30 s or less, or at most 7 slides)
+## Project Demonstration  ("Link to Project Demo": 7 slides at most, or a video of 30 s at most)
 
 ```
-https://youtu.be/3xZdPJr71bg
+<public link to the 7-slide English deck PDF>
 ```
 
-(29 seconds, recorded from the game itself. Check that it is Public or Unlisted, not Private, and that it opens in a
-private window. The deck is the alternative: a public Drive or GitHub link to the 7-slide PDF.)
+Use the **7-slide English deck**, not the 30-second video. The demo is how the judges understand the problem, the
+solution, the real use of NASA data and what was built (global demo guide, `docs/challenge/Guia_Project_Demo_Global_
+NASA_Space_Apps_2026.pdf`, pages 2 and 15), and it counts toward the **Presentation** score (Judging & Awards Guide).
+Our 29-second gameplay video shows the game but explains none of that, so it belongs inside the deck and the
+details, not here.
 
----
+Checklist of the guide (page 15), all required before pasting the link:
+1. 7 slides at most, cover and closing included; in English.
+2. Team name, the members' names and the challenge on it.
+3. Problem and solution understood without extra explanation.
+4. NASA data named **and shown in use** (what variable, what it becomes in the game).
+5. What was built, with real screenshots, and what results exist.
+6. Sources and images credited.
+7. Public link that opens in a private window without login: Google Drive ("Anyone with the link"), or the PDF in
+   the public repository.
 
-## Project  (a public link to the project)
+Not allowed to remain on it: any `TODO`, a placeholder link, NASA logos, images of people under 18.
+
+## Project  ("Link to Final Project": a public website, app or repository)
 
 ```
 https://farpoint-horizon.web.app
 ```
 
-(The game itself. The repository, https://github.com/alexanderkholodov1/farpoint-horizon, is linked from the Details
-and from the game's credits. If the form allows only one link, the live game is the stronger one.)
+(The live game. The repository, https://github.com/alexanderkholodov1/farpoint-horizon, goes in the Details and is
+linked from the game's credits. If the judges should see the code first, put the repository here instead.)
 
 ---
 
