@@ -50,6 +50,8 @@ static func build(id: String, world) -> Dictionary:
 			S = _lcross_space(world, env)
 		"dart_space":
 			S = _dart_space(world, env)
+		"orion_cabin":
+			S = _orion_cabin(world, env)
 		_:
 			S = _andes(world, env)
 	S["id"] = id
@@ -1752,4 +1754,95 @@ static func _dart_space(world, env: Environment) -> Dictionary:
 		"act": "idle",
 		"moon_flash": flash,
 		"ejecta": ej,
+	}
+
+
+# ===================================================================================== INSIDE ORION, ARTEMIS I
+## Artemis I, 2022: inside Orion, no crew aboard but a manikin, Commander Moonikin Campos, in the commander's seat, in
+## an orange survival suit [S-artemis-campos]; the cuyes ride hidden in his seat. Screens on the panel, four windows,
+## the Moon or the Earth outside. Shapes only, no markings; one unit is about 0.3 m. "outside" is the body in the
+## window (the story's "earthset": the Moon, then the Earth).
+static func _orion_cabin(world, env: Environment) -> Dictionary:
+	var st: Node3D = world.stage
+	env.sky = Space.make_space_sky()
+	env.background_energy_multiplier = 1.0
+	env.ambient_light_color = Color(0.6, 0.62, 0.7)
+	env.ambient_light_energy = 0.35
+	world.sun.light_energy = 1.3
+	world.sun.light_color = Color(1.0, 0.97, 0.92)
+	world.sun.rotation_degrees = Vector3(-20, 40, 0)
+	var room := Node3D.new()
+	st.add_child(room)
+	var wall := mat(Color(0.82, 0.83, 0.82), 0.8)
+	var dark := mat(Color(0.08, 0.09, 0.1), 0.5)
+	# the panel with three glass screens
+	var panel := Node3D.new()
+	panel.position = Vector3(0, 2.3, -4.2)
+	panel.rotation.x = -0.35
+	room.add_child(panel)
+	box(panel, Vector3(6.4, 1.8, 0.3), Vector3.ZERO, mat(Color(0.25, 0.27, 0.3), 0.6, 0.3))
+	for i in 3:
+		box(panel, Vector3(1.7, 1.15, 0.05), Vector3((i - 1) * 2.05, 0.05, 0.17), mat([Color(0.15, 0.45, 0.8), Color(0.2, 0.7, 0.45), Color(0.85, 0.6, 0.2)][i], 0.3, 0.0, 0.9))
+	# outside, apart from the room: Orion and its four wings over the Moon (each shot shows one or the other)
+	var out := Node3D.new()
+	out.position = Vector3(400, 0, 0)
+	st.add_child(out)
+	cyl(out, 1.8, 5.2, 3.6, Vector3(0, 1.8, 0), mat(Color(0.85, 0.86, 0.88), 0.45, 0.2), 32)
+	cyl(out, 5.0, 5.0, 6.0, Vector3(0, -3.0, 0), mat(Color(0.82, 0.82, 0.84), 0.4, 0.5), 32)
+	cyl(out, 1.2, 2.3, 2.6, Vector3(0, -7.3, 0), mat(Color(0.3, 0.3, 0.32), 0.4, 0.7), 16)
+	for i in 4:
+		var a := i * TAU / 4.0 + PI / 4.0
+		var wing := box(out, Vector3(3.0, 0.15, 20.0), Vector3(sin(a) * 15.0, -4.0, cos(a) * 15.0), mat(Color(0.1, 0.12, 0.25), 0.25, 0.6))
+		wing.rotation.y = a
+	out.rotation = Vector3(0.5, 0.3, 1.2)
+	var outside := bright_moon(260.0)
+	outside.position = Vector3(400, -320, -700)
+	st.add_child(outside)
+	# the seats: the commander's, with Campos in it; two empty
+	var seat_m := mat(Color(0.3, 0.32, 0.35), 0.8)
+	for i in 3:
+		box(room, Vector3(1.5, 0.3, 2.6), Vector3((i - 1) * 1.8, 0.0, 0.3), seat_m)
+		var back_ := box(room, Vector3(1.5, 1.8, 0.3), Vector3((i - 1) * 1.8, 0.9, 1.6), seat_m)
+		back_.rotation.x = 0.4
+	# Commander Moonikin Campos: an orange suit, a white helmet with a dark visor
+	var suit := mat(Color(0.95, 0.45, 0.12), 0.85)
+	var c := Node3D.new()
+	c.position = Vector3(0, 0.3, 0.6)
+	room.add_child(c)
+	ball(c, 0.55, Vector3(0, 0.75, 0.55), suit, Vector3(1.0, 1.4, 0.7))
+	ball(c, 0.42, Vector3(0, 1.75, 0.75), mat(Color(0.95, 0.95, 0.95), 0.4))
+	ball(c, 0.3, Vector3(0, 1.75, 0.45), mat(Color(0.05, 0.06, 0.08), 0.1, 0.6), Vector3(1.1, 0.8, 0.5))
+	for sx in [-1.0, 1.0]:
+		ball(c, 0.18, Vector3(sx * 0.55, 0.65, 0.3), suit, Vector3(1, 2.4, 1))
+		ball(c, 0.2, Vector3(sx * 0.28, 0.2, -0.4), suit, Vector3(1, 1, 3.0))
+	# the hull around
+	var hull := MeshInstance3D.new()
+	var hm := CylinderMesh.new()
+	hm.top_radius = 2.2
+	hm.bottom_radius = 5.5
+	hm.height = 6.0
+	hm.radial_segments = 48
+	hm.cap_top = false
+	hm.cap_bottom = false
+	hull.mesh = hm
+	var hullm := wall.duplicate() as StandardMaterial3D
+	hullm.cull_mode = BaseMaterial3D.CULL_DISABLED
+	hull.material_override = hullm
+	hull.position = Vector3(0, 2.5, -0.8)
+	hull.scale = Vector3(1.35, 1.0, 1.35)
+	room.add_child(hull)
+	box(room, Vector3(12, 0.2, 12), Vector3(0, -0.3, 0), dark)
+	omni(room, Vector3(0, 4.5, 1.0), Color(1.0, 0.95, 0.88), 1.4, 9.0)
+	omni(room, Vector3(0, 2.4, -2.0), Color(0.5, 0.75, 1.0), 0.6, 5.0)
+	return {
+		"marks": marks({"inti": [-1.0, 0.15, 0.1, 190], "killa": [0.0, 2.25, 1.35, 180], "rumi": [1.0, 0.15, 0.1, 170], "wayra": [6, 0, 6, 0]}),
+		"cast": ["rumi", "killa", "inti"],
+		"actor_scale": 0.55,
+		"cams": {
+			"wide": {"from": Vector3(1.6, 2.4, -3.4), "to": Vector3(0, 1.3, 0.6)},
+			"campos": {"from": Vector3(0.5, 1.9, -1.9), "to": Vector3(0, 1.7, 0.9), "from2": Vector3(1.4, 2.3, -3.2), "to2": Vector3(0, 1.4, 0.8), "time": 6.0},
+			"window": {"from": Vector3(470, 40, 110), "to": Vector3(400, -40, -200), "from2": Vector3(445, 25, 70), "to2": Vector3(400, -60, -300), "time": 7.0},
+		},
+		"act": "idle",
+		"outside": outside,
 	}

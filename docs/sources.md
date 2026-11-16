@@ -211,6 +211,23 @@ branches add entries at the same place (`.gitattributes`).
   about 2 s before impact, about 3 cm per pixel; LICIACube released on Sept 11, following about 3 minutes behind.
   Mission 5's approach and last picture.
 
+- **S-artemis-nasa** NASA. *Artemis I*. https://www.nasa.gov/mission/artemis-i/. Launched from Launch Pad 39B at
+  1:47 a.m. EST on Nov 16, 2022; Orion traveled 268,563 miles from Earth and 43,471 miles beyond the far side of the
+  Moon; splashed down off the coast of San Diego at 12:40 p.m. EST on Dec 11, 2022, after 25 days, 10 hours, 53
+  minutes. Mission 6.
+- **S-artemis-timeline** NASA. *Artemis I Mission Timeline*. https://www.nasa.gov/reference/artemis-i-mission-timeline/.
+  Solid rocket booster separation at 2 min 12 s; core stage separation at 8 min 03 s; the outbound powered flyby about
+  81 miles above the Moon, from 2,128 to 5,102 mph; re-entry speed 24,581 mph (Mach 32); 1.4 million miles in all.
+  Mission 6's launch, flyby and re-entry.
+- **S-artemis-campos** NASA. *Public Names Moonikin Flying Around Moon on NASA's Artemis I Mission* (June 29, 2021).
+  https://www.nasa.gov/news-release/public-names-moonikin-flying-around-moon-on-nasas-artemis-i-mission/. 'Commander
+  Moonikin Campos', named for Arturo Campos, a key player in bringing Apollo 13 safely back to Earth; in the commander's
+  seat, in an Orion Crew Survival System suit. Chapter 6.
+- **S-artemis-art672** NASA. *Artemis I Flight Day 13: Orion, Earth, and Moon*, art001e000672 (Nov 28, 2022), NASA Image
+  and Video Library, https://images.nasa.gov/details/art001e000672 (public domain). Orion at its farthest, 268,563 miles
+  from Earth. Our processing: cropped to the Moon and the Earth (the spacecraft and its markings left out). In
+  `assets/missions/artemis1/`.
+
 ## The look: Earth, Moon, the Andes and the launch site (issue 12; scripts in `assets/source/`)
 - **S-moon-kit** NASA Goddard Space Flight Center, Scientific Visualization Studio. *CGI Moon Kit* (2019).
   https://svs.gsfc.nasa.gov/4720. LRO LROC WAC colour map (`lroc_color_poles_4k.tif`, colour enhanced from LROC and Kaguya) and
