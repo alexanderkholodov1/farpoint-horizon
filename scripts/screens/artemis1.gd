@@ -14,6 +14,7 @@ const Flight := preload("res://scripts/missions/artemis1/flight.gd")
 const Sets := preload("res://scripts/story/sets.gd")
 const Space := preload("res://scripts/world/space_builder.gd")
 const Sound := preload("res://scripts/flight/sound.gd")
+const CuyActor := preload("res://scripts/story/cuy_actor.gd")
 ## The same flight as the game's own launches (Missions): the climb's physics and the pilot's panel.
 const Ascent := preload("res://scripts/flight/ascent.gd")
 const FlightHud := preload("res://scripts/flight/flight_hud.gd")
@@ -48,6 +49,20 @@ var stage_wait := 0.0
 var shown_pitch := 0.0
 var in_space := false
 var stages_dropped := 0
+var pilot_warp := false        ## The pilot picked how fast time runs: the screen stops choosing for them.
+var stars: Node3D              ## The stars over the night pad (they follow the camera).
+var clouds: Node3D
+var pad_smoke: CPUParticles3D
+var pflames: Array = []        ## The particle fire: [core, booster left, booster right, upper stage].
+var fire_light: OmniLight3D
+var cam_focus := 45.0
+var cam_off := Vector3.INF          ## Where along the stack the camera looks (units up from its base).
+var alarm: AudioStreamPlayer
+var beep: AudioStreamPlayer
+var alarm_t := 0.0
+var red: ColorRect
+var said_count := {}
+var KSC := Vector2(28.61, -80.6)   ## Launch Pad 39B, Kennedy Space Center (latitude, longitude; degrees).
 var rocket: Node3D
 var boosters: Array = []
 var core: Node3D
@@ -111,6 +126,8 @@ func enter(args: Dictionary) -> void:
 	saved = Sets.save_world(world)
 	world.cam_free = false
 	thump = Sound.player(self, "thud", -2.0)
+	alarm = Sound.player(self, "alarm")
+	beep = Sound.player(self, "beep")
 	roar = Sound.player(self, "rumble", -4.0)
 	_build_ui()
 	_build_launch()
@@ -174,12 +191,25 @@ func _build_launch() -> void:
 	var env: Environment = world.world_env.environment
 	# 1:47 a.m. in Florida: a starry night sky from the first second, the pad lit by its floodlights
 	env.background_mode = Environment.BG_SKY
-	env.sky = Space.make_space_sky()
-	env.background_energy_multiplier = 0.7
+	var sky := Sky.new()
+	var ps := ProceduralSkyMaterial.new()
+	ps.sky_top_color = Color(0.03, 0.05, 0.14)
+	ps.sky_horizon_color = Color(0.16, 0.2, 0.36)
+	ps.sky_curve = 0.12
+	ps.ground_horizon_color = Color(0.16, 0.2, 0.36)
+	ps.ground_bottom_color = Color(0.02, 0.03, 0.06)
+	ps.sun_angle_max = 1.0
+	sky.sky_material = ps
+	env.sky = sky
+	env.background_energy_multiplier = 1.0
+	env.fog_enabled = true
+	env.fog_mode = Environment.FOG_MODE_EXPONENTIAL
+	env.fog_light_color = Color(0.14, 0.18, 0.3)
+	env.fog_density = 0.00025
+	env.fog_sky_affect = 0.0
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = Color(0.45, 0.5, 0.65)
 	env.ambient_light_energy = 0.6
-	env.fog_enabled = false
 	env.glow_enabled = true
 	world.sun.light_energy = 0.4
 	world.sun.light_color = Color(0.8, 0.85, 1.0)
@@ -252,8 +282,139 @@ func _build_launch() -> void:
 		var pl := _glow(rocket, 26.0, Vector3(x, -16, 0), Color(1.0, 0.55, 0.2, 0.0))
 		pl.scale = Vector3(0.6, 1.8, 1)
 		flames.append(pl)
-	var fl := Sets.omni(rocket, Vector3(0, -6, 0), Color(1.0, 0.7, 0.4), 0.0, 120.0)
+	var fl := Sets.omni(rocket, Vector3(0, -6, 0), Color(1.0, 0.7, 0.4), 0.0, 260.0)
 	fl.name = "FireLight"
+	fire_light = fl
+	# the real fire: particles under the core's four engines and each booster (the game's own flames), and the upper
+	# stage's engine for later
+	pflames.clear()
+	for x in [0.0, -4.3, 4.3]:
+		var pf := Space.make_flame(5.5 if x == 0.0 else 4.5)
+		pf.position = Vector3(x, -2.0, 0)
+		pf.amount = 120
+		if x == 0.0:
+			core.add_child(pf)
+		else:
+			(boosters[0] if x < 0.0 else boosters[1]).add_child(pf)
+			pf.position = Vector3(0, -2.0, 0)
+		pflames.append(pf)
+	var uf := Space.make_vacuum_flame(2.5)
+	uf.position = Vector3(0, 61.0, 0)
+	rocket.get_node("Upper").add_child(uf)
+	pflames.append(uf)
+	# steam and smoke from the deluge water, thrown sideways across the pad at ignition
+	pad_smoke = _smoke()
+	pad_smoke.position = Vector3(0, 3, 0)
+	ground.add_child(pad_smoke)
+	_night_dressing()
+
+
+## A grey cloud of steam and smoke that rolls out across the pad.
+func _smoke() -> CPUParticles3D:
+	var p := CPUParticles3D.new()
+	p.amount = 70
+	p.lifetime = 6.0
+	p.emitting = false
+	p.local_coords = false
+	var q := QuadMesh.new()
+	q.size = Vector2(26, 26)
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	m.vertex_color_use_as_albedo = true
+	m.albedo_texture = Sets.soft_glow()
+	q.material = m
+	p.mesh = q
+	p.direction = Vector3(1, 0.15, 0)
+	p.spread = 180.0
+	p.flatness = 0.85
+	p.initial_velocity_min = 25.0
+	p.initial_velocity_max = 60.0
+	p.damping_min = 6.0
+	p.damping_max = 10.0
+	p.gravity = Vector3(0, 2.0, 0)
+	p.scale_amount_min = 1.0
+	p.scale_amount_max = 3.0
+	var sc := Curve.new()
+	sc.add_point(Vector2(0, 0.4))
+	sc.add_point(Vector2(1, 2.2))
+	p.scale_amount_curve = sc
+	var g := Gradient.new()
+	g.set_color(0, Color(1.0, 0.75, 0.45, 0.7))
+	g.set_color(1, Color(0.3, 0.32, 0.38, 0.0))
+	g.add_point(0.2, Color(0.75, 0.72, 0.7, 0.55))
+	p.color_ramp = g
+	return p
+
+
+## The night around the pad: stars, low clouds, the lights of the Space Coast, so it is a place and not a void.
+func _night_dressing() -> void:
+	var st: Node3D = world.stage
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 1116
+	# the stars, on a dome that travels with the camera
+	stars = Node3D.new()
+	st.add_child(stars)
+	var smm := MultiMesh.new()
+	smm.transform_format = MultiMesh.TRANSFORM_3D
+	smm.use_colors = true
+	var sq := QuadMesh.new()
+	sq.size = Vector2(14, 14)
+	smm.mesh = sq
+	smm.instance_count = 900
+	for i in 900:
+		var d := Vector3(rng.randf_range(-1, 1), rng.randf_range(0.05, 1.0), rng.randf_range(-1, 1)).normalized()
+		smm.set_instance_transform(i, Transform3D(Basis.from_scale(Vector3.ONE * rng.randf_range(0.4, 1.4)), d * 15000.0))
+		var b := rng.randf_range(0.4, 1.0)
+		smm.set_instance_color(i, Color(b, b, b * rng.randf_range(0.9, 1.1), 1.0))
+	var sm := MultiMeshInstance3D.new()
+	sm.multimesh = smm
+	var mat := _soft_mat(Color(1, 1, 1, 1))
+	mat.vertex_color_use_as_albedo = true
+	mat.no_depth_test = false
+	sm.material_override = mat
+	stars.add_child(sm)
+	# low clouds, a few hundred metres to three kilometres up, that the rocket climbs through
+	clouds = Node3D.new()
+	st.add_child(clouds)
+	var cm := StandardMaterial3D.new()
+	cm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	cm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	cm.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	cm.albedo_texture = Sets.soft_glow()
+	cm.albedo_color = Color(0.32, 0.36, 0.5, 0.55)
+	for i in 34:
+		var c := MeshInstance3D.new()
+		var q := QuadMesh.new()
+		var w := rng.randf_range(250, 700)
+		q.size = Vector2(w, w * 0.45)
+		c.mesh = q
+		c.material_override = cm
+		var x := rng.randf_range(-3000, 3000)
+		var z := rng.randf_range(-3000, 1800)
+		if absf(x) < 200 and absf(z) < 200:
+			x += 400
+		c.position = Vector3(x, rng.randf_range(700, 1600), z)
+		clouds.add_child(c)
+	# the Space Coast's lights to the west, the Atlantic dark to the east
+	var lmm := MultiMesh.new()
+	lmm.transform_format = MultiMesh.TRANSFORM_3D
+	lmm.use_colors = true
+	var lq := QuadMesh.new()
+	lq.size = Vector2(9, 9)
+	lmm.mesh = lq
+	lmm.instance_count = 700
+	for i in 700:
+		var pos := Vector3(rng.randf_range(-2400, -150), 1.0, rng.randf_range(-2600, 2600))
+		lmm.set_instance_transform(i, Transform3D(Basis(), pos))
+		lmm.set_instance_color(i, Color(1.0, rng.randf_range(0.55, 0.8), 0.35, rng.randf_range(0.4, 1.0)))
+	var lm := MultiMeshInstance3D.new()
+	lm.multimesh = lmm
+	var lmat := _soft_mat(Color(1, 1, 1, 1))
+	lmat.vertex_color_use_as_albedo = true
+	lm.material_override = lmat
+	ground.add_child(lm)
 
 
 func _build_flyby() -> void:
@@ -463,6 +624,11 @@ func _build_ui() -> void:
 	bubble.add_theme_constant_override("outline_size", 8)
 	bubble.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
 	add_child(bubble)
+	red = ColorRect.new()
+	red.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	red.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	red.color = Color(0.9, 0.05, 0.02, 0.0)
+	add_child(red)
 	flash = ColorRect.new()
 	flash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -551,9 +717,9 @@ func _start() -> void:
 		brief.queue_free()
 	phase = "count"
 	phase_t = 0.0
-	met = -5.0
+	met = -10.0
 	hint.text = tr(T.ignite)
-	_say("Wayra", tr("Terminal count. Five..."))
+	_say("Wayra", tr("Terminal count. All stations, go for launch."))
 
 
 # ===================================================================================== STAGE 1: LAUNCH
@@ -596,9 +762,12 @@ func _start_climb() -> void:
 	hud.lever.value = 1.0
 	hud.throttle_changed.connect(func(v): throttle = v)
 	hud.action_pressed.connect(_on_stage)
+	hud.warp_picked.connect(func(_w): pilot_warp = true)
 	hud.set_autopilot(false)
 	hud.hint(tr("Lean with ← → to keep the needle on the green marker, W and S move the throttle, Space drops what is empty."))
-	horizon = Scene3D.horizon_earth(HORIZON_R)
+	# the Earth under the climb, seen from above Florida (with its clouds), from about 17 km up
+	horizon = Space.make_earth(HORIZON_R, false)
+	horizon.set_meta("base", Basis(Quaternion(Space.latlon_to_vec(KSC.x, KSC.y).normalized(), Vector3.UP)))
 	horizon.visible = false
 	world.stage.add_child(horizon)
 	# the story's own panels step aside for the pilot's
@@ -622,8 +791,16 @@ func _climb(delta: float) -> void:
 	# time runs by itself: liftoff and Max Q in real time, then ten times faster, real time again for each staging
 	var calm: bool = model.t > 75.0 and model.fuel() > 0.07 and model.stress < Ascent.STRESS_WARN and model.orbit_progress() < 0.97 and not model.wants_stage()
 	var want_w := 10.0 if calm else 1.0
-	if hud.warp != want_w:
+	# the pilot's own choice of ×1 or ×10 stays; until they choose, the screen picks
+	if not pilot_warp and hud.warp != want_w:
 		hud.set_warp(want_w)
+	# the tension: alarms and a red edge while the stress is high
+	alarm_t -= delta
+	var hot: bool = model.stress > Ascent.STRESS_WARN
+	if hot and alarm_t <= 0.0:
+		alarm_t = 1.1
+		alarm.play()
+	red.color.a = lerpf(red.color.a, (0.18 + 0.1 * sin(_t * 12.0)) if hot else 0.0, clampf(delta * 6.0, 0.0, 1.0))
 	model.step(delta, steer, hud.warp)
 	met = model.t
 	if model.wants_stage():
@@ -674,18 +851,40 @@ func _place_rocket(delta: float) -> void:
 	rocket.position = Vector3(_squash(model.x, 1000.0, 0.08) * VIS, 1.0 + _squash(model.h, 1500.0, 0.1) * VIS, 0)
 	shown_pitch = lerpf(shown_pitch, model.pitch, clampf(delta * 3.5, 0.0, 1.0))
 	rocket.rotation = Vector3(0, 0, -deg_to_rad(shown_pitch))
+	var on: bool = model.lifted and not model.flameout and throttle > 0.02
 	for i in flames.size():
 		var f: MeshInstance3D = flames[i]
 		if is_instance_valid(f) and f.visible:
-			var on: bool = model.lifted and not model.flameout and throttle > 0.02
 			(f.material_override as StandardMaterial3D).albedo_color.a = (0.85 + 0.15 * sin(_t * 40.0 + i)) * throttle if on else 0.0
 			f.scale.y = (1.8 if i % 2 == 1 else 1.0) * (1.0 + 0.8 * clampf(model.h / 40000.0, 0.0, 1.0))
-	if model.h > 15000.0:
+	# the particle fire: the core and boosters while attached, the upper stage's after the core is gone
+	var core_on: bool = core != null and core.get_parent() == rocket
+	pflames[0].emitting = on and core_on
+	pflames[1].emitting = on and model.boosters_attached
+	pflames[2].emitting = on and model.boosters_attached
+	pflames[3].emitting = on and not core_on
+	var spread: float = 1.0 + 1.8 * clampf(model.h / 50000.0, 0.0, 1.0)   # the plume opens up in thin air
+	for k in 3:
+		(pflames[k] as Node3D).scale = Vector3(spread, 1.0, spread)
+	fire_light.light_energy = (8.0 + randf_range(-1.5, 1.5)) * throttle if on else 0.0
+	pad_smoke.emitting = model.t < 9.0
+	if stars:
+		stars.position = world.cam.global_position
+	# from about 17 km the ground gives way to the whole Earth below, with its clouds; the night sky turns to space
+	if model.h > 17000.0:
 		ground.visible = false
+		clouds.visible = false
 		horizon.visible = true
-		Scene3D.horizon_place(horizon, rocket.position, HORIZON_R, model.h * 6.0, model.R, model.x)
-	if model.h > 55000.0 and not in_space:
+		var base: Basis = horizon.get_meta("base")
+		horizon.position = rocket.position - Vector3(0, HORIZON_R * (model.R + model.h * 6.0) / model.R, 0)
+		horizon.basis = Basis(Vector3(0, 0, 1), model.x / model.R) * base
+	var env: Environment = world.world_env.environment
+	env.fog_density = lerpf(0.00025, 0.0, clampf(model.h / 12000.0, 0.0, 1.0))
+	if model.h > 30000.0 and not in_space:
 		in_space = true
+		env.fog_enabled = false
+		env.sky = Space.make_space_sky()
+		stars.visible = false
 	for b in boosters:
 		if b.get_parent() != rocket:
 			b.position += Vector3(signf(b.position.x - rocket.position.x) * 8.0, -25.0, 0) * delta
@@ -724,6 +923,9 @@ func _on_stage() -> void:
 		world.stage.add_child(core)
 		core.global_transform = g2
 		hud.message(tr("CORE STAGE AWAY"), tr("Eight minutes and three seconds, on the real flight."), Kit.C_ACCENT, 2.0)
+		for i in [2, 3]:
+			flames[i].visible = false
+		cam_focus = 72.0
 		_say("Rumi", tr("Core stage away. The upper stage takes us on."))
 
 
@@ -886,9 +1088,94 @@ func _far_to_home() -> void:
 		return
 	if photo_layer and is_instance_valid(photo_layer):
 		photo_layer.queue_free()
+	_cabin_beat([["killa", "point", "happy", tr("Look out the window: the Earth and the Moon, the same size. We are that far.")],
+			["inti", "scared", "scared", tr("And now we go back. Into the fire. At Mach thirty-two.")],
+			["rumi", "shrug", "flat", tr("The heat shield does the work. We just sit still. Like Campos.")]],
+			func(): _go_map(2))
+
+
+func _go_map(step: int) -> void:
+	if step == 1:
+		phase = "map_x"
+		return
 	phase = "map"
 	phase_t = 0.0
 	_show_map(2, tr("Next: home"), tr("A second flyby of the Moon on December 5 turns Orion for home. Six days later it meets the Earth's air at 24,581 mph, Mach 32, over the Pacific Ocean, and has to come down off the coast of San Diego, in California."), _start_entry)
+
+
+# ===================================================================================== THE CREW BETWEEN THE STAGES
+var beat_lines: Array = []
+var beat_i := -1
+var beat_next: Callable
+var beat_actors := {}
+var beat_cam := [Vector3.ZERO, Vector3.ZERO]
+
+
+## A short moment inside Orion: the cuyes hidden in Campos's seat say a line each about what just happened and what
+## comes next (the story's set "orion_cabin"), then the mission goes on.
+func _cabin_beat(lines: Array, next: Callable) -> void:
+	if hud and is_instance_valid(hud):
+		hud.queue_free()
+		hud = null
+	red.color.a = 0.0
+	gauge_panel.visible = false
+	now_lbl.text = ""
+	hint.text = ""
+	big.text = ""
+	big_sub.text = ""
+	roar.stop()
+	beat_lines = lines
+	beat_next = next
+	beat_i = -1
+	_clear()
+	var S: Dictionary = Sets.build("orion_cabin", world)
+	beat_actors.clear()
+	for id in ["inti", "killa", "rumi"]:
+		var a = CuyActor.new()
+		a.id = id
+		world.stage.add_child(a)
+		a.scale = Vector3.ONE * float(S.get("actor_scale", 1.0))
+		a.global_position = S.marks[id].pos
+		a.rotation.y = S.marks[id].yaw
+		beat_actors[id] = a
+	var c: Dictionary = S.cams.wide
+	beat_cam = [c.from, c.to]
+	world.cam.position = c.from
+	world.cam.look_at(c.to, Vector3.UP)
+	flash.color = Color(0, 0, 0, 1.0)
+	phase = "beat"
+	phase_t = 0.0
+	_beat_next_line()
+
+
+func _beat_next_line() -> void:
+	beat_i += 1
+	for k in beat_actors:
+		beat_actors[k].talking = false
+	if beat_i >= beat_lines.size():
+		var n := beat_next
+		n.call()
+		return
+	var L: Array = beat_lines[beat_i]
+	var a = beat_actors[L[0]]
+	a.act = L[1]
+	a.set_mood(L[2])
+	a.talking = true
+	_say(L[0].capitalize(), L[3])
+	hint.text = tr("Enter: go on")
+	beat_t = 0.0
+
+
+var beat_t := 0.0
+
+
+func _beat(delta: float) -> void:
+	beat_t += delta
+	# a slow push in on the seat, the crew peeking out of it
+	world.cam.position = world.cam.position.lerp(beat_cam[0] + (beat_cam[1] - beat_cam[0]) * 0.12, clampf(delta * 0.3, 0.0, 1.0))
+	world.cam.look_at(beat_cam[1], Vector3.UP)
+	if beat_t > 3.6:
+		_beat_next_line()
 
 
 # ===================================================================================== THE JOURNEY MAP
@@ -1271,13 +1558,36 @@ func process(delta: float) -> void:
 				now_lbl.text = tr("T- %d") % n if met < 0.0 else tr("IGNITION: SPACE!")
 				now_lbl.add_theme_color_override("font_color", Kit.C_GOLD)
 				clock_lbl.text = "T- 00:00:%02d" % maxi(n, 0)
+				if n > 0 and not said_count.has(n):
+					said_count[n] = true
+					beep.play()
+					shake = 0.08 * (11 - n) / 10.0
+					match n:
+						9:
+							_say("Rumi", tr("Tanks pressed. Everything is green."))
+						7:
+							_say("Killa", tr("Campos, sit still. We are right behind you."))
+						5:
+							_say("Inti", tr("Five... four... I am not nervous. I am counting."))
+						3:
+							_say("Wayra", tr("Engines start!"))
+					if n <= 6:
+						pad_smoke.emitting = true
+				if n <= 6:
+					fire_light.light_energy = (6.0 - float(n)) * 1.2
+					for k in [0]:
+						pflames[k].emitting = n <= 6
 				if met > 1.0:
 					ignite_q = 0.0
 					_grade(0.0)
 					ignite_q = -1.0
 					_ignite()
-			world.cam.position = Vector3(40, 18, 60)
+			# the countdown: a slow push in on the rocket, under the stars
+			var push := clampf((met + 10.0) / 10.0, 0.0, 1.0) if phase == "count" else 0.0
+			world.cam.position = Vector3(150, 25, 260).lerp(Vector3(70, 16, 120), smoothstep(0.0, 1.0, push))
 			world.cam.look_at(Vector3(0, 40, 0), Vector3.UP)
+			if stars:
+				stars.position = world.cam.global_position
 		"ascent":
 			_climb(delta)
 			clock_lbl.text = Fl.met(met)
@@ -1286,20 +1596,37 @@ func process(delta: float) -> void:
 			var up := rocket.global_transform.basis.y
 			var hk: float = clampf(model.h / 40000.0, 0.0, 1.0) if model else 0.0
 			var want := Vector3(110, 25, 190).lerp(Vector3(90, 70, 130), hk)
+			if cam_focus > 50.0:
+				# only the upper stage and Orion now: closer, and on them
+				want = Vector3(30, 26, 52)
 			if phase_t < 5.0:
 				# liftoff seen from the ground, the whole pad and the rocket in view, then the camera follows
 				want = want.lerp(Vector3(150, 20 - rp.y + 30.0, 260), 1.0 - smoothstep(1.0, 5.0, phase_t))
-			world.cam.position = world.cam.position.lerp(rp + want, clampf(delta * 3.0, 0.0, 1.0))
-			world.cam.look_at(rp + up * 45.0, Vector3.UP)
+			# the camera keeps its place relative to the rocket (never lagging behind it at speed), easing between views
+			cam_off = want if cam_off == Vector3.INF else cam_off.lerp(want, clampf(delta * 2.0, 0.0, 1.0))
+			world.cam.position = rp + cam_off
+			var look := rp + up * cam_focus
+			if cam_focus > 50.0:
+				look -= Vector3(0, 10, 0)    # a little below the stage, so the Earth shows under it
+			world.cam.look_at(look, Vector3.UP)
 			world.cam.fov = 50.0
 		"to_moon":
 			if phase_t > 3.0:
 				if hud and is_instance_valid(hud):
 					hud.queue_free()
 					hud = null
-				phase = "map"
-				phase_t = 0.0
-				_show_map(1, tr("Next: to the Moon"), tr("From orbit, the upper stage fires once more and sends Orion toward the Moon: the trans-lunar injection, 1 hour and 29 minutes after liftoff. Five days later Orion passes 81 miles above the far side of the Moon, and fires its own engine to swing out past it."), _start_flyby)
+				_cabin_beat([["inti", "cheer", "happy", tr("Orbit! Did you feel that? I felt that in my whiskers.")],
+						["rumi", "work", "pleased", tr("Upper stage healthy. In ninety minutes it fires again, and we leave the Earth.")],
+						["killa", "point", "happy", tr("Next stop: the far side of the Moon. Nobody has seen it from this seat.")]],
+						func(): _go_map(1))
+		"beat":
+			_beat(delta)
+		"map_wait":
+			pass
+		"map_x":
+			phase = "map"
+			phase_t = 0.0
+			_show_map(1, tr("Next: to the Moon"), tr("From orbit, the upper stage fires once more and sends Orion toward the Moon: the trans-lunar injection, 1 hour and 29 minutes after liftoff. Five days later Orion passes 81 miles above the far side of the Moon, and fires its own engine to swing out past it."), _start_flyby)
 		"map":
 			pass
 		"flyby":
@@ -1318,8 +1645,10 @@ func process(delta: float) -> void:
 			world.cam.look_at(capsule.position + Vector3(0, 5, 0), Vector3.UP)
 			capsule.position.y = -0.2 + 0.3 * sin(_t * 1.5)
 			if phase_t > 4.0 and not result_shown:
-				phase = "done"
-				_show_result()
+				_cabin_beat([["inti", "cheer", "happy", tr("Splashdown! We are floating! I love floating.")],
+						["killa", "cheer", "happy", tr("Twenty-five days. The Moon and back. With Campos.")],
+						["rumi", "wave", "pleased", tr("Next time, people sit in these seats. We just tested them first.")]],
+						func(): phase = "done"; _show_result())
 	_stages_ui()
 	if shake > 0.0:
 		world.cam.rotate_object_local(Vector3.UP, deg_to_rad(randf_range(-1, 1) * shake * 0.6))
@@ -1374,6 +1703,8 @@ func _unhandled_input(e: InputEvent) -> void:
 		_far_to_home()
 	elif phase == "map" and (k == KEY_ENTER or k == KEY_SPACE) and phase_t > 0.8:
 		_map_go()
+	elif phase == "beat" and (k == KEY_ENTER or k == KEY_SPACE) and beat_t > 0.6:
+		_beat_next_line()
 	elif phase == "chutes" and k == KEY_1 and drogue_q < 0.0:
 		_drogue()
 	elif phase == "chutes" and k == KEY_2 and drogue_q >= 0.0 and main_q < 0.0:
