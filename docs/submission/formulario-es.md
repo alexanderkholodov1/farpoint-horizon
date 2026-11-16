@@ -1,6 +1,6 @@
 # NASA Space Apps 2026: formulario de entrega, cada campo listo para pegar (español)
 
-Reto: **Space Mission Design Game**. Equipo: **SK Horizon** (Quito, Ecuador; sede Sangolquí, ESPE).
+Reto: **Space Mission Design Game**. Equipo: **SK-Horizons** (Quito, Ecuador; sede Sangolquí, ESPE).
 El formulario global de la NASA se llena en inglés con [`form-en.md`](form-en.md). Este archivo es la misma entrega en
 español, para la sede, la ficha y el pitch. Los campos van en el orden del formulario.
 
@@ -86,7 +86,7 @@ CREATIVIDAD Y LO QUE CONSIDERAMOS
 Elegimos física real en lugar de animaciones guionadas para que lo que se aprende sea verdad, y una historia contada solo con las páginas de la propia NASA. Los cuyes aportan humor e identidad andina sin cambiar la historia. Diseñamos para computadoras escolares modestas, para quien nunca estudió el espacio, para dos idiomas y para las reglas del reto: sin logos ni insignias de la NASA, y con todo uso de IA declarado.
 
 Repositorio: https://github.com/alexanderkholodov1/farpoint-horizon
-Equipo SK Horizon, Quito, Ecuador: Alexander Kholodov (líder) y Sebastián Amaguaya.
+Equipo SK-Horizons, Quito, Ecuador: Alexander Kholodov (líder) y Sebastián Amaguaya.
 ```
 
 ---

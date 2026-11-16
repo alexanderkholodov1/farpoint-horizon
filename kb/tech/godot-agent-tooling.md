@@ -1,6 +1,6 @@
 # Godot agent tooling: letting AI agents operate Godot 4.7, see the game and make 3D models
 
-Researched 2026-11-14 for the two-person SK Horizon team (Windows 11, Godot 4.7.2 Steam, Claude Code mainly, plus Cursor and Codex).
+Researched 2026-11-14 for the two-person SK-Horizons team (Windows 11, Godot 4.7.2 Steam, Claude Code mainly, plus Cursor and Codex).
 Facts come from GitHub API/README reads and official docs fetched today; each has a URL. "(inference)" marks reasoning not
 verified by a source. Star counts and dates are as of 2026-11-14.
 
@@ -103,7 +103,7 @@ Docs warning: unknown arguments are silently ignored, so a typo gives no error.
 
 Practical error-reading recipes (inference unless noted):
 - Syntax check one script: `godot --headless --path . --check-only --script res://scripts/x.gd` (parse only; it will not catch every cross-script type error).
-- Whole-project load check: `godot --headless --path . --import` or run the main scene with `--quit-after 60`; read stderr and the log. The game log on this machine is at `%APPDATA%\Godot\app_userdata\SK Horizon - Mission Architect\logs\godot.log` (from `CLAUDE.md`).
+- Whole-project load check: `godot --headless --path . --import` or run the main scene with `--quit-after 60`; read stderr and the log. The game log on this machine is at `%APPDATA%\Godot\app_userdata\SK-Horizons - Mission Architect\logs\godot.log` (from `CLAUDE.md`).
 - CI export check: the same headless export command as above.
 
 ### 2.1 GDScript language server (LSP) and debug adapter (DAP)

@@ -2,7 +2,7 @@
 
 **Six real NASA missions. Four guinea pigs who were there. And one mission that is all yours.**
 
-Farpoint HORIZON is a 3D space game made in Quito, Ecuador, by team SK Horizon for the NASA Space Apps Challenge
+Farpoint HORIZON is a 3D space game made in Quito, Ecuador, by team SK-Horizons for the NASA Space Apps Challenge
 2026 ([Space Mission Design Game](https://www.spaceappschallenge.org/2026/challenges/space-mission-design-game/)).
 It lets anyone, alone or with up to three friends, live a space mission from the first idea to the moment the data
 comes home: build the spacecraft, launch it, fly it, land it and keep it working. On the way, a small crew of Andean
@@ -144,7 +144,7 @@ There are no AI-generated images or videos, and no NASA logos, insignia or missi
   NASA 3D Resources.
 - Images and data from NASA, listed in [`docs/sources.md`](docs/sources.md).
 
-## Team SK Horizon, Quito, Ecuador
+## Team SK-Horizons, Quito, Ecuador
 
 - **Alexander Kholodov**, team lead: the flight, the Moon landing, ground control, playing together and the NASA
   data. [GitHub](https://github.com/alexanderkholodov1)
@@ -160,7 +160,7 @@ Submission texts: [`docs/submission/`](docs/submission/) · License: MIT ([LICEN
 
 **Seis misiones reales de la NASA. Cuatro cuyes que estuvieron ahí. Y una misión que es toda tuya.**
 
-Farpoint HORIZON es un juego espacial en 3D hecho en Quito por el equipo SK Horizon para el NASA Space Apps Challenge
+Farpoint HORIZON es un juego espacial en 3D hecho en Quito por el equipo SK-Horizons para el NASA Space Apps Challenge
 2026. Permite a cualquiera, solo o con hasta tres amigos, vivir una misión espacial desde la primera idea hasta que
 los datos vuelven a casa: construir la nave, lanzarla, volarla, aterrizarla y mantenerla funcionando. En el camino,
 una tripulación de cuyes astronautas te lleva por seis momentos históricos de la NASA: Apollo 13, la primera

@@ -1,6 +1,6 @@
 # NASA Space Apps 2026: submission form, every field ready to paste
 
-Challenge: **Space Mission Design Game**. Team: **SK Horizon** (Quito, Ecuador; local event Sangolquí, ESPE).
+Challenge: **Space Mission Design Game**. Team: **SK-Horizons** (Quito, Ecuador; local event Sangolquí, ESPE).
 Fields in the order the form shows them. Text inside the boxes is what goes into the form; notes outside are for us.
 The form closes **Sunday 15 November 2026, 23:59 local time**, and only the last "Submit for Judging" counts.
 Open every link in a private window before submitting.
@@ -13,7 +13,7 @@ Open every link in a private window before submitting.
 Farpoint HORIZON
 ```
 
-(The form had "Project SK-Horizons": the team is SK Horizon, the project is Farpoint HORIZON.)
+(The team is SK-Horizons; the project is Farpoint HORIZON.)
 
 ---
 
@@ -104,7 +104,7 @@ CREATIVITY AND WHAT WE CONSIDERED
 We chose real physics over scripted animation so that what players learn is true, and a story told only from NASA's own pages. The cuyes add humor and an Andean identity without changing history. We designed for modest school computers, for players who have never studied space, for two languages, and for the challenge's rules: no NASA logos or insignia, and every use of AI disclosed.
 
 Repository: https://github.com/alexanderkholodov1/farpoint-horizon
-Team SK Horizon, Quito, Ecuador: Alexander Kholodov (lead) and Sebastián Amaguaya.
+Team SK-Horizons, Quito, Ecuador: Alexander Kholodov (lead) and Sebastián Amaguaya.
 ```
 
 ---

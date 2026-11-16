@@ -58,7 +58,7 @@ for c in b:
     x += t.textlength(c, font=f_title) + spacing
 sub = "Design, launch and fly your own space mission"
 t.text(((W - t.textlength(sub, font=f_small)) / 2, 440), sub, font=f_small, fill=(170, 184, 208))
-foot = "NASA Space Apps Challenge 2026  ·  Team SK Horizon  ·  Quito, Ecuador"
+foot = "NASA Space Apps Challenge 2026  ·  Team SK-Horizons  ·  Quito, Ecuador"
 f_foot = ImageFont.truetype(str(fonts / "Inter-Regular.otf"), 16)
 t.text(((W - t.textlength(foot, font=f_foot)) / 2, 650), foot, font=f_foot, fill=(110, 124, 150))
 out = ROOT / "assets" / "brand" / "splash.png"

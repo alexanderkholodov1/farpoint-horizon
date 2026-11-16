@@ -88,18 +88,18 @@ footer { position: absolute; left: 120px; right: 120px; top: 40px; display: flex
 </style></head><body>
 <section class="slide cover" style="background-image:url('../art/cover.jpg')"><div class="text"><p class="label">NASA Space Apps Challenge 2026 · Space Mission Design Game</p><h1>Farpoint <span>HORIZON</span></h1>
 <p class="big">Build your own craft, launch it from the equator, fly it to the Moon, and keep it talking to Earth.</p>
-<p><strong>Team SK Horizon</strong> · Quito, Ecuador · Local event Sangolquí (ESPE)</p>
-<p>Alexander Kholodov · Sebastián Amaguaya</p></div><div class="figs n0"></div><footer><span>Farpoint HORIZON · SK Horizon · NASA Space Apps Challenge 2026 · Sangolquí</span><span>1 / 7</span></footer></section>
+<p><strong>Team SK-Horizons</strong> · Quito, Ecuador · Local event Sangolquí (ESPE)</p>
+<p>Alexander Kholodov · Sebastián Amaguaya</p></div><div class="figs n0"></div><footer><span>Farpoint HORIZON · SK-Horizons · NASA Space Apps Challenge 2026 · Sangolquí</span><span>1 / 7</span></footer></section>
 <section class="slide split" style="background-image:url('../art/space.png')"><div class="text"><p class="label">The problem</p><h2>Mission design is taught as a list, not lived as a story</h2>
 <ul>
 <li>A real mission trades <strong>mass, power, data, delta-v, budget and time</strong> against each other; on a whiteboard those trade-offs stay invisible.</li>
 <li>Students meet orbits as formulas, never as a craft they built, launched and kept alive.</li>
 <li>Ecuador put its first satellite in orbit in 2013 (NEE-01 Pegaso, a 1U CubeSat [S-pegaso]); the next generation needs a way in.</li>
 </ul>
-<p class="big">No design is perfect. The challenge asks players to feel that.</p></div><div class="figs n1"><figure><img src="../../../assets/mission_photos/volcano_watch/sangay_landsat8_2022-11-05_truecolor.jpg" alt=""><figcaption>Sangay, Ecuador, seen by Landsat 8 (2022). Every image like this is the end of a chain of hard trade-offs. NASA Earth Observatory / USGS [S-eo]</figcaption></figure></div><footer><span>Farpoint HORIZON · SK Horizon · NASA Space Apps Challenge 2026 · Sangolquí</span><span>2 / 7</span></footer></section>
+<p class="big">No design is perfect. The challenge asks players to feel that.</p></div><div class="figs n1"><figure><img src="../../../assets/mission_photos/volcano_watch/sangay_landsat8_2022-11-05_truecolor.jpg" alt=""><figcaption>Sangay, Ecuador, seen by Landsat 8 (2022). Every image like this is the end of a chain of hard trade-offs. NASA Earth Observatory / USGS [S-eo]</figcaption></figure></div><footer><span>Farpoint HORIZON · SK-Horizons · NASA Space Apps Challenge 2026 · Sangolquí</span><span>2 / 7</span></footer></section>
 <section class="slide wide" style="background-image:url('../art/space.png')"><div class="text"><p class="label">The solution · how it plays</p><h2>One complete mission, from the idea to the first signal home</h2>
 <div class="flow"><b>Choose a mission</b><i>→</i><b>Design the craft (CML 1-4)</b><i>→</i><b>Build the rocket</b><i>→</i><b>Launch</b><i>→</i><b>Fly to the target</b><i>→</i><b>Operate with ground control</b><i>→</i><b>Celebrate</b></div>
-<p>Every choice moves the shared gauges and shows on the craft itself. Missing a goal is never a failure screen: every mission that flies achieves something, and doing more earns bonuses. Four stations for up to four players (engineer, scientist, pilot, ground control), with bots in the free ones.</p></div><div class="figs n4"><figure class="todo"><div class="hole"><span>SCREENSHOT</span>the craft's design, a tile chosen and the gauges moving (scripts/screens/design.gd)</div><figcaption>1 · Design: ten questions, real parts</figcaption></figure><figure class="todo"><div class="hole"><span>SCREENSHOT</span>the rocket builder with a stack and its delta-v per stage (scripts/screens/builder.gd)</div><figcaption>2 · Build the rocket</figcaption></figure><figure class="todo"><div class="hole"><span>SCREENSHOT</span>liftoff from the pad near Cotopaxi, time speed shown</div><figcaption>3 · Launch from the equator</figcaption></figure><figure class="todo"><div class="hole"><span>SCREENSHOT</span>lunar orbit or touchdown, the celebration</div><figcaption>4 · Arrive, operate, celebrate</figcaption></figure></div><footer><span>Farpoint HORIZON · SK Horizon · NASA Space Apps Challenge 2026 · Sangolquí</span><span>3 / 7</span></footer></section>
+<p>Every choice moves the shared gauges and shows on the craft itself. Missing a goal is never a failure screen: every mission that flies achieves something, and doing more earns bonuses. Four stations for up to four players (engineer, scientist, pilot, ground control), with bots in the free ones.</p></div><div class="figs n4"><figure class="todo"><div class="hole"><span>SCREENSHOT</span>the craft's design, a tile chosen and the gauges moving (scripts/screens/design.gd)</div><figcaption>1 · Design: ten questions, real parts</figcaption></figure><figure class="todo"><div class="hole"><span>SCREENSHOT</span>the rocket builder with a stack and its delta-v per stage (scripts/screens/builder.gd)</div><figcaption>2 · Build the rocket</figcaption></figure><figure class="todo"><div class="hole"><span>SCREENSHOT</span>liftoff from the pad near Cotopaxi, time speed shown</div><figcaption>3 · Launch from the equator</figcaption></figure><figure class="todo"><div class="hole"><span>SCREENSHOT</span>lunar orbit or touchdown, the celebration</div><figcaption>4 · Arrive, operate, celebrate</figcaption></figure></div><footer><span>Farpoint HORIZON · SK-Horizons · NASA Space Apps Challenge 2026 · Sangolquí</span><span>3 / 7</span></footer></section>
 <section class="slide split" style="background-image:url('../art/space.png')"><div class="text"><p class="label">NASA data at the core</p><h2>Real NASA data drives the physics</h2>
 <ul>
 <li><strong>JPL Horizons</strong>: where the Moon is on launch day; the trip is timed to meet it [S-horizons].</li>
@@ -109,7 +109,7 @@ footer { position: absolute; left: 120px; right: 120px; top: 40px; display: flex
 <div class="flow"><b>NASA APIs</b><i>→</i><b><code>tools/data/</code></b><i>→</i><b><code>data/nasa/*.json</code></b><i>→</i><b>physics and textures</b></div>
 <div class="card"><p class="caps">Checked, not tuned</p>
 <p>Our Electron-type rocket lifts <strong>313 kg</strong> to low orbit (real: 300 kg); Cotopaxi's summit comes out at <strong>5,876 m</strong> (published: 5,897 m).</p>
-</div></div><div class="figs n1"><figure><img src="../../../assets/mission_photos/moon_south_pole/south_pole_wide_lroc_wac.jpg" alt=""><figcaption>The Moon's south pole from the LRO Wide Angle Camera mosaic, re-projected by our script [S-lroc-wac]</figcaption></figure></div><footer><span>Farpoint HORIZON · SK Horizon · NASA Space Apps Challenge 2026 · Sangolquí</span><span>4 / 7</span></footer></section>
+</div></div><div class="figs n1"><figure><img src="../../../assets/mission_photos/moon_south_pole/south_pole_wide_lroc_wac.jpg" alt=""><figcaption>The Moon's south pole from the LRO Wide Angle Camera mosaic, re-projected by our script [S-lroc-wac]</figcaption></figure></div><footer><span>Farpoint HORIZON · SK-Horizons · NASA Space Apps Challenge 2026 · Sangolquí</span><span>4 / 7</span></footer></section>
 <section class="slide split" style="background-image:url('../art/space.png')"><div class="text"><p class="label">Technology · the working game</p><h2>Built to run anywhere a school has a browser</h2>
 <ul>
 <li><strong>Godot 4.7</strong>, GL Compatibility renderer: runs on integrated GPUs and in the browser; desktop build as a fallback.</li>
@@ -119,7 +119,7 @@ footer { position: absolute; left: 120px; right: 120px; top: 40px; display: flex
 </ul>
 <div class="card"><p class="caps">Play it</p>
 <p><mark>TODO</mark>: live game link · repository: github.com/alexanderkholodov1/farpoint-horizon (MIT)</p>
-</div></div><div class="figs n1"><figure class="todo"><div class="hole"><span>SCREENSHOT</span>the menu or mission cards in the web build, browser frame visible</div><figcaption>Plays in the browser: <mark>TODO</mark> add the live link</figcaption></figure></div><footer><span>Farpoint HORIZON · SK Horizon · NASA Space Apps Challenge 2026 · Sangolquí</span><span>5 / 7</span></footer></section>
+</div></div><div class="figs n1"><figure class="todo"><div class="hole"><span>SCREENSHOT</span>the menu or mission cards in the web build, browser frame visible</div><figcaption>Plays in the browser: <mark>TODO</mark> add the live link</figcaption></figure></div><footer><span>Farpoint HORIZON · SK-Horizons · NASA Space Apps Challenge 2026 · Sangolquí</span><span>5 / 7</span></footer></section>
 <section class="slide split" style="background-image:url('../art/space.png')"><div class="text"><p class="label">Impact · next steps</p><h2>From Ecuador's volcanoes to the Moon, in Spanish and English</h2>
 <ul>
 <li><strong>For</strong> students, teachers and anyone curious: no install, every concept explained in plain words.</li>
@@ -131,19 +131,19 @@ footer { position: absolute; left: 120px; right: 120px; top: 40px; display: flex
 <li>A story campaign; play with up to three friends online.</li>
 <li>Classroom pilots in Ecuador. <mark>TODO</mark>: a partner or first step.</li>
 </ul>
-</div></div><div class="figs n1"><figure><img src="../../../assets/mission_photos/volcano_watch/cotopaxi_landsat8_2015-09-15_truecolor.jpg" alt=""><figcaption>Cotopaxi from Landsat 8 (2015): the "Ecuador Volcano Watch" mission flies over it [S-eo]</figcaption></figure></div><footer><span>Farpoint HORIZON · SK Horizon · NASA Space Apps Challenge 2026 · Sangolquí</span><span>6 / 7</span></footer></section>
+</div></div><div class="figs n1"><figure><img src="../../../assets/mission_photos/volcano_watch/cotopaxi_landsat8_2015-09-15_truecolor.jpg" alt=""><figcaption>Cotopaxi from Landsat 8 (2015): the "Ecuador Volcano Watch" mission flies over it [S-eo]</figcaption></figure></div><footer><span>Farpoint HORIZON · SK-Horizons · NASA Space Apps Challenge 2026 · Sangolquí</span><span>6 / 7</span></footer></section>
 <section class="slide split" style="background-image:url('../art/space.png')"><div class="text"><p class="label">Transparency · credits · team</p><h2>Our work, our sources, our help</h2>
 <ul>
 <li><strong>Made by us</strong>: the game, its 3D models (from our scripts), music and sounds. <strong>No AI-generated images.</strong></li>
 <li><strong>Cited</strong>: <mark>TODO</mark> count of <code>docs/sources.md</code> (69 today), in the repository and the game's credits. No NASA logos.</li>
 <li><strong>AI disclosed</strong>: Claude Code for code and research; Cursor for a web test. <mark>TODO</mark>: the teammate's tools (README). The idea and design are ours.</li>
 </ul>
-<div class="card"><p class="caps">Team SK Horizon</p>
+<div class="card"><p class="caps">Team SK-Horizons</p>
 <ul>
 <li><strong>Alexander Kholodov</strong>: lead; the mission and the flight to the Moon.</li>
 <li><strong>Sebastián Amaguaya</strong>: the rocket builder, 3D models, look and sound.</li>
 </ul>
-</div></div><div class="figs n1"><figure class="todo"><div class="hole"><span>SCREENSHOT</span>the credits film over the Earth, or the sources list in the game (scripts/screens/credits.gd)</div><figcaption>Every source is in the game's credits</figcaption></figure></div><footer><span>Farpoint HORIZON · SK Horizon · NASA Space Apps Challenge 2026 · Sangolquí</span><span>7 / 7</span></footer></section>
+</div></div><div class="figs n1"><figure class="todo"><div class="hole"><span>SCREENSHOT</span>the credits film over the Earth, or the sources list in the game (scripts/screens/credits.gd)</div><figcaption>Every source is in the game's credits</figcaption></figure></div><footer><span>Farpoint HORIZON · SK-Horizons · NASA Space Apps Challenge 2026 · Sangolquí</span><span>7 / 7</span></footer></section>
 <script>
 /* Marks a slide whose text or pictures do not fit, so the PDF itself shows it (agents: look at every page). */
 for (const s of document.querySelectorAll(".slide")) {

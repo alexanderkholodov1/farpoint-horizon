@@ -1,7 +1,7 @@
 # Farpoint HORIZON · presentación (es): speaker notes
 
 ## 1. NASA Space Apps Challenge 2026 · Space Mission Design Game
-(15 s) Somos SK Horizon, de Quito. Elegimos el reto "Space Mission Design Game". Farpoint HORIZON es un juego donde
+(15 s) Somos SK-Horizons, de Quito. Elegimos el reto "Space Mission Design Game". Farpoint HORIZON es un juego donde
 tú construyes tu propia nave, la lanzas desde el Ecuador y la llevas hasta la Luna.
 
 ## 2. El problema

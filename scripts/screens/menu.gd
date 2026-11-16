@@ -67,7 +67,7 @@ func enter(args: Dictionary) -> void:
 	tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	tele.add_child(tag)
 	_tick()
-	var foot := Kit.lbl("NASA Space Apps Challenge 2026  ·  " + tr("Team SK Horizon · Quito, Ecuador") + "  ·  " + VERSION, 12, Color(Kit.C_ON_DARK, 0.5))
+	var foot := Kit.lbl("NASA Space Apps Challenge 2026  ·  " + tr("Team SK-Horizons · Quito, Ecuador") + "  ·  " + VERSION, 12, Color(Kit.C_ON_DARK, 0.5))
 	Kit.place(foot, 0, 1, 0, 1, 84, -38, 900, -14)
 	add_child(foot)
 	foot.visible = not Kit.compact   # on a phone the list needs the bottom; the team is in the Credits

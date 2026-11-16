@@ -1,5 +1,5 @@
 title: Farpoint HORIZON · presentación
-footer: Farpoint HORIZON · SK Horizon · NASA Space Apps Challenge 2026 · Sangolquí
+footer: Farpoint HORIZON · SK-Horizons · NASA Space Apps Challenge 2026 · Sangolquí
 <!-- Mazo en español: el del pitch en vivo (la sede lo pide en español) y la versión ES de los entregables. Debe ir
      diapositiva por diapositiva igual que en.md. Las notas son el guion hablado: 5 minutos en total.
      Formato y reglas: docs/pitch/README.md. Generar: python tools/pitch.py -->
@@ -10,11 +10,11 @@ label: NASA Space Apps Challenge 2026 · Space Mission Design Game
 
 # Farpoint HORIZON
 > Construye tu nave, lánzala desde la línea ecuatorial, llévala a la Luna y mantenla hablando con la Tierra.
-**Equipo SK Horizon** · Quito, Ecuador · Sede Sangolquí (ESPE)
+**Equipo SK-Horizons** · Quito, Ecuador · Sede Sangolquí (ESPE)
 Alexander Kholodov · Sebastián Amaguaya
 
 Notas:
-(15 s) Somos SK Horizon, de Quito. Elegimos el reto "Space Mission Design Game". Farpoint HORIZON es un juego donde
+(15 s) Somos SK-Horizons, de Quito. Elegimos el reto "Space Mission Design Game". Farpoint HORIZON es un juego donde
 tú construyes tu propia nave, la lanzas desde el Ecuador y la llevas hasta la Luna.
 
 ---
@@ -108,7 +108,7 @@ image: shot: la película de créditos sobre la Tierra, o la lista de fuentes en
 - **Hecho por nosotros**: el juego, sus modelos 3D (de nuestros scripts), música y sonidos. **Ninguna imagen hecha con IA.**
 - **Citado**: TODO número de fuentes en `docs/sources.md` (69 hoy), en el repositorio y en los créditos. Sin logos de la NASA.
 - **IA declarada**: Claude Code para código e investigación; Cursor para una prueba web. TODO: las herramientas del compañero (README). La idea y el diseño son nuestros.
-### Equipo SK Horizon
+### Equipo SK-Horizons
 - **Alexander Kholodov**: líder; la misión y el vuelo a la Luna.
 - **Sebastián Amaguaya**: el constructor de cohetes, modelos 3D, imagen y sonido.
 

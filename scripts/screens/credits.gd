@@ -128,7 +128,7 @@ func _people(box: VBoxContainer, people: Array) -> void:
 		nv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		hb.add_child(nv)
 		nv.add_child(Kit.lbl(P.name, Kit.T_STAT + 8, Kit.C_TEXT, Kit.FONT_T, true))
-		nv.add_child(Kit.lbl("SK Horizon · Quito", Kit.T_BODY, col, Kit.FONT_B))
+		nv.add_child(Kit.lbl("SK-Horizons · Quito", Kit.T_BODY, col, Kit.FONT_B))
 		tv.add_child(Kit.lbl(_cap(P.role), Kit.T_LEAD + 1, Kit.C_TEXT, Kit.FONT_R, true))
 		var links := Kit.hbox(6)
 		tv.add_child(links)

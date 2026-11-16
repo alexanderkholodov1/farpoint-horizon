@@ -4,7 +4,7 @@ The one rulebook for every agent in this repository, whoever runs it (Claude Cod
 other) and whichever team member it works for. `CLAUDE.md` only imports this file.
 
 The game: **Farpoint HORIZON** (always written this way), a 3D space-mission game in Godot 4.7 for the 2026 NASA Space
-Apps Challenge, challenge "Space Mission Design Game", by team SK Horizon (Quito, Ecuador). Alone or with up to three friends, players build a craft, plan its
+Apps Challenge, challenge "Space Mission Design Game", by team **SK-Horizons** (Quito, Ecuador; always written this way, with the hyphen and the final s, never "SK Horizon"). Alone or with up to three friends, players build a craft, plan its
 route, launch it, fly it to its target, land it or keep it talking to Earth, and enjoy what they achieved.
 
 ## Read first

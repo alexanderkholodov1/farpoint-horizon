@@ -1,5 +1,5 @@
 title: Farpoint HORIZON · pitch deck
-footer: Farpoint HORIZON · SK Horizon · NASA Space Apps Challenge 2026 · Sangolquí
+footer: Farpoint HORIZON · SK-Horizons · NASA Space Apps Challenge 2026 · Sangolquí
 <!-- English deck: the one uploaded to the global platform (decks must be in English). Keep it slide for slide in
      step with es.md. Format and rules: docs/pitch/README.md. Build: python tools/pitch.py -->
 
@@ -9,7 +9,7 @@ label: NASA Space Apps Challenge 2026 · Space Mission Design Game
 
 # Farpoint HORIZON
 > Build your own craft, launch it from the equator, fly it to the Moon, and keep it talking to Earth.
-**Team SK Horizon** · Quito, Ecuador · Local event Sangolquí (ESPE)
+**Team SK-Horizons** · Quito, Ecuador · Local event Sangolquí (ESPE)
 Alexander Kholodov · Sebastián Amaguaya
 
 Notes:
@@ -101,7 +101,7 @@ image: shot: the credits film over the Earth, or the sources list in the game (s
 - **Made by us**: the game, its 3D models (from our scripts), music and sounds. **No AI-generated images.**
 - **Cited**: TODO count of `docs/sources.md` (69 today), in the repository and the game's credits. No NASA logos.
 - **AI disclosed**: Claude Code for code and research; Cursor for a web test. TODO: the teammate's tools (README). The idea and design are ours.
-### Team SK Horizon
+### Team SK-Horizons
 - **Alexander Kholodov**: lead; the mission and the flight to the Moon.
 - **Sebastián Amaguaya**: the rocket builder, 3D models, look and sound.
 

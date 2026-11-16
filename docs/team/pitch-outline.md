@@ -8,7 +8,7 @@ English. Cite requirement IDs from `kb/challenge/requirements.md` where a claim 
 ## Slides
 
 1. **Problem.** Mission design is taught in an abstract way.
-2. **Solution.** SK Horizon, with screenshots of the game.
+2. **Solution.** SK-Horizons, with screenshots of the game.
 3. **How it plays.** CML 1 to 4, launch, operation, report.
 4. **Real trade-offs.** One example: the SAR radar (1.5 kW, 400 GB/day, needs a medium platform), or a CubeSat against a SmallSat.
 5. **Team mode and educational value.** Four roles, shared approval, "why does it matter" explanations.
