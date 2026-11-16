@@ -18,7 +18,7 @@ Notes:
 ---
 layout: split
 label: The problem
-image: assets/mission_photos/volcano_watch/sangay_landsat8_2022-11-05_truecolor.jpg | Sangay, Ecuador, seen by Landsat 8 (2022). Every image like this is the end of a chain of hard trade-offs. NASA Earth Observatory / USGS [S-eo]
+image: assets/photos/volcano_watch/sangay_landsat8_2022-11-05_truecolor.jpg | Sangay, Ecuador, seen by Landsat 8 (2022). Every image like this is the end of a chain of hard trade-offs. NASA Earth Observatory / USGS [S-eo]
 
 ## Mission design is taught as a list, not lived as a story
 - A real mission trades **mass, power, data, delta-v, budget and time** against each other; on a whiteboard those trade-offs stay invisible.
@@ -47,7 +47,7 @@ Notes:
 ---
 layout: split
 label: NASA data at the core
-image: assets/mission_photos/moon_south_pole/south_pole_wide_lroc_wac.jpg | The Moon's south pole from the LRO Wide Angle Camera mosaic, re-projected by our script [S-lroc-wac]
+image: assets/photos/moon_south_pole/south_pole_wide_lroc_wac.jpg | The Moon's south pole from the LRO Wide Angle Camera mosaic, re-projected by our script [S-lroc-wac]
 
 ## Real NASA data drives the physics
 - **JPL Horizons**: where the Moon is on launch day; the trip is timed to meet it [S-horizons].
@@ -79,7 +79,7 @@ Notes:
 ---
 layout: split
 label: Impact · next steps
-image: assets/mission_photos/volcano_watch/cotopaxi_landsat8_2015-09-15_truecolor.jpg | Cotopaxi from Landsat 8 (2015): the "Ecuador Volcano Watch" mission flies over it [S-eo]
+image: assets/photos/volcano_watch/cotopaxi_landsat8_2015-09-15_truecolor.jpg | Cotopaxi from Landsat 8 (2015): the "Ecuador Volcano Watch" mission flies over it [S-eo]
 
 ## From Ecuador's volcanoes to the Moon, in Spanish and English
 - **For** students, teachers and anyone curious: no install, every concept explained in plain words.

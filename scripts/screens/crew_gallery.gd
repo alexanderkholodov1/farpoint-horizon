@@ -4,7 +4,7 @@ extends "res://scripts/screens/screen.gd"
 ## to the front. The models are assets/models/crew/crew_<name>_meshy.glb (assets/source/crew_*.py; docs/design/crew/README.md).
 ## Names and lines are proposals for the team to confirm (story: docs/design/story-v0.3.0.md).
 
-const Space := preload("res://scripts/space_builder.gd")
+const Space := preload("res://scripts/world/space_builder.gd")
 
 ## [file id, name, station, one line]
 const CREW := [

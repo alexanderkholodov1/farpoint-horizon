@@ -43,7 +43,7 @@ def px(v):
 
 def font(bold=False, size=28):
     name = "seguisb.ttf" if bold else "segoeui.ttf"
-    for p in (WINFONTS / name, ROOT / "fonts" / ("Inter-SemiBold.otf" if bold else "Inter-Regular.otf")):
+    for p in (WINFONTS / name, ROOT / "assets" / "fonts" / ("Inter-SemiBold.otf" if bold else "Inter-Regular.otf")):
         if p.exists():
             return ImageFont.truetype(str(p), int(size))
     return ImageFont.load_default()

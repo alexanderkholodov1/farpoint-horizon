@@ -15,7 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 TOP = ("docs/", "spaceapps/", "tools/", "kb/", "scripts/", "data/", "assets/", "tests/", "i18n/", "scenes/",
-       "textures/", "audio/", "fonts/", "shaders/", "web/", ".github/")
+       "assets/textures/", "assets/audio/", "assets/fonts/", "assets/shaders/", "web/", ".github/")
 ROOT_FILES = ("README.md", "AGENTS.md", "CLAUDE.md", "LICENSE", "project.godot", "export_presets.cfg", "icon.svg",
               "firebase.json", "database.rules.json", ".gitignore", ".gitattributes")
 # Records of a past moment name what existed then: the plans of shipped versions, the decision log, dated research.

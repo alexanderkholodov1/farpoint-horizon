@@ -3,7 +3,7 @@
 
 Usage:  python tools/content/data/fetch_nasa_data.py [photos|numbers|all]
 Needs Python 3.9+ and Pillow (pip install pillow). Everything else is the standard library.
-Outputs: assets/mission_photos/<mission_id>/*.jpg, data/nasa/*.json, data/nasa/manifest.json.
+Outputs: assets/photos/<mission_id>/*.jpg, data/nasa/*.json, data/nasa/manifest.json.
 See tools/content/data/README.md for what each step does. Source IDs refer to docs/sources.md.
 """
 import io, json, math, re, sys, time, datetime, urllib.request, urllib.parse
@@ -12,7 +12,7 @@ from pathlib import Path
 from PIL import Image, ImageFilter
 
 ROOT = Path(__file__).resolve().parents[3]
-PHOTOS = ROOT / "assets" / "mission_photos"
+PHOTOS = ROOT / "assets" / "photos"
 NUMBERS = ROOT / "data" / "nasa"
 CHECKED = datetime.date.today().isoformat()
 MAXSIDE = 1024

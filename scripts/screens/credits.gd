@@ -2,7 +2,7 @@ extends "res://scripts/screens/screen.gd"
 ## Overlay: the credits (issue #14), told like the end of a film rather than a bibliography. The title and the arc, the
 ## two people who made the game with their links, a nod to the four bots, what it is built with, the AI that helped,
 ## and the sources behind every number, folded by section so they open on a click. Everything comes from
-## data/credits.json (tools/content/credits.py, from docs/sources.md and the README; tests/credits.gd keeps it in step).
+## data/credits.json (tools/content/credits.py, from docs/sources.md and the README; tests/ci/credits.gd keeps it in step).
 ## Opened with main.overlay("credits").
 
 const CREDITS_PATH := "res://data/credits.json"

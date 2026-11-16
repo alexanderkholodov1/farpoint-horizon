@@ -6,7 +6,7 @@ extends "res://scripts/screens/screen.gd"
 ## the full list of sources (the "credits" overlay) or goes back to the menu. Text comes from data/credits.json.
 
 const CREDITS_PATH := "res://data/credits.json"
-const Space := preload("res://scripts/space_builder.gd")
+const Space := preload("res://scripts/world/space_builder.gd")
 const Horizon := preload("res://scripts/ui/horizon.gd")
 const Bots := preload("res://scripts/crew/bots.gd")
 const UiSound := preload("res://scripts/ui/ui_sound.gd")

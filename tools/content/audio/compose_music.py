@@ -1,7 +1,7 @@
 """Composes the game's music (issue #12): synthesized here, no samples, nothing from outside.
 
 Run:  python tools/content/audio/compose_music.py
-Writes audio/music_horizon.ogg, a 46-second loop (16 bars) that joins without a seam: the reverb is applied around the loop
+Writes assets/audio/music_horizon.ogg, a 46-second loop (16 bars) that joins without a seam: the reverb is applied around the loop
 (circular convolution), so its tail flows back into the start. Needs numpy and ffmpeg (libvorbis).
 
 The piece, "Horizon": 84 bpm, in D. Four chords of four bars each (Dmaj9, Bm9, Gmaj9, A6sus2), a pad of slightly
@@ -15,7 +15,7 @@ import subprocess
 import numpy as np
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-OUT_DIR = os.path.join(ROOT, "audio")
+OUT_DIR = os.path.join(ROOT, "assets", "audio")
 WAV = os.path.join(ROOT, "build", "music_horizon.wav")
 OGG = os.path.join(OUT_DIR, "music_horizon.ogg")
 DRIVE_WAV = os.path.join(ROOT, "build", "music_horizon_drive.wav")

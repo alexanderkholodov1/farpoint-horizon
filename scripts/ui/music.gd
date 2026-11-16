@@ -9,8 +9,8 @@ extends Node
 ## silences it with everything else, and it pauses while the game's window is not in front.
 ##   const Music := preload("res://scripts/ui/music.gd")
 
-const TRACK := preload("res://audio/music_horizon.ogg")
-const DRIVE := preload("res://audio/music_horizon_drive.ogg")
+const TRACK := preload("res://assets/audio/music_horizon.ogg")
+const DRIVE := preload("res://assets/audio/music_horizon_drive.ogg")
 const OFF := -60.0
 ## The piece's level on each screen (dB); DEFAULT_DB elsewhere.
 const LEVEL := {"credits_film": -9.0, "launch": -30.0, "flight": -20.0, "landing": -30.0, "report": -13.0}

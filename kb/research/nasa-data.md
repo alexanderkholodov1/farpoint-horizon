@@ -27,7 +27,7 @@ The first volcano set (GIBS VIIRS, 250 m, 2024-08-31) was cloudy and soft, so it
   clean NASA pages: Shackleton's rim (credit NASA/GSFC/Arizona State University) and Shackleton's floor by ShadowCam (credit NASA,
   ShadowCam, Korea Aerospace Research Institute, Arizona State University; the arrow is part of the published image). The SVS Moon
   Kit (4720) has only global maps, no south-pole still.
-- Files now: `volcano_watch/` 6, `moon_south_pole/` 3, `grand_tour/` 4; `assets/mission_photos/` about 1.6 MB.
+- Files now: `volcano_watch/` 6, `moon_south_pole/` 3, `grand_tour/` 4; `assets/photos/` about 1.6 MB.
   The section below describes the first pass; where they disagree, this update wins.
 
 ## 1. Photos each mission returns (first pass)

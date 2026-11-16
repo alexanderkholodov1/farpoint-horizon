@@ -159,7 +159,7 @@ def render(lang):
         sections.append(
             f'<section class="slide {layout}"{style}><div class="text">{head}{body}</div>'
             f'<div class="figs n{len(s.get("image", []))}">{figs}</div>{foot}</section>')
-    fonts = os.path.relpath(ROOT / "fonts", BUILD).replace(os.sep, "/")
+    fonts = os.path.relpath(ROOT / "assets" / "fonts", BUILD).replace(os.sep, "/")
     page = TEMPLATE.replace("{FONTS}", fonts).replace("{LANG}", lang) \
         .replace("{TITLE}", html.escape(front.get("title", "Pitch"))).replace("{SLIDES}", "\n".join(sections))
     BUILD.mkdir(parents=True, exist_ok=True)
@@ -224,7 +224,7 @@ TEMPLATE = """<!doctype html>
 <html lang="{LANG}"><head><meta charset="utf-8"><title>{TITLE}</title>
 <style>
 /* The game's look (scripts/ui/kit.gd, scripts/ui/horizon.gd): deep space, the horizon arc from sunrise amber to deep
-   blue, horizon-blue glass panels. Backgrounds: spaceapps/local-pitch/source/art (tools/content/deck/pitch_art.py). Type: Inter (fonts/). */
+   blue, horizon-blue glass panels. Backgrounds: spaceapps/local-pitch/source/art (tools/content/deck/pitch_art.py). Type: Inter (assets/fonts/). */
 @font-face { font-family: Inter; src: url("{FONTS}/Inter-Regular.otf"); font-weight: 400; }
 @font-face { font-family: Inter; src: url("{FONTS}/Inter-SemiBold.otf"); font-weight: 600; }
 @font-face { font-family: InterDisplay; src: url("{FONTS}/InterDisplay-Bold.otf"); font-weight: 700; }

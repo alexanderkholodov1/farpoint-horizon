@@ -1,7 +1,7 @@
 extends RefCounted
 ## The Deep Space Network as numbers, for ground control (issue #9): which of its three complexes sees the craft now,
 ## how high, how long the light takes, and how far the craft's motion shifts its tone (Doppler). No screen, so
-## tests/ground.gd checks the same numbers the mini-game shows.
+## tests/ci/ground.gd checks the same numbers the mini-game shows.
 ##   const Dsn := preload("res://scripts/minigames/dsn.gd")
 ##   var best: Dictionary = Dsn.best_station(unix_time, craft_x, craft_y)
 ## Our simplifications: the craft's direction is taken from the Earth's centre (no parallax, fine beyond a few Earth

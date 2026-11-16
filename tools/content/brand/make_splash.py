@@ -40,7 +40,7 @@ glow = glow.filter(ImageFilter.GaussianBlur(14))
 img = ImageChops.add(img, glow)
 img = ImageChops.lighter(img, line)
 
-fonts = ROOT / "fonts"
+fonts = ROOT / "assets" / "fonts"
 f_title = ImageFont.truetype(str(fonts / "InterDisplay-Bold.otf"), 76)
 f_small = ImageFont.truetype(str(fonts / "Inter-Regular.otf"), 22)
 t = ImageDraw.Draw(img)

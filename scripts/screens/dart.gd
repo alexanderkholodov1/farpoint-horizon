@@ -12,7 +12,7 @@ extends "res://scripts/screens/screen.gd"
 
 const Approach := preload("res://scripts/missions/dart/approach.gd")
 const Sets := preload("res://scripts/story/sets.gd")
-const Space := preload("res://scripts/space_builder.gd")
+const Space := preload("res://scripts/world/space_builder.gd")
 const Sound := preload("res://scripts/flight/sound.gd")
 const DIDYMOS_AT := Vector3(-0.95, 0.25, -0.7)   ## Didymos from Dimorphos (km): 1.2 km apart, ours.
 const CAM_FOV := 1.0           ## Godot's narrowest camera; DRACO's 0.29 degrees is kept by bringing the eye closer.

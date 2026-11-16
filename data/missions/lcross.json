@@ -1,7 +1,7 @@
 {
  "doc": "Mission 4, LCROSS (October 9, 2009): 'The plan is to crash?' (issue #48). The crew fly it from mission control. (1) The aim, at separation (01:50 UT): on NASA's LROC mosaic of the south pole (S-lroc-wac) the Centaur's predicted impact point is nudged into Cabeus (its place and size: S-cabeus-gazetteer) with small burns; a change of speed v moves the impact point by v times the time left (9 h 41 min), the straight-line rule of a free fall seen this far out (our simplification of the trajectory). Inside Cabeus but on its sunlit floor, or outside it: lost, tried again. Time then runs fast to just before the impact (said on screen). (2) The four minutes: the Centaur hits at 11:31:19.5 UT, the shepherding craft follows 4 min 16.6 s behind at about 2.5 km/s and hits at 11:35:36.1 UT (S-lcross-nssdc); the four minutes are shown 4 times faster (said on screen; real time for the last 15 km); the player keeps the instruments on the plume, through the craft's wobbles, and catches the glints of ice in the crosshair (Space), one reading each, when a clump of ejecta crosses the view; a reading with no glint costs a pause. Too few readings at the end: lost. Climax: the four minutes, then NASA's announcement of water (S-lcross-nasa). Our simplifications, said here: the plume's ejecta speeds (no plume height found on a NASA page), the drift and wobbles of the pointing, the flashes (clumps of ejecta) and the reading rule, showing the four minutes 4 times faster, the trim budget, the spectrum drawn for the game.",
  "aim": {
-  "map": "res://assets/mission_photos/moon_south_pole/south_pole_wide_lroc_wac.jpg",
+  "map": "res://assets/photos/moon_south_pole/south_pole_wide_lroc_wac.jpg",
   "map_px": 1000,
   "map_half_deg": 11.0,
   "moon_radius_km": 1737.4,

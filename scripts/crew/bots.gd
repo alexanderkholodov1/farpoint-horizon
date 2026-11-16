@@ -12,7 +12,7 @@ extends RefCounted
 ## languages works); their arguments are numbers or "kind:id" references that each reader resolves in its own catalogs.
 ## All numbers and rules come from the game's data (data/*.json), which cite their sources.
 
-const GD := preload("res://scripts/game_data.gd")
+const GD := preload("res://scripts/core/game_data.gd")
 ## Loaded when first used: a script started with -s is compiled before the autoloads Mission refers to exist.
 static var _mission_script: GDScript
 
@@ -80,7 +80,7 @@ static func _resolve(a) -> Variant:
 # ===================================================================================== PLAN
 static func _copy(m):
 	if _mission_script == null:
-		_mission_script = load("res://scripts/mission.gd")
+		_mission_script = load("res://scripts/core/mission.gd")
 	var c = _mission_script.new()
 	c.from_dict(m.to_dict())
 	return c

@@ -11,7 +11,7 @@ anyone can check, repeat or update them. Every source ID (`S-...`) is described 
 
 ## What it does, step by step
 
-### 1. Volcano Watch photos (`assets/mission_photos/volcano_watch/`, sources S-eo and S-nasa-images)
+### 1. Volcano Watch photos (`assets/photos/volcano_watch/`, sources S-eo and S-nasa-images)
 The mission's real twin is Landsat 9, so we want pictures of the same kind: 15 to 30 m pixels, natural colour and infrared.
 We first tried NASA's GIBS image service (VIIRS, 250 m), but the Ecuadorian Andes were under cloud and the pictures were soft,
 so we dropped them. Now:
@@ -24,7 +24,7 @@ so we dropped them. Now:
    "special instrument" photos.
 3. The credit line each page prints is saved in the manifest next to the file.
 
-### 2. Moon south pole photos (`assets/mission_photos/moon_south_pole/`, sources S-lroc-wac and S-nasa-science)
+### 2. Moon south pole photos (`assets/photos/moon_south_pole/`, sources S-lroc-wac and S-nasa-science)
 1. NASA Moon Trek serves the LROC Wide Angle Camera mosaic of the whole Moon as small square tiles on a flat map. Near
    the pole a flat map is stretched sideways, so the tiles are useless as they are.
 2. Download the 128 tiles that touch the pole, join them, then redraw the picture as seen from above the pole: for each
@@ -34,7 +34,7 @@ so we dropped them. Now:
 3. Two close views of Shackleton crater come straight from NASA Science pages: its sunlit rim (LRO) and its floor, which
    never sees the Sun, taken by ShadowCam (shows a track left by a rolling boulder).
 
-### 3. Grand Tour photos (`assets/mission_photos/grand_tour/`, source S-nasa-images)
+### 3. Grand Tour photos (`assets/photos/grand_tour/`, source S-nasa-images)
 1. For Jupiter, Saturn, Uranus and Neptune we picked one Voyager image each (record numbers in the script) from the
    NASA Image and Video Library.
 2. Ask the library which sizes exist and download the biggest; shrink to at most 1024 px; save as JPEG.

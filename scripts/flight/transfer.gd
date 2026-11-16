@@ -1,5 +1,5 @@
 extends RefCounted
-## The trip from Earth orbit to the Moon, as numbers: no screen, so the flight screen and tests/flight.gd fly the same
+## The trip from Earth orbit to the Moon, as numbers: no screen, so the flight screen and tests/ci/flight.gd fly the same
 ## physics. Real time in seconds; the screen chooses how fast it runs (its time warp).
 ##   - The Earth and the Moon pull the craft (their GM and size from NSSDC [S-nssdc-planets]). The frame is centred on
 ##     the Earth, which itself falls toward the Moon, so the Moon's pull on the Earth is subtracted (the indirect term).

@@ -13,8 +13,8 @@ extends "res://scripts/screens/screen.gd"
 ## Generous: if the pilot does not act, the flight computer does after a few seconds; a cut too early is refused
 ## while the path does not reach the Moon; Skip lets the computer fly the current step. Never a failure screen.
 
-const Space := preload("res://scripts/space_builder.gd")
-const Ship := preload("res://scripts/ship_builder.gd")
+const Space := preload("res://scripts/world/space_builder.gd")
+const Ship := preload("res://scripts/world/ship_builder.gd")
 const FlightHud := preload("res://scripts/flight/flight_hud.gd")
 const FlightData := preload("res://scripts/flight/flight_data.gd")
 const Sound := preload("res://scripts/flight/sound.gd")

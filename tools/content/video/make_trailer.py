@@ -1,6 +1,6 @@
 """Cuts the 30-second video from the game's own recording (issue #38).
 
-1. Record:  tools/dev/godot.sh --path . --write-movie build/video/raw.ogv --fixed-fps 30 res://tests/trailer.tscn > build/video/record.log
+1. Record:  tools/dev/godot.sh --path . --write-movie build/video/raw.ogv --fixed-fps 30 res://tests/look/trailer.tscn > build/video/record.log
    (the window size of the project, 1600x900; the cut is scaled to 1920x1080). Do not close the window: it ends itself.
 2. Cut:     python tools/content/video/make_trailer.py
 Writes build/video/farpoint_horizon_30s.mp4 (H.264 + AAC, under 30 s), from the "[cut] <moment> <seconds>" marks the

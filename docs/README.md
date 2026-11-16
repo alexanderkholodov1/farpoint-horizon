@@ -9,12 +9,12 @@ longer exists.
 
 | Folder | What is in it |
 |---|---|
-| `project.godot`, `scenes/` | The project and its one scene, `scenes/main.tscn`, which starts `scripts/main.gd` |
-| `scripts/` | All the code, one folder per area (`screens/`, `flight/`, `story/`, `missions/`, `minigames/`, `craft/`, `crew/`, `net/`, `ui/`...). Each script says what it does in its first `##` lines; `tools/dev/map.sh` lists them |
+| `project.godot`, `scenes/` | The project and its one scene, `scenes/main.tscn`, which starts `scripts/core/main.gd` |
+| `scripts/` | All the code, one folder per area: `core/` (start-up, the game's state, the catalogs, the mission model), `world/` (the 3D world and its builders), `screens/` (one script per screen), `flight/`, `story/`, `missions/`, `minigames/`, `craft/`, `crew/`, `net/`, `tutorial/`, `ui/`. Each script says what it does in its first `##` lines; `tools/dev/map.sh` lists them |
 | `data/` | Content and balance as JSON (missions, parts, orbits, the story, NASA data), each entry with its source |
 | `i18n/` | The Spanish texts, one CSV per piece (`keys,es`) |
-| `assets/`, `textures/`, `audio/`, `fonts/`, `shaders/` | Models, NASA imagery, music, type and shaders; `assets/source/` holds the scripts that build our models |
-| `tests/` | The checks CI runs on every push (a file with a `## check:` line) and the look harnesses that save screenshots to judge by eye ([guides/testing.md](guides/testing.md)) |
+| `assets/` | Everything seen and heard: `models/`, `parts/`, `textures/`, `photos/` (NASA pictures a mission shows), `story/`, `brand/`, `audio/`, `fonts/`, `shaders/`; `source/` holds the scripts that build our models and textures |
+| `tests/` | `ci/`: the checks CI runs on every push; `look/`: the harnesses that save screenshots to judge by eye ([guides/testing.md](guides/testing.md)) |
 
 ## 2. The team's work
 

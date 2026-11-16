@@ -239,7 +239,7 @@
     },
     {
      "id": "S-apollo13-mailbox",
-     "text": "NASA. Apollo 13 photograph AS13-62-9004: in the lunar module, hoses and the canister of the \"mail box\", the crew's carbon dioxide adapter (public domain). Full-size file in the Apollo Lunar Surface Journal (NASA History Office, hosted at apollojournals.org): https://apollojournals.org/alsj/a13/AS13-62-9004.jpg. Checked 2026-11-15 (this frame is not in the NASA Image and Video Library; frame AS13-62-8929 there shows the same mail box from the front: https://images.nasa.gov/details/as13-62-8929). The real adapter, shown when mission 1's adapter game is won (assets/missions/apollo13/as13-62-9004.jpg). The same mission page [S-apollo13-nasa] gives the game's other facts: the CO2 warning after a day and a half in the lunar module, and the lunar module made for two men for two days, asked to keep three for about four."
+     "text": "NASA. Apollo 13 photograph AS13-62-9004: in the lunar module, hoses and the canister of the \"mail box\", the crew's carbon dioxide adapter (public domain). Full-size file in the Apollo Lunar Surface Journal (NASA History Office, hosted at apollojournals.org): https://apollojournals.org/alsj/a13/AS13-62-9004.jpg. Checked 2026-11-15 (this frame is not in the NASA Image and Video Library; frame AS13-62-8929 there shows the same mail box from the front: https://images.nasa.gov/details/as13-62-8929). The real adapter, shown when mission 1's adapter game is won (assets/photos/apollo13/as13-62-9004.jpg). The same mission page [S-apollo13-nasa] gives the game's other facts: the CO2 warning after a day and a half in the lunar module, and the lunar module made for two men for two days, asked to keep three for about four."
     },
     {
      "id": "S-hubble-sm1",
@@ -251,7 +251,7 @@
     },
     {
      "id": "S-m100-pia22913",
-     "text": "NASA/JPL. M100 Through 3 Cameras, PIA22913 (public domain). https://images.nasa.gov/details/PIA22913. M100 with WFPC1 in 1993, blurry from the mirror's flaw, and with WFPC2 after STS-61, \"snapped into sharp focus\". Cropped for mission 2's first image (assets/missions/sts61/m100_wfpc1_1993.jpg, m100_wfpc2_1993.jpg)."
+     "text": "NASA/JPL. M100 Through 3 Cameras, PIA22913 (public domain). https://images.nasa.gov/details/PIA22913. M100 with WFPC1 in 1993, blurry from the mirror's flaw, and with WFPC2 after STS-61, \"snapped into sharp focus\". Cropped for mission 2's first image (assets/photos/sts61/m100_wfpc1_1993.jpg, m100_wfpc2_1993.jpg)."
     },
     {
      "id": "S-nasa-9408670",
@@ -315,7 +315,7 @@
     },
     {
      "id": "S-artemis-art672",
-     "text": "NASA. Artemis I Flight Day 13: Orion, Earth, and Moon, art001e000672 (Nov 28, 2022), NASA Image and Video Library, https://images.nasa.gov/details/art001e000672 (public domain). Orion at its farthest, 268,563 miles from Earth. Our processing: cropped to the Moon and the Earth (the spacecraft and its markings left out). In assets/missions/artemis1/."
+     "text": "NASA. Artemis I Flight Day 13: Orion, Earth, and Moon, art001e000672 (Nov 28, 2022), NASA Image and Video Library, https://images.nasa.gov/details/art001e000672 (public domain). Orion at its farthest, 268,563 miles from Earth. Our processing: cropped to the Moon and the Earth (the spacecraft and its markings left out). In assets/photos/artemis1/."
     }
    ]
   },
@@ -324,23 +324,23 @@
    "entries": [
     {
      "id": "S-moon-kit",
-     "text": "NASA Goddard Space Flight Center, Scientific Visualization Studio. CGI Moon Kit (2019). https://svs.gsfc.nasa.gov/4720. LRO LROC WAC colour map (lroc_color_poles_4k.tif, colour enhanced from LROC and Kaguya) and LOLA elevation (ldem_16.tif, 16 pixels per degree); the game's Moon colour and relief (textures/moon_color.jpg, moon_normal.jpg, made by assets/source/planet_textures.py). Credit: \"NASA/GSFC/Scientific Visualization Studio, LRO\". NASA media guidelines."
+     "text": "NASA Goddard Space Flight Center, Scientific Visualization Studio. CGI Moon Kit (2019). https://svs.gsfc.nasa.gov/4720. LRO LROC WAC colour map (lroc_color_poles_4k.tif, colour enhanced from LROC and Kaguya) and LOLA elevation (ldem_16.tif, 16 pixels per degree); the game's Moon colour and relief (assets/textures/moon_color.jpg, moon_normal.jpg, made by assets/source/planet_textures.py). Credit: \"NASA/GSFC/Scientific Visualization Studio, LRO\". NASA media guidelines."
     },
     {
      "id": "S-gibs-earth",
-     "text": "NASA GIBS WMS (see S-gibs), whole globe at 4096 x 2048: BlueMarble_NextGeneration and BlueMarble_ShadedRelief (August 2004, NASA Earth Observatory, Reto Stockli, MODIS), VIIRS_Black_Marble (2016, Suomi NPP VIIRS) and VIIRS_SNPP_CorrectedReflectance_TrueColor of 2024-08-31 (the day of the volcano photos). The Earth by day, its relief, its city lights and its clouds (textures/earth_*.jpg, assets/source/planet_textures.py). Replaces the former Earth texture (earth_albedo.jpg), whose source was unknown. Credit: \"NASA Earth Observatory / NASA GIBS\"."
+     "text": "NASA GIBS WMS (see S-gibs), whole globe at 4096 x 2048: BlueMarble_NextGeneration and BlueMarble_ShadedRelief (August 2004, NASA Earth Observatory, Reto Stockli, MODIS), VIIRS_Black_Marble (2016, Suomi NPP VIIRS) and VIIRS_SNPP_CorrectedReflectance_TrueColor of 2024-08-31 (the day of the volcano photos). The Earth by day, its relief, its city lights and its clouds (assets/textures/earth_*.jpg, assets/source/planet_textures.py). Replaces the former Earth texture (earth_albedo.jpg), whose source was unknown. Credit: \"NASA Earth Observatory / NASA GIBS\"."
     },
     {
      "id": "S-gibs-region",
-     "text": "NASA GIBS WMS (see S-gibs), the same three layers (Blue Marble, shaded relief, VIIRS of 2024-08-31) over 92-68 W, 12 N-12 S at 2048 x 2048 (about 1.3 km per pixel): the sharper Earth under the climb from Ecuador (textures/earth_region_*.jpg, assets/source/planet_textures.py region())."
+     "text": "NASA GIBS WMS (see S-gibs), the same three layers (Blue Marble, shaded relief, VIIRS of 2024-08-31) over 92-68 W, 12 N-12 S at 2048 x 2048 (about 1.3 km per pixel): the sharper Earth under the climb from Ecuador (assets/textures/earth_region_*.jpg, assets/source/planet_textures.py region())."
     },
     {
      "id": "S-terrain-tiles",
-     "text": "Mapzen/Tilezen. Terrain Tiles on the Registry of Open Data on AWS, https://registry.opendata.aws/terrain-tiles/ (terrarium encoding), which in the Andes is NASA SRTM elevation (NASA/ USGS, public domain); attribution as the registry asks. Sixteen zoom-11 tiles around Cotopaxi; the launch site's relief (textures/terrain_cotopaxi.png, assets/source/terrain_cotopaxi.py). Our check: the summit comes out at 5,876 m against the published 5,897 m."
+     "text": "Mapzen/Tilezen. Terrain Tiles on the Registry of Open Data on AWS, https://registry.opendata.aws/terrain-tiles/ (terrarium encoding), which in the Andes is NASA SRTM elevation (NASA/ USGS, public domain); attribution as the registry asks. Sixteen zoom-11 tiles around Cotopaxi; the launch site's relief (assets/textures/terrain_cotopaxi.png, assets/source/terrain_cotopaxi.py). Our check: the summit comes out at 5,876 m against the published 5,897 m."
     },
     {
      "id": "S-cotopaxi-belts",
-     "text": "Our simplification of the altitude belts painted on that relief: valley farmland, paramo grass from about 3,500 m, volcanic sand from about 4,500 m, glacier from about 4,850 m (shaders/terrain.gdshader). To be checked against a published source; the glacier line of Cotopaxi is near 4,800-5,000 m in recent surveys."
+     "text": "Our simplification of the altitude belts painted on that relief: valley farmland, paramo grass from about 3,500 m, volcanic sand from about 4,500 m, glacier from about 4,850 m (assets/shaders/terrain.gdshader). To be checked against a published source; the glacier line of Cotopaxi is near 4,800-5,000 m in recent surveys."
     }
    ]
   },
@@ -353,19 +353,19 @@
     },
     {
      "id": "S-eo",
-     "text": "NASA Earth Observatory (science.nasa.gov/earth/earth-observatory), image pages with their full-size files: Sangay (Landsat 8 OLI, 5 Nov 2022, https://science.nasa.gov/earth/earth-observatory/a-line-of-ash-from-sangay-150650/), Cotopaxi (Landsat 8 OLI, 15 Sep 2015, https://science.nasa.gov/earth/earth-observatory/cotopaxi-volcano-ecuador-86618/), Tungurahua (EO-1 ALI natural and short-wave infrared, 1 Jan 2011, https://science.nasa.gov/earth/earth-observatory/ongoing-eruption-of-tungurahua-ecuador-48337/). In assets/mission_photos/volcano_watch/. Credits as the pages print them: \"NASA Earth Observatory images by Lauren Dauphin / Jesse Allen, using Landsat data from the U.S. Geological Survey\" (Landsat data are public domain, USGS); \"NASA Earth Observatory image created by Jesse Allen, using EO-1 ALI data provided courtesy of the NASA EO-1 team and the U.S. Geological Survey\". Our processing: cropped to the volcano, resized."
+     "text": "NASA Earth Observatory (science.nasa.gov/earth/earth-observatory), image pages with their full-size files: Sangay (Landsat 8 OLI, 5 Nov 2022, https://science.nasa.gov/earth/earth-observatory/a-line-of-ash-from-sangay-150650/), Cotopaxi (Landsat 8 OLI, 15 Sep 2015, https://science.nasa.gov/earth/earth-observatory/cotopaxi-volcano-ecuador-86618/), Tungurahua (EO-1 ALI natural and short-wave infrared, 1 Jan 2011, https://science.nasa.gov/earth/earth-observatory/ongoing-eruption-of-tungurahua-ecuador-48337/). In assets/photos/volcano_watch/. Credits as the pages print them: \"NASA Earth Observatory images by Lauren Dauphin / Jesse Allen, using Landsat data from the U.S. Geological Survey\" (Landsat data are public domain, USGS); \"NASA Earth Observatory image created by Jesse Allen, using EO-1 ALI data provided courtesy of the NASA EO-1 team and the U.S. Geological Survey\". Our processing: cropped to the volcano, resized."
     },
     {
      "id": "S-nasa-science",
-     "text": "NASA Science (science.nasa.gov) resource and image pages, for the Moon: Shackleton crater rim, credit \"NASA/GSFC/Arizona State University\" (https://science.nasa.gov/resource/shackleton-craters-illuminated-rim-shadowed-interior/); Shackleton floor seen by ShadowCam, a NASA instrument on the Korean KPLO orbiter, credit as printed \"NASA, ShadowCam, Korea Aerospace Research Institute, Arizona State University\" (https://science.nasa.gov/image-article/apod-2023-may-5-shackleton-from-shadowcam/); the Korean partner is named in the credit; no separate terms found. In assets/mission_photos/moon_south_pole/."
+     "text": "NASA Science (science.nasa.gov) resource and image pages, for the Moon: Shackleton crater rim, credit \"NASA/GSFC/Arizona State University\" (https://science.nasa.gov/resource/shackleton-craters-illuminated-rim-shadowed-interior/); Shackleton floor seen by ShadowCam, a NASA instrument on the Korean KPLO orbiter, credit as printed \"NASA, ShadowCam, Korea Aerospace Research Institute, Arizona State University\" (https://science.nasa.gov/image-article/apod-2023-may-5-shackleton-from-shadowcam/); the Korean partner is named in the credit; no separate terms found. In assets/photos/moon_south_pole/."
     },
     {
      "id": "S-lroc-wac",
-     "text": "NASA/GSFC/Arizona State University, Lunar Reconnaissance Orbiter Camera (LROC) Wide Angle Camera global mosaic (100 m), served by NASA Moon Trek, https://trek.nasa.gov/tiles/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd_v02/1.0.0/WMTSCapabilities.xml. Photos in assets/mission_photos/moon_south_pole/. Credit: \"NASA/GSFC/Arizona State University, LRO\". Our processing: tiles joined and re-projected to a view from above the south pole."
+     "text": "NASA/GSFC/Arizona State University, Lunar Reconnaissance Orbiter Camera (LROC) Wide Angle Camera global mosaic (100 m), served by NASA Moon Trek, https://trek.nasa.gov/tiles/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd_v02/1.0.0/WMTSCapabilities.xml. Photos in assets/photos/moon_south_pole/. Credit: \"NASA/GSFC/Arizona State University, LRO\". Our processing: tiles joined and re-projected to a view from above the south pole."
     },
     {
      "id": "S-nasa-images",
-     "text": "NASA Image and Video Library, https://images.nasa.gov (API https://images-api.nasa.gov), records PIA00022 (Jupiter, Voyager 1), PIA01374 (Saturn, Voyager 1), PIA18182 (Uranus, Voyager 2), PIA00049 (Neptune, Voyager 2); catalogued by NASA/JPL Photojournal. Photos in assets/mission_photos/grand_tour/. Credit: \"NASA/JPL-Caltech\". Our processing: resized. Also the ASTER pictures in assets/mission_photos/volcano_watch/: PIA23914 (Sangay, night thermal infrared, 11 Jun 2020, credit \"NASA/METI/AIST/Japan Space Systems, and U.S./Japan ASTER Science Team\") and PIA15151 (Cotopaxi, false colour, 22 Aug 2015, credit \"NASA/GSFC/METI/ERSDAC/JAROS, and U.S./Japan ASTER Science Team\"); ASTER is a joint Japanese (METI) and NASA instrument on Terra, hence the credit."
+     "text": "NASA Image and Video Library, https://images.nasa.gov (API https://images-api.nasa.gov), records PIA00022 (Jupiter, Voyager 1), PIA01374 (Saturn, Voyager 1), PIA18182 (Uranus, Voyager 2), PIA00049 (Neptune, Voyager 2); catalogued by NASA/JPL Photojournal. Photos in assets/photos/grand_tour/. Credit: \"NASA/JPL-Caltech\". Our processing: resized. Also the ASTER pictures in assets/photos/volcano_watch/: PIA23914 (Sangay, night thermal infrared, 11 Jun 2020, credit \"NASA/METI/AIST/Japan Space Systems, and U.S./Japan ASTER Science Team\") and PIA15151 (Cotopaxi, false colour, 22 Aug 2015, credit \"NASA/GSFC/METI/ERSDAC/JAROS, and U.S./Japan ASTER Science Team\"); ASTER is a joint Japanese (METI) and NASA instrument on Terra, hence the credit."
     },
     {
      "id": "S-horizons",
@@ -414,7 +414,7 @@
     },
     {
      "id": "S-afj11-loi",
-     "text": "Woods, W. D., et al. Apollo 11, Day 4 part 2: Entering Lunar Orbit, Apollo Flight Journal. https://apollojournals.org/afj/ap11fj/12day4-loi1.html. Checked 2026-11-15. LOI-1: \"duration 6 minutes, 2 seconds\", delta-v 2,917 ft/s (889 m/s), weight before the burn 96,012 lb (43,550 kg), resulting orbit about 113 x 313 km. The craft's engine of the trip (data/engines.json) and tests/flight.gd."
+     "text": "Woods, W. D., et al. Apollo 11, Day 4 part 2: Entering Lunar Orbit, Apollo Flight Journal. https://apollojournals.org/afj/ap11fj/12day4-loi1.html. Checked 2026-11-15. LOI-1: \"duration 6 minutes, 2 seconds\", delta-v 2,917 ft/s (889 m/s), weight before the burn 96,012 lb (43,550 kg), resulting orbit about 113 x 313 km. The craft's engine of the trip (data/engines.json) and tests/ci/flight.gd."
     },
     {
      "id": "S-j2",

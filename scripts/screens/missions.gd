@@ -6,18 +6,18 @@ extends "res://scripts/screens/screen.gd"
 ## The picture of each mission: [file, the part of it shown (x, y, w, h in its pixels; none = all), caption].
 ## All are NASA images already in the game and cited in docs/sources.md (the mission photos and the globe textures).
 const PICTURES := {
-	"volcanes": ["res://assets/mission_photos/volcano_watch/cotopaxi_landsat8_2015-09-15_truecolor.jpg", [], "Cotopaxi · Landsat 8, 2015"],
-	"clima": ["res://textures/earth_day.jpg", [740, 840, 620, 380], "The Pacific off Ecuador · Blue Marble"],
-	"luna": ["res://textures/moon_color.jpg", [796, 370, 455, 256], "The Moon · Lunar Reconnaissance Orbiter"],
-	"telescopio": ["res://assets/mission_photos/grand_tour/neptune_voyager2_1989.jpg", [170, 330, 640, 330], "Neptune · Voyager 2, 1989"],
-	"libre": ["res://textures/earth_night.jpg", [313, 228, 512, 312], "The Americas at night · Black Marble"],
-	"moon_south_pole": ["res://assets/mission_photos/moon_south_pole/south_pole_wide_lroc_wac.jpg", [], "The Moon's south pole · LRO"],
+	"volcanes": ["res://assets/photos/volcano_watch/cotopaxi_landsat8_2015-09-15_truecolor.jpg", [], "Cotopaxi · Landsat 8, 2015"],
+	"clima": ["res://assets/textures/earth_day.jpg", [740, 840, 620, 380], "The Pacific off Ecuador · Blue Marble"],
+	"luna": ["res://assets/textures/moon_color.jpg", [796, 370, 455, 256], "The Moon · Lunar Reconnaissance Orbiter"],
+	"telescopio": ["res://assets/photos/grand_tour/neptune_voyager2_1989.jpg", [170, 330, 640, 330], "Neptune · Voyager 2, 1989"],
+	"libre": ["res://assets/textures/earth_night.jpg", [313, 228, 512, 312], "The Americas at night · Black Marble"],
+	"moon_south_pole": ["res://assets/photos/moon_south_pole/south_pole_wide_lroc_wac.jpg", [], "The Moon's south pole · LRO"],
 }
 const PHOTO_H := 150.0
 
 var order: Array = []      ## The missions as shown, for the number keys.
-const Progress := preload("res://scripts/progress.gd")
-const GREY := preload("res://shaders/ui_grey.gdshader")
+const Progress := preload("res://scripts/core/progress.gd")
+const GREY := preload("res://assets/shaders/ui_grey.gdshader")
 
 
 func enter(_args: Dictionary) -> void:

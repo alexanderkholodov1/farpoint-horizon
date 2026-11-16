@@ -39,7 +39,7 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
   `docs/sources.md` with an ID, in a form fit to show the judges. Our own simplifications say so and cite what they
   simplify. The README and the game's credits are built from that list. Research notes in `kb/` keep their URLs.
 - **Data apart from code.** Missions, parts, launchers, orbits, events and texts live in data (today
-  `scripts/game_data.gd`), so content and balance change without touching logic.
+  `scripts/core/game_data.gd`), so content and balance change without touching logic.
 - **Measure before you claim.** Run it, read the log, look at the screenshot; cite the file and line or the command.
   A guess is labeled as a guess.
 - **Real behavior, never a drawing of it.** Everything that moves behaves as in real life: launch, orbits, transfers,
@@ -131,7 +131,7 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
 - No shared lists or files: a piece adds its own files and never edits a list or file every piece edits, so three or
   more agents work at once without conflicts (issues #26, #28); a new thing every piece would have to register is
   found by folder instead. Its Spanish texts go in its own `i18n/<piece>.csv` (`keys,es`; `translations.csv` is the old
-  base and takes no new lines); a new screen is only `scripts/screens/<id>.gd`; a new test is only `tests/<name>.gd`
+  base and takes no new lines); a new screen is only `scripts/screens/<id>.gd`; a new check is only `tests/ci/<name>.gd`
   with a `## check: <pattern>` line. The game and `tools/dev/check.sh` find them by folder.
 - Never rewrite, reformat or revert someone else's work, and never push to someone else's branch; ask in the issue,
   or propose your change with a pull request into their branch.
@@ -141,7 +141,7 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
 - Godot 4.7.2, renderer GL Compatibility (it runs in browsers and on integrated GPUs). The web build is the
   single-threaded export (`export_presets.cfg`, preset "Web"), so any static host works.
 - `tools/dev/godot.sh` finds the Godot binary (or set `GODOT`); `tools/dev/check.sh` runs what CI runs: import, a short
-  headless run of the main scene, the fuzz test, every check in `tests/`, the documentation check and the web export
+  headless run of the main scene, the fuzz test, every check in `tests/ci/`, the documentation check and the web export
   (`docs/guides/testing.md`). `tools/dev/shots.sh` plays the scripted walkthrough with
   a window and saves screenshots to `shots/` (headless runs draw nothing).
 - Every pull request gets its own temporary page on Firebase Hosting, linked on the pull request by CI (it expires
@@ -171,8 +171,8 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
 ## Layout
 The map is `docs/README.md`. Three areas, each with a README that says what it holds, who uses it and when it changes;
 `tools/dev/check.sh` fails when a README is missing or a document names a path that does not exist.
-- **The game** (what Godot loads): `project.godot`, `scenes/`, `scripts/`, `data/`, `i18n/`, `assets/`, `textures/`,
-  `audio/`, `fonts/`, `shaders/`, `tests/`.
+- **The game** (what Godot loads): `project.godot`, `scenes/`, `scripts/` (one folder per area),
+  `data/`, `i18n/`, `assets/` (everything seen and heard), `tests/` (`ci/` and `look/`).
 - **The team's work**: `docs/` (`guides/` how to work, `design/` what the game is, `versions/` one page per version,
   `state/` notes a piece keeps, `sources.md` the bibliography), `kb/` (research), `tools/` (`dev/` to build, test and
   integrate; `content/` to make data, credits, art and the deck), `.github/` (CI, release, templates).

@@ -2,7 +2,7 @@
 
 Run after changing docs/sources.md or the README's "Use of AI" / "Credits" sections:
     python tools/content/credits.py
-tests/credits.gd fails when a source in docs/sources.md is missing from data/credits.json.
+tests/ci/credits.gd fails when a source in docs/sources.md is missing from data/credits.json.
 
 What goes in:
 - Every source entry of docs/sources.md (lines "- **ID** ..."), by section, the section "Still to add" left out.

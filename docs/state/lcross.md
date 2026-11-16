@@ -11,5 +11,5 @@
 - Glints of ice fly out of the plume (our simplification of clumps of ejecta): chase each with the crosshair
   (mouse or WASD), Space to catch it; combos; a press with no glint pauses the instruments; the craft wobbles now and
   then. 8 readings needed (stars at 8, 12, 16). Signal lost at 11:35:36.1 UT with static; NASA's facts close it.
-- Rules: `scripts/missions/lcross/impact.gd`, tested by `tests/lcross.gd`; look: `tests/lcrossshot.tscn`; to play the
-  chapter alone: `tests/lcrossplay.tscn`. Set "lcross_space" (the Centaur and the shepherding craft, the Moon ahead).
+- Rules: `scripts/missions/lcross/impact.gd`, tested by `tests/ci/lcross.gd`; look: `tests/look/lcrossshot.tscn`; to play the
+  chapter alone: `tests/look/lcrossplay.tscn`. Set "lcross_space" (the Centaur and the shepherding craft, the Moon ahead).

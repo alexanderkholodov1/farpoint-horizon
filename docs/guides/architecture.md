@@ -1,6 +1,6 @@
 # Architecture
 
-Everything in the game is built in code. `scenes/main.tscn` holds a single node with `scripts/main.gd` attached: a
+Everything in the game is built in code. `scenes/main.tscn` holds a single node with `scripts/core/main.gd` attached: a
 small flow controller that owns the 3D world and the UI root and switches screens. Each screen is its own script in
 `scripts/screens/`, so several people can build different screens without touching the same file. Checked against the
 code on 2026-11-15.
@@ -22,9 +22,9 @@ What is not a script:
 | `web/room_bridge.js`, `web/build_head.py` | The page's JavaScript for Firebase; `build_head.py` writes it into the Web preset's `html/head_include` (Godot's export copies only `index.html`) |
 | `database.rules.json` | Realtime Database rules: only `rooms/<code>` |
 | `data/*.json`, `i18n/*.csv` | The content (see "Data and translation") and the Spanish texts, one file per piece |
-| `shaders/` | `earth`, `clouds`, `atmosphere`, `moon`, `sky`, `solar_cell`, `engine_glow`, and the include `noise.gdshaderinc` |
-| `fonts/` | Inter Regular, SemiBold and Display Bold, with `FONTS_LICENSE.txt` |
-| `textures/` | `earth_day/night/relief/clouds.jpg`, `moon_color/normal.jpg`, `terrain_cotopaxi.png` (NASA data, made by `assets/source/planet_textures.py` and `terrain_cotopaxi.py`) |
+| `assets/shaders/` | `earth`, `clouds`, `atmosphere`, `moon`, `sky`, `solar_cell`, `engine_glow`, and the include `noise.gdshaderinc` |
+| `assets/fonts/` | Inter Regular, SemiBold and Display Bold, with `FONTS_LICENSE.txt` |
+| `assets/textures/` | `earth_day/night/relief/clouds.jpg`, `moon_color/normal.jpg`, `terrain_cotopaxi.png` (NASA data, made by `assets/source/planet_textures.py` and `terrain_cotopaxi.py`) |
 
 Node tree at run time: `Main` (main.gd) holds `World` (world.gd: environment, lights, camera, `stage`), the UI
 `CanvasLayer` with the themed root `Control`, and a top `CanvasLayer` with the fade rectangle. The current screen is a
@@ -55,13 +55,13 @@ How to add a screen:
    says what the player does there and which `args` it takes.
 2. Build its UI in `enter(args)` with `add_child()` and `Kit`; to redraw, call `clear()` and build again. Put per-frame
    work in `process(delta)`.
-3. Nothing to register: `main.gd` finds every script in `scripts/screens/` at startup (`scripts/found.gd`), and the
+3. Nothing to register: `main.gd` finds every script in `scripts/screens/` at startup (`scripts/core/found.gd`), and the
    file name is the id. An overlay is a screen opened with `main.overlay(id)`. A parse error in the screen fails
    `tools/dev/check.sh` at once (the main scene loads every screen). Its Spanish texts go in its piece's own
-   `i18n/<piece>.csv`, and `tests/i18n.gd` checks every `tr("...")` in the code.
+   `i18n/<piece>.csv`, and `tests/ci/i18n.gd` checks every `tr("...")` in the code.
 4. Reach it from another screen with `go("<id>", {...})`; keep what other screens need in `GameState`, not in the
    screen, since the screen is freed when the player leaves it.
-5. Add it to `tests/autoshot.gd` with a screenshot, run the walkthrough and look at the picture.
+5. Add it to `tests/look/autoshot.gd` with a screenshot, run the walkthrough and look at the picture.
 
 Rules that keep screens apart:
 - A screen owns its file(s) and its UI; it never reaches into another screen. Shared values go through `GameState`;
@@ -76,8 +76,8 @@ Rules that keep screens apart:
 Content and balance live in `data/*.json`, never in code. `GameData` reads the files once at startup (and again when
 the language changes) and keeps them in static variables under the names in the table above, so
 `GameData.LAUNCHERS["light"].cost` works anywhere, including in a script started with `-s` (which compiles before the
-autoloads exist, so it reaches `GameData` through `const GD := preload("res://scripts/game_data.gd")`, see
-`tests/fuzz.gd`). JSON numbers load as floats; the fields in `GameData.INT_FIELDS` become integers; `color` (three
+autoloads exist, so it reaches `GameData` through `const GD := preload("res://scripts/core/game_data.gd")`, see
+`tests/ci/fuzz.gd`). JSON numbers load as floats; the fields in `GameData.INT_FIELDS` become integers; `color` (three
 numbers 0 to 1) becomes a `Color` and `dims` a `Vector3`.
 
 Every file is an object `{"doc": "...", "entries": {id: entry}}` and every entry carries:
@@ -87,7 +87,7 @@ Every file is an object `{"doc": "...", "entries": {id: entry}}` and every entry
 Ids (`volcanes`, `cam_basic`) are stable keys, never shown to players. To add content: add an entry with the same
 fields as its neighbors, cite the source, and run `tools/dev/check.sh`. New sources go at the end of their section in
 `docs/sources.md` with a word ID. Text fields hold English; the Spanish goes in the piece's own
-`i18n/<piece>.csv` (columns `keys,es`), which `scripts/found.gd` loads at startup with every other file in `i18n/`
+`i18n/<piece>.csv` (columns `keys,es`), which `scripts/core/found.gd` loads at startup with every other file in `i18n/`
 (`translations.csv` is the old base and takes no new lines). One file per piece, so two branches never edit the same one.
 
 | File | Entry fields (units in the game header: kg, W, Wh, M$ = millions of USD, GB/day, Mbps, m/s) |
@@ -106,7 +106,7 @@ fields as its neighbors, cite the source, and run `tools/dev/check.sh`. New sour
 | `difficulty.json` | `name`, `desc`, `budget`, `events`, `launch_fail` (multipliers) |
 | `labels.json` | `size_names` and `cml_names` (number to name) |
 
-Not in data yet: the numbers inside `scripts/mission.gd` (the 10 % and 20 % costs of redundancy, event chances,
+Not in data yet: the numbers inside `scripts/core/mission.gd` (the 10 % and 20 % costs of redundancy, event chances,
 score weights), cited in its comments, and the missions of `data/nasa/` (another package).
 
 Translation. English is the default and the source text: every text a player sees is written once in English, in a
@@ -118,16 +118,16 @@ code (static functions use `TranslationServer.translate`), or put it in a data t
 Spanish. A text with numbers is translated before it is formatted: `tr("Budget %s") % x`. Never join pieces of a
 sentence, translate it whole. The language switch is on the menu (`GameData.set_language("es")`, saved in
 `user://settings.cfg`); screens already drawn must be drawn again, the menu does `go("menu")`.
-`tools/dev/godot.sh --headless --path . -s res://tests/i18n.gd` plays every screen in both languages and lists the texts
+`tools/dev/godot.sh --headless --path . -s res://tests/ci/i18n.gd` plays every screen in both languages and lists the texts
 that look the same in both, which have no Spanish row.
 
 ## GameState
 
-The autoload `GameState` (`scripts/game_state.gd`) holds what lives across screens:
+The autoload `GameState` (`scripts/core/game_state.gd`) holds what lives across screens:
 
 | Member | What it is |
 |---|---|
-| `mission` | The `Mission` being designed (`scripts/mission.gd`); `start_mission(scenario)` replaces it with the scenario's starting parts and keeps the difficulty |
+| `mission` | The `Mission` being designed (`scripts/core/mission.gd`); `start_mission(scenario)` replaces it with the scenario's starting parts and keeps the difficulty |
 | `difficulty` | The difficulty id of `GameData.DIFFICULTY`; it is stored in `mission.difficulty` because the numbers use it |
 | `room` | The shared state of the crew (the Room, below). Every screen reads and changes crew state through it |
 | `players`, `team_mode` | The people (not bots) as `[{"name", "roles"}]`, rebuilt from the room; `team_mode` is true with two or more people or online. `start_solo(station)`, `start_crew(mode, humans)`, `new_online_room()`, `player_for_role(station)` |
@@ -173,8 +173,8 @@ every bot signs unless something is red, with a line. Lines are English msgids w
 reader. Data is in `data/*.json`; the bot adds no numbers of its own except the margins it asks for (20 % power, 15 %
 data, 10 % reserve), which are our own game choices.
 
-**Testing online.** `tests/room.gd` (host and guest over the in-memory transport, bots, sign-off, launch) and
-`tests/crew.gd` (the bots launch every scenario). Against the real database code: start `firebase emulators:start
+**Testing online.** `tests/ci/room.gd` (host and guest over the in-memory transport, bots, sign-off, launch) and
+`tests/ci/crew.gd` (the bots launch every scenario). Against the real database code: start `firebase emulators:start
 --only database --project demo-farpoint`, serve `build/web`, and open two pages with `?emulator=127.0.0.1:9000`
 (done with Playwright and headless Edge, `--use-angle=swiftshader`).
 
@@ -191,13 +191,13 @@ data, 10 % reserve), which are our own game choices.
 
 ## Tests
 
-- **Logic fuzz test.** `godot --headless -s res://tests/fuzz.gd` builds 600 random designs with seed 42, calls `compute()` and `simulate(i)` on each, and prints `ok 600 launchable grades {...}`. It fails if any call errors. It asserts no values, only that nothing crashes.
-- **Autoshot walkthrough.** Run `tests/autoshot.tscn` with a window (not headless): `tools/dev/shots.sh`, or Godot with `--path . --position 4000,4000 --resolution 1600x900 res://tests/autoshot.tscn` to keep the window off screen. It drives the game as the buttons do (`GameState` for the choices, `go()` and `overlay()` for the flow) through menu, scenarios, design, review, launch, operation, report, Moon, L2 telescope, a forced launch failure, the team screen and how to play, and saves 16 PNG screenshots, `01_menu` to `16_howto`, to `shots/` in the project (created if missing; ignored by git and by the web export). It is for development only.
+- **Logic fuzz test.** `godot --headless -s res://tests/ci/fuzz.gd` builds 600 random designs with seed 42, calls `compute()` and `simulate(i)` on each, and prints `ok 600 launchable grades {...}`. It fails if any call errors. It asserts no values, only that nothing crashes.
+- **Autoshot walkthrough.** Run `tests/look/autoshot.tscn` with a window (not headless): `tools/dev/shots.sh`, or Godot with `--path . --position 4000,4000 --resolution 1600x900 res://tests/look/autoshot.tscn` to keep the window off screen. It drives the game as the buttons do (`GameState` for the choices, `go()` and `overlay()` for the flow) through menu, scenarios, design, review, launch, operation, report, Moon, L2 telescope, a forced launch failure, the team screen and how to play, and saves 16 PNG screenshots, `01_menu` to `16_howto`, to `shots/` in the project (created if missing; ignored by git and by the web export). It is for development only.
 
 ## Renderer notes
 
 - The project uses `gl_compatibility`, with no 3D MSAA. The first version (Forward+ with Vulkan) crashed on an AMD integrated GPU (an Asus VivoBook Go, Radeon, Windows); with `gl_compatibility` and no MSAA it runs there (checked 2026-11-14).
 - `GameState.trace()` prints `[SKH]` lines at startup: the steps that found that crash. They cost nothing and can stay.
-- Rendering features in use that matter when debugging a crash: `Environment` glow (`space_builder.gd`), a `DirectionalLight3D` with shadows (`world.gd`), transparent clouds and atmosphere shaders, a star-loop sky shader (`shaders/sky.gdshader`), and `CPUParticles3D` flames.
+- Rendering features in use that matter when debugging a crash: `Environment` glow (`space_builder.gd`), a `DirectionalLight3D` with shadows (`world.gd`), transparent clouds and atmosphere shaders, a star-loop sky shader (`assets/shaders/sky.gdshader`), and `CPUParticles3D` flames.
 - Godot 4.5.1 and 4.7.1 on Linux, and 4.7.2 Steam on Windows (Alexander's laptop), are the versions on which the project has run.
 - The game log is at `%APPDATA%\Godot\app_userdata\SK Horizon - Mission Architect\logs\godot.log`.

@@ -20,7 +20,7 @@ tú construyes tu propia nave, la lanzas desde el Ecuador y la llevas hasta la L
 ---
 layout: split
 label: El problema
-image: assets/mission_photos/volcano_watch/sangay_landsat8_2022-11-05_truecolor.jpg | El Sangay visto por Landsat 8 (2022). Cada imagen así es el final de una cadena de decisiones difíciles. NASA Earth Observatory / USGS [S-eo]
+image: assets/photos/volcano_watch/sangay_landsat8_2022-11-05_truecolor.jpg | El Sangay visto por Landsat 8 (2022). Cada imagen así es el final de una cadena de decisiones difíciles. NASA Earth Observatory / USGS [S-eo]
 
 ## El diseño de misiones se enseña como lista, no se vive como historia
 - Una misión real equilibra **masa, energía, datos, delta-v, presupuesto y tiempo**; en una pizarra esos compromisos no se ven.
@@ -52,7 +52,7 @@ TODO: decidir demo o imágenes cuando el juego esté completo.
 ---
 layout: split
 label: Datos de la NASA en el centro
-image: assets/mission_photos/moon_south_pole/south_pole_wide_lroc_wac.jpg | Polo sur de la Luna, mosaico de la cámara gran angular de LRO, reproyectado por nuestro script [S-lroc-wac]
+image: assets/photos/moon_south_pole/south_pole_wide_lroc_wac.jpg | Polo sur de la Luna, mosaico de la cámara gran angular de LRO, reproyectado por nuestro script [S-lroc-wac]
 
 ## Datos reales de la NASA mueven la física
 - **JPL Horizons**: dónde está la Luna el día del lanzamiento; el viaje se sincroniza para encontrarla [S-horizons].
@@ -86,7 +86,7 @@ Notas:
 ---
 layout: split
 label: Impacto · siguientes pasos
-image: assets/mission_photos/volcano_watch/cotopaxi_landsat8_2015-09-15_truecolor.jpg | El Cotopaxi desde Landsat 8 (2015): la misión "Ecuador Volcano Watch" lo sobrevuela [S-eo]
+image: assets/photos/volcano_watch/cotopaxi_landsat8_2015-09-15_truecolor.jpg | El Cotopaxi desde Landsat 8 (2015): la misión "Ecuador Volcano Watch" lo sobrevuela [S-eo]
 
 ## De los volcanes del Ecuador a la Luna, en español e inglés
 - **Para** estudiantes, docentes y curiosos: sin instalar nada, cada concepto explicado en palabras simples.

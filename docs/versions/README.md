@@ -17,4 +17,5 @@ integrated step (`tools/dev/state.sh` lists them); the GitHub issues hold what i
 - `v0.2.3` is not in `v0.3.0` yet: when #92 is merged, `v0.3.0` merges `main`.
 - The branch `v0.2.2` is merged and can be deleted by a team member.
 
-Update this page when a version branch opens or is merged.
+Update this page when a version branch opens or is merged. The version the game shows on its menu is
+`application/config/version` in `project.godot`: set it on the version branch when the branch opens.

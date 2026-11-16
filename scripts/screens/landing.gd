@@ -8,7 +8,7 @@ extends "res://scripts/screens/screen.gd"
 ## Touchdown records GameState.flight.landing, settles the extra objectives and goes on to the operation; a crater
 ## ends the flight early and goes to the report.
 
-const Space := preload("res://scripts/space_builder.gd")
+const Space := preload("res://scripts/world/space_builder.gd")
 const FlightHud := preload("res://scripts/flight/flight_hud.gd")
 const FlightData := preload("res://scripts/flight/flight_data.gd")
 const Scene3D := preload("res://scripts/flight/flight_scene.gd")
