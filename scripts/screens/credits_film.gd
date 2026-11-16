@@ -5,6 +5,7 @@ extends "res://scripts/screens/screen.gd"
 ## rolling up as at the end of a film. About a minute and a half; Skip (or Esc) jumps to the end card, which opens
 ## the full list of sources (the "credits" overlay) or goes back to the menu. Text comes from data/credits.json.
 
+const CreditsList := preload("res://scripts/screens/credits.gd")
 const CREDITS_PATH := "res://data/credits.json"
 const Space := preload("res://scripts/world/space_builder.gd")
 const Horizon := preload("res://scripts/ui/horizon.gd")
@@ -74,6 +75,9 @@ func exit() -> void:
 func _unhandled_input(e: InputEvent) -> void:
 	if not (e is InputEventKey) or not e.pressed or e.echo:
 		return
+	for c in get_children():   # the list of every source is open on top: its keys are its own (#97: Esc and Enter
+		if c.get_script() == CreditsList:   # went to the menu and left the list open over it)
+			return
 	var k: int = e.physical_keycode
 	if not at_end and k in [KEY_ESCAPE, KEY_ENTER, KEY_KP_ENTER, KEY_SPACE]:
 		_to_end()

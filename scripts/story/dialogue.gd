@@ -205,7 +205,7 @@ func next() -> void:
 	name_lbl.visible = not narrator
 	name_lbl.text = (Cast.display_name(who) + "  ·  " + Cast.station(who)).to_upper()
 	name_lbl.add_theme_color_override("font_color", Kit.ink(col))
-	text_lbl.add_theme_color_override("font_color", Color(1.0, 0.86, 0.62) if narrator else Kit.C_TEXT)
+	text_lbl.add_theme_color_override("font_color", (Color(1.0, 0.86, 0.62) if Kit.mode != "light" else Kit.ink(Kit.C_GOLD)) if narrator else Kit.C_TEXT)   # a pale gold on the dark card, a deep one on the light card (#97)
 	var tex: Texture2D = _live_portrait(who, str(L.get("mood", ""))) if live and not narrator else null
 	if tex == null:
 		tex = Cast.portrait(who)

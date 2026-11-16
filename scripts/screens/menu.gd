@@ -216,8 +216,11 @@ static func logo(k := 1.0) -> Control:
 	v.add_child(a)
 	var h := Kit.hbox(int(14 * k))
 	v.add_child(h)
-	h.add_child(Kit.lbl("Farpoint", int(56 * k), Kit.C_TEXT, Kit.FONT_T))
-	h.add_child(Kit.lbl("HORIZON", int(56 * k), Kit.C_ACCENT, spaced(Kit.FONT_B, int(7 * k))))
+	# always over space, in either appearance: light on dark (#97: in Light mode "Farpoint" went navy on black)
+	h.add_child(Kit.lbl("Farpoint", int(56 * k), Kit.C_ON_DARK, Kit.FONT_T))
+	var hz := Kit.lbl("HORIZON", int(56 * k), Color(0.55, 0.78, 1.0), spaced(Kit.FONT_B, int(7 * k)))
+	hz.add_theme_color_override("font_color", Color(0.55, 0.78, 1.0))   # not darkened for a light panel: it is over space
+	h.add_child(hz)
 	return v
 
 
