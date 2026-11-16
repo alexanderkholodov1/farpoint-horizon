@@ -53,6 +53,7 @@ func enter(_args: Dictionary) -> void:
 		Kit.place(bar, 0, 1, 1, 1, 50, -62, -50, -20)
 	add_child(bar)
 	bar.add_child(Kit.btn(tr("◀ Menu"), func(): go("menu")))
+	bar.add_child(Kit.btn(tr("The crew and your patches"), func(): go("crew_gallery")))
 	var gap := Control.new()
 	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bar.add_child(gap)

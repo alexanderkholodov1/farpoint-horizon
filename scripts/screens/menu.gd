@@ -38,10 +38,12 @@ func enter(args: Dictionary) -> void:
 	add_child(box)
 	var lg := logo(0.72 if Kit.compact else 1.0)
 	box.add_child(lg)
-	lg.visible = not (Kit.compact and args.get("settings", false))   # on a phone the settings need the room
+	lg.visible = not (Kit.compact and (args.get("settings", false) or args.get("more", false)))   # a phone needs the room
 	arc = lg.get_child(0)
 	if args.get("settings", false):
 		_settings(box)
+	elif args.get("more", false):
+		_more(box)
 	else:
 		arc.progress = 0.0
 		arc.create_tween().tween_property(arc, "progress", 1.0, 1.4).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
@@ -87,14 +89,10 @@ func _main_list(box: VBoxContainer) -> void:
 	box.add_child(play)
 	play.grab_focus.call_deferred()   # the keyboard starts on Play: arrows move along the list, Enter chooses
 	box.add_child(Kit.spacer(2 if Kit.compact else 10))
+	# four choices (team decision 2026-11-15): each opens what belongs to it, nothing is more than one step deeper
 	var items := [
-		[tr("Your own mission"), _play],
-		[tr("Play with friends"), func(): go("team")],
-		[tr("Guided first mission"), func(): Coach.start(main)],
-		[tr("How to play"), func(): main.overlay("howto")],
-		[tr("Campaign"), func(): go("crew_gallery")],
-		[tr("Ranking"), func(): main.overlay("ranking")],
-		[tr("Credits"), func(): go("credits_film")],
+		[tr("Your own mission"), func(): go("team")],                          # alone, with friends, or guided
+		[tr("Ranking & credits"), func(): go("menu", {"more": true})],         # the ranking, how to play, the credits
 		[tr("Settings"), func(): go("menu", {"settings": true})]]
 	if not OS.has_feature("web"):
 		items.append([tr("Quit"), func(): get_tree().quit()])
@@ -107,6 +105,27 @@ func _main_list(box: VBoxContainer) -> void:
 func _play() -> void:
 	GameState.start_solo()
 	go("missions")
+
+
+## Ranking & credits, in the menu's own place: the ranking, how to play, the credits film and its full list.
+func _more(box: VBoxContainer) -> void:
+	var rows := Kit.vbox(Kit.GAP)
+	var pn := Kit.panel_box(Kit.PAD)
+	pn.add_child(rows)
+	box.add_child(Kit.spacer(8))
+	box.add_child(pn)
+	rows.add_child(Kit.lbl(tr("Ranking & credits"), Kit.T_STAT, Kit.C_TEXT, Kit.FONT_T))
+	for it in [[tr("Ranking"), func(): main.overlay("ranking")],
+			[tr("How to play"), func(): main.overlay("howto")],
+			[tr("Credits"), func(): go("credits_film")]]:
+		var b := Kit.btn(it[0], it[1], Kit.T_BODY, 340)
+		b.custom_minimum_size.y = Kit.BTN_H
+		rows.add_child(b)
+	rows.add_child(Kit.rule())
+	var back := Kit.btn(tr("◀ Menu"), func(): go("menu"), Kit.T_BODY, 340)
+	back.custom_minimum_size.y = Kit.BTN_H
+	rows.add_child(back)
+	(rows.get_child(1) as Control).grab_focus.call_deferred()
 
 
 ## The settings, in the menu's own place: language, difficulty, appearance, sound. Each choice is kept and shown at once.
