@@ -109,6 +109,10 @@ branches add entries at the same place (`.gitattributes`).
 - [S13] and [S14] also give the stage lengths and masses the parts are cut from: Falcon 9 first stage 25.6 t empty and
   395.7 t of propellant, second stage 3.9 t and 92.67 t, fairing about 1.9 t; Electron 13.0 t at liftoff, stages of
   12.1 m and 2.4 m, fairing 44 kg.
+- **S-wiki-fairing** Wikipedia. *Payload fairing* (checked 2026-11-15). https://en.wikipedia.org/wiki/Payload_fairing.
+  "Once outside the atmosphere the fairing is jettisoned, exposing the payload to outer space"; "In some cases, the
+  fairing is planned to separate after cutoff of the upper stage". The launch opens its fairing in two halves in orbit,
+  after the engine cuts off.
 
 ## Real missions
 - **S11** NASA. *Landsat 9*. https://science.nasa.gov/mission/landsat-9. Orbit and coverage of an Earth-imaging twin.
