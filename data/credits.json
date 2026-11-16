@@ -255,7 +255,7 @@
     },
     {
      "id": "S-m100-pia22913",
-     "text": "NASA/JPL. M100 Through 3 Cameras, PIA22913 (public domain). https://images.nasa.gov/details/PIA22913. M100 with WFPC1 in 1993, blurry from the mirror's flaw, and with WFPC2 after STS-61, \"snapped into sharp focus\". Cropped for mission 2's first image (assets/photos/sts61/m100_wfpc1_1993.jpg, m100_wfpc2_1993.jpg)."
+     "text": "NASA. M100 Through 3 Cameras, PIA22913 (NASA Image and Video Library, public domain; credit as the record prints it: \"NASA, ESA, STScI and Judy Schmidt\"; the record's centre is JPL). https://images.nasa.gov/details/PIA22913. M100 with WFPC1 in 1993, blurry from the mirror's flaw, and with WFPC2 after STS-61, \"snapped into sharp focus\". Cropped for mission 2's first image (assets/photos/sts61/m100_wfpc1_1993.jpg, m100_wfpc2_1993.jpg)."
     },
     {
      "id": "S-nasa-9408670",
@@ -356,6 +356,59 @@
    ]
   },
   {
+   "title": "Software, fonts and services (the engine, the build, the data scripts and the web)",
+   "entries": [
+    {
+     "id": "S-tool-godot",
+     "text": "Godot Engine 4.7, the game engine and its web export template. MIT License. https://godotengine.org/license/. Used by every scene and script of the game (project.godot, export_presets.cfg)."
+    },
+    {
+     "id": "S-tool-firebase",
+     "text": "Google Firebase: Hosting (the live web game and every pull request preview) and Realtime Database (the crew's room, web/room_bridge.js). Terms: https://firebase.google.com/terms/."
+    },
+    {
+     "id": "S-tool-firebase-js",
+     "text": "Firebase JavaScript SDK 10.14.1 (pinned in web/build_head.py), Apache License 2.0. https://github.com/firebase/firebase-js-sdk/blob/master/LICENSE. Loaded by web/build_head.py and used by web/room_bridge.js."
+    },
+    {
+     "id": "S-tool-blender",
+     "text": "Blender, GNU GPL 2 or later (SPDX list: https://github.com/blender/blender/blob/main/doc/license/SPDX-license-identifiers.txt; project page https://www.blender.org). Builds the 3D models of assets/source/*.py (its Python API: bpy, bmesh, mathutils)."
+    },
+    {
+     "id": "S-tool-python",
+     "text": "Python, Python Software Foundation License. https://www.python.org/psf/license/. Runs every script in tools/ and assets/source/."
+    },
+    {
+     "id": "S-tool-numpy",
+     "text": "NumPy, BSD 3-Clause (https://github.com/numpy/numpy/blob/main/LICENSE.txt). Computes the music (tools/content/audio/compose_music.py) and the terrain and planet textures (assets/source/planet_textures.py, assets/source/terrain_cotopaxi.py)."
+    },
+    {
+     "id": "S-tool-pillow",
+     "text": "Pillow, the Pillow license (HPND, https://github.com/python-pillow/Pillow/blob/main/LICENSE). Image processing in tools/content/deck/pitch_art.py, the NASA photos' cropping and the Earth and Cotopaxi textures (assets/source/planet_textures.py, assets/source/terrain_cotopaxi.py)."
+    },
+    {
+     "id": "S-tool-ffmpeg",
+     "text": "FFmpeg, LGPL 2.1 or later (GPL parts not used; https://ffmpeg.org/legal.html). Encodes the music (audio/music_horizon.ogg) and the 30-second demo (tools/content/video/make_trailer.py)."
+    },
+    {
+     "id": "S-tool-pptx",
+     "text": "python-pptx, MIT License (https://github.com/scanny/python-pptx/blob/master/LICENSE). Builds the deck (tools/content/deck/build_v2.py, pitch_pptx.py)."
+    },
+    {
+     "id": "S-tool-lxml",
+     "text": "lxml, BSD License (https://github.com/lxml/lxml/blob/master/LICENSE.txt). XML editing in tools/content/deck/build_v2.py."
+    },
+    {
+     "id": "S-font-inter",
+     "text": "Inter typeface, Rasmus Andersson, SIL Open Font License 1.1 (https://github.com/rsms/inter/blob/master/LICENSE.txt; project page https://rsms.me/inter/). The game's text font: assets/fonts/Inter-Regular.otf, Inter-SemiBold.otf, InterDisplay-Bold.otf."
+    },
+    {
+     "id": "S-model-sketchfab",
+     "text": "The four outside engine and booster models in assets/source/vendor/ are the Sketchfab models cited above (S-merlin-model, S-mvac-model, S-nozzle-model) and NASA's booster (S-srb-model), used as they are; the Sketchfab licence is CC BY 4.0 (credit each author as above)."
+    }
+   ]
+  },
+  {
    "title": "NASA data used by the mission photos and the route numbers",
    "entries": [
     {
@@ -450,7 +503,7 @@
     },
     {
      "id": "S-usno-gast",
-     "text": "U.S. Naval Observatory. Computing Greenwich Apparent Sidereal Time. https://aa.usno.navy.mil/faq/GAST (not reachable on 2026-11-16 from either checking network: the connection was reset; open it in a browser to confirm the formula). GMST = 18.697374558 + 24.06570982441908 D hours (D: days since 2000 January 1, 12h UT); the tilt of the Earth's axis, about 23.44 degrees. Which way each dish faces at each moment of the flight."
+     "text": "U.S. Naval Observatory. Computing Greenwich Apparent Sidereal Time. https://aa.usno.navy.mil/faq/GAST. Not readable on 2026-11-16 (the connection was reset from both networks), so the formula is not re-checked against the page. The constants are the mean sidereal time at 2000 January 1 12h UT (18h 41m 50.55s = 18.6973746 h) and the sidereal rate (1.00273790935 x 24 h = 24.0657098 h per day), which agree with the Earth's rotation; open the page in a browser to confirm before pasting. GMST = 18.697374558 + 24.06570982441908 D hours (D: days since 2000 January 1, 12h UT); the tilt of the Earth's axis, about 23.44 degrees. Which way each dish faces at each moment of the flight."
     },
     {
      "id": "S-codata-c",
@@ -519,5 +572,5 @@
    ]
   }
  ],
- "count": 109
+ "count": 121
 }

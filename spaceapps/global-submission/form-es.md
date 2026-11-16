@@ -1,6 +1,6 @@
 # NASA Space Apps 2026: formulario de entrega, cada campo listo para pegar (español)
 
-Reto: **Space Mission Design Game**. Equipo: **SK-Horizons** (Quito, Ecuador; sede Sangolquí, ESPE).
+Reto: **Space Mission Design Game**. Equipo: **SK-Horizons** (Quito, Ecuador).
 El formulario global de la NASA se llena en inglés con [`form-en.md`](form-en.md). Este archivo es la misma entrega en
 español, para la sede, la ficha y el pitch. Los campos van en el orden del formulario.
 
@@ -25,7 +25,7 @@ Farpoint HORIZON es un juego espacial en 3D que permite a cualquiera, solo o con
 ## Demostración del proyecto
 
 ```
-https://github.com/alexanderkholodov1/farpoint-horizon/blob/v0.3.0/spaceapps/global-submission/deck/EN_17_SK-Horizons_v2.pdf
+https://github.com/alexanderkholodov1/farpoint-horizon/blob/v0.3.0/spaceapps/global-submission/deck/Farpoint-HORIZON_NASA-Space-Apps-2026_Demo_EN.pdf
 ```
 
 La presentación de 7 diapositivas en inglés, no el vídeo de 30 s: la demo debe hacer entender el problema, la

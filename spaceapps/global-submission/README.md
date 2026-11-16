@@ -6,7 +6,7 @@ What goes into each field of NASA's form. The rules behind it: `../rules/global-
 | Form field | What goes in | Where |
 |---|---|---|
 | Project Name, Summary, Project Details, Use of SI | The texts, ready to paste | [form-en.md](form-en.md) |
-| Link to Project Demo | The 7-slide English deck v2 (PDF), not the video | [deck/EN_17_SK-Horizons_v2.pdf](deck/EN_17_SK-Horizons_v2.pdf), linked from the form pinned to its commit |
+| Link to Project Demo | The 7-slide English deck v2 (PDF), not the video | [deck/Farpoint-HORIZON_NASA-Space-Apps-2026_Demo_EN.pdf](deck/Farpoint-HORIZON_NASA-Space-Apps-2026_Demo_EN.pdf), linked from the form pinned to its commit |
 | Link to Final Project | The live game | https://farpoint-horizon.web.app |
 | NASA Data; Space Agency Partner & Other Data | Every source of `docs/sources.md`, each opened and read | [links.md](links.md), also inside `form-en.md` |
 

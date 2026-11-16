@@ -162,7 +162,7 @@ branches add entries at the same place (`.gitattributes`).
 - **S-sts61-nasa** NASA. *STS-61*. https://www.nasa.gov/mission/sts-61/. Launch Dec 2, 1993, landing Dec 13, 1993
   (10 days, 19 hours, 58 minutes); Hubble grappled and stood upright in the bay on flight day three by Claude
   Nicollier with the robot arm; each spacewalk's crew, work and length (7 h 54, 6 h 35, 6 h 48, 6 h 50, 7 h 21).
-- **S-m100-pia22913** NASA/JPL. *M100 Through 3 Cameras*, PIA22913 (public domain).
+- **S-m100-pia22913** NASA. *M100 Through 3 Cameras*, PIA22913 (NASA Image and Video Library, public domain; credit as the record prints it: "NASA, ESA, STScI and Judy Schmidt"; the record's centre is JPL).
   https://images.nasa.gov/details/PIA22913. M100 with WFPC1 in 1993, blurry from the mirror's flaw, and with WFPC2
   after STS-61, "snapped into sharp focus". Cropped for mission 2's first image
   (assets/photos/sts61/m100_wfpc1_1993.jpg, m100_wfpc2_1993.jpg).
@@ -267,11 +267,39 @@ branches add entries at the same place (`.gitattributes`).
 - The launch site (`assets/source/launch_site.py`) and the craft components (`assets/source/craft_kit.py`) are our own
   models after photographs of the East Coast pads and of real spacecraft hardware; their sizes are our estimates.
 
-## Still to add
-- The sources of `data/*.json` are listed above. Each value of an entry that mixes sources still has to be checked
-  against the agency page (the catalogs cite the family of sources and say what they simplify; the values are rounded
-  and not yet checked one by one).
-- The fonts, the engine and every library, model, image and sound, with their licenses.
+## Software, fonts and services (the engine, the build, the data scripts and the web)
+Licences were read on the owners' pages on 2026-11-16 (the link in each entry).
+- **S-tool-godot** Godot Engine 4.7, the game engine and its web export template. MIT License.
+  https://godotengine.org/license/. Used by every scene and script of the game (`project.godot`, `export_presets.cfg`).
+- **S-tool-firebase** Google Firebase: Hosting (the live web game and every pull request preview) and Realtime Database
+  (the crew's room, `web/room_bridge.js`). Terms: https://firebase.google.com/terms/.
+- **S-tool-firebase-js** Firebase JavaScript SDK 10.14.1 (pinned in `web/build_head.py`), Apache License 2.0.
+  https://github.com/firebase/firebase-js-sdk/blob/master/LICENSE. Loaded by `web/build_head.py` and used by `web/room_bridge.js`.
+- **S-tool-blender** Blender, GNU GPL 2 or later (SPDX list: https://github.com/blender/blender/blob/main/doc/license/SPDX-license-identifiers.txt;
+  project page https://www.blender.org). Builds the 3D models of `assets/source/*.py` (its Python API: bpy, bmesh, mathutils).
+- **S-tool-python** Python, Python Software Foundation License. https://www.python.org/psf/license/. Runs every script in `tools/` and `assets/source/`.
+- **S-tool-numpy** NumPy, BSD 3-Clause (https://github.com/numpy/numpy/blob/main/LICENSE.txt). Computes the music
+  (`tools/content/audio/compose_music.py`) and the terrain and planet textures (`assets/source/planet_textures.py`,
+  `assets/source/terrain_cotopaxi.py`).
+- **S-tool-pillow** Pillow, the Pillow license (HPND, https://github.com/python-pillow/Pillow/blob/main/LICENSE). Image
+  processing in `tools/content/deck/pitch_art.py`, the NASA photos' cropping and the Earth and Cotopaxi textures
+  (`assets/source/planet_textures.py`, `assets/source/terrain_cotopaxi.py`).
+- **S-tool-ffmpeg** FFmpeg, LGPL 2.1 or later (GPL parts not used; https://ffmpeg.org/legal.html). Encodes the music
+  (`audio/music_horizon.ogg`) and the 30-second demo (`tools/content/video/make_trailer.py`).
+- **S-tool-pptx** python-pptx, MIT License (https://github.com/scanny/python-pptx/blob/master/LICENSE). Builds the deck
+  (`tools/content/deck/build_v2.py`, `pitch_pptx.py`).
+- **S-tool-lxml** lxml, BSD License (https://github.com/lxml/lxml/blob/master/LICENSE.txt). XML editing in
+  `tools/content/deck/build_v2.py`.
+- **S-font-inter** Inter typeface, Rasmus Andersson, SIL Open Font License 1.1 (https://github.com/rsms/inter/blob/master/LICENSE.txt;
+  project page https://rsms.me/inter/). The game's text font: `assets/fonts/Inter-Regular.otf`, `Inter-SemiBold.otf`,
+  `InterDisplay-Bold.otf`.
+- **S-model-sketchfab** The four outside engine and booster models in `assets/source/vendor/` are the Sketchfab models
+  cited above (S-merlin-model, S-mvac-model, S-nozzle-model) and NASA's booster (S-srb-model), used as they are; the
+  Sketchfab licence is CC BY 4.0 (credit each author as above).
+- Our own, not from outside: the music (`tools/content/audio/compose_music.py`, no samples), the sounds (synthesised in
+  the game's code), the launchers, CubeSat, launch site and craft models (`assets/source/`), the cuy crew (`assets/source/crew_cuy.py`,
+  Blender; Rumi's body from TRELLIS, see the README's "Use of AI"). The only outside images are the NASA and NASA-partner
+  pictures listed above.
 
 ## NASA data used by the mission photos and the route numbers (issue 19; pipeline in `tools/content/data/`)
 All checked 2026-11-14. NASA media are used under the NASA Media Usage Guidelines
@@ -364,8 +392,10 @@ All checked 2026-11-14; the research behind them is `kb/research/in-flight-failu
 - **S-dsn-sites** Wikipedia. *NASA Deep Space Network* (coordinates of the complexes and the bands). 
   https://en.wikipedia.org/wiki/NASA_Deep_Space_Network. Goldstone 35.42667 N 116.89 W, Madrid 40.43139 N 4.24806 W,
   Canberra 35.40139 S 148.98167 E; S, X and Ka bands (2, 8 and 32 GHz). The stations ground control picks from.
-- **S-usno-gast** U.S. Naval Observatory. *Computing Greenwich Apparent Sidereal Time*. https://aa.usno.navy.mil/faq/GAST
-  (not reachable on 2026-11-16 from either checking network: the connection was reset; open it in a browser to confirm the formula).
+- **S-usno-gast** U.S. Naval Observatory. *Computing Greenwich Apparent Sidereal Time*. https://aa.usno.navy.mil/faq/GAST.
+  Not readable on 2026-11-16 (the connection was reset from both networks), so the formula is not re-checked against the page. The constants
+  are the mean sidereal time at 2000 January 1 12h UT (18h 41m 50.55s = 18.6973746 h) and the sidereal rate (1.00273790935 x 24 h =
+  24.0657098 h per day), which agree with the Earth's rotation; open the page in a browser to confirm before pasting.
   GMST = 18.697374558 + 24.06570982441908 D hours (D: days since 2000 January 1, 12h UT); the tilt of the Earth's axis,
   about 23.44 degrees. Which way each dish faces at each moment of the flight.
 - **S-codata-c** NIST. *CODATA value: speed of light in vacuum*. https://physics.nist.gov/cgi-bin/cuu/Value?c.
