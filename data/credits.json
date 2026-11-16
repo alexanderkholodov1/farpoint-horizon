@@ -253,6 +253,30 @@
     {
      "id": "S-mpf-pia00633",
      "text": "NASA/JPL. Rover Tracks, PIA00633 (public domain). https://images.nasa.gov/details/PIA00633. Sojourner's tracks on sol 3, from its own camera. Shown at the end of mission 3."
+    },
+    {
+     "id": "S-lcross-nasa",
+     "text": "NASA Science. LCROSS. https://science.nasa.gov/mission/lcross/. Launched June 18, 2009, 21:32 UT, with the Lunar Reconnaissance Orbiter on an Atlas V 401; the Centaur hit Cabeus at 11:31 UT; LCROSS flew through the plume and struck four minutes later, at 11:36 UT, at 9,000 km/h; its instruments: cameras (visible, near and mid infrared), spectrometers and a photometer; on Nov 13, 2009 NASA announced the data showed water near the Moon's south pole. Mission 4."
+    },
+    {
+     "id": "S-lcross-nssdc",
+     "text": "NASA Space Science Data Coordinated Archive. LCROSS Shepherding Spacecraft, 2009-031B. https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2009-031B. The 2000 kg Centaur upper stage; the shepherding craft separated at 01:50 UT on Oct 9, 2009 and followed a few minutes behind; the Centaur hit at 11:31:19.5 UT at about 2.5 km/s; the shepherding craft gathered data for about four minutes and hit at 11:35:36.1 UT. Mission 4's aim and its four minutes."
+    },
+    {
+     "id": "S-cabeus-gazetteer",
+     "text": "IAU / USGS Astrogeology Science Center (NASA-supported). Gazetteer of Planetary Nomenclature, Moon, Cabeus. https://planetarynames.wr.usgs.gov/SearchResults?Target=16_Moon&Feature%20Name=Cabeus. Centre 85.33 S, 42.13 W (planetographic, +East), diameter 100.58 km. Where mission 4 draws Cabeus on NASA's LROC mosaic (S-lroc-wac)."
+    },
+    {
+     "id": "S-dart-nasa",
+     "text": "NASA Science. DART. https://science.nasa.gov/mission/dart/. Launched Nov 24, 2021 (1:21 a.m. EST) on a Falcon 9 from Vandenberg; hit Dimorphos, 160 m across, the moon of the 780 m Didymos, on Sept 26, 2022. Mission 5."
+    },
+    {
+     "id": "S-dart-nasa-period",
+     "text": "NASA. NASA Confirms DART Mission Impact Changed Asteroid's Motion in Space (release 22-105, Oct 11, 2022). https://www.nasa.gov/news-release/nasa-confirms-dart-mission-impact-changed-asteroids-motion-in-space/. Dimorphos's orbit around Didymos from 11 h 55 min to 11 h 23 min, 32 minutes shorter, plus or minus about 2; the minimum for success was 73 s; LICIACube from the Italian Space Agency. Mission 5's measurement."
+    },
+    {
+     "id": "S-dart-nssdc",
+     "text": "NASA Space Science Data Coordinated Archive. DART, 2021-110A. https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2021-110A. Impact at about 6.58 km/s, 23:14 UT Earth received time, about 11.2 million km from Earth; impact mass 560 kg; DRACO, a 20.8 cm telescope with a 0.29-degree view and about 0.5 arcsec per pixel; DRACO and SMARTNav targeted the asteroid in the last 4 hours; the final images, about 2 s before impact, about 3 cm per pixel; LICIACube released on Sept 11, following about 3 minutes behind. Mission 5's approach and last picture."
     }
    ]
   },
@@ -397,5 +421,5 @@
    ]
   }
  ],
- "count": 83
+ "count": 89
 }
