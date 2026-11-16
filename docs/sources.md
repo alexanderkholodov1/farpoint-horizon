@@ -58,7 +58,7 @@ branches add entries at the same place (`.gitattributes`).
   low-orbit cycling tests run at depths of discharge of 20 %, 30 % and 40 %. The game lets a battery give 60 % of its
   charge per eclipse: our game value, more generous than those tests, so small craft can work (a simplification).
 - **S-wiki-geo** Wikipedia. *Geostationary orbit*. https://en.wikipedia.org/wiki/Geostationary_orbit. Altitude 35,786 km,
-  period 1,436 min, continuous view of one hemisphere.
+  period 1,436 min; to a ground observer it stays fixed in the sky.
 - **S-wiki-dv** Wikipedia. *Delta-v budget*. https://en.wikipedia.org/wiki/Delta-v_budget. Delta-v from low Earth orbit to
   geostationary and lunar orbits.
 - **S-wiki-iss** Wikipedia. *International Space Station*. https://en.wikipedia.org/wiki/International_Space_Station.
@@ -80,7 +80,8 @@ branches add entries at the same place (`.gitattributes`).
 
 - **S-rideshare-price** New Space Economy. *SpaceX rideshare pricing as of February 2026*, 2026.
   https://newspaceeconomy.ca/2026/02/27/spacex-rideshare-pricing-as-of-february-2026-what-it-costs-whats-included-and-how-buyers-budget-a-mission/.
-  About 7,000 $/kg for a rideshare to low orbit; the game uses 6,500 $/kg.
+  As published in February 2026: $350,000 for up to 50 kg to sun-synchronous orbit, then $7,000 per kg more. The game
+  uses 6,500 $/kg (our rounding, not in the source).
 
 ## Rocket parts (the builder)
 - **S-merlin-model** hoahluke. *Merlin Engine* (3D model). Sketchfab, CC BY 4.0.
@@ -257,7 +258,9 @@ branches add entries at the same place (`.gitattributes`).
   https://registry.opendata.aws/terrain-tiles/ (terrarium encoding), which in the Andes is NASA SRTM elevation (NASA/
   USGS, public domain); attribution as the registry asks. Sixteen zoom-11 tiles around Cotopaxi; the launch site's
   relief (`assets/textures/terrain_cotopaxi.png`, `assets/source/terrain_cotopaxi.py`). Our check: the summit comes out at
-  5,876 m against the published 5,897 m.
+  5,876 m against the published 5,897 m [S-cotopaxi-height].
+- **S-cotopaxi-height** Wikipedia. *Cotopaxi* (infobox and text). https://en.wikipedia.org/wiki/Cotopaxi. Elevation 5,897 m
+  (19,347 ft), the summit used in our relief check [S-terrain-tiles].
 - **S-cotopaxi-belts** Our simplification of the altitude belts painted on that relief: valley farmland, paramo grass
   from about 3,500 m, volcanic sand from about 4,500 m, glacier from about 4,850 m (`assets/shaders/terrain.gdshader`). To be
   checked against a published source; the glacier line of Cotopaxi is near 4,800-5,000 m in recent surveys.
@@ -322,7 +325,7 @@ All checked 2026-11-14.
   places it never reaches are permanently shadowed and trap water ice.
 - **S-chandrayaan3** Wikipedia. *Chandrayaan-3* (infobox and text). https://en.wikipedia.org/wiki/Chandrayaan-3.
   Launched 14 July 2023 on LVM3 M4, landed 23 August 2023 at 69.373 S; lander Vikram 1,726 kg; the hop of about 40 cm
-  (ISRO, 4 September 2023, as cited there). Real twin of the south pole mission.
+  (3 September 2023, as cited there; ISRO announced it on 4 September). Real twin of the south pole mission.
 - **S-im1** Wikipedia. *IM-1* (text). https://en.wikipedia.org/wiki/IM-1. Intuitive Machines' Odysseus, launched
   15 February 2024 on Falcon 9, landed 22 February 2024 at Malapert A (80.13 S); landed faster than planned on a
   12-degree slope, broke a leg, tipped onto its side and kept returning data until the lunar night, about a week.
@@ -370,13 +373,14 @@ All checked 2026-11-14; the research behind them is `kb/research/in-flight-failu
   formerly at www2.jpl.nasa.gov/basics, now moved). https://science.nasa.gov/learn/basics-of-space-flight/chapter1-1/.
   Checked 2026-11-15: "3 seconds, 900,000 km, ~ Earth-Moon round trip"; the Moon is a little over a light-second away.
 - **S-descanso-bands** Taylor, J. (ed.), *Deep Space Communications*, DESCANSO series vol. 4, ch. 10, JPL.
-  https://descanso.jpl.nasa.gov/monograph/series4/Mono4_Ch10.pdf. S, X and Ka are the deep-space bands; the X-band
-  downlink near 8.4 GHz is the craft's tone in "Find the carrier".
+  https://descanso.jpl.nasa.gov/monograph/series4/Mono4_Ch10.pdf. S, X and Ka are the deep-space bands (this chapter). The
+  8.4 GHz tone of the X-band downlink in "Find the carrier" is our own figure; this chapter does not print it.
 - **S-jpl-voyager2** NASA Jet Propulsion Laboratory. *NASA Mission Update: Voyager 2 Communications Pause*, 2023.
   https://www.jpl.nasa.gov/news/nasa-mission-update-voyager-2-communications-pause/. The Deep Space Network heard
   Voyager 2's carrier when it was too faint to carry data: the idea of "Find the carrier".
 - **S-soho-recovery** NASA/ESA. *SOHO Mission Interruption and Recovery*. https://soho.nascom.nasa.gov/about/Recovery/.
-  SOHO's faint carrier found again on 3 August 1998, six weeks after the loss.
+  The page records the loss of contact on 25 June 1998 and the recovery updates from 24 June to 20 November 1998;
+  the game's "Find the carrier" follows that story (the date of the first detection is not on the page).
 - **S-usno-sun** U.S. Naval Observatory. *Approximate Solar Coordinates*. https://aa.usno.navy.mil/faq/sun_approx
   (read through the Internet Archive on 2026-11-15; the site did not answer). g = 357.529 + 0.98560028 D,
   L = q + 1.915 sin g + 0.020 sin 2g, about 1 arcminute within two centuries of 2000. Where the Sun is, so where L2 is

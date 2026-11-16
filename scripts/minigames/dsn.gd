@@ -8,7 +8,7 @@ extends RefCounted
 ## radii), and the trip lies in the ecliptic like scripts/flight/transfer.gd.
 
 const C := 299792458.0                 ## m/s, the speed of light (exact by definition) [S-codata-c].
-const X_BAND_HZ := 8.4e9               ## Deep-space X-band downlink, about 8.4 GHz [S-descanso-bands].
+const X_BAND_HZ := 8.4e9               ## Deep-space X-band downlink: our figure of about 8.4 GHz; the bands are in [S-descanso-bands].
 const OBLIQUITY_DEG := 23.44           ## Tilt of the Earth's axis to the ecliptic [S-usno-gast].
 const MIN_ELEV_DEG := 6.0              ## A dish tracks above about this height; lower, the ground and air get in the way (our simplification).
 

@@ -251,14 +251,14 @@
      "name": "Fire alert latency (FIRMS)",
      "value": 3,
      "units": "hours (secondary source)",
-     "source": "https://africa-knowledge-platform.ec.europa.eu/dataset/fires-last-72-hours",
+     "source": "https://africa-knowledge-platform.ec.europa.eu/dataset/fires-last-72-hours (blocks automated checks; open in a browser)",
      "confidence": "typical range"
     },
     {
      "name": "Fire product spatial resolution",
      "value": 375,
      "units": "m (product name)",
-     "source": "https://catalog.data.gov/dataset/viirs-s-npp-i-band-375-m-active-fire-product-nrt-vector-data-6f751",
+     "source": "https://catalog.data.gov/dataset/viirs-s-npp-i-band-375-m-active-fire-product-nrt-vector-data-6f751 (404 on 2026-11-16)",
      "confidence": "documented"
     }
    ],
@@ -273,7 +273,7 @@
      "id": "three_hour_alert",
      "text": "Get the fire map to the ground within about 3 hours",
      "instrument": "fast downlink",
-     "source": "https://africa-knowledge-platform.ec.europa.eu/dataset/fires-last-72-hours"
+     "source": "https://africa-knowledge-platform.ec.europa.eu/dataset/fires-last-72-hours (blocks automated checks; open in a browser)"
     },
     {
      "id": "burn_scar",

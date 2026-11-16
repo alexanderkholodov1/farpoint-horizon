@@ -43,7 +43,7 @@ Each entry: what happened, how people noticed, how it was solved, how long, sour
   (per the post-flight mission report, as quoted in the Flight Journal).
 - **How long.** About a minute to the switch; under 3 minutes to full recovery.
 - **Source.** Apollo Flight Journal: https://www.nasa.gov/history/afj/ap12fj/01launch_to_earth_orbit.html ;
-  NASA lightning analysis: https://sma.nasa.gov/SignificantIncidents/assets/analysis-of-apollo-12-lightning-incident.pdf ;
+  NASA lightning analysis: https://sma.nasa.gov/SignificantIncidents/assets/analysis-of-apollo-12-lightning-incident.pdf (error 500 on 2026-11-16) ;
   story: https://www.nasa.gov/history/55-years-ago-apollo-12-makes-a-pinpoint-landing-on-the-moon/
 
 ### 3. Apollo 13: the CO2 "mailbox" (April 1970, NASA)
@@ -133,7 +133,7 @@ Each entry: what happened, how people noticed, how it was solved, how long, sour
   The game can make it a "rescue in time" version (inference).
 - **How long.** Months of drift in cruise; investigation report dated Nov 10, 1999.
 - **Source.** NASA Phase I Board report: https://llis.nasa.gov/llis_lib/pdf/1009464main1_0641-mr.pdf ; NASA
-  safety message: https://sma.nasa.gov/docs/default-source/safety-messages/safetymessage-2009-08-01-themarsclimateorbitermishap.pdf
+  safety message: https://sma.nasa.gov/docs/default-source/safety-messages/safetymessage-2009-08-01-themarsclimateorbitermishap.pdf (404 on 2026-11-16)
 
 ### 10. Spirit: the flash-memory reboot loop (Jan 2004, JPL)
 - **What happened.** On January 21, 2004 (about sol 18) Spirit stopped sending useful data and kept rebooting. Too many
@@ -175,7 +175,7 @@ Each entry: what happened, how people noticed, how it was solved, how long, sour
   another, a "virtual engine"; JAXA announced on Nov 19, 2009 that thrust above 5 mN was restored. The capsule landed
   June 13, 2010.
 - **How long.** 15 days to the announced fix.
-- **Source.** JAXA: https://global.jaxa.jp/press/2009/11/20091119_hayabusa_e.html and
+- **Source.** JAXA: https://global.jaxa.jp/press/2009/11/20091119_hayabusa_e.html (blocks automated checks; open in a browser) and
   https://www.isas.jaxa.jp/e/topics/2009/1119.shtml ; engine labels vary between reports, so the game should name the
   parts generically.
 
@@ -367,7 +367,7 @@ divided by the speed of light, then shows it in a clock that can be skipped.
 - Voyager today: science data returns in real time at 160 bits per second, via the DSN. Source:
   https://science.nasa.gov/mission/voyager/interstellar-science/ . For comparison, Galileo's emergency link after the
   stuck antenna was reported as about 10 bps rising to about 300 bps (single source:
-  https://www.pulse.bot/spacetech/news/when-the-galileo-spacecrafts-main-antenna-failed-to-unfurl-on-the-way-to-jupiter-engineers-salvaged-63632d4b-2476-49c3-817f-1c195c759ae8
+  https://www.pulse.bot/spacetech/news/when-the-galileo-spacecrafts-main-antenna-failed-to-unfurl-on-the-way-to-jupiter-engineers-salvaged-63632d4b-2476-49c3-817f-1c195c759ae8 (404 on 2026-11-16)
   which I flagged as low-reliability; prefer the NASA papers listed in item 5 for any number).
 - Webb is about 1 million miles (1.5 million km) away and downlinks stored science via Ka-band, far more efficient than S-band
   (a transfer that takes hours on Ka takes many days on S). Webb page above.

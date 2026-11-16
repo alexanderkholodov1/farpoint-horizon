@@ -47,7 +47,7 @@ Cada decisión mueve los indicadores compartidos y se ve en la nave. No alcanzar
 
 Notas:
 (60 s) Demo en vivo si la sala lo permite; si no, estas cuatro imágenes. Contar una misión de punta a punta.
-TODO: decidir demo o imágenes cuando el juego esté completo.
+Demo: el video de 29 segundos del repositorio o estas imágenes.
 
 ---
 layout: split
@@ -70,7 +70,7 @@ Y lo comprobamos contra la realidad sin hacer trampa. (RCD 1.1-1.3)
 ---
 layout: split
 label: Tecnología · el juego funcionando
-image: shot: el menú o las tarjetas de misión en la versión web, con el navegador a la vista | Se juega en el navegador: TODO el enlace en vivo
+image: shot: el menú o las tarjetas de misión en la versión web, con el navegador a la vista | Se juega en el navegador: farpoint-horizon.web.app
 
 ## Hecho para correr donde haya un navegador
 - **Godot 4.7**, renderizador GL Compatibility: corre en GPUs integradas y en el navegador; versión de escritorio como respaldo.
@@ -78,7 +78,7 @@ image: shot: el menú o las tarjetas de misión en la versión web, con el naveg
 - **Comportamiento real**: gravedad de cada cuerpo, constantes reales; el tiempo corre real y el jugador lo acelera a la vista (×1, ×10, ×100).
 - **Revisado en cada cambio**: importación, una corrida sin pantalla, una prueba de estrés y la exportación web.
 ### Juégalo
-TODO: enlace del juego · repositorio: github.com/alexanderkholodov1/farpoint-horizon (MIT)
+Juego: farpoint-horizon.web.app (versión publicada) · historia v0.3.0: https://farpoint-horizon--pr93-v0-3-0-a59yjofm.web.app · repositorio: github.com/alexanderkholodov1/farpoint-horizon/tree/v0.3.0 (MIT)
 
 Notas:
 (45 s) La arquitectura en una frase, después el enlace. (IET 2.1-2.5)
@@ -91,10 +91,10 @@ image: assets/photos/volcano_watch/cotopaxi_landsat8_2015-09-15_truecolor.jpg | 
 ## De los volcanes del Ecuador a la Luna, en español e inglés
 - **Para** estudiantes, docentes y curiosos: sin instalar nada, cada concepto explicado en palabras simples.
 - **Local**: lanzar desde el Ecuador (el giro de la Tierra regala velocidad), vigilar el Cotopaxi y el Sangay, seguir El Niño.
-- **Misiones**: TODO confirmar la lista final (volcanes, El Niño, la Luna, un telescopio espacial).
+- **Misiones**: las seis misiones de la NASA (Apolo 13, STS-61, Mars Pathfinder, LCROSS, DART, Artemis I) y los escenarios libres: Ecuador Volcano Watch, Ocean Guardians y El Niño, Lunar Cartographer, Eye on the Universe, Ice at the Moon's South Pole y modo libre.
 ### Después del hackathon
 - Una campaña con historia; jugar con hasta tres amigos en línea.
-- Pilotos en aulas del Ecuador. TODO: un aliado o primer paso.
+- Pilotos en aulas del Ecuador planeados; sin aliado confirmado todavía.
 
 Notas:
 (45 s) A quién sirve, por qué encaja en el Ecuador y un camino realista para seguir. (IR 3.1-3.5)
@@ -106,8 +106,8 @@ image: shot: la película de créditos sobre la Tierra, o la lista de fuentes en
 
 ## Nuestro trabajo, nuestras fuentes, nuestra ayuda
 - **Hecho por nosotros**: el juego, sus modelos 3D (de nuestros scripts), música y sonidos. **Ninguna imagen hecha con IA.**
-- **Citado**: TODO número de fuentes en `docs/sources.md` (69 hoy), en el repositorio y en los créditos. Sin logos de la NASA.
-- **IA declarada**: Claude Code para código e investigación; Cursor para una prueba web. TODO: las herramientas del compañero (README). La idea y el diseño son nuestros.
+- **Citado**: todas las fuentes de `docs/sources.md`, en el repositorio y en los créditos del juego. Sin logos de la NASA.
+- **IA declarada**: Claude Code (código, investigación), Antigravity y Cursor (código y una prueba web); Meshy y TRELLIS (referencias 3D; ver "Uso de IA" en el README). La idea y el diseño son nuestros.
 ### Equipo SK-Horizons
 - **Alexander Kholodov**: la misión y el vuelo a la Luna.
 - **Sebastian Amaguaya**: el constructor de cohetes, modelos 3D, imagen y sonido.

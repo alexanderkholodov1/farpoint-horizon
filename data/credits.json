@@ -26,12 +26,12 @@
  "ai": [
   "Claude Code (Anthropic) helped write code, documents and research notes.",
   "Antigravity and Cursor helped with code and with a first test of the web version.",
-  "Meshy and TRELLIS made 3D drafts that served as references for the four cuyes. Rumi's body comes from a TRELLIS model; the rest was modeled in Blender by our own scripts.",
-  "Claude (Anthropic) generated the game's music. The music files and the game's credits say so."
+  "Meshy (AI 3D tool) made reference models that the team measured the four cuyes on. Rumi's body is a TRELLIS (AI 3D) mesh made from a screenshot of those references; the other cuy models were modeled in Blender by our own scripts (assets/source/crew_cuy.py).",
+  "Claude (Anthropic) helped write the script that composes the game's music (tools/content/audio/compose_music.py, numpy and ffmpeg, no samples). The music files and the game's credits say so."
  ],
  "ai_note": [
   "AI tools helped us build this project, as the challenge rules ask us to disclose. The idea, the design, the story and the decisions are the team's.",
-  "There are no AI-generated images or videos, and no NASA logos, insignia or mission patches anywhere in the game."
+  "The game and the deck contain no AI-generated images or videos, and no NASA logos, insignia or mission patches. The Meshy renders kept in docs/design/crew/ai-references/ are AI output, shown only to document how the models were made."
  ],
  "built_with": [
   "Engine: Godot Engine, MIT license (godotengine.org).",
@@ -39,7 +39,7 @@
   "Font: Inter by Rasmus Andersson, SIL Open Font License (rsms.me/inter).",
   "Outside 3D models: Merlin Engine by hoahluke, Merlin 1D Vacuum by MartianDays and Rocket Nozzle Part by corncob_127 (Sketchfab, CC BY 4.0); the Space Shuttle Solid Rocket Booster from NASA 3D Resources (public domain).",
   "NASA imagery and data: the Earth, the Moon, the landing ground, the planets' positions and every mission photo, each listed with its source in docs/sources.md.",
-  "Sounds: made by the game itself, in code; the music, composed for the game (see \"Use of AI\")."
+  "Sounds: synthesized by the game's own code; the music is composed by our script (see \"Use of AI\")."
  ],
  "sections": [
   {
@@ -108,7 +108,7 @@
     },
     {
      "id": "S-wiki-geo",
-     "text": "Wikipedia. Geostationary orbit. https://en.wikipedia.org/wiki/Geostationary_orbit. Altitude 35,786 km, period 1,436 min, continuous view of one hemisphere."
+     "text": "Wikipedia. Geostationary orbit. https://en.wikipedia.org/wiki/Geostationary_orbit. Altitude 35,786 km, period 1,436 min; to a ground observer it stays fixed in the sky."
     },
     {
      "id": "S-wiki-dv",
@@ -145,7 +145,7 @@
     },
     {
      "id": "S-rideshare-price",
-     "text": "New Space Economy. SpaceX rideshare pricing as of February 2026, 2026. https://newspaceeconomy.ca/2026/02/27/spacex-rideshare-pricing-as-of-february-2026-what-it-costs-whats-included-and-how-buyers-budget-a-mission/. About 7,000 $/kg for a rideshare to low orbit; the game uses 6,500 $/kg."
+     "text": "New Space Economy. SpaceX rideshare pricing as of February 2026, 2026. https://newspaceeconomy.ca/2026/02/27/spacex-rideshare-pricing-as-of-february-2026-what-it-costs-whats-included-and-how-buyers-budget-a-mission/. As published in February 2026: $350,000 for up to 50 kg to sun-synchronous orbit, then $7,000 per kg more. The game uses 6,500 $/kg (our rounding, not in the source)."
     }
    ]
   },
@@ -343,7 +343,11 @@
     },
     {
      "id": "S-terrain-tiles",
-     "text": "Mapzen/Tilezen. Terrain Tiles on the Registry of Open Data on AWS, https://registry.opendata.aws/terrain-tiles/ (terrarium encoding), which in the Andes is NASA SRTM elevation (NASA/ USGS, public domain); attribution as the registry asks. Sixteen zoom-11 tiles around Cotopaxi; the launch site's relief (assets/textures/terrain_cotopaxi.png, assets/source/terrain_cotopaxi.py). Our check: the summit comes out at 5,876 m against the published 5,897 m."
+     "text": "Mapzen/Tilezen. Terrain Tiles on the Registry of Open Data on AWS, https://registry.opendata.aws/terrain-tiles/ (terrarium encoding), which in the Andes is NASA SRTM elevation (NASA/ USGS, public domain); attribution as the registry asks. Sixteen zoom-11 tiles around Cotopaxi; the launch site's relief (assets/textures/terrain_cotopaxi.png, assets/source/terrain_cotopaxi.py). Our check: the summit comes out at 5,876 m against the published 5,897 m [S-cotopaxi-height]."
+    },
+    {
+     "id": "S-cotopaxi-height",
+     "text": "Wikipedia. Cotopaxi (infobox and text). https://en.wikipedia.org/wiki/Cotopaxi. Elevation 5,897 m (19,347 ft), the summit used in our relief check [S-terrain-tiles]."
     },
     {
      "id": "S-cotopaxi-belts",
@@ -397,7 +401,7 @@
     },
     {
      "id": "S-chandrayaan3",
-     "text": "Wikipedia. Chandrayaan-3 (infobox and text). https://en.wikipedia.org/wiki/Chandrayaan-3. Launched 14 July 2023 on LVM3 M4, landed 23 August 2023 at 69.373 S; lander Vikram 1,726 kg; the hop of about 40 cm (ISRO, 4 September 2023, as cited there). Real twin of the south pole mission."
+     "text": "Wikipedia. Chandrayaan-3 (infobox and text). https://en.wikipedia.org/wiki/Chandrayaan-3. Launched 14 July 2023 on LVM3 M4, landed 23 August 2023 at 69.373 S; lander Vikram 1,726 kg; the hop of about 40 cm (3 September 2023, as cited there; ISRO announced it on 4 September). Real twin of the south pole mission."
     },
     {
      "id": "S-im1",
@@ -458,7 +462,7 @@
     },
     {
      "id": "S-descanso-bands",
-     "text": "Taylor, J. (ed.), Deep Space Communications, DESCANSO series vol. 4, ch. 10, JPL. https://descanso.jpl.nasa.gov/monograph/series4/Mono4_Ch10.pdf. S, X and Ka are the deep-space bands; the X-band downlink near 8.4 GHz is the craft's tone in \"Find the carrier\"."
+     "text": "Taylor, J. (ed.), Deep Space Communications, DESCANSO series vol. 4, ch. 10, JPL. https://descanso.jpl.nasa.gov/monograph/series4/Mono4_Ch10.pdf. S, X and Ka are the deep-space bands (this chapter). The 8.4 GHz tone of the X-band downlink in \"Find the carrier\" is our own figure; this chapter does not print it."
     },
     {
      "id": "S-jpl-voyager2",
@@ -466,7 +470,7 @@
     },
     {
      "id": "S-soho-recovery",
-     "text": "NASA/ESA. SOHO Mission Interruption and Recovery. https://soho.nascom.nasa.gov/about/Recovery/. SOHO's faint carrier found again on 3 August 1998, six weeks after the loss."
+     "text": "NASA/ESA. SOHO Mission Interruption and Recovery. https://soho.nascom.nasa.gov/about/Recovery/. The page records the loss of contact on 25 June 1998 and the recovery updates from 24 June to 20 November 1998; the game's \"Find the carrier\" follows that story (the date of the first detection is not on the page)."
     },
     {
      "id": "S-usno-sun",
@@ -515,5 +519,5 @@
    ]
   }
  ],
- "count": 108
+ "count": 109
 }
