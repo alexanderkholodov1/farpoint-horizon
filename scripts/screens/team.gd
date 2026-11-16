@@ -53,7 +53,7 @@ func _steps_of(st: String) -> String:
 
 # ===================================================================================== HOME
 func _show_home() -> void:
-	var v := _frame(700, 520, tr("Your crew"), tr("A mission is a team effort. You have four stations, each with its cuy: Rumi the engineer, Killa the scientist, Inti the pilot and Wayra at ground control. Friends take the stations they like, and the cuyes take the rest, so you never fly alone."))
+	var v := _frame(700, 620, tr("Your crew"), tr("A mission is a team effort. You have four stations, each with its cuy: Rumi the engineer, Killa the scientist, Inti the pilot and Wayra at ground control. Friends take the stations they like, and the cuyes take the rest, so you never fly alone."))
 	var opts := [
 		[tr("Solo"), tr("You take one station. Three cuyes take the others and work with you."), "solo", Kit.C_GOLD],
 		[tr("Same screen"), tr("Two to four people on one computer, passing the screen. Free stations get their cuy."), "same", null],
@@ -64,6 +64,10 @@ func _show_home() -> void:
 			Kit.accent_btn(b, o[3])
 		v.add_child(b)
 		v.add_child(Kit.lbl(o[1], 14, Kit.C_DIM, Kit.FONT_R, true))
+	# the first mission, guided by the crew, is a way in too: it lives here with the other ways to play
+	var guided := Kit.btn(tr("Guided first mission"), func(): preload("res://scripts/tutorial/coach.gd").start(main), 22, 640)
+	v.add_child(guided)
+	v.add_child(Kit.lbl(tr("New to space missions? The crew walks you through your first one, station by station."), 14, Kit.C_DIM, Kit.FONT_R, true))
 	v.add_child(Kit.spacer(6))
 	v.add_child(Kit.btn(tr("◀ Back"), func(): go("menu")))
 
