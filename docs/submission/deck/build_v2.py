@@ -1,5 +1,6 @@
 """Builds EN_17_SK-Horizons_v2.pptx from the presented v1 deck, keeping its look (Segoe UI, glass cards, amber dashes).
-Usage: python build_v2.py v1.pptx out.pptx imgdir
+Usage (from the repository root): python docs/submission/deck/build_v2.py docs/submission/presented/EN_17_SK-Horizons.pptx docs/submission/deck/EN_17_SK-Horizons_v2.pptx docs/submission/deck/img
+The images are in-game captures (shots/ from tests/*shot.tscn, cropped) and the crew portraits of assets/story/portraits.
 """
 import sys, copy
 from xml.sax.saxutils import escape
@@ -128,7 +129,7 @@ s1 = S[0]
 set_paras(shape(s1, "Tagline"), [para([run("Six real NASA missions. Four cuyes who were there.", 1900, WHITE)], 2470, 0, align="ctr"),
                                   para([run("And one mission that is all yours.", 1900, WHITE, True)], 2470, 0, align="ctr")])
 set_paras(shape(s1, "Team"), [para([run("Team SK-Horizons", 1400, WHITE, True), run(" · Quito, Ecuador · Sangolquí local event (ESPE)", 1400, WHITE)], 1890, 0, align="ctr"),
-                              para([run("Alexander Kholodov · Sebastián Amaguaya", 1400, WHITE)], 1890, 0, align="ctr")])
+                              para([run("Sebastian Amaguaya · Alexander Kholodov", 1400, WHITE)], 1890, 0, align="ctr")])
 notes(s1, "(15 s) We are SK-Horizons, from Quito. Our answer to the Space Mission Design Game challenge is Farpoint HORIZON: "
           "six real NASA missions lived with a crew of four cuyes, and a mission of your own, from the first idea to the data coming home.")
 
@@ -271,19 +272,19 @@ set_paras(shape(s7, "Bullets"), bullets([
     ("AI, disclosed: ", "Claude Code (code, research), Antigravity and Cursor (code); Meshy and TRELLIS 3D drafts for the cuyes; music generated with Claude."),
 ], 1150, 1500, 350))
 move(shape(s7, "Bullets"), w=4.25, h=2.5)
-set_paras(shape(s7, "Card heading"), [para([run("TEAM SK-HORIZONS", 950, AMBER, True, 400)], 1235)])
+set_paras(shape(s7, "Card heading"), [para([run("TEAM SK-HORIZONS · SIDE BY SIDE", 950, AMBER, True, 400)], 1235)])
 move(shape(s7, "Card"), y=4.75, w=4.25, h=1.5)
 move(shape(s7, "Card heading"), y=4.9, w=3.9)
 set_paras(shape(s7, "Bullets", 1), [
+    para([run("Sebastian Amaguaya", 1250, AMBER, True)], 1500, 0, bullet=True),
+    para([run("the story and the cuyes, the missions, 3D models, music", 1000, MUTED)], 1300, 250, indent=True),
     para([run("Alexander Kholodov", 1250, AMBER, True)], 1500, 0, bullet=True),
-    para([run("lead: flight, landing, ground control, NASA data", 1000, MUTED)], 1300, 250, indent=True),
-    para([run("Sebastián Amaguaya", 1250, AMBER, True)], 1500, 0, bullet=True),
-    para([run("builder, 3D models and cuyes, story missions, music", 1000, MUTED)], 1300, 0, indent=True)])
+    para([run("planning, flight physics, testing, design polish", 1000, MUTED)], 1300, 0, indent=True)])
 move(shape(s7, "Bullets", 1), y=5.15, w=3.9, h=1.3)
 move(shape(s7, "Title"), w=4.6)
 move(shape(s7, "Picture 14"), x=5.9, y=1.45, w=6.6, h=6.6 * 5.02 / 7.84)
 move(shape(s7, "Caption"), x=5.9, y=1.45 + 6.6 * 5.02 / 7.84 + 0.12, w=6.6)
-notes(s7, "(20 s) Everything is ours and everything is cited, with every use of AI disclosed. We are Alexander and Sebastián, SK-Horizons. Thank you.")
+notes(s7, "(20 s) Everything is ours and everything is cited, with every use of AI disclosed. We are Sebastian and Alexander, SK-Horizons, and we built it side by side. Thank you.")
 
 # ===================================================================================== ORDER: story after the solution
 lst = prs.slides._sldIdLst

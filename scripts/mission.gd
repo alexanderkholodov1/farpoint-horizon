@@ -22,7 +22,7 @@ var shielding := false
 var extras_offered: Array = []   ## Extra objective ids drawn for this mission (data/objectives.json).
 var extras: Array = []           ## The ones the team goes for.
 
-const DOD := 0.6            # safe battery depth of discharge in low orbit, simplified from [S-ntrs-dod]
+const DOD := 0.6            # depth of discharge per eclipse: our game value; NASA's low-orbit Li-ion tests run 20-40 % [S-ntrs-dod]
 # Our game values (balance, not measured): what redundancy and shielding add to the dry mass and to the hardware cost,
 # the fixed cost of fitting propulsion (M$), how much of its power electric propulsion draws on average, the years a
 # high orbit lasts once its station-keeping fuel is gone, and how much science an instrument the attitude control

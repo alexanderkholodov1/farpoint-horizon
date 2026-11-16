@@ -10,7 +10,7 @@ label: NASA Space Apps Challenge 2026 · Space Mission Design Game
 # Farpoint HORIZON
 > Build your own craft, launch it from the equator, fly it to the Moon, and keep it talking to Earth.
 **Team SK-Horizons** · Quito, Ecuador · Local event Sangolquí (ESPE)
-Alexander Kholodov · Sebastián Amaguaya
+Sebastian Amaguaya · Alexander Kholodov
 
 Notes:
 (15 s) Who we are, the challenge, the one-line promise of the game.
@@ -103,7 +103,7 @@ image: shot: the credits film over the Earth, or the sources list in the game (s
 - **AI disclosed**: Claude Code for code and research; Cursor for a web test. TODO: the teammate's tools (README). The idea and design are ours.
 ### Team SK-Horizons
 - **Alexander Kholodov**: lead; the mission and the flight to the Moon.
-- **Sebastián Amaguaya**: the rocket builder, 3D models, look and sound.
+- **Sebastian Amaguaya**: the rocket builder, 3D models, look and sound.
 
 Notes:
 (25 s) Close: thank the judges, invite them to play. RCD 1.5.

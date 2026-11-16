@@ -144,12 +144,12 @@ There are no AI-generated images or videos, and no NASA logos, insignia or missi
   NASA 3D Resources.
 - Images and data from NASA, listed in [`docs/sources.md`](docs/sources.md).
 
-## Team SK-Horizons, Quito, Ecuador
+## Team
 
-- **Alexander Kholodov**, team lead: the flight, the Moon landing, ground control, playing together and the NASA
-  data. [GitHub](https://github.com/alexanderkholodov1)
-- **Sebastián Amaguaya**: the rocket builder, the 3D models and the cuyes, the story missions, the look of the game,
-  the music and the sounds. [GitHub](https://github.com/XebaxCode)
+Team SK-Horizons, Quito, Ecuador: two teammates who built it side by side, as equals.
+
+- **Sebastian Amaguaya**: the story campaign and its cuy crew, nearly every mission and its mechanics, the 3D models, the rocket builder, the music and the look of the game. [GitHub](https://github.com/XebaxCode)
+- **Alexander Kholodov**: the first brainstorm and the plan by stages that let the work run in parallel, the flight's real physics, testing, debugging and edge cases, design polish and the order of the repository. [GitHub](https://github.com/alexanderkholodov1)
 
 Demo video: https://youtu.be/3xZdPJr71bg · Pitch (English and Spanish): [`docs/pitch/build/`](docs/pitch/build/) ·
 Submission texts: [`docs/submission/`](docs/submission/) · License: MIT ([LICENSE](LICENSE))

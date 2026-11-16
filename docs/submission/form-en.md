@@ -104,7 +104,7 @@ CREATIVITY AND WHAT WE CONSIDERED
 We chose real physics over scripted animation so that what players learn is true, and a story told only from NASA's own pages. The cuyes add humor and an Andean identity without changing history. We designed for modest school computers, for players who have never studied space, for two languages, and for the challenge's rules: no NASA logos or insignia, and every use of AI disclosed.
 
 Repository: https://github.com/alexanderkholodov1/farpoint-horizon
-Team SK-Horizons, Quito, Ecuador: Alexander Kholodov (lead) and Sebastián Amaguaya.
+Team SK-Horizons, Quito, Ecuador: Sebastian Amaguaya and Alexander Kholodov, who built it side by side.
 ```
 
 ---

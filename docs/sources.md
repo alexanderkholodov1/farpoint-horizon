@@ -53,8 +53,10 @@ branches add entries at the same place (`.gitattributes`).
   Verification and Operation of Flight Systems*, Rule 1.06 and Table 1.06-1.
   https://standards.nasa.gov/system/files/tmp/GSFC-STD-1000RevI_Approved_0.pdf. Mass margin above 10 % and power margin
   above 15 %, the margins of the Systems Engineer's goal.
-- **S-ntrs-dod** NASA Technical Reports Server. *Lithium-ion battery depth of discharge in low Earth orbit*, 2007.
-  https://ntrs.nasa.gov/citations/20070022412. Why the game uses 60 % of the battery per eclipse.
+- **S-ntrs-dod** NASA Glenn Research Center (NASA Technical Reports Server). *An Update on the Lithium-Ion Cell
+  Low-Earth-Orbit Verification Test Program*, 2007. https://ntrs.nasa.gov/citations/20070022412. Checked 2026-11-15: the
+  low-orbit cycling tests run at depths of discharge of 20 %, 30 % and 40 %. The game lets a battery give 60 % of its
+  charge per eclipse: our game value, more generous than those tests, so small craft can work (a simplification).
 - **S-wiki-geo** Wikipedia. *Geostationary orbit*. https://en.wikipedia.org/wiki/Geostationary_orbit. Altitude 35,786 km,
   period 1,436 min, continuous view of one hemisphere.
 - **S-wiki-dv** Wikipedia. *Delta-v budget*. https://en.wikipedia.org/wiki/Delta-v_budget. Delta-v from low Earth orbit to
@@ -138,12 +140,14 @@ branches add entries at the same place (`.gitattributes`).
   cold (38 degrees Fahrenheit, condensation on the walls), noncritical systems off and power use cut to 1/5, the
   five-minute burn near the Moon to speed up the return, launch at 1:13 p.m. CST, and splashdown in the Pacific near
   Samoa with USS Iwo Jima as recovery ship.
-- **S-apollo13-mailbox** NASA. *Apollo 13 Crew Installing "Mail Box" for Purging Carbon Dioxide From Lunar Module,
-  April 14, 1970*, photograph AS13-62-9004 (public domain). https://images.nasa.gov/details/as13-62-9004, caption on
-  the Apollo Flight Journal page https://www.nasa.gov/history/afj/ap13fj/. The real adapter, shown when mission 1's
-  adapter game is won (assets/missions/apollo13/as13-62-9004.jpg). The same mission page [S-apollo13-nasa] gives the
-  game's other facts: the CO2 warning after a day and a half in the lunar module, and the lunar module made for two
-  men for two days, asked to keep three for about four.
+- **S-apollo13-mailbox** NASA. Apollo 13 photograph *AS13-62-9004*: in the lunar module, hoses and the canister of the
+  "mail box", the crew's carbon dioxide adapter (public domain). Full-size file in the Apollo Lunar Surface Journal
+  (NASA History Office, hosted at apollojournals.org): https://apollojournals.org/alsj/a13/AS13-62-9004.jpg. Checked
+  2026-11-15 (this frame is not in the NASA Image and Video Library; frame AS13-62-8929 there shows the same mail box
+  from the front: https://images.nasa.gov/details/as13-62-8929). The real adapter, shown when mission 1's adapter game
+  is won (assets/missions/apollo13/as13-62-9004.jpg). The same mission page [S-apollo13-nasa] gives the game's other
+  facts: the CO2 warning after a day and a half in the lunar module, and the lunar module made for two men for two
+  days, asked to keep three for about four.
 - **S-hubble-sm1** NASA Science. *Hubble Servicing Mission 1*.
   https://science.nasa.gov/mission/hubble/observatory/missions-to-hubble/servicing-mission-1/. Endeavour launched
   Dec 2, 1993; the mirror's flaw (spherical aberration: many foci instead of one, fuzzy first images); five
@@ -305,7 +309,7 @@ All checked 2026-11-14.
   Reports Server 19730010151, https://ntrs.nasa.gov/citations/19730010151. A landing is decided mainly by the touchdown
   speed and the slope of the ground under the legs; the game's touchdown bands use those two (their values are ours).
 - **S-afj11-tli** Woods, W. D., et al. *Apollo 11, Day 1 part 2: Earth Orbit and Translunar Injection*, Apollo Flight
-  Journal (NASA History Office; apollojournals.org, linked from https://www.nasa.gov/history/afj/).
+  Journal (NASA History Office, hosted at apollojournals.org).
   https://apollojournals.org/afj/ap11fj/02earth-orbit-tli.html. Checked 2026-11-15. "Duration of the burn expected to
   be 5 minutes, 47 seconds"; inertial velocity at cutoff 35,575 ft/s (10,843 m/s); "an orbital weight of the combined
   vehicles of 297,914 pounds" in the parking orbit. The departure stage of the trip (`data/engines.json`).
@@ -344,7 +348,7 @@ All checked 2026-11-14; the research behind them is `kb/research/in-flight-failu
   Voyager 2's carrier when it was too faint to carry data: the idea of "Find the carrier".
 - **S-soho-recovery** NASA/ESA. *SOHO Mission Interruption and Recovery*. https://soho.nascom.nasa.gov/about/Recovery/.
   SOHO's faint carrier found again on 3 August 1998, six weeks after the loss.
-- **S-afj-loi** O'Brien, F. *Lunar Orbit Insertion*, Apollo Flight Journal (NASA History Office, hosted at apollojournals.org, linked from https://www.nasa.gov/history/afj/). https://apollojournals.org/afj/loiessay.html. The crew had to "perform and monitor the burn on the far side of the Moon, without assistance from the ground": the trip's loss of signal when the braking burn happens behind the Moon.
+- **S-afj-loi** O'Brien, F. *Lunar Orbit Insertion*, Apollo Flight Journal (NASA History Office, hosted at apollojournals.org). https://apollojournals.org/afj/loiessay.html. The crew had to "perform and monitor the burn on the far side of the Moon, without assistance from the ground": the trip's loss of signal when the braking burn happens behind the Moon.
 - **S-eo-orbits** Riebeek, H. *Catalog of Earth Satellite Orbits*, NASA Earth Observatory, 2009.
   https://earthobservatory.nasa.gov/features/OrbitsCatalog. Low, Sun-synchronous and geostationary orbits in plain
   words: the glossary of the game (issue #69) and the plain names of its orbits.

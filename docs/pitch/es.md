@@ -11,7 +11,7 @@ label: NASA Space Apps Challenge 2026 · Space Mission Design Game
 # Farpoint HORIZON
 > Construye tu nave, lánzala desde la línea ecuatorial, llévala a la Luna y mantenla hablando con la Tierra.
 **Equipo SK-Horizons** · Quito, Ecuador · Sede Sangolquí (ESPE)
-Alexander Kholodov · Sebastián Amaguaya
+Sebastian Amaguaya · Alexander Kholodov
 
 Notas:
 (15 s) Somos SK-Horizons, de Quito. Elegimos el reto "Space Mission Design Game". Farpoint HORIZON es un juego donde
@@ -110,7 +110,7 @@ image: shot: la película de créditos sobre la Tierra, o la lista de fuentes en
 - **IA declarada**: Claude Code para código e investigación; Cursor para una prueba web. TODO: las herramientas del compañero (README). La idea y el diseño son nuestros.
 ### Equipo SK-Horizons
 - **Alexander Kholodov**: líder; la misión y el vuelo a la Luna.
-- **Sebastián Amaguaya**: el constructor de cohetes, modelos 3D, imagen y sonido.
+- **Sebastian Amaguaya**: el constructor de cohetes, modelos 3D, imagen y sonido.
 
 Notas:
 (25 s) Cierre: qué es nuestro, qué no, y gracias. Invitar al jurado a jugar. (RCD 1.5)

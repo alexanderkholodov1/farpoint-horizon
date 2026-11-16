@@ -19,6 +19,8 @@ OUT = ROOT / "docs" / "submission" / "links.md"
 
 # Hosts whose content is NASA's (NASA centres, JPL, NASA archives and the NASA-hosted journals and repositories).
 NASA_HOSTS = ("nasa.gov", "pds-geosciences.wustl.edu", "apollojournals.org", "github.com/nasa/")
+# Links in the bibliography that are rules we follow, not resources we use (NASA's media guidelines).
+SKIP = ("nasa-brand-center",)
 # Tools and libraries the game is made with: not in docs/sources.md, which lists what the game's content uses.
 TOOLS = [
     ("Godot Engine (MIT license): the game engine", "https://godotengine.org"),
@@ -29,9 +31,9 @@ TOOLS = [
 
 
 def _trim(u):
-    u = u.rstrip(".,;`")
+    u = u.rstrip(".,;:`")
     while u.endswith(")") and u.count("(") < u.count(")"):
-        u = u[:-1].rstrip(".,;")
+        u = u[:-1].rstrip(".,;:")
     return u
 
 
@@ -43,14 +45,16 @@ def entries():
             continue
         sid, body = m.group(1), " ".join(m.group(2).split())
         body = body.split("\n## ")[0]
-        urls = [_trim(u) for u in re.findall(r"https?://\S+", body)]
+        urls = list(dict.fromkeys(_trim(u) for u in re.findall(r"https?://\S+", body)))
         if not urls:
             continue   # an entry without its own link (our simplification, or a layer of another entry)
         t = re.search(r"\*([^*]+)\*", body)
         who = body.split(". *")[0] if ". *" in body else ""
         name = t.group(1) if t else body[:60]
         label = f"{name} ({who})" if who and len(who) < 70 else name
-        yield sid, label.replace("|", "/"), urls[0]
+        urls = [u for u in urls if not any(x in u for x in SKIP)]
+        for k, u in enumerate(urls):
+            yield sid, label.replace("|", "/") + ("" if k == 0 else f" [{k + 1}]"), u
 
 
 def check(url):
