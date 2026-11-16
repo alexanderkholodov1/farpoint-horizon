@@ -316,6 +316,10 @@
     {
      "id": "S-artemis-art672",
      "text": "NASA. Artemis I Flight Day 13: Orion, Earth, and Moon, art001e000672 (Nov 28, 2022), NASA Image and Video Library, https://images.nasa.gov/details/art001e000672 (public domain). Orion at its farthest, 268,563 miles from Earth. Our processing: cropped to the Moon and the Earth (the spacecraft and its markings left out). In assets/photos/artemis1/."
+    },
+    {
+     "id": "S-dart-pia25329",
+     "text": "NASA/Johns Hopkins APL. NASA's DART at the Didymos System, PIA25329 (illustration, Sept. 22, 2022), NASA Image and Video Library, https://images.nasa.gov/details/PIA25329 (checked 2026-11-15 through the library's API: \"This illustration depicts NASA's Double Asteroid Redirection Test (DART) spacecraft prior to impact at the Didymos binary asteroid system\"). An illustration, said so on screen. The picture of chapter 5's card in the chapter select (assets/photos/dart/PIA25329.jpg)."
     }
    ]
   },
@@ -476,5 +480,5 @@
    ]
   }
  ],
- "count": 93
+ "count": 98
 }

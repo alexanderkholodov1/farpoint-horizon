@@ -48,6 +48,9 @@ func enter(_args: Dictionary) -> void:
 		last_sim = GameState.last_sim
 	bonus = int(flight.get("bonus", 0))
 	var s: Dictionary = last_sim.score
+	if not flight.get("ranked", false):   # each flight enters the ranking once (issue #52), whatever happens after
+		flight["ranked"] = true
+		GameState.add_ranking(_crew_name(), int(s.total) + bonus, str(s.grade))
 	var r: Dictionary = GameState.last_report
 	var S: Dictionary = GameData.SCENARIOS[mission.scenario]
 	var p := Kit.panel_box(Kit.PAD)
@@ -476,7 +479,9 @@ func _actions(outer: VBoxContainer, s: Dictionary) -> void:
 	var sp := Control.new()
 	sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bh.add_child(sp)
-	# the ranking comes back with the crew of friends (v0.3.0, issue #52); the menu has none either
+	var rank := Kit.btn(tr("Ranking"), func(): main.overlay("ranking"), Kit.T_BODY)
+	rank.custom_minimum_size.y = Kit.BTN_H
+	bh.add_child(rank)
 	var menu := Kit.btn(tr("Menu") + "  ·  Esc", func(): go("menu"), Kit.T_BODY)
 	menu.custom_minimum_size.y = Kit.BTN_H
 	bh.add_child(menu)
@@ -493,3 +498,12 @@ func _back_to_design() -> void:
 func _fly_again() -> void:
 	GameState.approve_all()
 	main.launch()
+
+
+## Who flew it, for the ranking: the players' names, or the station the player held with its cuy crewmates.
+func _crew_name() -> String:
+	var names: Array = []
+	for P in GameState.players:
+		names.append(str(P.get("name", "")))
+	names = names.filter(func(n): return n.strip_edges() != "")
+	return " · ".join(names) if not names.is_empty() else tr("You and the cuyes")

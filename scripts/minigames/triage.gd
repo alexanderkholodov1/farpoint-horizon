@@ -55,7 +55,7 @@ func setup(alarm: Dictionary) -> void:
 	var sp := Control.new()
 	sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	acts.add_child(sp)
-	acts.add_child(Kit.btn(tr("Echo, take it"), func(): _finish("bot"), Kit.T_SMALL))
+	acts.add_child(Kit.btn(tr("Wayra, take it"), func(): _finish("bot"), Kit.T_SMALL))
 	rng.randomize()
 	_draw_tray()
 
