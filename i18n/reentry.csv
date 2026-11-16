@@ -3,7 +3,7 @@ Coming home,De vuelta a casa
 Bring them home through the air,Tráelos a casa a través del aire
 ▲ Shallower,▲ Menos inclinado
 ▼ Steeper,▼ Más inclinado
-"Keep the marker in the green band: W or ▲ makes it shallower, S or ▼ steeper.","Mantén la marca en la banda verde: W o ▲ la hace menos inclinada, S o ▼ más inclinada."
+"Keep the arrow inside the bright band: W or ▲ makes it shallower, S or ▼ steeper.","Mantén la flecha dentro de la banda clara: W o ▲ la hace menos inclinada, S o ▼ más inclinada."
 Angle %.1f°.,Ángulo %.1f°.
 Too steep: the heat shield is overheating!,Demasiado inclinado: ¡el escudo térmico se recalienta!
 Too shallow: the capsule could skip off the air!,Muy plano: ¡la cápsula podría rebotar en el aire!
@@ -26,3 +26,4 @@ shallow: skips off,plano: rebota
 steep: too hot,inclinado: muy caliente
 Fly it again,Volver a intentarlo
 Continue · Enter,Continuar · Enter
+corridor,corredor

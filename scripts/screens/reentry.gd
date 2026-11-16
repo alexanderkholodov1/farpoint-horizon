@@ -5,6 +5,9 @@ extends "res://scripts/screens/screen.gd"
 ##   go("reentry", {"craft": "apollo13", "then": [...scenes], "back": "chapters"})
 
 const Reentry := preload("res://scripts/flight/reentry.gd")
+const Scene3D := preload("res://scripts/flight/flight_scene.gd")
+const Sets := preload("res://scripts/story/sets.gd")
+const EARTH_R := 6000.0                ## The globe under the plasma, scene units (as the launch's horizon).
 
 var R
 var craft := "apollo13"
@@ -21,6 +24,9 @@ var chute_btn: Button
 var done_card: Control
 var push := 0
 var pad: HBoxContainer
+var bg: ColorRect
+var earth: Node3D
+var saved := {}
 var shake := 0.0
 
 
@@ -30,12 +36,34 @@ func enter(args: Dictionary) -> void:
 	back = str(args.get("back", "menu"))
 	R = Reentry.new(craft)
 	_build()
+	_build_earth()
+
+
+## The game's own Earth (the launch's horizon globe, NASA's textures and its air) under the capsule, seen from about
+## 90 km up, for the plasma part; the parachutes then play over the drawn sky and sea.
+func _build_earth() -> void:
+	saved = Sets.save_world(world)
+	world.clear_stage()
+	world.cam_free = false
+	world.cam.far = 20000.0
+	world.cam.position = Vector3.ZERO
+	world.cam.rotation = Vector3.ZERO
+	world.cam.rotate_x(deg_to_rad(-8.0))
+	earth = Scene3D.horizon_earth(EARTH_R)
+	world.stage.add_child(earth)
+	Scene3D.horizon_place(earth, Vector3.ZERO, EARTH_R, 700000.0, 6.371e6, 0.0)   # high enough to see the curve
+
+
+func exit() -> void:
+	world.cam_free = true
+	Sets.restore_world(world, saved)
 
 
 func _build() -> void:
-	var bg := ColorRect.new()
+	bg = ColorRect.new()
 	bg.color = Color(0.02, 0.03, 0.07)
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	bg.visible = false   # the plasma plays over the 3D Earth; the parachutes draw their own sky
 	add_child(bg)
 	view = Control.new()
 	view.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -71,12 +99,14 @@ func _build() -> void:
 	chute_btn = Kit.accent_btn(Kit.btn(tr("Drogues · 1"), func(): _chute(), Kit.T_ACTION), Kit.C_GOLD)
 	chute_btn.visible = false
 	right.add_child(chute_btn)
-	pad = Kit.hbox(Kit.GAP)   # touch controls for the angle (phones)
+	var pad_box := Kit.panel_box(8)   # touch controls for the angle (phones), on a card so they read over the clouds
 	if Kit.compact:
-		Kit.place(pad, 1, 1, 1, 1, -300, -64, -20, -14)
+		Kit.place(pad_box, 1, 1, 1, 1, -310, -72, -14, -10)
 	else:
-		Kit.place(pad, 0, 1, 0, 1, 40, -90, 360, -30)
-	add_child(pad)
+		Kit.place(pad_box, 0, 1, 0, 1, 40, -100, 380, -26)
+	add_child(pad_box)
+	pad = Kit.hbox(Kit.GAP)
+	pad_box.add_child(pad)
 	for d in [[tr("▲ Shallower"), 1], [tr("▼ Steeper"), -1]]:
 		var b := Kit.btn(d[0], func(): pass, Kit.T_BODY, 140)
 		var v: int = d[1]
@@ -87,6 +117,7 @@ func _build() -> void:
 	black_l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	Kit.place(black_l, 0.5, 1, 0.5, 1, -360, -150, 360, -96)
 	add_child(black_l)
+	Kit.legible(black_l, 1.6)
 	Kit.UiSound.play("notify")
 
 
@@ -109,7 +140,7 @@ func process(delta: float) -> void:
 
 func _texts() -> void:
 	if R.phase == "plasma":
-		hint_l.text = tr("Keep the marker in the green band: W or ▲ makes it shallower, S or ▼ steeper.")
+		hint_l.text = tr("Keep the arrow inside the bright band: W or ▲ makes it shallower, S or ▼ steeper.")
 		var side: String = R.off_side()
 		big_l.text = "%s mph" % _num(R.speed_mph())
 		info_l.text = tr("Angle %.1f°.") % R.angle + " " + (tr("Too steep: the heat shield is overheating!") if side == "steep" else (tr("Too shallow: the capsule could skip off the air!") if side == "shallow" else tr("In the corridor. Good.")))
@@ -120,7 +151,7 @@ func _texts() -> void:
 		big_l.text = "%s ft" % _num(R.height_ft)
 		info_l.text = tr("Next mark: %s ft.") % _num(next_ft) if R.main_err < 0.0 else tr("Under three main parachutes. Splashdown coming.")
 		black_l.text = ""
-		pad.visible = false
+		pad.get_parent().visible = false
 		chute_btn.visible = R.main_err < 0.0
 		chute_btn.text = tr("Drogues · 1") if R.drogue_err < 0.0 else tr("Mains · 2")
 
@@ -179,11 +210,7 @@ func _draw_view() -> void:
 	var c := Vector2(s.x * 0.5, s.y * 0.5) + Vector2(randf_range(-1, 1), randf_range(-1, 1)) * shake * 6.0
 	var t_ms := Time.get_ticks_msec() * 0.001
 	if R.phase == "plasma":
-		for k in 60:   # stars, fixed by index
-			var p := Vector2(fmod(k * 197.3, s.x), fmod(k * 113.7, s.y * 0.6))
-			view.draw_circle(p, 1.2, Color(1, 1, 1, 0.5))
-		view.draw_circle(Vector2(s.x * 0.5, s.y * 2.6), s.y * 2.0, Color(0.12, 0.3, 0.6))   # the Earth's limb
-		view.draw_circle(Vector2(s.x * 0.5, s.y * 2.6), s.y * 2.0 + 18.0, Color(0.3, 0.6, 1.0, 0.25))
+		pass   # the 3D Earth and its stars (_build_earth)
 	else:
 		var sea_y: float = lerpf(s.y + 40.0, s.y * 0.7, 1.0 - R.height_ft / Reentry.TOP_FT)
 		view.draw_rect(Rect2(0, 0, s.x, s.y), Color(0.35, 0.58, 0.85))
@@ -201,10 +228,10 @@ func _draw_view() -> void:
 			var off := Vector2(randf_range(-40, 40), 0)
 			var a := tf * (Vector2(0, 40) + off)
 			var b := tf * (Vector2(0, -160 - randf() * 140.0) + off * 1.6)
-			view.draw_line(a, b, Color(1.0, 0.6, 0.2, 0.25 * h), 3.0, true)
+			view.draw_line(a, b, Color(1.0, 0.65, 0.25, minf(0.6 * h, 0.7)), 3.0, true)
 		for i in 5:
 			var r := 58.0 + i * 16.0 + randf() * 6.0
-			view.draw_circle(tf * Vector2(0, 40), r * (0.7 + h * 0.6), Color(1.0, 0.5 + i * 0.1, 0.2 + i * 0.12, (0.5 - i * 0.09) * h))
+			view.draw_circle(tf * Vector2(0, 40), r * (0.7 + h * 0.6), Color(1.0, 0.5 + i * 0.1, 0.2 + i * 0.12, minf((0.75 - i * 0.12) * h * 1.5, 0.9)))
 	if R.phase != "plasma":
 		var n: int = 0 if R.drogue_err < 0.0 else (2 if R.main_err < 0.0 else 3)
 		var big: bool = R.main_err >= 0.0
@@ -232,10 +259,12 @@ func _draw_gauge() -> void:
 	var lo := -11.0
 	var hi := -2.0
 	var y_of := func(a: float) -> float: return s.y * (1.0 - (a - lo) / (hi - lo))
-	gauge.draw_rect(Rect2(0, 0, s.x * 0.4, s.y), Color(1, 1, 1, 0.08))
+	gauge.draw_rect(Rect2(-12, -34, s.x + 24, s.y + 66), Color(0.02, 0.03, 0.07, 0.75))   # a dark card behind it
+	gauge.draw_rect(Rect2(0, 0, s.x * 0.4, s.y), Color(1, 1, 1, 0.12))
 	var y0: float = y_of.call(float(R.D.corridor_deg[1]))
 	var y1: float = y_of.call(float(R.D.corridor_deg[0]))
-	gauge.draw_rect(Rect2(0, y0, s.x * 0.4, y1 - y0), Color(Kit.C_OK, 0.55))
+	gauge.draw_rect(Rect2(0, y0, s.x * 0.4, y1 - y0), Color(Kit.C_OK, 0.95))
+	gauge.draw_string(Kit.font_num(), Vector2(s.x * 0.45, y0 - 6.0), tr("corridor"), HORIZONTAL_ALIGNMENT_LEFT, 120, Kit.T_SMALL, Kit.C_OK)
 	var ym: float = y_of.call(R.angle)
 	var col: Color = Kit.C_OK if R.in_corridor() else Kit.C_BAD
 	gauge.draw_colored_polygon(PackedVector2Array([Vector2(s.x * 0.42, ym), Vector2(s.x * 0.72, ym - 12), Vector2(s.x * 0.72, ym + 12)]), col)
