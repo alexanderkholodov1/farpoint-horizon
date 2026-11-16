@@ -344,17 +344,34 @@ static func _pad(world, env: Environment) -> Dictionary:
 	Space.apply_day(env)
 	env.sky = low_sky()
 	env.glow_enabled = false
-	env.fog_density = 0.0009
-	env.fog_light_color = Color(0.75, 0.8, 0.86)
+	env.fog_density = 0.00035   # light haze: from the far camera the pad must not wash out white (#97)
+	env.fog_light_color = Color(0.62, 0.74, 0.88)
 	env.ambient_light_color = Color(0.62, 0.68, 0.78)
 	env.ambient_light_energy = 0.35
 	world.sun.light_energy = 1.0
 	world.sun.light_color = Color(1.0, 0.95, 0.86)
 	world.sun.rotation_degrees = Vector3(-38, -35, 0)
-	var gm := mat(Color(0.3, 0.36, 0.22), 1.0)
+	var gm := mat(Color(0.24, 0.3, 0.16), 1.0)
 	gm.metallic_specular = 0.05
-	var ground := box(st, Vector3(3000, 0.2, 3000), Vector3(0, -0.1, 0), gm)
+	var ground := box(st, Vector3(3000, 0.2, 2100), Vector3(0, -0.1, 450), gm)
 	ground.name = "Ground"
+	# Florida's coast behind the pad: a strip of beach, then the Atlantic to the horizon
+	box(st, Vector3(3000, 0.2, 60), Vector3(0, -0.08, -630), mat(Color(0.82, 0.76, 0.6), 1.0))
+	var sea := mat(Color(0.08, 0.3, 0.48), 0.25)
+	box(st, Vector3(6000, 0.2, 3000), Vector3(0, -0.3, -2160), sea)
+	# the crawlerway: the gravel road the rocket rolled out on, running toward the camera
+	box(st, Vector3(40, 0.25, 1000), Vector3(0, 0.0, 420), mat(Color(0.46, 0.44, 0.4), 1.0))
+	# scrub and palmettos for scale
+	var scrub := mat(Color(0.16, 0.24, 0.1), 1.0)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 39
+	for i in 90:
+		var p := Vector3(rng.randf_range(-900, 900), 0, rng.randf_range(-560, 900))
+		if absf(p.x) < 140 and p.z < 60:
+			continue   # keep the pad clear
+		if absf(p.x) < 30:
+			continue   # and the crawlerway
+		ball(st, rng.randf_range(4, 11), p, scrub, Vector3(1.0, 0.55, 1.0))
 	var concrete := mat(Color(0.55, 0.54, 0.51), 0.9)
 	box(st, Vector3(220, 0.3, 220), Vector3(0, 0.0, -90), concrete)
 	# the launch platform and the tower beside it
@@ -866,7 +883,9 @@ static func _mars(world, env: Environment) -> Dictionary:
 	p.sky_top_color = Color(0.5, 0.38, 0.3)
 	p.sky_horizon_color = Color(0.82, 0.64, 0.46)
 	p.sky_curve = 0.25
-	p.ground_bottom_color = Color(0.35, 0.22, 0.15)
+	# below the horizon the sky takes the haze's colour, so wherever the ground ends it melts into it (#97: seen
+	# from 1.6 km up in the descent, the plain read as a square patch over a dark band)
+	p.ground_bottom_color = Color(0.78, 0.6, 0.45)
 	p.ground_horizon_color = Color(0.82, 0.64, 0.46)
 	p.sun_angle_max = 8.0
 	sky.sky_material = p
@@ -875,7 +894,7 @@ static func _mars(world, env: Environment) -> Dictionary:
 	env.glow_enabled = false
 	env.fog_enabled = true
 	env.fog_light_color = Color(0.78, 0.6, 0.45)
-	env.fog_density = 0.0009
+	env.fog_density = 0.0011
 	env.fog_sky_affect = 0.0
 	env.ambient_light_color = Color(0.85, 0.66, 0.5)
 	env.ambient_light_energy = 0.5
@@ -886,9 +905,9 @@ static func _mars(world, env: Environment) -> Dictionary:
 	# the ground: a wide plain with soft swells, rust and ochre
 	var ground := MeshInstance3D.new()
 	var pm := PlaneMesh.new()
-	pm.size = Vector2(6000, 6000)
-	pm.subdivide_width = 200
-	pm.subdivide_depth = 200
+	pm.size = Vector2(24000, 24000)   # to the haze in every direction, even from the top of the descent
+	pm.subdivide_width = 400
+	pm.subdivide_depth = 400
 	ground.mesh = pm
 	ground.material_override = shader_mat("""
 shader_type spatial;
@@ -1179,20 +1198,32 @@ void fragment() {
 	cyl(spin, 1.33, 1.05, 0.28, Vector3(0, -0.62, 0), mat(Color(0.42, 0.27, 0.17), 0.85), 48)
 	craft.rotation = Vector3(0.35, 0, 0.25)
 	# the glow of entry, wrapped around the heat shield (shown by the story's "fireball")
+	# a soft glow facing the camera, hot at its heart, and a trail of fading glows behind the craft; one material, so
+	# the story's fade (its alpha) drives them all (#97: it read as a flat orange egg with stars showing through)
 	var plasma := MeshInstance3D.new()
-	var psm := SphereMesh.new()
-	psm.radius = 1.0
-	psm.height = 2.0
-	plasma.mesh = psm
+	var pq := QuadMesh.new()
+	pq.size = Vector2(3.4, 3.4)
+	plasma.mesh = pq
 	var pmat := StandardMaterial3D.new()
 	pmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	pmat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	pmat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	pmat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	pmat.billboard_keep_scale = true
+	pmat.albedo_texture = soft_glow()
 	pmat.albedo_color = Color(1.0, 0.5, 0.18, 0.0)
 	plasma.material_override = pmat
 	plasma.position = Vector3(0, -1.5, 0)
 	plasma.scale = Vector3(1.5, 2.0, 1.5)
 	craft.add_child(plasma)
+	for i in 5:
+		var tq := MeshInstance3D.new()
+		var tm := QuadMesh.new()
+		tm.size = Vector2(1.0, 1.0) * (2.8 - i * 0.4)
+		tq.mesh = tm
+		tq.material_override = pmat
+		tq.position = Vector3(0, 0.9 + i * 0.85, 0)
+		plasma.add_child(tq)
 	# inside: the crew ride in the folded lander, a small warm room among the airbags and the folded petals, a little
 	# window toward Mars (the room sits apart from the craft drawn outside, so each shot shows one or the other)
 	var room := Node3D.new()
@@ -1355,8 +1386,8 @@ static func _ocean(world, env: Environment) -> Dictionary:
 	Space.apply_day(env)
 	env.sky = low_sky()
 	env.glow_enabled = false
-	env.fog_density = 0.0006
-	env.fog_light_color = Color(0.72, 0.8, 0.9)
+	env.fog_density = 0.00025   # a low camera over water: little haze, or sea and ship wash out white (#97)
+	env.fog_light_color = Color(0.55, 0.7, 0.88)
 	env.ambient_light_color = Color(0.7, 0.78, 0.9)
 	env.ambient_light_energy = 0.65
 	world.sun.light_energy = 1.05
@@ -1385,9 +1416,10 @@ void fragment() {
 	vec3 n = normalize(cross(dFdx(wp), dFdy(wp)));
 	NORMAL = (VIEW_MATRIX * vec4(n, 0.0)).xyz;
 	float fres = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 4.0);
-	ALBEDO = mix(vec3(0.02, 0.12, 0.2), vec3(0.15, 0.32, 0.42), fres);
-	ROUGHNESS = 0.08;
-	SPECULAR = 0.7;
+	float crest = smoothstep(0.12, 0.2, wp.y);
+	ALBEDO = mix(mix(vec3(0.01, 0.14, 0.28), vec3(0.08, 0.32, 0.5), fres), vec3(0.85, 0.9, 0.95), crest * 0.5);
+	ROUGHNESS = 0.22;
+	SPECULAR = 0.3;   // the deep Pacific blue, not a mirror of the pale sky
 }
 """)
 	st.add_child(water)
@@ -1397,15 +1429,20 @@ void fragment() {
 	ship.position = Vector3(-140, 0, -420)
 	ship.rotation.y = 0.3
 	st.add_child(ship)
+	# USS Iwo Jima: a flat-topped helicopter carrier, a grey hull, a darker deck, the island to starboard, a pointed bow
 	box(ship, Vector3(180 / 2.0, 10, 30 / 2.0), Vector3(0, 4, 0), grey)
 	box(ship, Vector3(180 / 2.0, 1, 34 / 2.0), Vector3(0, 9.5, 0), mat(Color(0.32, 0.33, 0.35), 0.9))
 	box(ship, Vector3(14, 14, 5), Vector3(20, 17, 6), grey)
+	box(ship, Vector3(6, 10, 3), Vector3(22, 28, 6), grey)
+	var bow := box(ship, Vector3(14, 10, 14), Vector3(-45, 4, 0), grey, Vector3(0, PI / 4.0, 0))
+	bow.scale.z = 0.75
+	box(ship, Vector3(184 / 2.0, 1.2, 31 / 2.0), Vector3(0, 0.6, 0), mat(Color(0.25, 0.08, 0.06), 0.9))   # the red waterline
 	# the command module, coming down under its parachutes
 	var cm := Node3D.new()
 	cm.name = "Capsule"
 	cm.position = Vector3(-16, 0, -26)
 	st.add_child(cm)
-	var shell := mat(Color(0.78, 0.76, 0.7), 0.35, 0.6)
+	var shell := mat(Color(0.5, 0.42, 0.32), 0.6, 0.3)   # scorched by the re-entry, not a mirror of the sky
 	cyl(cm, 0.35 * K, 1.95 * K, 3.2 * K, Vector3(0, 1.6 * K - 0.8, 0), shell, 48)
 	cyl(cm, 1.98 * K, 1.9 * K, 0.4 * K, Vector3(0, -0.8, 0), mat(Color(0.3, 0.24, 0.18), 0.9), 48)
 	var collar := MeshInstance3D.new()

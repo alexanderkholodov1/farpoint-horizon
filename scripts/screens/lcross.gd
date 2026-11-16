@@ -515,7 +515,8 @@ void fragment() {
 	now_panel.add_child(now_lbl)
 	# what a catch or a miss says, right of the crosshair
 	bubble = Kit.lbl("", Kit.T_CLOCK, Kit.C_GOLD, Kit.FONT_T)
-	Kit.place(bubble, 0.5, 0.5, 0.5, 0.5, 110, -40, 700, 20)
+	Kit.place(bubble, 0.5, 0.5, 0.5, 0.5, 110, -40, 560, 20)
+	bubble.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART   # a long call wraps instead of leaving the screen
 	bubble.add_theme_constant_override("outline_size", 8)
 	bubble.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
 	add_child(bubble)
@@ -541,6 +542,10 @@ func _shout(a: String, b := "", col := Kit.C_GOLD) -> void:
 
 func _pop(text: String, col: Color) -> void:
 	bubble.text = text
+	# a long call in a smaller size; under the crosshair while a headline is up, so two never read at once
+	bubble.add_theme_font_size_override("font_size", Kit.T_CLOCK if text.length() <= 22 else Kit.T_ACTION)
+	bubble.offset_top = 60.0 if big.text != "" else -40.0
+	bubble.offset_bottom = bubble.offset_top + 60.0
 	bubble.add_theme_color_override("font_color", col)
 	bubble.pivot_offset = Vector2(0, 30)
 	bubble.scale = Vector2(1.5, 1.5)
