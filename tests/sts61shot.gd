@@ -2,7 +2,7 @@ extends Node
 ## A look at mission 2 (issue #46; development only, needs a window): the five spacewalks (a wrong part, the cloth,
 ## a spacewalk that runs out and is tried again), the first image brought into focus, the photo; then the story's
 ## intro, the Your turn card and the outro. Saves to shots/s61_*.png.
-## Run: tools/godot.sh --path . --resolution 1600x900 res://tests/sts61shot.tscn
+## Run: tools/dev/godot.sh --path . --resolution 1600x900 res://tests/sts61shot.tscn
 var g
 var n := 0
 

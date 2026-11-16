@@ -1,8 +1,8 @@
 extends SceneTree
 ## Room test: the stations with their bots on one screen, and the online room's protocol (create, join, take a station,
 ## edit, sign off, launch) between a host and a guest over the in-memory transport. No browser needed; the real
-## Firebase round trip is tested in a browser (see docs/architecture.md, Room). Run:
-##   tools/godot.sh --headless --path . -s res://tests/room.gd
+## Firebase round trip is tested in a browser (see docs/guides/architecture.md, Room). Run:
+##   tools/dev/godot.sh --headless --path . -s res://tests/room.gd
 ## check: ^ok room
 const GD := preload("res://scripts/game_data.gd")
 

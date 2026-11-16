@@ -2,7 +2,7 @@ extends Node
 ## A look at mission 3 (issue #47; development only, needs a window): a descent that bursts (no rockets), then one
 ## flown right (steady, rockets at 98 m, cut at 21.5 m), the bounces, the petals, Sojourner down the ramp, the first
 ## wheel and the photos; then the story's intro. Saves to shots/mpf_*.png and always quits.
-## Run: tools/godot.sh --path . --resolution 1600x900 res://tests/pathfindershot.tscn
+## Run: tools/dev/godot.sh --path . --resolution 1600x900 res://tests/pathfindershot.tscn
 var g
 var n := 0
 

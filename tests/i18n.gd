@@ -1,7 +1,7 @@
 extends SceneTree
 ## Translation check: plays through every screen in English and in Spanish and lists every text a player can read that
 ## is the same in both languages, which means it has no Spanish translation (names and numbers aside).
-## Run: tools/godot.sh --headless --path . -s res://tests/i18n.gd
+## Run: tools/dev/godot.sh --headless --path . -s res://tests/i18n.gd
 ## It also reports the data texts of GameData and the texts of the mission checks and events found by 300 random designs.
 ## check: 0 texts without a Spanish version
 

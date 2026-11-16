@@ -1,7 +1,7 @@
 extends Node
 ## A look at mission 3's story intro (development only, needs a window): every line of the intro and the Your turn
 ## card, until the mission screen opens. Saves to shots/mi_*.png and quits.
-## Run: tools/godot.sh --path . --resolution 1600x900 res://tests/marsintroshot.tscn
+## Run: tools/dev/godot.sh --path . --resolution 1600x900 res://tests/marsintroshot.tscn
 var g
 var n := 0
 

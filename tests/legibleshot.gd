@@ -1,8 +1,8 @@
 extends Node
 ## The text a demo video shows, photographed where it is hardest to read (issue #77): the credits list and its team,
 ## cards of the credits film, the launch's big messages over the white pad, the end celebration, the menu's corner.
-## Run (needs a window): tools/godot.sh --path . --resolution 1600x900 res://tests/legibleshot.tscn
-## Development harness, not part of tools/check.sh. Screenshots in shots/legible_*.png.
+## Run (needs a window): tools/dev/godot.sh --path . --resolution 1600x900 res://tests/legibleshot.tscn
+## Development harness, not part of tools/dev/check.sh. Screenshots in shots/legible_*.png.
 var g
 
 

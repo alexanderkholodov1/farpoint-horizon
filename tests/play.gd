@@ -3,7 +3,7 @@ extends Node
 ## a button is (found by its visible text) and pass through the GUI like a person's; keys are pressed and held like a
 ## person's. No state is set by hand, no screen is skipped, no autopilot unless a step says so. Screenshots go to
 ## shots/play_*.png and the buttons on screen are printed at each step, so a reader can follow and judge it.
-## Run (needs a window): tools/godot.sh --path . res://tests/play.tscn -- <part>
+## Run (needs a window): tools/dev/godot.sh --path . res://tests/play.tscn -- <part>
 var g
 var step := 0
 

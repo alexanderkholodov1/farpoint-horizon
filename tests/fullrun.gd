@@ -3,7 +3,7 @@ extends Node
 ## prologue and every chapter with its mission played right, from the menu's crew screen back to it. A screenshot at
 ## every new screen, every title card, the first line of every scene, key moments of each mission and every few
 ## seconds; a timeout so it always ends. Saves to shots/full_*.png.
-## Run: tools/godot.sh --path . --resolution 1600x900 res://tests/fullrun.tscn
+## Run: tools/dev/godot.sh --path . --resolution 1600x900 res://tests/fullrun.tscn
 var g
 var n := 0
 var t0 := 0

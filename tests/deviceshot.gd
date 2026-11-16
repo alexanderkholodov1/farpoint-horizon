@@ -1,6 +1,6 @@
 extends Node
 ## Every screen at the window size the harness is run with (issue #76): phone, tablet, laptop. Saves shots/dev_<tag>_*.png.
-## Run: tools/godot.sh --path . --resolution 1215x562 res://tests/deviceshot.tscn -- phone
+## Run: tools/dev/godot.sh --path . --resolution 1215x562 res://tests/deviceshot.tscn -- phone
 var g
 var tag := "dev"
 

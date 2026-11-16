@@ -1,5 +1,5 @@
 extends Node
-## The game's music (issue #12): "Horizon", our own piece composed by tools/audio/compose_music.py, in two layers of
+## The game's music (issue #12): "Horizon", our own piece composed by tools/content/audio/compose_music.py, in two layers of
 ## the same length that always play together:
 ##   - the piece itself (pads, bells, a slow bass): the calm of the menus, the design and the coast through space;
 ##   - the drive (a pulse, a thump on each beat, a run of the chord's notes): it comes in under the piece when the

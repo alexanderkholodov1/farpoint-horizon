@@ -4,7 +4,7 @@ extends SceneTree
 ## lands on NASA's mosaic where its shadow is, half of it dark; aiming into the dark floor wins, outside it loses; a
 ## player who keeps the plume in the crosshair saves the readings needed; the facts' sources are listed in
 ## docs/sources.md and every text has its Spanish in i18n/lcross.csv.
-## Run: tools/godot.sh --headless --path . -s res://tests/lcross.gd
+## Run: tools/dev/godot.sh --headless --path . -s res://tests/lcross.gd
 ## check: ^ok lcross
 
 var bad := 0

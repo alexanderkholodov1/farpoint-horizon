@@ -121,7 +121,14 @@ Every number, fact, image and model that comes from outside is listed with its l
 - **On your own computer:** install [Godot 4.7](https://godotengine.org), open `project.godot` and press F5.
 
 The game is made with the free Godot engine. Our 3D models are built with Blender, and the sounds are created by the
-game itself. How it is put together is described in [`docs/architecture.md`](docs/architecture.md).
+game itself. How it is put together is described in [`docs/guides/architecture.md`](docs/guides/architecture.md).
+
+## How it was made
+
+We brought nothing to the event: no template, no code, no assets. The work began with a brainstorm at the local event
+in Sangolquí (Universidad de las Fuerzas Armadas ESPE) on Saturday 14 November 2026, and everything in this repository
+was made during the 48 hours of the hackathon, as the rules ask. The repository's history shows it: its first commit is
+of 14 November 2026 at 09:37 (Ecuador time), and every step after it is there, dated, in the order it was made.
 
 ## Use of AI
 
@@ -148,11 +155,19 @@ There are no AI-generated images or videos, and no NASA logos, insignia or missi
 
 Team SK-Horizons, Quito, Ecuador.
 
+- **Alexander Kholodov**: the first brainstorm and the plan by stages that let the work run in parallel, the real physics of the flight and the landing, ground control, testing, debugging and edge cases, design polish, and the care and order of the repository. [GitHub](https://github.com/alexanderkholodov1)
 - **Sebastian Amaguaya**: the story campaign and its cuy crew, nearly every mission and its mechanics, the 3D models, the rocket builder, the music and the look of the game. [GitHub](https://github.com/XebaxCode)
-- **Alexander Kholodov**: the first brainstorm and the plan by stages that let the work run in parallel, the flight's real physics, testing, debugging and edge cases, design polish and the order of the repository. [GitHub](https://github.com/alexanderkholodov1)
 
-Demo video: https://youtu.be/3xZdPJr71bg · Pitch (English and Spanish): [`docs/pitch/build/`](docs/pitch/build/) ·
-Submission texts: [`docs/submission/`](docs/submission/) · License: MIT ([LICENSE](LICENSE))
+## Delivered to the event
+
+Everything we delivered to the event is in [`spaceapps/`](spaceapps/): the decks presented in Sangolquí
+([`spaceapps/local-pitch/`](spaceapps/local-pitch/)), the texts and deck sent to NASA
+([`spaceapps/global-submission/`](spaceapps/global-submission/)) and the 30-second video. The map of the whole
+repository is [`docs/README.md`](docs/README.md).
+
+## License
+
+MIT, see [LICENSE](LICENSE).
 
 ---
 

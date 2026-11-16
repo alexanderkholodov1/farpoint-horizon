@@ -9,7 +9,7 @@ their own on screen.
 The mission select (`scripts/screens/missions.gd`) is cards to pick: a NASA picture already in the game, the name, the
 brief's first sentence and the facts as chips (`Kit.chip`, `Kit.cover`); the whole brief is the tooltip.
 
-Look at it: `tools/godot.sh --path . --resolution 1600x900 res://tests/identityshot.tscn` (LOOK_MODE=light for the
+Look at it: `tools/dev/godot.sh --path . --resolution 1600x900 res://tests/identityshot.tscn` (LOOK_MODE=light for the
 light appearance), shots in `shots/id_*.png`.
 
 Left to do: the launch's pitch gauge still has a green marker (its text says "the green marker"); the map's planned

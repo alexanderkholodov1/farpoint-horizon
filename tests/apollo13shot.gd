@@ -1,7 +1,7 @@
 extends Node
 ## A look at mission 1's adapter game (issue #45; development only, needs a window): played on its own with a wrong
 ## part, the tape on the timing ring and the win, then from the story's "Your turn" card on into the outro.
-## Saves to shots/a13_*.png. Run: tools/godot.sh --path . --resolution 1600x900 res://tests/apollo13shot.tscn
+## Saves to shots/a13_*.png. Run: tools/dev/godot.sh --path . --resolution 1600x900 res://tests/apollo13shot.tscn
 var g
 var n := 0
 

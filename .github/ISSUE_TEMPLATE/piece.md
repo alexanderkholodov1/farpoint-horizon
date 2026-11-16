@@ -31,4 +31,4 @@ small piece, agreed by both team members. -->
 - [ ] Every outside value cited where it is used and listed in `docs/sources.md` (`tests/sources.gd` passes).
 - [ ] Spanish texts in this piece's own `i18n/<piece>.csv`; `tests/i18n.gd` passes.
 - [ ] What is true now about this piece is in its own note, `docs/state/<topic>.md`.
-- [ ] `tools/check.sh` green; then integrated with `tools/integrate.sh <branch> "<what it adds>"`.
+- [ ] `tools/dev/check.sh` green; then integrated with `tools/dev/integrate.sh <branch> "<what it adds>"`.

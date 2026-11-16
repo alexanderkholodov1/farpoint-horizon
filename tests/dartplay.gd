@@ -1,6 +1,6 @@
 extends Node
 ## Plays chapter 5 alone, intro, mission and outro, for a person to try it (issue #49; needs a window).
-## Run: tools/godot.sh --path . --resolution 1600x900 res://tests/dartplay.tscn
+## Run: tools/dev/godot.sh --path . --resolution 1600x900 res://tests/dartplay.tscn
 
 
 func _ready() -> void:

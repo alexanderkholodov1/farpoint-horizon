@@ -1,7 +1,7 @@
 extends Node
 ## The trip to the Moon never leaves the player stuck (issue #36): a hands-off pilot arrives (the flight computer acts
 ## after each countdown), a departure moved far off ends in "you missed the Moon" with the way back, and Skip from a
-## miss flies it. Run: tools/godot.sh --headless --path . res://tests/flightsafe.tscn
+## miss flies it. Run: tools/dev/godot.sh --headless --path . res://tests/flightsafe.tscn
 var g
 var fails := 0
 

@@ -1,7 +1,7 @@
 extends Node
 ## The space weather alert in the operation (issue #90), played with real keys: a low-orbit mission and a lunar one run
 ## until their first alert, the card is photographed, then answered with 2 (keep working) and the log photographed.
-## Saves shots/storm_<tag>_*.png. Run: tools/godot.sh --path . --resolution 1600x900 res://tests/stormshot.tscn -- laptop
+## Saves shots/storm_<tag>_*.png. Run: tools/dev/godot.sh --path . --resolution 1600x900 res://tests/stormshot.tscn -- laptop
 var g
 var tag := "laptop"
 

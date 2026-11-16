@@ -2,7 +2,7 @@ extends Node
 ## Ground control as a player sees it (issue #9; development only, needs a window): the south pole mission flown by
 ## the flight computer, the person holding every station, so the desk opens "Find the carrier" after the burn to the
 ## Moon and the 1202 in the descent. Saves to shots/ground_*.png.
-## Run: tools/godot.sh --path . --resolution 1600x900 res://tests/groundshot.tscn
+## Run: tools/dev/godot.sh --path . --resolution 1600x900 res://tests/groundshot.tscn
 var g
 
 

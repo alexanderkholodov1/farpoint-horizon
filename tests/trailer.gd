@@ -2,9 +2,9 @@ extends Node
 ## The 30-second video, recorded from the game itself (issue #38). Plays the Moon's south pole mission end to end on
 ## the real screens (design, the rocket builder, liftoff from the Andes, the climb, the trip, the landing, the report,
 ## an Earthrise to close) with English caption cards, and prints "[cut] <moment> <seconds>" when each moment starts,
-## in the recording's own time. tools/video/make_trailer.py records it and cuts the 30 seconds from those marks.
-## Run (records): tools/godot.sh --path . --write-movie build/video/raw.ogv --fixed-fps 30 --resolution 1920x1080 res://tests/trailer.tscn
-## Not a check: it has no "## check:" line, so tools/check.sh leaves it alone.
+## in the recording's own time. tools/content/video/make_trailer.py records it and cuts the 30 seconds from those marks.
+## Run (records): tools/dev/godot.sh --path . --write-movie build/video/raw.ogv --fixed-fps 30 --resolution 1920x1080 res://tests/trailer.tscn
+## Not a check: it has no "## check:" line, so tools/dev/check.sh leaves it alone.
 
 const Kit := preload("res://scripts/ui/kit.gd")
 const Horizon := preload("res://scripts/ui/horizon.gd")

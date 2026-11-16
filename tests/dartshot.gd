@@ -1,7 +1,7 @@
 extends Node
 ## A look at mission 5 (issue #49; development only, needs a window): the brief, the dot splitting, the lock on
 ## Dimorphos, the steering, the last picture, the impact, the measurement and the result. Saves to shots/dart_*.png.
-## Run: tools/godot.sh --path . --resolution 1600x900 res://tests/dartshot.tscn
+## Run: tools/dev/godot.sh --path . --resolution 1600x900 res://tests/dartshot.tscn
 var g
 var n := 0
 

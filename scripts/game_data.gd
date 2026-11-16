@@ -1,6 +1,6 @@
 extends Node
 ## The game's catalogs (autoload `GameData`), read from the JSON files in `data/` when the game starts. The content and
-## the balance live in those files, never here; the schema of each file is in docs/architecture.md.
+## the balance live in those files, never here; the schema of each file is in docs/guides/architecture.md.
 ## Units: mass in kg, power in W, energy in Wh, money in millions of USD (M$), data in GB per day, link rate in Mbps,
 ## delta-v in m/s. Every entry carries `source` (IDs of docs/sources.md) and, where the number is our own rounding,
 ## `simplified` saying so.

@@ -4,7 +4,7 @@ extends SceneTree
 ## asteroids split into two dots on DRACO's view hours before; a player who pulses toward the target hits Dimorphos,
 ## one who does nothing may not; Dimorphos's orbit 11 h 55 min before, 11 h 23 min after, 32 minutes shorter
 ## [S-dart-nasa-period]; the facts' sources are in docs/sources.md and every text has its Spanish.
-## Run: tools/godot.sh --headless --path . -s res://tests/dart.gd
+## Run: tools/dev/godot.sh --headless --path . -s res://tests/dart.gd
 ## check: ^ok dart
 
 var bad := 0

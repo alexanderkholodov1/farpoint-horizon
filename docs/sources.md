@@ -14,7 +14,7 @@ branches add entries at the same place (`.gitattributes`).
 
 ## Challenge and NASA resources
 - **S1** NASA Space Apps Challenge. *Space Mission Design Game* (challenge statement and resources). 2026.
-  https://www.spaceappschallenge.org/2026/challenges/space-mission-design-game/ (copy in `docs/challenge/`). The brief.
+  https://www.spaceappschallenge.org/2026/challenges/space-mission-design-game/ (copy in `spaceapps/challenge/`). The brief.
 - **S2** NASA. *Design and Develop Science Missions*. 2025.
   https://www.nasa.gov/wp-content/uploads/2025/04/250323-design-and-develop-science-mission.pdf. The four mission
   segments (launch, space, ground, user) and the path from need to mission.
@@ -220,7 +220,7 @@ branches add entries at the same place (`.gitattributes`).
   `BlueMarble_ShadedRelief` (August 2004, NASA Earth Observatory, Reto Stockli, MODIS), `VIIRS_Black_Marble` (2016,
   Suomi NPP VIIRS) and `VIIRS_SNPP_CorrectedReflectance_TrueColor` of 2024-08-31 (the day of the volcano photos). The
   Earth by day, its relief, its city lights and its clouds (`textures/earth_*.jpg`, `assets/source/planet_textures.py`).
-  Replaces `textures/earth_albedo.jpg`, whose source was unknown. Credit: "NASA Earth Observatory / NASA GIBS".
+  Replaces the former Earth texture (earth_albedo.jpg), whose source was unknown. Credit: "NASA Earth Observatory / NASA GIBS".
 - **S-gibs-region** NASA GIBS WMS (see S-gibs), the same three layers (Blue Marble, shaded relief, VIIRS of 2024-08-31)
   over 92-68 W, 12 N-12 S at 2048 x 2048 (about 1.3 km per pixel): the sharper Earth under the climb from Ecuador
   (`textures/earth_region_*.jpg`, `assets/source/planet_textures.py` `region()`).
@@ -241,7 +241,7 @@ branches add entries at the same place (`.gitattributes`).
   and not yet checked one by one).
 - The fonts, the engine and every library, model, image and sound, with their licenses.
 
-## NASA data used by the mission photos and the route numbers (issue 19; pipeline in `tools/data/`)
+## NASA data used by the mission photos and the route numbers (issue 19; pipeline in `tools/content/data/`)
 All checked 2026-11-14. NASA media are used under the NASA Media Usage Guidelines
 (https://www.nasa.gov/nasa-brand-center/images-and-media/): no NASA logo or insignia, no implied endorsement.
 - **S-gibs** NASA ESDIS, Global Imagery Browse Services (GIBS), NASA Worldview, WMS
@@ -287,7 +287,7 @@ All checked 2026-11-14.
   version 2.0, 2017), NASA Planetary Data System, Geosciences Node.
   https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/img/ldem_875s_20m.lbl.
   The ground of the landing: a 12 km square around the south pole and Shackleton's rim, averaged to 60 m, in
-  `data/nasa/lola_south_pole.json` (made by `tools/data/fetch_lola_terrain.py`). Credit: "NASA/GSFC LOLA team, NASA PDS".
+  `data/nasa/lola_south_pole.json` (made by `tools/content/data/fetch_lola_terrain.py`). Credit: "NASA/GSFC LOLA team, NASA PDS".
 - **S-svs-south-pole** NASA Scientific Visualization Studio. *Shadows near the Moon's South Pole*, 2021.
   https://svs.gsfc.nasa.gov/4893. At the poles the Sun is never more than 1.5 degrees above or below the horizon;
   places it never reaches are permanently shadowed and trap water ice.

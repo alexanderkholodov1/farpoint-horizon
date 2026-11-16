@@ -1,8 +1,8 @@
 extends SceneTree
-## Credits check (issue #14): the game's credits (data/credits.json, made by tools/credits.py) list every source of
+## Credits check (issue #14): the game's credits (data/credits.json, made by tools/content/credits.py) list every source of
 ## docs/sources.md, and nothing that is not there, so the credits never drift from the bibliography. When it fails,
-## run: python tools/credits.py
-## Run: tools/godot.sh --headless --path . -s res://tests/credits.gd
+## run: python tools/content/credits.py
+## Run: tools/dev/godot.sh --headless --path . -s res://tests/credits.gd
 ## check: ^ok credits
 
 
@@ -23,9 +23,9 @@ func _initialize() -> void:
 	var missing: Array = listed.keys().filter(func(k): return not shown.has(k))
 	var extra: Array = shown.keys().filter(func(k): return not listed.has(k))
 	if not data is Dictionary or data.get("ai", []).is_empty() or data.get("built_with", []).is_empty():
-		print("credits: data/credits.json is missing or has no AI or built-with lines; run python tools/credits.py")
+		print("credits: data/credits.json is missing or has no AI or built-with lines; run python tools/content/credits.py")
 	elif missing.is_empty() and extra.is_empty():
 		print("ok credits %d sources" % shown.size())
 	else:
-		print("credits out of date (run python tools/credits.py). Missing: %s Extra: %s" % [missing, extra])
+		print("credits out of date (run python tools/content/credits.py). Missing: %s Extra: %s" % [missing, extra])
 	quit()

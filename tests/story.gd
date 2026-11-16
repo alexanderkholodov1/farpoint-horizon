@@ -3,7 +3,7 @@ extends SceneTree
 ## Enter (the first press completes a line still being written, the second goes on) and ends by itself; Esc skips a
 ## scene; every speaker is in the cast and has a portrait; every NASA fact names a source of docs/sources.md; every
 ## line and fact has its Spanish version in i18n/story.csv.
-## Run: tools/godot.sh --headless --path . -s res://tests/story.gd
+## Run: tools/dev/godot.sh --headless --path . -s res://tests/story.gd
 ## check: ^ok story
 
 var bad := 0

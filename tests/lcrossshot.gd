@@ -2,7 +2,7 @@ extends Node
 ## A look at mission 4 (issue #48; development only, needs a window): an aim outside Cabeus (lost), then one into
 ## its dark floor, the fast-forward, the Centaur falling ahead, its impact, the four minutes with readings taken on
 ## the plume, the end and the result. Saves to shots/lcross_*.png and always quits.
-## Run: tools/godot.sh --path . --resolution 1600x900 res://tests/lcrossshot.tscn
+## Run: tools/dev/godot.sh --path . --resolution 1600x900 res://tests/lcrossshot.tscn
 var g
 var n := 0
 

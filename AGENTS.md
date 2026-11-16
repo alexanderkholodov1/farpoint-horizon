@@ -8,13 +8,13 @@ Apps Challenge, challenge "Space Mission Design Game", by team **SK-Horizons** (
 route, launch it, fly it to its target, land it or keep it talking to Earth, and enjoy what they achieved.
 
 ## Read first
-1. `tools/state.sh`: where the project is today and what comes next, assembled from one note per topic
+1. `tools/dev/state.sh`: where the project is today and what comes next, assembled from one note per topic
    (`docs/state/`), the steps on the version branch and the open issues.
 2. `docs/design/vision.md`: what the game will be and what it will have. Every change serves it.
-3. `kb/README.md`, then `kb/challenge/requirements.md` (the challenge as IDs) and `kb/decisions.md` (what the team
+3. `kb/README.md`, then `spaceapps/challenge/requirements.md` (the challenge as IDs) and `kb/decisions.md` (what the team
    decided; open items are theirs to decide).
-4. `docs/architecture.md` before touching code; `docs/design/criteria.md` before touching anything players see.
-5. If you lead a piece of work (you plan it, brief other agents and integrate their results), `docs/agents/lead.md`.
+4. `docs/guides/architecture.md` before touching code; `docs/design/criteria.md` before touching anything players see.
+5. If you lead a piece of work (you plan it, brief other agents and integrate their results), `docs/guides/leading.md`.
 
 ## Who decides
 - **The two team members decide**: the idea, the design, scope, accounts, anything public. Agents bring evidence,
@@ -70,8 +70,8 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
 
 ## The cycle of a version
 1. The version branch collects finished pieces. Its pull request into `main` opens only when the version is complete.
-   More than one line can run at once (`docs/state/versions.md` says which, today `v0.2.3` for fixes and `v0.3.0`
-   for the story); pick the branch by your issue's milestone. `tools/pr-when-green.sh` and `tools/state.sh` default
+   More than one line can run at once (`docs/versions/README.md` says which, today `v0.2.3` for fixes and
+   `v0.3.0` for the story); pick the branch by your issue's milestone. `tools/dev/pr-when-green.sh` and `tools/dev/state.sh` default
    to the newest version branch, so for a fix pass the fix line's branch to them.
 2. Every piece of work is a GitHub issue, written with `.github/ISSUE_TEMPLATE/piece.md` (what the player gets, the
    files it owns, the real values to check, the done-when list). Claim it by assigning it to your person before starting.
@@ -82,17 +82,17 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
    another piece that is not integrated yet, merge that branch into yours (`git merge origin/work/6-builder`), or
    propose yours into it with a pull request. Never rebase or force-push a pushed branch: others may have merged it.
 5. When the piece works (CI green, played as a player, screenshots in the issue, every outside value cited), say so
-   in its issue. A pull request into the version branch is optional (`tools/pr-when-green.sh "<what it adds>"
+   in its issue. A pull request into the version branch is optional (`tools/dev/pr-when-green.sh "<what it adds>"
    <body-file>`), for example to ask for a review.
-6. A lead agent (or a team member) integrates it, with no need to ask: `tools/integrate.sh <branch> "<what it adds>"`.
-   It checks the branch's CI, merges the branch into the version branch in a scratch copy, runs `tools/check.sh` on
+6. A lead agent (or a team member) integrates it, with no need to ask: `tools/dev/integrate.sh <branch> "<what it adds>"`.
+   It checks the branch's CI, merges the branch into the version branch in a scratch copy, runs `tools/dev/check.sh` on
    the result and only then pushes, as one commit named with the next step number (`0.1.6: <what it adds>`). If
    someone integrated first, it starts again on top, so numbers never collide. It comments on the branch's open pull
    request (GitHub then shows it merged into the version branch) or on its issue. It never touches `main` and never
    deletes a branch, so the piece can keep growing and be integrated again.
 7. Someone who did not build a piece reviews it; findings are verified before they are fixed, and fixed at their
    cause.
-8. When the version is complete and verified, its pull request into `main` opens with `tools/pr-when-green.sh`. Only a
+8. When the version is complete and verified, its pull request into `main` opens with `tools/dev/pr-when-green.sh`. Only a
    team member merges it, never an agent. The release workflow tags it and publishes it; then someone checks the live
    game.
 
@@ -102,16 +102,16 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
 - Only the version branch carries version numbers. Each integrated piece is one commit whose message starts with its
   step number, the patch numbers of the current line (`0.1.5`, `0.1.6`, ...), never a `-1`/`-2` suffix. The number
   is given at integration, so pieces built in parallel never collide on one. Work branches carry no numbers.
-- The version itself comes from the branch name, never from memory: `tools/pr-when-green.sh` puts it at the head of
+- The version itself comes from the branch name, never from memory: `tools/dev/pr-when-green.sh` puts it at the head of
   the pull request title into `main`, and the release workflow tags the merge with it.
 
 ## Pull requests
 - **Into `main`: only the version pull request**, from the version branch, one per functional version, never one per
-  fix. It opens only when CI is green (`tools/pr-when-green.sh "<what it delivers>" <body-file>`); its title leads
+  fix. It opens only when CI is green (`tools/dev/pr-when-green.sh "<what it delivers>" <body-file>`); its title leads
   with the version (`v0.2.0: <what a player can now do>`). Only a team member merges it. CI fails any other pull
   request into `main`.
 - **Into any other branch** (the version branch, someone's work branch): allowed and optional, titled with what it
-  adds and no number. Lead agents integrate into the version branch with `tools/integrate.sh`, never into `main`.
+  adds and no number. Lead agents integrate into the version branch with `tools/dev/integrate.sh`, never into `main`.
 - Bodies follow `.github/pull_request_template.md`. Commits and pull requests carry no AI co-author lines or
   generated-by signatures (`.claude/settings.json` turns them off for Claude Code; set the same in other tools). AI
   use is disclosed in the README instead.
@@ -124,7 +124,7 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
   mission model, `GameState`, `project.godot`, this file) is its own small piece, agreed by both team members and
   integrated first, so the others build on it.
 - Files every piece touches: none by hand. The state is one note per topic in `docs/state/` (keep the notes of your
-  own pieces, delete them when they stop being true) and `tools/state.sh` assembles it with the steps and the open
+  own pieces, delete them when they stop being true) and `tools/dev/state.sh` assembles it with the steps and the open
   issues; describe your piece in its issue. `docs/sources.md` only grows: add entries at the end of the right section
   with a short unique word as ID (`S-gibs-viirs`), never a new number; git keeps both sides when two branches add
   entries at the same place.
@@ -132,7 +132,7 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
   more agents work at once without conflicts (issues #26, #28); a new thing every piece would have to register is
   found by folder instead. Its Spanish texts go in its own `i18n/<piece>.csv` (`keys,es`; `translations.csv` is the old
   base and takes no new lines); a new screen is only `scripts/screens/<id>.gd`; a new test is only `tests/<name>.gd`
-  with a `## check: <pattern>` line. The game and `tools/check.sh` find them by folder.
+  with a `## check: <pattern>` line. The game and `tools/dev/check.sh` find them by folder.
 - Never rewrite, reformat or revert someone else's work, and never push to someone else's branch; ask in the issue,
   or propose your change with a pull request into their branch.
 - Leave every branch better than you found it: the game runs and the checks pass.
@@ -140,13 +140,14 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
 ## Godot
 - Godot 4.7.2, renderer GL Compatibility (it runs in browsers and on integrated GPUs). The web build is the
   single-threaded export (`export_presets.cfg`, preset "Web"), so any static host works.
-- `tools/godot.sh` finds the Godot binary (or set `GODOT`); `tools/check.sh` runs what CI runs: import, a short
-  headless run of the main scene, the fuzz test, the web export. `tools/shots.sh` plays the scripted walkthrough with
+- `tools/dev/godot.sh` finds the Godot binary (or set `GODOT`); `tools/dev/check.sh` runs what CI runs: import, a short
+  headless run of the main scene, the fuzz test, every check in `tests/`, the documentation check and the web export
+  (`docs/guides/testing.md`). `tools/dev/shots.sh` plays the scripted walkthrough with
   a window and saves screenshots to `shots/` (headless runs draw nothing).
 - Every pull request gets its own temporary page on Firebase Hosting, linked on the pull request by CI (it expires
   after 7 days); production (https://farpoint-horizon.web.app) is deployed only when the version pull request is
   merged into `main`.
-- Commit the `.import` and `.uid` files Godot creates beside the files you add (run `tools/check.sh` first: its import
+- Commit the `.import` and `.uid` files Godot creates beside the files you add (run `tools/dev/check.sh` first: its import
   step creates them). They carry random IDs, so a file left for someone else to import collides between branches.
 - One UI standard: every screen builds its interface only from `scripts/ui/kit.gd`: its type scale (`Kit.T_*`),
   spacing (`Kit.MARGIN`, `Kit.PAD`, `Kit.GAP`, `Kit.BTN_H`), colours (`Kit.C_*`, readable in both appearances) and
@@ -154,9 +155,9 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
   No loose font sizes, paddings or colours in a screen, and no need to copy another screen from a screenshot; a
   piece the kit lacks is added to the kit, for everyone.
 - GDScript is Godot 4 syntax (`await`, `@onready`, `@export`, typed signals); the project's own pitfalls are in
-  `docs/architecture.md`. Tools that let agents drive Godot, Blender and the browser: `kb/tech/godot-agent-tooling.md`.
+  `docs/guides/architecture.md`. Tools that let agents drive Godot, Blender and the browser: `kb/tech/godot-agent-tooling.md`.
 
-## What the event requires (sources: `kb/challenge/event-and-judging.md`, global; `kb/challenge/local-event.md`, the venue)
+## What the event requires (sources: `spaceapps/rules/event-and-judging.md`, global; `spaceapps/rules/local-event.md`, the venue)
 - AI tools are allowed and their use is disclosed: the README names the agents used and cites every source.
 - No NASA logos, insignia, flags or mission identifiers in anything generated, and nothing implying NASA endorses us;
   crediting NASA data in text is expected.
@@ -168,7 +169,12 @@ route, launch it, fly it to its target, land it or keep it talking to Earth, and
   video of at most 30 s; every link opens in a private window.
 
 ## Layout
-- Godot project at the root: `project.godot`, `scenes/`, `scripts/`, `shaders/`, `fonts/`, `textures/`, `tests/`.
-- `docs/`: `state/` (one note per topic), `architecture.md`, `design/`, `agents/`, `changelog/`, `challenge/` (the challenge page
-  material), `team/` (the team's notes, schedule and pitch outline).
-- `kb/`: the knowledge base. `tools/`: scripts for people and agents. `.github/`: CI, release, pull request template.
+The map is `docs/README.md`. Three areas, each with a README that says what it holds, who uses it and when it changes;
+`tools/dev/check.sh` fails when a README is missing or a document names a path that does not exist.
+- **The game** (what Godot loads): `project.godot`, `scenes/`, `scripts/`, `data/`, `i18n/`, `assets/`, `textures/`,
+  `audio/`, `fonts/`, `shaders/`, `tests/`.
+- **The team's work**: `docs/` (`guides/` how to work, `design/` what the game is, `versions/` one page per version,
+  `state/` notes a piece keeps, `sources.md` the bibliography), `kb/` (research), `tools/` (`dev/` to build, test and
+  integrate; `content/` to make data, credits, art and the deck), `.github/` (CI, release, templates).
+- **The event**: `spaceapps/` (the challenge, the rules, the team's notes, the local pitch, the global submission).
+- Names: documents and folders in lowercase words joined by hyphens; code by its language's convention.

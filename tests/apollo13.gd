@@ -3,7 +3,7 @@ extends SceneTree
 ## and turns the CO2 around; a part out of order costs air and a star; at the top of the scale the air runs out (lost,
 ## tried again) and no part is taken any more; the data's facts name sources listed in docs/sources.md, and every text
 ## has its Spanish version in i18n/apollo13.csv.
-## Run: tools/godot.sh --headless --path . -s res://tests/apollo13.gd
+## Run: tools/dev/godot.sh --headless --path . -s res://tests/apollo13.gd
 ## check: ^ok apollo13
 
 var bad := 0

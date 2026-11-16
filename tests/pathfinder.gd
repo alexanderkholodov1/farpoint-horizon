@@ -3,7 +3,7 @@ extends SceneTree
 ## the cut at 21.5 m land near the real 18 m/s and bounce about 12 m up, at least 15 more times [S-mpf-nssdc]; no
 ## rockets, or no cut, burst the airbags (lost); the data's facts and photos name sources listed in docs/sources.md;
 ## every text has its Spanish in i18n/pathfinder.csv or i18n/story.csv.
-## Run: tools/godot.sh --headless --path . -s res://tests/pathfinder.gd
+## Run: tools/dev/godot.sh --headless --path . -s res://tests/pathfinder.gd
 ## check: ^ok pathfinder
 
 var bad := 0

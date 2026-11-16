@@ -1,7 +1,7 @@
 extends Node
 ## A look at the screens that carry the game's identity (development only; needs a window): the menu, the crew, the
 ## mission select, the design and its review, the launch. Saves to shots/id_*.png. LOOK_MODE=light shoots the light
-## appearance. Run: tools/godot.sh --path . --resolution 1600x900 res://tests/identityshot.tscn
+## appearance. Run: tools/dev/godot.sh --path . --resolution 1600x900 res://tests/identityshot.tscn
 var g
 
 func shot(name: String) -> void:

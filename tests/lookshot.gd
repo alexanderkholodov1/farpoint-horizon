@@ -1,7 +1,7 @@
 extends Node
 ## Quick look at the scenes that carry the game's look (development only; needs a window): the menu Earth, the craft,
 ## the Earth and the Moon in operation, the pad before and after liftoff, the builder. Saves to shots/look_*.png.
-## Run: tools/godot.sh --path . --resolution 1600x900 res://tests/lookshot.tscn
+## Run: tools/dev/godot.sh --path . --resolution 1600x900 res://tests/lookshot.tscn
 var g
 
 func shot(name: String) -> void:

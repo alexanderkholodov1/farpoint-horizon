@@ -3,7 +3,7 @@ extends SceneTree
 ## spacewalks' real lengths add up to 35 h 28 min [S-hubble-sm1]; each asks for its real parts in order; a wrong part
 ## or Killa's cloth costs seconds; a spacewalk whose clock runs out is tried again from its start; the data's facts
 ## name sources listed in docs/sources.md; every text has its Spanish in i18n/sts61.csv or i18n/story.csv.
-## Run: tools/godot.sh --headless --path . -s res://tests/sts61.gd
+## Run: tools/dev/godot.sh --headless --path . -s res://tests/sts61.gd
 ## check: ^ok sts61
 
 var bad := 0

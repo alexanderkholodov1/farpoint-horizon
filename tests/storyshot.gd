@@ -2,7 +2,7 @@ extends Node
 ## A look at the story (issue #66; development only, needs a window): chapter 1 played through on the story stage,
 ## a screenshot at every beat (title cards, each line while it is spoken, the launch, the splashdown), then a scene
 ## over the design with the live portrait. Saves to shots/story_*.png.
-## Run: tools/godot.sh --path . --resolution 1600x900 res://tests/storyshot.tscn
+## Run: tools/dev/godot.sh --path . --resolution 1600x900 res://tests/storyshot.tscn
 const Dialogue := preload("res://scripts/story/dialogue.gd")
 var g
 var n := 0

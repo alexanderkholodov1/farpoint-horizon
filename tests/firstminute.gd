@@ -1,7 +1,7 @@
 extends Node
 ## The first minute through real input (issue #65): drag the menu's globe, then click Play once; Esc in a few screens.
-## Run (needs a window): tools/godot.sh --path . --resolution 1600x900 res://tests/firstminute.tscn
-## check-free: development harness, not part of tools/check.sh.
+## Run (needs a window): tools/dev/godot.sh --path . --resolution 1600x900 res://tests/firstminute.tscn
+## check-free: development harness, not part of tools/dev/check.sh.
 var g
 
 

@@ -56,7 +56,7 @@ func _process(_delta: float) -> void:
 		room.poll()
 
 
-## Prints a startup trace line tagged [SKH] (see docs/state/skh-traces.md).
+## Prints a startup trace line tagged [SKH] (see docs/guides/architecture.md, Renderer notes).
 func trace(msg: String) -> void:
 	print("[SKH] ", msg)
 
@@ -233,11 +233,11 @@ func add_ranking(team: String, score: int, grade: String) -> void:
 # ===================================================================================== FLIGHT (the pilot, issue #8)
 ## A moment of the pilot's flight, for ground control (#9) and the celebration (#11). kind is one of "launch",
 ## "staging", "orbit", "launch_lost", "burn_start", "burn_end", "coast", "arrival", "descent_start", "alarm",
-## "alarm_cleared", "touchdown", "impact"; data holds the numbers of that moment (see docs/architecture.md, "Flight").
+## "alarm_cleared", "touchdown", "impact"; data holds the numbers of that moment (see docs/guides/architecture.md, "Flight").
 signal flight_event(kind: String, data: Dictionary)
 
 ## What the pilot did on the last flight, filled as it happens; begin_flight() empties it. Keys: "ascent", "tli",
-## "landing" (each a Dictionary, see docs/architecture.md), "extras" (objective id -> true when met), "photos" (the
+## "landing" (each a Dictionary, see docs/guides/architecture.md), "extras" (objective id -> true when met), "photos" (the
 ## pictures the mission sent home, res:// paths), "bonus" (points of the extra objectives met).
 var flight := {}
 ## True when a bot holds the pilot's station (the room, #5, sets it): the flight then flies itself, and a person can

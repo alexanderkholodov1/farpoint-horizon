@@ -1,8 +1,8 @@
 extends Node
 ## The last screens played from the keyboard only (issue #58): the menu and how to play, the credits film and its
 ## sources, the report and a photo in it. Every step is a key press through the viewport, as a player's.
-## Run (needs a window): tools/godot.sh --path . --resolution 1600x900 res://tests/keysend.tscn
-## Development harness, not part of tools/check.sh. Screenshots in shots/keys_*.png.
+## Run (needs a window): tools/dev/godot.sh --path . --resolution 1600x900 res://tests/keysend.tscn
+## Development harness, not part of tools/dev/check.sh. Screenshots in shots/keys_*.png.
 var g
 
 

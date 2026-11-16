@@ -3,7 +3,7 @@ extends SceneTree
 ## pilot and by one who tries to break the rocket; the landing flown by the bot, by players with slow reflexes, and
 ## by one who never touches the throttle. Prints what happened; fails if the generous cases do not end well or the
 ## deliberate ones do not end badly.
-## Run: tools/godot.sh --headless --path . -s res://tests/flight.gd
+## Run: tools/dev/godot.sh --headless --path . -s res://tests/flight.gd
 ## check: flight test: 0 failure
 
 const Ascent := preload("res://scripts/flight/ascent.gd")
