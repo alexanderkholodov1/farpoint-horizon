@@ -12,6 +12,7 @@ extends "res://scripts/screens/screen.gd"
 ## (go("apollo13")) or inside the story (args {"campaign": true, "then": [scene refs], "back": id}), where Rumi and
 ## Killa work beside the adapter and the story's outro follows.
 
+const TouchKeys := preload("res://scripts/ui/touch_keys.gd")
 const Progress := preload("res://scripts/story/campaign_progress.gd")
 const Adapter := preload("res://scripts/missions/apollo13/adapter.gd")
 const Sets := preload("res://scripts/story/sets.gd")
@@ -123,6 +124,7 @@ func enter(args: Dictionary) -> void:
 	world.cam.look_at(Vector3(0, 1.15, 1.0), Vector3.UP)
 	_build_ui()
 	_show_step()
+	TouchKeys.attach(self)
 
 
 func exit() -> void:
@@ -733,3 +735,12 @@ class PartIcon extends Control:
 					draw_line(c + Vector2(-14, -16 + i * 9), c + Vector2(14, -16 + i * 9), Color(0.4, 0.45, 0.5), 2.0)
 			_:
 				draw_rect(Rect2(c + Vector2(-24, -24), Vector2(48, 48)), Color(0.55, 0.56, 0.58))
+
+
+## The buttons a phone needs now (scripts/ui/touch_keys.gd): the parts are tapped on the table; the tape needs SPACE.
+func touch_keys() -> Array:
+	if lost_t >= 0.0 or photo_shown:
+		return []
+	if (ring as Instruments.TimingRing).active:
+		return [[tr("TAPE!"), KEY_SPACE, "right"]]
+	return []

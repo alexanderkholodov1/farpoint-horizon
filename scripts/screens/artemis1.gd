@@ -9,6 +9,7 @@ extends "res://scripts/screens/screen.gd"
 ## plasma, then the drogues (1) and the mains (2) on their calls, and splashdown off San Diego.
 ## Out of the corridor: lose screen. Rules: scripts/missions/artemis1/flight.gd; data: data/missions/artemis1.json.
 
+const TouchKeys := preload("res://scripts/ui/touch_keys.gd")
 const Progress := preload("res://scripts/story/campaign_progress.gd")
 const Flight := preload("res://scripts/missions/artemis1/flight.gd")
 const Sets := preload("res://scripts/story/sets.gd")
@@ -133,6 +134,8 @@ func enter(args: Dictionary) -> void:
 	_build_launch()
 	_say("Wayra", tr("Pad 39B. Everyone in the seat? Campos does not mind the company."))
 	_show_brief()
+	_phone_layout()
+	TouchKeys.attach(self)
 
 
 func exit() -> void:
@@ -1859,3 +1862,46 @@ class JourneyMap extends Control:
 		var o := _p(lerpf(start, done_to, fmod(t * 0.25, 1.0)))
 		draw_circle(o, 7.0, Color(1, 1, 1))
 		draw_arc(o, 12.0 + 3.0 * sin(t * 6.0), 0, TAU, 24, Kit.C_GOLD, 2.0)
+
+
+## The buttons a phone needs now (scripts/ui/touch_keys.gd): the climb has the pilot's own panel; the rest, only what
+## each moment asks for.
+func touch_keys() -> Array:
+	match phase:
+		"count":
+			return [[tr("IGNITION"), KEY_SPACE, "right"]]
+		"flyby":
+			if burn_q < 0.0:
+				return [[tr("BURN (hold)"), KEY_SPACE, "right"]]
+		"earth":
+			return [[tr("PHOTO"), KEY_SPACE, "right"]]
+		"far":
+			return [[tr("Continue"), KEY_ENTER, "right"]]
+		"entry":
+			return [["▲", KEY_W, "left"], ["▼", KEY_S, "left"]]
+		"chutes":
+			if drogue_q < 0.0:
+				return [[tr("1 DROGUES"), KEY_1, "right"]]
+			if main_q < 0.0:
+				return [[tr("2 MAINS"), KEY_2, "right"]]
+	return []
+
+
+## A phone in landscape (Kit.compact): fewer panels and nothing over anything. The stage list goes (the step is in the
+## title and the call to act), the radio keeps one short line at the top right, the line of what to do sits in the
+## middle above the touch buttons (scripts/ui/touch_keys.gd), and the big call to act just above it.
+func _phone_layout() -> void:
+	if not Kit.compact:
+		return
+	if not stage_rows.is_empty():
+		(stage_rows[0] as Control).get_parent().get_parent().visible = false
+	var radio_card: Control = radio.get_parent().get_parent()
+	Kit.place(radio_card, 1, 0, 1, 0, -Kit.MARGIN - 330, Kit.MARGIN, -Kit.MARGIN, Kit.MARGIN + 50)
+	radio.custom_minimum_size.x = 300
+	radio.add_theme_font_size_override("font_size", Kit.T_BODY)
+	Kit.place(hint_panel, 0.5, 1, 0.5, 1, -250, -150, 250, -96)
+	hint.add_theme_font_size_override("font_size", Kit.T_BODY)
+	Kit.place(now_panel, 0.5, 1, 0.5, 1, -10, -210, 10, -160)
+	now_lbl.add_theme_font_size_override("font_size", Kit.T_ACTION + 2)
+	Kit.place(gauge_panel, 1, 1, 1, 1, -Kit.MARGIN - 200, -Kit.MARGIN - 330, -Kit.MARGIN, -Kit.MARGIN - 96)
+	gauge.custom_minimum_size = Vector2(180, 220)

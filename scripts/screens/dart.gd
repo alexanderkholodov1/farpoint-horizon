@@ -10,6 +10,7 @@ extends "res://scripts/screens/screen.gd"
 ## orbit 32 minutes shorter. Rules: scripts/missions/dart/approach.gd; data: data/missions/dart.json. The world is in
 ## km: Dimorphos at the origin, DART coming down the +z axis.
 
+const TouchKeys := preload("res://scripts/ui/touch_keys.gd")
 const Progress := preload("res://scripts/story/campaign_progress.gd")
 const Approach := preload("res://scripts/missions/dart/approach.gd")
 const Sets := preload("res://scripts/story/sets.gd")
@@ -94,6 +95,8 @@ func enter(args: Dictionary) -> void:
 	t = float(A.P.start_s)
 	_say("Wayra", tr("Four hours out. DRACO is on. Find the little moon."))
 	_show_brief()
+	_phone_layout()
+	TouchKeys.attach(self)
 
 
 func exit() -> void:
@@ -959,3 +962,40 @@ class Tags extends Control:
 				draw_string(Kit.FONT_B, p + Vector2(-r - 210, 5), it[1], HORIZONTAL_ALIGNMENT_RIGHT, 200, Kit.T_SMALL, it[2])
 			else:
 				draw_string(Kit.FONT_B, p + Vector2(r + 8, 5), it[1], HORIZONTAL_ALIGNMENT_LEFT, -1, Kit.T_SMALL, it[2])
+
+
+## The buttons a phone needs now (scripts/ui/touch_keys.gd): only what this stage asks for.
+func touch_keys() -> Array:
+	var pad := [["◀", KEY_A, "left"], ["▲", KEY_W, "left"], ["▼", KEY_S, "left"], ["▶", KEY_D, "left"]]
+	match phase:
+		"find":
+			if A.resolved(t):
+				return [[tr("◀ ▶ SWITCH"), KEY_D, "left"], [tr("LOCK"), KEY_ENTER, "right"]]
+		"steer":
+			if -t <= float(A.P.photo_window_s) and photo_cm < 0.0:
+				return pad + [[tr("PHOTO"), KEY_SPACE, "right"]]
+			return pad
+		"measure":
+			return [[tr("MARK"), KEY_SPACE, "right"]]
+	return []
+
+
+## A phone in landscape (Kit.compact): fewer panels and nothing over anything. The stage list goes (the step is in the
+## title and the call to act), the radio keeps one short line at the top right, the line of what to do sits in the
+## middle above the touch buttons (scripts/ui/touch_keys.gd), and the big call to act just above it.
+func _phone_layout() -> void:
+	if not Kit.compact:
+		return
+	if not stage_rows.is_empty():
+		(stage_rows[0] as Control).get_parent().get_parent().visible = false
+	var radio_card: Control = radio.get_parent().get_parent()
+	Kit.place(radio_card, 1, 0, 1, 0, -Kit.MARGIN - 330, Kit.MARGIN, -Kit.MARGIN, Kit.MARGIN + 50)
+	radio.custom_minimum_size.x = 300
+	radio.add_theme_font_size_override("font_size", Kit.T_BODY)
+	Kit.place(hint_panel, 0.5, 1, 0.5, 1, -250, -150, 250, -96)
+	hint.add_theme_font_size_override("font_size", Kit.T_BODY)
+	Kit.place(now_panel, 0.5, 1, 0.5, 1, -10, -210, 10, -160)
+	now_lbl.add_theme_font_size_override("font_size", Kit.T_ACTION + 2)
+	Kit.place(scope_panel, 1, 1, 1, 1, -Kit.MARGIN - 210, -Kit.MARGIN - 280, -Kit.MARGIN, -Kit.MARGIN - 96)
+	scope.custom_minimum_size = Vector2(190, 160)
+	draco.visible = false
