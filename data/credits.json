@@ -34,10 +34,12 @@
   "There are no AI-generated images or videos, and no NASA logos, insignia or mission patches anywhere in the game."
  ],
  "built_with": [
-  "Made with Godot Engine (https://godotengine.org) and Blender (https://www.blender.org).",
-  "Font: Inter by Rasmus Andersson (SIL Open Font License).",
-  "Some rocket engine 3D models by hoahluke, MartianDays and corncob_127 (Sketchfab, CC BY 4.0), and a booster from NASA 3D Resources.",
-  "Images and data from NASA, listed in [docs/sources.md](docs/sources.md)."
+  "Engine: Godot Engine, MIT license (godotengine.org).",
+  "3D: Blender, GPL (blender.org), driven by our scripts in assets/source/.",
+  "Font: Inter by Rasmus Andersson, SIL Open Font License (rsms.me/inter).",
+  "Outside 3D models: Merlin Engine by hoahluke, Merlin 1D Vacuum by MartianDays and Rocket Nozzle Part by corncob_127 (Sketchfab, CC BY 4.0); the Space Shuttle Solid Rocket Booster from NASA 3D Resources (public domain).",
+  "NASA imagery and data: the Earth, the Moon, the landing ground, the planets' positions and every mission photo, each listed with its source in docs/sources.md.",
+  "Sounds: made by the game itself, in code; the music, composed for the game (see \"Use of AI\")."
  ],
  "sections": [
   {
