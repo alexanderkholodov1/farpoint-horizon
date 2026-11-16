@@ -49,5 +49,17 @@ func _initialize() -> void:
 		r2.step(0.02)
 	_ok(r2.phase == "splash" and r2.stars() >= 1 and r2.drogue_err >= 0.0 and r2.main_err >= 0.0, "hands off still splashes down, chutes open late: stars %d" % r2.stars())
 	_ok(r2.stars() < 3, "hands off is not three stars")
+	# Artemis I's way home on the same mechanic (#100): NASA's 24,581 mph [S-artemis-timeline], its own blackout
+	var r3 = Reentry.new("artemis1", 3)
+	_ok(absf(r3.speed_mph() - 24581.0) < 1.0, "Orion enters at 24,581 mph: %f" % r3.speed_mph())
+	var black3 := false
+	for i in 4000:
+		if r3.phase == "splash":
+			break
+		r3.step(0.02)
+		black3 = black3 or r3.blackout()
+	_ok(r3.phase == "splash" and black3, "Orion splashes down, through its blackout")
+	for k in ["blackout_note", "down_in", "sources_line", "simplified", "craft", "date"]:
+		_ok(r.D.has(k) and r3.D.has(k), "both crafts bring their own " + k)
 	print("ok reentry" if fails == 0 else "reentry: %d failed" % fails)
 	quit(0 if fails == 0 else 1)

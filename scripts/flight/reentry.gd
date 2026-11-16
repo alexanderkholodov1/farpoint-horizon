@@ -41,7 +41,7 @@ func _new_drift() -> float:
 
 ## Speed now in mph: the real entry speed, falling through the plasma as the air brakes the capsule.
 func speed_mph() -> float:
-	var v0 := float(D.speed_fts) * 3600.0 / 5280.0
+	var v0: float = float(D.speed_mph) if D.has("speed_mph") else float(D.speed_fts) * 3600.0 / 5280.0
 	if phase == "plasma":
 		return lerpf(v0, 300.0, clampf(t / float(D.plasma_s), 0.0, 1.0))
 	return lerpf(300.0, 20.0, clampf(1.0 - height_ft / TOP_FT, 0.0, 1.0))
@@ -72,6 +72,9 @@ func heat() -> float:
 func blackout() -> bool:
 	if phase != "plasma":
 		return false
+	if D.has("blackout_from"):   # a craft whose blackout is given as a share of the plasma
+		var f := t / float(D.plasma_s)
+		return f >= float(D.blackout_from) and f <= float(D.blackout_to)
 	var k := float(D.plasma_s) / float(D.blackout_end_s)
 	return t >= float(D.blackout_start_s) * k
 

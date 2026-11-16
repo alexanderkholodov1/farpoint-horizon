@@ -144,10 +144,10 @@ func _texts() -> void:
 		var side: String = R.off_side()
 		big_l.text = "%s mph" % _num(R.speed_mph())
 		info_l.text = tr("Angle %.1f°.") % R.angle + " " + (tr("Too steep: the heat shield is overheating!") if side == "steep" else (tr("Too shallow: the capsule could skip off the air!") if side == "shallow" else tr("In the corridor. Good.")))
-		black_l.text = tr("RADIO BLACKOUT · the glowing air blocks the radio. Houston can only wait (3 min 19 s for real).") if R.blackout() else ""
+		black_l.text = (tr("RADIO BLACKOUT · the glowing air blocks the radio.") + " " + tr(str(R.D.blackout_note))) if R.blackout() else ""
 	else:
 		var next_ft: float = float(R.D.drogue_ft) if R.drogue_err < 0.0 else float(R.D.main_ft)
-		hint_l.text = tr("Open the parachutes on their marks: 1 for the drogues at 24,000 ft, 2 for the mains at 10,000 ft.")
+		hint_l.text = tr("Open the parachutes on their marks: 1 for the drogues at %s ft, 2 for the mains at %s ft.") % [_num(float(R.D.drogue_ft)), _num(float(R.D.main_ft))]
 		big_l.text = "%s ft" % _num(R.height_ft)
 		info_l.text = tr("Next mark: %s ft.") % _num(next_ft) if R.main_err < 0.0 else tr("Under three main parachutes. Splashdown coming.")
 		black_l.text = ""
@@ -182,9 +182,9 @@ func _finish() -> void:
 	var v := Kit.overlay(self, tr("Splashdown!"), 620.0, 360.0, func(): _continue())
 	done_card = v.get_parent().get_parent()
 	v.add_child(Kit.lbl("★".repeat(n) + "☆".repeat(3 - n), 40, Kit.C_GOLD, Kit.FONT_B))
-	v.add_child(Kit.lbl(tr("%s is down in the Pacific Ocean, %s. The recovery ship USS Iwo Jima was about four miles away.") % [str(R.D.craft), tr(str(R.D.date))], Kit.T_BODY, Kit.C_TEXT, Kit.FONT_R, true))
+	v.add_child(Kit.lbl(tr(str(R.D.down_in)) % [str(R.D.craft), tr(str(R.D.date))], Kit.T_BODY, Kit.C_TEXT, Kit.FONT_R, true))
 	v.add_child(Kit.lbl(tr("In the corridor %d %% of the time · drogues %s ft off · mains %s ft off.") % [roundi(R.corridor_quality() * 100.0), _num(R.drogue_err), _num(R.main_err)], Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true))
-	v.add_child(Kit.lbl(tr(str(R.D.simplified)) + " " + tr("Sources: Apollo Flight Journal, NASA."), Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true))
+	v.add_child(Kit.lbl(tr(str(R.D.simplified)) + " " + tr(str(R.D.sources_line)), Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true))
 	var row := Kit.hbox(Kit.GAP)
 	v.add_child(row)
 	row.add_child(Kit.btn(tr("Fly it again"), func(): go("reentry", {"craft": craft, "then": then_scenes, "back": back}), Kit.T_BODY))
