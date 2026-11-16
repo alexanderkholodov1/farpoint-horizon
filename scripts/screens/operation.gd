@@ -10,6 +10,7 @@ extends "res://scripts/screens/screen.gd"
 ## Space weather (issue #90): when a storm on NOAA's scales reaches the craft [S-noaa-scales], time stops and an alert
 ## card asks what to do (safe mode or keep working, each with its real cost and its chance of damage); the months from
 ## the storm on are simulated again with the answer (mission.simulate is the same for the same seed and choices).
+## Ground control's games of the operation (issue #63, scripts/minigames/desk.gd) hold the time-lapse while open.
 ## The time panel says in words how fast time runs (the rule of AGENTS.md: real time, said on screen). At the end (or
 ## when the craft is lost) it fades to the report.
 
@@ -221,7 +222,12 @@ func process(delta: float) -> void:
 	var sim: Dictionary = GameState.last_sim
 	if sim.is_empty() or leaving or is_instance_valid(alert):
 		return
-	month_f += delta * speed / MONTH_REAL_S
+	var desk = main.get_node_or_null("GroundDesk")
+	if desk and desk.busy:   # ground control has a game open (#63): the months wait for it
+		return
+	# a slow frame (the scene loading, a hitch) never skips months: what happens in them, and ground control's games
+	# (#63), get their turn
+	month_f += minf(delta, 0.1) * speed / MONTH_REAL_S
 	var target := int(floor(month_f))
 	var months: int = sim.months
 	var events: Array = sim.events

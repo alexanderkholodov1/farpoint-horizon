@@ -6,6 +6,8 @@ extends SceneTree
 const Dsn := preload("res://scripts/minigames/dsn.gd")
 const Carrier := preload("res://scripts/minigames/carrier.gd")
 const Triage := preload("res://scripts/minigames/triage.gd")
+const Handoff := preload("res://scripts/minigames/handoff.gd")
+const Telemetry := preload("res://scripts/minigames/telemetry.gd")
 
 var fails := 0
 
@@ -97,6 +99,94 @@ func _initialize() -> void:
 	_ok(r3.get("go", false), "go called in time when nobody plays")
 	for n in [g, g2, g3]:
 		n.free()
+
+	# Hand it over (#63): over one turn of the Earth a player who hands over each setting dish to a risen one makes
+	# three clean handoffs, wherever the craft is: the Moon at several dates, and L2
+	var Desk := load("res://scripts/minigames/desk.gd")
+	var skies := [["lunar", 0.0], ["lunar", 5.0 * 86400.0], ["lunar", 11.0 * 86400.0], ["l2", 0.0], ["l2", 120.0 * 86400.0]]
+	for sk in skies:
+		var sky: Vector2 = Desk.sky_of(sk[0], sk[1])
+		var h = Handoff.new()
+		h.setup(sky, Desk.UNIX_DAY0 + sk[1], "the Moon")
+		var hr := {}
+		h.done.connect(func(r): hr.merge(r))
+		var early := false
+		for i in 1200:
+			h.step(0.05)
+			if hr.size() > 0:
+				break
+			if h.holder >= 0 and not h.is_setting(h.holder) and not early:
+				for k in 3:
+					if k != h.holder and h.is_up(k):
+						early = true
+						_ok(not h.hand_to(k), "an early handoff is refused (%s)" % str(sk))
+						break
+			if h.holder >= 0 and h.is_setting(h.holder):
+				var best := -1
+				for k in 3:
+					if k != h.holder and h.is_up(k) and (best < 0 or h.elev[k] > h.elev[best]):
+						best = k
+				if best >= 0:
+					h.hand_to(best)
+		_ok(hr.get("by", "") == "player" and int(hr.clean) == Handoff.HANDOFFS and int(hr.bonus) == Handoff.HANDOFFS * Handoff.BONUS_CLEAN,
+			"three clean handoffs at %s: %s" % [str(sk), str(hr)])
+		_ok(float(hr.get("secs", 99)) <= Handoff.DAY_REAL_S * 1.5, "within about one turn of the Earth at %s" % str(sk))
+		h.free()
+	# a player who never hands over loses contact; picking it up again still counts, for less
+	var h2 = Handoff.new()
+	h2.setup(Desk.sky_of("lunar", 0.0), Desk.UNIX_DAY0, "the Moon")
+	var lost := false
+	for i in 1200:
+		h2.step(0.05)
+		if h2.holder < 0:
+			lost = true
+			break
+	_ok(lost, "contact lost when nobody hands over")
+	var up := -1
+	for i in 1200:
+		for k in 3:
+			if h2.is_up(k):
+				up = k
+		if up >= 0:
+			break
+		h2.step(0.05)
+	_ok(up >= 0 and h2.hand_to(up) and h2.late == 1, "a gap picked up again counts as late")
+	h2.free()
+	# left alone, Wayra takes it
+	var h3 = Handoff.new()
+	h3.setup(Desk.sky_of("lunar", 0.0), Desk.UNIX_DAY0, "the Moon")
+	var r3h := {}
+	h3.done.connect(func(r): r3h.merge(r))
+	for i in 100:
+		h3.step(1.0)
+	_ok(r3h.get("by", "") == "bot", "Wayra hands it over when nobody plays")
+	h3.free()
+
+	# Read the squiggles (#63): every case is found from its log titles, and solving it right pays the full bonus
+	var chans: Dictionary = Telemetry.channels()
+	var cases: Array = JSON.parse_string(FileAccess.get_file_as_string(Telemetry.DATA)).cases
+	_ok(not Telemetry.fallback().is_empty(), "a fallback case")
+	for cs in cases:
+		_ok(cs.fixes.size() == 3 and cs.channels.has(cs.bad) and cs.channels.size() == 4, "case %s is well formed" % cs.id)
+		for ch in cs.channels:
+			_ok(chans.has(ch), "channel %s of %s exists" % [ch, cs.id])
+		for m in cs.match:
+			var title: String = str(m).replace("%s", "G4 (severe)")
+			_ok(Telemetry.case_for(title).get("id", "") == cs.id, "'%s' opens %s" % [title, cs.id])
+		var tg = Telemetry.new()
+		tg.setup(cs, chans, "x", 7)
+		var tr_res := {}
+		tg.done.connect(func(r): tr_res.merge(r))
+		for i in 30:
+			tg.step(0.1)
+		var wrong: int = (tg.bad + 1) % 4
+		_ok(not tg.pick_channel(wrong) and tg.stage == "find", "a normal channel is not the trouble (%s)" % cs.id)
+		_ok(tg.pick_channel(tg.bad) and tg.stage == "fix", "the bad channel found (%s)" % cs.id)
+		_ok(not tg.pick_fix(1), "a wrong fix does nothing (%s)" % cs.id)
+		_ok(tg.pick_fix(0) and tr_res.get("by", "") == "player" and int(tr_res.bonus) == Telemetry.BONUS_MAX - 2 * Telemetry.SLIP,
+			"fixed with two slips (%s): %s" % [cs.id, str(tr_res)])
+		tg.free()
+	_ok(Telemetry.case_for("Liftoff").is_empty(), "good news opens nothing")
 
 	print("ok ground" if fails == 0 else "ground: %d failed" % fails)
 	quit(0 if fails == 0 else 1)
