@@ -59,6 +59,9 @@ for rel in tracked:
             except ValueError:
                 continue
         if not target.exists():
+            ignored = subprocess.run(["git", "check-ignore", "-q", str(target)], cwd=ROOT).returncode == 0
+            if ignored:   # a generated file git leaves out on purpose (a .translation, a build): made on demand
+                continue
             problems.append(f"{rel}: names `{raw}`, which does not exist")
 
 for p in problems:
