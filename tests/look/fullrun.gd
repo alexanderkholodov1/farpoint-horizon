@@ -81,6 +81,8 @@ func _ready() -> void:
 				await _dart()
 			"artemis1":
 				await _artemis1()
+			"reentry":
+				await _reentry()
 			_:
 				await wait(0.5)
 	await shot("end")
@@ -384,3 +386,24 @@ func _artemis1() -> void:
 	await shot("art_result")
 	key(KEY_ENTER)
 	await wait(1.0)
+
+
+## Apollo 13's way home (#67): hold the corridor's middle, open each chute on its mark, then continue.
+func _reentry() -> void:
+	var s = g.screen
+	var R = s.R
+	var mid := (float(R.D.corridor_deg[0]) + float(R.D.corridor_deg[1])) * 0.5
+	var shot_b := false
+	while is_instance_valid(s) and g.screen == s and R.phase != "splash":
+		if R.phase == "plasma":
+			s.push = 1 if R.angle < mid - 0.3 else (-1 if R.angle > mid + 0.3 else 0)
+			if R.blackout() and not shot_b:
+				shot_b = true
+				await shot("reentry_blackout")
+		elif (R.drogue_err < 0.0 and R.height_ft <= float(R.D.drogue_ft)) or (R.drogue_err >= 0.0 and R.main_err < 0.0 and R.height_ft <= float(R.D.main_ft)):
+			s._chute()
+		await wait(0.02)
+	await wait(1.5)
+	await shot("reentry_splash")
+	if is_instance_valid(s) and g.screen == s:
+		s._continue()
