@@ -14,6 +14,11 @@ var chapters: Array = []
 func enter(_args: Dictionary) -> void:
 	var d = JSON.parse_string(FileAccess.get_file_as_string(DATA))
 	chapters = d.get("chapters", []) if d is Dictionary else []
+	var veil := ColorRect.new()   # the globe stays behind, dimmed, so its orbit lines never cross the cards
+	veil.color = Color(0.0, 0.01, 0.04, 0.6)
+	veil.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	veil.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(veil)
 	var head := Kit.vbox(4)
 	if Kit.compact:
 		Kit.place(head, 0, 0, 1, 0, 24, 6, -24, 70)
@@ -89,6 +94,8 @@ func _card(i: int, C: Dictionary) -> Control:
 	for side in ["left", "right", "top", "bottom"]:
 		pad.add_theme_constant_override("margin_" + side, 14 if Kit.compact else 18)
 	pad.add_child(t)
+	pad.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	t.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	v.add_child(pad)
 	var kind := Kit.caps("%d  ·  %s" % [i + 1, tr(C.year)])
 	kind.add_theme_color_override("font_color", Kit.C_GOLD)
@@ -97,6 +104,9 @@ func _card(i: int, C: Dictionary) -> Control:
 	var line := Kit.lbl(tr(C.line), Kit.T_SMALL + 1, Kit.C_DIM, Kit.FONT_R, true)
 	line.visible = not Kit.compact
 	t.add_child(line)
+	var push := Control.new()   # the buttons sit on the card's floor, level across a row of cards
+	push.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	t.add_child(push)
 	var row := Kit.hbox(8)
 	t.add_child(row)
 	row.add_child(Kit.accent_btn(Kit.btn(tr("▶ Play the chapter"), func(): _play_chapter(C.id), Kit.T_SMALL + 1), Kit.C_GOLD))
