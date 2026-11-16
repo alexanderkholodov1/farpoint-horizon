@@ -894,7 +894,7 @@ static func _mars(world, env: Environment) -> Dictionary:
 	env.glow_enabled = false
 	env.fog_enabled = true
 	env.fog_light_color = Color(0.78, 0.6, 0.45)
-	env.fog_density = 0.0011
+	env.fog_density = 0.0007   # the ground shows through the dust from the top of the descent; its edge, 12 km off, never
 	env.fog_sky_affect = 0.0
 	env.ambient_light_color = Color(0.85, 0.66, 0.5)
 	env.ambient_light_energy = 0.5
