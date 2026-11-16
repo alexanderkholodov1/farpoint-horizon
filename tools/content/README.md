@@ -3,7 +3,7 @@
 | Script | What it makes |
 |---|---|
 | `credits.py` | `data/credits.json`, the in-game credits, from `docs/sources.md` and the README (run after a new source) |
-| `submission_links.py` | `spaceapps/global-submission/links.md`, the form's link lists from `docs/sources.md`, each link opened |
+| `submission_links.py` | the form's link lists from `docs/sources.md`, each link opened; written to links.md in `spaceapps/global-submission/` when it runs (not kept in the repository) |
 | `tools/content/data/` | The NASA data in `data/nasa/` and the mission photos (`fetch_nasa_data.py`, `fetch_lola_terrain.py`; see its README) |
 | `tools/content/audio/compose_music.py` | The game's music in `assets/audio/` |
 | `tools/content/brand/make_splash.py` | The loading screen's image |
