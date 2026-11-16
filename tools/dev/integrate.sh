@@ -49,6 +49,14 @@ for attempt in 1 2 3 4 5; do
   last=$(git log --first-parent --format=%s HEAD | grep -oE "^${line//./\.}\.[0-9]+:" | tr -d ':' | sort -V | tail -1 || true)
   if [ -n "$last" ]; then next="$line.$(( ${last##*.} + 1 ))"; else next="$line.1"; fi
   if ! git merge -q --no-ff --no-commit "$sha" >/dev/null 2>&1; then
+    # A generated file in conflict (the credits, made from docs/sources.md and the README) is made again from the
+    # merged sources instead of stopping: two pieces that each add a source always meet there.
+    if [ "$(git diff --name-only --diff-filter=U)" = "data/credits.json" ]; then
+      git checkout -q --theirs data/credits.json
+      (python3 tools/content/credits.py >/dev/null 2>&1 || python tools/content/credits.py >/dev/null) && git add data/credits.json
+    fi
+  fi
+  if [ -n "$(git diff --name-only --diff-filter=U)" ]; then
     echo "$branch conflicts with $base in: $(git diff --name-only --diff-filter=U | tr '\n' ' ')"
     echo "Its author merges $base into it (git merge origin/$base), resolves, pushes, and this runs again. Nothing integrated."
     git merge --abort; exit 1

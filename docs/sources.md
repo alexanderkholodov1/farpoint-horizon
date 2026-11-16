@@ -109,6 +109,10 @@ branches add entries at the same place (`.gitattributes`).
 - [S13] and [S14] also give the stage lengths and masses the parts are cut from: Falcon 9 first stage 25.6 t empty and
   395.7 t of propellant, second stage 3.9 t and 92.67 t, fairing about 1.9 t; Electron 13.0 t at liftoff, stages of
   12.1 m and 2.4 m, fairing 44 kg.
+- **S-wiki-fairing** Wikipedia. *Payload fairing* (checked 2026-11-15). https://en.wikipedia.org/wiki/Payload_fairing.
+  "Once outside the atmosphere the fairing is jettisoned, exposing the payload to outer space"; "In some cases, the
+  fairing is planned to separate after cutoff of the upper stage". The launch opens its fairing in two halves in orbit,
+  after the engine cuts off.
 
 ## Real missions
 - **S11** NASA. *Landsat 9*. https://science.nasa.gov/mission/landsat-9. Orbit and coverage of an Earth-imaging twin.
@@ -389,6 +393,21 @@ All checked 2026-11-14; the research behind them is `kb/research/in-flight-failu
   https://www.nasa.gov/image-article/keplers-second-light-how-k2-will-work. Checked 2026-11-15: Kepler lost the second of
   four reaction wheels in May 2013; sunlight's pressure balanced with the two left as a "third wheel". A case of
   "Read the squiggles".
+- **S-afj13-return** Apollo Flight Journal. *Apollo 13, Day 6, part 8: The Blackout, Splashdown and Recovery*.
+  https://apollojournals.org/afj/ap13fj/29day6-returnhome.html. Checked 2026-11-16: velocity at Entry Interface
+  (400,000 ft) 36,211 ft/s; the communications blackout from 0:19 to 3:38 after Entry Interface. The speed and the
+  blackout of "Coming home" (issue 67).
+- **S-apollo13-return** NASA History. *Apollo 13 Crew Returns Safely to Earth*.
+  https://www.nasa.gov/history/apollo-13-crew-returns-safely-to-earth/. Checked 2026-11-16: two drogue parachutes at
+  24,000 feet, three mains at 10,000 feet; the recovery ship USS Iwo Jima about four miles away. The parachute marks of
+  "Coming home" (issue 67).
+- **S-nasa-crew10** NASA. *NASA's SpaceX Crew-10 Launch Day Milestones*, Commercial Crew blog, 12 March 2025.
+  https://www.nasa.gov/blogs/commercialcrew/2025/03/12/nasas-spacex-crew-10-launch-day-milestones. Falcon 9 liftoff
+  7:48 p.m., Max Q 7:49 p.m., second stage engine cutoff (SECO-1) 7:57 p.m.: a climb to orbit of about nine minutes,
+  the bound of the flow audit's climb (`tests/ci/flowaudit.gd`).
+- **S-afj-a11-loi** NASA History Office. *Apollo 11 Flight Journal, Day 4: Lunar Orbit Insertion*.
+  https://www.nasa.gov/history/afj/ap11fj/12day4-loi1.html. The LOI-1 burn ran from 075:49:51 to 075:55:49 ground
+  elapsed time, about six minutes: the real length of the capture burn the flow audit compares with the game's.
 - **S-afj-loi** O'Brien, F. *Lunar Orbit Insertion*, Apollo Flight Journal (NASA History Office, hosted at apollojournals.org). https://apollojournals.org/afj/loiessay.html. The crew had to "perform and monitor the burn on the far side of the Moon, without assistance from the ground": the trip's loss of signal when the braking burn happens behind the Moon.
 - **S-eo-orbits** Riebeek, H. *Catalog of Earth Satellite Orbits*, NASA Earth Observatory, 2009.
   https://earthobservatory.nasa.gov/features/OrbitsCatalog. Low, Sun-synchronous and geostationary orbits in plain

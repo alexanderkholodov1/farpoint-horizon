@@ -1,0 +1,28 @@
+keys,es
+Coming home,De vuelta a casa
+Bring them home through the air,Tráelos a casa a través del aire
+▲ Shallower,▲ Menos inclinado
+▼ Steeper,▼ Más inclinado
+"Keep the marker in the green band: W or ▲ makes it shallower, S or ▼ steeper.","Mantén la marca en la banda verde: W o ▲ la hace menos inclinada, S o ▼ más inclinada."
+Angle %.1f°.,Ángulo %.1f°.
+Too steep: the heat shield is overheating!,Demasiado inclinado: ¡el escudo térmico se recalienta!
+Too shallow: the capsule could skip off the air!,Muy plano: ¡la cápsula podría rebotar en el aire!
+In the corridor. Good.,En el corredor. Bien.
+RADIO BLACKOUT · the glowing air blocks the radio. Houston can only wait (3 min 19 s for real).,APAGÓN DE RADIO · el aire incandescente bloquea la radio. Houston solo puede esperar (3 min 19 s en la realidad).
+"Open the parachutes on their marks: 1 for the drogues at 24,000 ft, 2 for the mains at 10,000 ft.","Abre los paracaídas en sus marcas: 1 para los de frenado a 24.000 pies, 2 para los principales a 10.000 pies."
+Next mark: %s ft.,Próxima marca: %s pies.
+Under three main parachutes. Splashdown coming.,Bajo tres paracaídas principales. Llega el amerizaje.
+Drogues · 1,Frenado · 1
+Mains · 2,Principales · 2
+Drogues out!,¡Paracaídas de frenado!
+Mains out!,¡Paracaídas principales!
+Right on the mark.,Justo en la marca.
+%s ft off the mark.,a %s pies de la marca.
+"%s is down in the Pacific Ocean, %s. The recovery ship USS Iwo Jima was about four miles away.","%s está en el océano Pacífico, %s. El barco de rescate USS Iwo Jima estaba a unas cuatro millas."
+In the corridor %d %% of the time · drogues %s ft off · mains %s ft off.,En el corredor el %d %% del tiempo · frenado a %s pies · principales a %s pies.
+"The corridor's edges, the drift and the pace are our game values; the plasma lasts 24 s here, the real blackout 3 min 19 s.","Los bordes del corredor, la deriva y el ritmo son valores del juego; el plasma dura aquí 24 s, el apagón real 3 min 19 s."
+"Sources: Apollo Flight Journal, NASA.","Fuentes: Apollo Flight Journal, NASA."
+shallow: skips off,plano: rebota
+steep: too hot,inclinado: muy caliente
+Fly it again,Volver a intentarlo
+Continue · Enter,Continuar · Enter

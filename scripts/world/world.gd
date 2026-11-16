@@ -139,7 +139,9 @@ func face_sun(extra := 0.8) -> void:
 
 func _animate_world(delta: float) -> void:
 	# the Sun's direction for the night side of the Earth, and the slow drift of its clouds
-	cloud_shift = fmod(cloud_shift + delta * 0.0012, 1.0)
+	# about 50 m/s along the parallels, a strong high-altitude wind (our value), as a share of the Earth's 40,075 km
+	# equator (2 pi x 6,378 km [S-nssdc-planets]); it used to be 0.12 % of the globe a second, some 48 km/s
+	cloud_shift = fmod(cloud_shift + delta * 50.0 / 40075000.0, 1.0)
 	var sd: Vector3 = sun.global_transform.basis.z
 	for m in get_tree().get_nodes_in_group(Space.SUN_LIT):
 		var mat := (m as MeshInstance3D).material_override as ShaderMaterial
