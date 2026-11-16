@@ -51,14 +51,18 @@ func setup(sky: Vector2, unix_start: float, target_name: String) -> void:
 	th.add_child(title)
 	count_lbl = Kit.lbl("", Kit.T_BODY, Kit.C_DIM, Kit.font_num())
 	th.add_child(count_lbl)
-	add_child(Kit.lbl(tr("The Earth turns, so each dish sees %s for only part of the day. Before the dish that has it sets, hand it to one that has just risen. Here a whole turn of the Earth takes %d seconds.") % [target, roundi(DAY_REAL_S)], Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true))
+	var intro := tr("The Earth turns, so each dish sees %s for only part of the day. Before the dish that has it sets, hand it to one that has just risen. Here a whole turn of the Earth takes %d seconds.") % [target, roundi(DAY_REAL_S)]
+	if Kit.compact:   # a phone: the short version, so the panel fits the screen's height
+		intro = tr("Before the dish that has %s sets, hand it to one that has risen.") % target
+	add_child(Kit.lbl(intro, Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true))
 	status = Kit.lbl("", Kit.T_BODY, Kit.C_ACCENT, Kit.FONT_B, true)
 	add_child(status)
 	globe = Control.new()
-	globe.custom_minimum_size = Vector2(400, 170)
+	globe.custom_minimum_size = Vector2(400, 96 if Kit.compact else 170)
 	globe.draw.connect(_draw_globe)
 	add_child(globe)
-	add_child(Kit.lbl(tr("Seen from above the North Pole. Green: the dish that has it · blue: can see it · grey: below its horizon."), Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true))
+	if not Kit.compact:
+		add_child(Kit.lbl(tr("Seen from above the North Pole. Green: the dish that has it · blue: can see it · grey: below its horizon."), Kit.T_SMALL, Kit.C_DIM, Kit.FONT_R, true))
 	for i in Dsn.STATIONS.size():
 		var st: Dictionary = Dsn.STATIONS[i]
 		var r := Kit.hbox(Kit.GAP)

@@ -66,3 +66,4 @@ has it · ,la tiene ·
 %s is setting (%d°). The next dish hasn't risen yet: get ready.,%s se está poniendo (%d°). La siguiente antena aún no sale: prepárate.
 FAULT,FALLA
 GOOD,BIEN
+"Before the dish that has %s sets, hand it to one that has risen.","Antes de que se ponga la antena que tiene %s, pásala a una que ya salió."
